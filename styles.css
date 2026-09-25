@@ -49,7 +49,7 @@ th { background: #f0f0f0; font-size: 13px; }
 
 
 /* ===================================================
-   REGLAS DE IMPRESIÓN CON OCULTACIÓN DE URL
+   REGLAS DE IMPRESIÓN
    =================================================== */
 
 /* TICKET 58MM */
@@ -99,7 +99,7 @@ th { background: #f0f0f0; font-size: 13px; }
 }
 
 
-/* HOJA A4 RESULTADOS (ESPACIADO ENTRE EXÁMENES Y REMOCIÓN DE URL) */
+/* HOJA A4 RESULTADOS */
 @media print {
   @page {
     size: A4 portrait;
@@ -120,6 +120,10 @@ th { background: #f0f0f0; font-size: 13px; }
   body.modo-impresion-a4 .print-hoja-a4 {
     display: block !important;
     width: 100%;
+    min-height: 98vh;
+    position: relative;
+    padding-bottom: 35px; /* Espacio reservado para el pie de página personalizado */
+    box-sizing: border-box;
     font-family: Arial, sans-serif;
     color: #111;
   }
@@ -155,11 +159,26 @@ th { background: #f0f0f0; font-size: 13px; }
   .a4-table th { border: 1px solid #0056b3; padding: 6px 8px; text-align: left; }
   .a4-table td { border: 1px solid #e0e0e0; padding: 5px 8px; text-align: left; }
 
-  .a4-footer { margin-top: 40px; display: flex; justify-content: flex-end; page-break-inside: avoid; }
+  .a4-footer { margin-top: 35px; display: flex; justify-content: flex-end; page-break-inside: avoid; }
   .a4-firma-container { text-align: center; width: 250px; position: relative; }
   .a4-firma-img { max-height: 80px; width: auto; position: absolute; top: -55px; left: 50%; transform: translateX(-50%); }
   .a4-firma-linea { border-top: 1px solid #000; margin-bottom: 5px; }
   .a4-firma-nombre { font-size: 12px; font-weight: bold; margin: 2px 0; }
   .a4-firma-cargo { font-size: 11px; margin: 1px 0; }
   .a4-firma-colegiatura { font-size: 11px; font-weight: bold; margin: 1px 0; }
+
+  /* PIE DE PÁGINA PERSONALIZADO */
+  .a4-bottom-info {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    text-align: center;
+    font-size: 10.5px;
+    font-weight: bold;
+    color: #0056b3;
+    border-top: 1px solid #0056b3;
+    padding-top: 6px;
+    background: #fff;
+  }
 }
