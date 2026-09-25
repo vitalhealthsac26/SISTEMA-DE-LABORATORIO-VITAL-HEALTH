@@ -501,9 +501,27 @@ function imprimirResultadosPDF() {
     });
   }
 
-  document.body.className = 'modo-impresion-a4';
-  window.print();
-  setTimeout(() => { document.body.className = ''; }, 1000);
+  // Generación/Impresión del documento PDF
+  if (typeof html2pdf !== 'undefined') {
+    const elemento = document.getElementById('print-a4');
+    elemento.style.display = 'block';
+
+    const opciones = {
+      margin:       [10, 10, 10, 10],
+      filename:     `Resultado_${paciente.replace(/ /g, "_")}.pdf`,
+      image:        { type: 'jpeg', quality: 0.98 },
+      html2canvas:  { scale: 2, useCORS: true },
+      jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    };
+
+    html2pdf().set(opciones).from(elemento).save().then(() => {
+      elemento.style.display = 'none';
+    });
+  } else {
+    document.body.className = 'modo-impresion-a4';
+    window.print();
+    setTimeout(() => { document.body.className = ''; }, 1000);
+  }
 }
 
 function pobladorSelectPlantillas() {
