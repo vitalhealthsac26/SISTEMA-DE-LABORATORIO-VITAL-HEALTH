@@ -160,7 +160,6 @@ function renderizarVenta() {
   calcularTotalCobro();
 }
 
-/* FUNCIÓN DE CÁLCULO DE DESCUENTO AUTOMÁTICO */
 function calcularTotalCobro() {
   const subtotal = itemsVenta.reduce((sum, item) => sum + item.Precio, 0);
 
@@ -293,7 +292,6 @@ function guardarYEmitirTicket() {
   }, 1000);
 }
 
-/* FILTRADO DE ÓRDENES CON FECHA EXACTA Y TEXTO */
 function cargarTablaOrdenes() {
   const filtroFecha = document.getElementById('o-filtro-fecha').value;
   const filtroPaciente = document.getElementById('o-filtro-paciente').value.toLowerCase().trim();
@@ -508,7 +506,6 @@ function imprimirResultadosPDF() {
   setTimeout(() => { document.body.className = ''; }, 1000);
 }
 
-// FUNCIONES DEL MÓDULO 4: PLANTILLAS
 function pobladorSelectPlantillas() {
   const select = document.getElementById('p-select-examen');
   if (!select) return;
