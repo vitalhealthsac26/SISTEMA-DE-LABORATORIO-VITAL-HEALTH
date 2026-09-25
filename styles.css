@@ -28,7 +28,6 @@ th { background: #f0f0f0; font-size: 13px; }
 
 .total-bar { display: flex; justify-content: space-between; align-items: center; margin-top: 15px; }
 
-/* Buscador desplegable */
 .search-container { position: relative; margin-bottom: 15px; }
 .dropdown-list {
   position: absolute;
@@ -50,7 +49,7 @@ th { background: #f0f0f0; font-size: 13px; }
 
 
 /* ===================================================
-   REGLAS DE IMPRESIÓN (@media print)
+   REGLAS DE IMPRESIÓN CON OCULTACIÓN DE URL
    =================================================== */
 
 /* TICKET 58MM */
@@ -100,11 +99,11 @@ th { background: #f0f0f0; font-size: 13px; }
 }
 
 
-/* HOJA A4 RESULTADOS CON REPETICIÓN DE CABECERA */
+/* HOJA A4 RESULTADOS (ESPACIADO ENTRE EXÁMENES Y REMOCIÓN DE URL) */
 @media print {
   @page {
     size: A4 portrait;
-    margin: 12mm;
+    margin: 10mm;
   }
 
   body.modo-impresion-a4 {
@@ -132,7 +131,7 @@ th { background: #f0f0f0; font-size: 13px; }
   .a4-empresa .a4-sub { font-size: 12px; font-weight: bold; color: #444; margin: 2px 0; }
   .a4-empresa p { margin: 1px 0; font-size: 11px; color: #555; }
   
-  .a4-line { border-bottom: 2px solid #0056b3; margin: 12px 0 15px 0; }
+  .a4-line { border-bottom: 2px solid #0056b3; margin: 10px 0 12px 0; }
 
   .a4-paciente-card {
     display: flex;
@@ -141,16 +140,22 @@ th { background: #f0f0f0; font-size: 13px; }
     border: 1px solid #dcdcdc;
     padding: 10px 15px;
     border-radius: 4px;
-    margin-bottom: 20px;
+    margin-bottom: 15px;
     font-size: 12px;
   }
   .a4-col p { margin: 4px 0; }
 
-  .a4-table { width: 100%; border-collapse: collapse; font-size: 12px; }
-  .a4-table th { background: #0056b3; color: white; border: 1px solid #0056b3; padding: 8px; text-align: left; }
-  .a4-table td { border: 1px solid #e0e0e0; padding: 6px 8px; text-align: left; }
+  /* ESPACIADO ENTRE BLOQUES DE EXÁMENES */
+  .a4-exam-block {
+    margin-bottom: 22px;
+    page-break-inside: avoid;
+  }
 
-  .a4-footer { margin-top: 60px; display: flex; justify-content: flex-end; page-break-inside: avoid; }
+  .a4-table { width: 100%; border-collapse: collapse; font-size: 11.5px; }
+  .a4-table th { border: 1px solid #0056b3; padding: 6px 8px; text-align: left; }
+  .a4-table td { border: 1px solid #e0e0e0; padding: 5px 8px; text-align: left; }
+
+  .a4-footer { margin-top: 40px; display: flex; justify-content: flex-end; page-break-inside: avoid; }
   .a4-firma-container { text-align: center; width: 250px; position: relative; }
   .a4-firma-img { max-height: 80px; width: auto; position: absolute; top: -55px; left: 50%; transform: translateX(-50%); }
   .a4-firma-linea { border-top: 1px solid #000; margin-bottom: 5px; }
