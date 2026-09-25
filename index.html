@@ -1,273 +1,299 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Sistema de Laboratorio - Vital Health</title>
-  <link rel="stylesheet" href="styles.css">
-</head>
-<body>
+/* GENERALES */
+* { box-sizing: border-box; }
+body { 
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+  margin: 0; 
+  padding: 15px; 
+  background: #f4f6f9; 
+  color: #333; 
+}
 
-  <!-- PANTALLAS DE TRABAJO EN PANTALLA -->
-  <div class="no-print">
-    <header class="main-header">
-      <h1>CENTRO MÉDICO VITAL HEALTH</h1>
-      <div class="tabs">
-        <button class="tab-btn active" onclick="cambiarModulo('modulo-venta', event)">1. Recepción y Cobro</button>
-        <button class="tab-btn" onclick="cambiarModulo('modulo-ordenes', event)">2. Órdenes del Día</button>
-        <button class="tab-btn" onclick="cambiarModulo('modulo-resultados', event)">3. Resultados</button>
-        <button class="tab-btn" onclick="cambiarModulo('modulo-plantillas', event)">4. Configurar Plantillas</button>
-      </div>
-    </header>
+.main-header { 
+  background: #0056b3; 
+  color: white; 
+  padding: 15px; 
+  border-radius: 8px; 
+  margin-bottom: 20px; 
+}
+.main-header h1 { 
+  margin: 0 0 12px 0; 
+  font-size: 20px; 
+  text-align: center;
+}
 
-    <!-- MÓDULO 1: RECEPCIÓN -->
-    <main id="modulo-venta" class="modulo active">
-      <div class="card">
-        <h2>Datos del Paciente</h2>
-        <div class="grid-4">
-          <div><label>DNI / Doc:</label><input type="text" id="v-dni" placeholder="Ej: 72750998"></div>
-          <div><label>Paciente:</label><input type="text" id="v-paciente" placeholder="Nombres y apellidos"></div>
-          <div><label>Fecha Nacimiento:</label><input type="date" id="v-fnac" onchange="calcularEdad()"></div>
-          <div><label>Edad:</label><input type="text" id="v-edad" placeholder="Ej: 27 AÑOS" readonly></div>
-        </div>
-        <div class="grid-2" style="margin-top:10px;">
-          <div>
-            <label>Sexo:</label>
-            <select id="v-sexo">
-              <option value="FEMENINO">FEMENINO</option>
-              <option value="MASCULINO">MASCULINO</option>
-            </select>
-          </div>
-          <div><label>Fecha Orden:</label><input type="date" id="v-fecha"></div>
-        </div>
-      </div>
+/* TABS / MENÚ PRINCIPAL RESPONSIVO */
+.tabs { 
+  display: flex; 
+  flex-wrap: wrap; 
+  gap: 8px; 
+  justify-content: center;
+}
+.tab-btn { 
+  background: #003d80; 
+  color: white; 
+  border: none; 
+  padding: 12px 14px; 
+  cursor: pointer; 
+  border-radius: 6px; 
+  font-weight: bold; 
+  font-size: 13px;
+  flex: 1 1 auto;
+  text-align: center;
+  min-height: 44px;
+}
+.tab-btn.active { background: #28a745; }
 
-      <div class="card">
-        <h2>Agregar Exámenes</h2>
-        <div class="search-container">
-          <input type="text" id="v-buscar" placeholder="Escriba para buscar examen..." autocomplete="off">
-          <div id="v-sugerencias" class="dropdown-list"></div>
-        </div>
+.modulo { display: none; }
+.modulo.active { display: block; }
 
-        <div class="table-responsive">
-          <table>
-            <thead>
-              <tr><th>Examen / Prueba</th><th>Precio (S/)</th><th>Acción</th></tr>
-            </thead>
-            <tbody id="v-lista"></tbody>
-          </table>
-        </div>
+.card { 
+  background: white; 
+  padding: 18px; 
+  border-radius: 8px; 
+  margin-bottom: 20px; 
+  box-shadow: 0 2px 4px rgba(0,0,0,0.08); 
+}
 
-        <!-- SECCIÓN DE DESCUENTO Y TOTAL -->
-        <div class="total-bar">
-          <div class="grid-3" style="align-items: flex-end;">
-            <div>
-              <label>Tipo Descuento:</label>
-              <select id="v-tipo-descuento" onchange="calcularTotalCobro()">
-                <option value="SIN">Sin Descuento</option>
-                <option value="PORCENTAJE">Porcentaje (%)</option>
-                <option value="MONTO">Monto en Soles (S/)</option>
-              </select>
-            </div>
-            <div>
-              <label>Valor Descuento:</label>
-              <input type="number" id="v-val-descuento" value="0" min="0" step="any" oninput="calcularTotalCobro()">
-            </div>
-            <div>
-              <p style="margin: 0; font-size: 13px; text-align: right;">Subtotal: S/ <span id="v-subtotal">0.00</span></p>
-              <p style="margin: 3px 0; font-size: 13px; text-align: right; color: #d9534f;">Descuento: S/ <span id="v-descuento-aplicado">0.00</span></p>
-              <h3 style="margin: 0; text-align: right;">Total Final: S/ <span id="v-total">0.00</span></h3>
-            </div>
-          </div>
-          <button class="btn-print-ticket" onclick="guardarYEmitirTicket()">Guardar e Imprimir Ticket</button>
-        </div>
-      </div>
-    </main>
+.card h2 {
+  font-size: 18px;
+  margin-top: 0;
+  color: #0056b3;
+  border-bottom: 2px solid #e9ecef;
+  padding-bottom: 8px;
+}
 
-    <!-- MÓDULO 2: ÓRDENES -->
-    <main id="modulo-ordenes" class="modulo">
-      <div class="card">
-        <h2>Órdenes Registradas</h2>
-        <div class="grid-2" style="margin-bottom:15px;">
-          <div><label>Filtrar por Fecha Exacta:</label><input type="date" id="o-filtro-fecha" onchange="cargarTablaOrdenes()"></div>
-          <div><label>Buscar Paciente o DNI:</label><input type="text" id="o-filtro-paciente" placeholder="Buscar..." onkeyup="cargarTablaOrdenes()"></div>
-        </div>
-        <div class="table-responsive">
-          <table>
-            <thead>
-              <tr>
-                <th>N° Órden</th>
-                <th>Fecha</th>
-                <th>Paciente</th>
-                <th>DNI</th>
-                <th>Exámenes</th>
-                <th>Total</th>
-                <th>Estado</th>
-                <th>Acciones</th>
-              </tr>
-            </thead>
-            <tbody id="o-lista"></tbody>
-          </table>
-        </div>
-      </div>
-    </main>
+/* GRID ADAPTABLE */
+.grid-4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
+.grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+.grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
 
-    <!-- MÓDULO 3: RESULTADOS -->
-    <main id="modulo-resultados" class="modulo">
-      <div class="card">
-        <h2>Ingreso de Resultados <span id="r-num-orden-title" style="color:#0056b3;"></span></h2>
-        <input type="hidden" id="r-orden-num">
-        <div class="grid-3">
-          <div><label>Paciente:</label><input type="text" id="r-paciente"></div>
-          <div><label>Edad:</label><input type="text" id="r-edad"></div>
-          <div><label>Sexo:</label><input type="text" id="r-sexo"></div>
-        </div>
-        <div class="grid-2" style="margin-top:10px;">
-          <div><label>Doctor Tratante (Opcional):</label><input type="text" id="r-doctor" placeholder="Dejar en blanco si no aplica"></div>
-          <div><label>Muestra / Tipo:</label><input type="text" id="r-muestra" value="SUERO / SANGRE TOTAL"></div>
-        </div>
-        
-        <h3 style="margin-top:20px; color:#0056b3;">Resultados de Exámenes</h3>
-        <div id="r-lista-examenes"></div>
-        <br>
-        <div class="btn-container-flex">
-          <button class="btn-save" onclick="guardarResultadosOrden()">💾 Guardar Resultados</button>
-          <button class="btn-print-pdf" onclick="imprimirResultadosPDF()">🖨️ Imprimir / Descargar A4 (PDF)</button>
-        </div>
-      </div>
-    </main>
+label { display: block; font-weight: bold; margin-bottom: 5px; font-size: 13px; color: #495057; }
+input, select { 
+  width: 100%; 
+  padding: 10px; 
+  border: 1px solid #ced4da; 
+  border-radius: 6px; 
+  font-size: 14px;
+  background-color: #fff;
+}
 
-    <!-- MÓDULO 4: ADMINISTRADOR DE PLANTILLAS -->
-    <main id="modulo-plantillas" class="modulo">
-      <div class="card">
-        <h2>Configurar Plantillas de Exámenes</h2>
-        <div class="grid-2" style="margin-bottom:15px;">
-          <div>
-            <label>Seleccionar Examen a Configurar:</label>
-            <select id="p-select-examen" onchange="cargarPlantillaParaEditar()"></select>
-          </div>
-          <div style="display:flex; flex-direction:column; justify-content:flex-end; gap:5px;">
-            <label>Crear Nuevo Examen:</label>
-            <div style="display:flex; gap:5px;">
-              <input type="text" id="p-nuevo-examen" placeholder="Nombre nuevo examen...">
-              <button class="btn-action" style="white-space:nowrap;" onclick="crearNuevaPlantilla()">+ Crear</button>
-            </div>
-          </div>
-        </div>
+/* TABLAS ADAPTABLES Y SCROLLABLE EN MÓVIL */
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin-top: 10px;
+}
 
-        <div class="table-responsive">
-          <table>
-            <thead>
-              <tr>
-                <th style="min-width:150px;">Parámetro / Analito</th>
-                <th style="min-width:100px;">Unidad</th>
-                <th style="min-width:180px;">Valores Referenciales</th>
-                <th style="min-width:150px;">Método</th>
-                <th style="width:50px;">Acción</th>
-              </tr>
-            </thead>
-            <tbody id="p-lista-parametros"></tbody>
-          </table>
-        </div>
-        <br>
-        <div class="btn-container-flex">
-          <button class="btn-action" onclick="agregarFilaParametro()" style="padding:12px;">+ Agregar Parámetro</button>
-          <button class="btn-save" onclick="guardarPlantillaActual()">💾 Guardar Cambios de Plantilla</button>
-        </div>
-      </div>
-    </main>
-  </div>
+table { width: 100%; border-collapse: collapse; min-width: 500px; }
+th, td { border: 1px solid #dee2e6; padding: 10px; text-align: left; font-size: 13px; }
+th { background: #f8f9fa; color: #333; }
 
-  <!-- IMPRESIÓN 1: TICKET 58MM -->
-  <div id="print-ticket" class="print-ticket-58mm">
-    <div class="t-center">
-      <img src="logo.png" alt="Logo" class="t-logo" onerror="this.style.display='none'">
-      <div class="t-title">VITAL HEALTH</div>
-      <div class="t-sub">CENTRO MÉDICO</div>
-      <p class="t-info">RUC: 20615708829<br>Av. Grau N° 1799, Piura</p>
-      <div class="t-divider">-----------------------------------</div>
-      <div class="t-ticket-num">TICKET N° <span id="t-num">0001</span></div>
-      <div class="t-divider">-----------------------------------</div>
-    </div>
-    
-    <div class="t-datos">
-      <p><strong>FECHA:</strong> <span id="t-fecha"></span></p>
-      <p><strong>DNI:</strong> <span id="t-dni"></span></p>
-      <p><strong>PACIENTE:</strong> <span id="t-paciente"></span></p>
-      <p><strong>EDAD:</strong> <span id="t-edad"></span></p>
-    </div>
-    
-    <div class="t-divider">-----------------------------------</div>
-    
-    <table class="t-table">
-      <thead>
-        <tr>
-          <th style="text-align:left;">DESCRIPCIÓN</th>
-          <th style="text-align:right;">TOTAL</th>
-        </tr>
-      </thead>
-      <tbody id="t-items"></tbody>
-    </table>
-    
-    <div class="t-divider">-----------------------------------</div>
-    <div class="t-right t-total-box">TOTAL: S/ <span id="t-total">0.00</span></div>
-    <div class="t-divider">-----------------------------------</div>
-    
-    <div class="t-center t-footer">
-      <p><strong>¡Gracias por su preferencia!</strong></p>
-      <p>Conserve este ticket para el recojo de sus resultados.</p>
-    </div>
-  </div>
+/* BOTONES TÁCTILES */
+.btn-container-flex {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
 
-  <!-- IMPRESIÓN 2: HOJA A4 RESULTADOS -->
-  <div id="print-a4" class="print-hoja-a4">
-    <div class="a4-header">
-      <div class="a4-logo-box">
-        <img src="logo.png" alt="Vital Health" class="a4-logo" onerror="this.style.display='none'">
-      </div>
-      <div class="a4-empresa">
-        <h2>CENTRO MÉDICO VITAL HEALTH</h2>
-        <p class="a4-sub">LABORATORIO DE ANÁLISIS CLÍNICOS</p>
-        <p>RUC: 20615708829</p>
-        <p>Av. Grau N° 1799, Piura</p>
-      </div>
-    </div>
-    
-    <div class="a4-line"></div>
+.btn-print-ticket, .btn-save, .btn-print-pdf, .btn-action {
+  border: none;
+  padding: 12px 18px;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+}
 
-    <div class="a4-paciente-card">
-      <div class="a4-col">
-        <p><strong>PACIENTE:</strong> <span id="a4-paciente"></span></p>
-        <p><strong>SEXO:</strong> <span id="a4-sexo"></span></p>
-        <p><strong>FECHA DE EMISIÓN:</strong> <span id="a4-fecha"></span></p>
-      </div>
-      <div class="a4-col">
-        <p><strong>EDAD:</strong> <span id="a4-edad"></span></p>
-        <p><strong>DOCTOR TRATANTE:</strong> <span id="a4-doctor"></span></p>
-        <p><strong>MUESTRA:</strong> <span id="a4-muestra"></span></p>
-      </div>
-    </div>
+.btn-print-ticket { background: #ffc107; color: #000; width: 100%; }
+.btn-save { background: #0056b3; color: white; flex: 1; }
+.btn-print-pdf { background: #28a745; color: white; flex: 1; }
+.btn-action { background: #0056b3; color: white; padding: 8px 12px; font-size: 12px; min-height: 36px; }
 
-    <!-- TABLAS DE RESULTADOS DE EXÁMENES -->
-    <div id="a4-container-examenes"></div>
+.total-bar { 
+  display: flex; 
+  flex-direction: column;
+  gap: 10px; 
+  margin-top: 15px; 
+  background: #e9ecef;
+  padding: 12px;
+  border-radius: 6px;
+}
 
-    <!-- FIRMA FIJA EN LA HOJA A4 -->
-    <div class="a4-footer">
-      <div class="a4-firma-container">
-        <img src="firma.png" alt="Firma Bióloga" class="a4-firma-img" onerror="this.style.visibility='hidden'">
-        <div class="a4-firma-linea"></div>
-        <p class="a4-firma-nombre">Raysa Yadira Ursula Alberca Atarama</p>
-        <p class="a4-firma-cargo">Bióloga</p>
-        <p class="a4-firma-colegiatura">C.B.P. 17763</p>
-      </div>
-    </div>
+.search-container { position: relative; margin-bottom: 15px; }
+.dropdown-list {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: white;
+  border: 1px solid #0056b3;
+  max-height: 220px;
+  overflow-y: auto;
+  z-index: 1000;
+  display: none;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+  border-radius: 0 0 6px 6px;
+}
+.dropdown-item { padding: 12px; cursor: pointer; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; }
+.dropdown-item:hover { background-color: #e9ecef; }
 
-    <!-- PIE DE PÁGINA FIJO EN LA HOJA A4 -->
-    <div class="a4-bottom-info">
-      📱 WhatsApp: 984 089 927 &nbsp;|&nbsp; 🏠 Análisis a domicilio &nbsp;|&nbsp; "Tu salud es nuestra prioridad"
-    </div>
-  </div>
+.print-ticket-58mm, .print-hoja-a4 { display: none; }
 
-  <script src="app.js"></script>
-</body>
-</html>
+/* REGLAS MÓVILES */
+@media screen and (max-width: 768px) {
+  body { padding: 8px; }
+  .main-header h1 { font-size: 17px; }
+  .tab-btn { font-size: 12px; width: 100%; }
+  .btn-container-flex { flex-direction: column; }
+  .btn-save, .btn-print-pdf { width: 100%; }
+}
+
+
+/* ===================================================
+   REGLAS DE IMPRESIÓN (INDEPENDIENTES DE LA PANTALLA)
+   =================================================== */
+
+/* TICKET 58MM */
+@media print {
+  @page {
+    size: 58mm auto;
+    margin: 0;
+  }
+
+  body.modo-impresion-ticket {
+    background: #fff !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+  
+  body.modo-impresion-ticket .no-print,
+  body.modo-impresion-ticket .print-hoja-a4 {
+    display: none !important;
+  }
+  
+  body.modo-impresion-ticket .print-ticket-58mm {
+    display: block !important;
+    width: 100% !important;
+    max-width: 58mm;
+    margin: 0 auto;
+    padding: 2mm;
+    box-sizing: border-box;
+    font-family: Arial, Helvetica, sans-serif !important;
+    font-size: 11px;
+    color: #000 !important;
+    font-weight: 600;
+  }
+
+  .t-center { text-align: center; }
+  .t-right { text-align: right; }
+  .t-logo { max-width: 40mm; height: auto; margin-bottom: 4px; }
+  .t-title { font-size: 14px; font-weight: 900; }
+  .t-sub { font-size: 11px; font-weight: bold; margin-bottom: 3px; }
+  .t-info { font-size: 10px; margin: 2px 0; }
+  .t-divider { font-size: 10px; margin: 3px 0; overflow: hidden; white-space: nowrap; }
+  .t-ticket-num { font-size: 12px; font-weight: bold; }
+  .t-datos p { margin: 3px 0; font-size: 10px; }
+  .t-table { width: 100%; border-collapse: collapse; font-size: 10px; margin: 4px 0; min-width: 0 !important; }
+  .t-table th, .t-table td { border: none !important; padding: 2px 0; }
+  .t-total-box { font-size: 13px; font-weight: 900; margin: 4px 0; }
+  .t-footer p { margin: 2px 0; font-size: 9px; }
+}
+
+
+/* HOJA A4 RESULTADOS (CORREGIDO PARA FIRMA EN ÚLTIMA HOJA) */
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 10mm 12mm 15mm 12mm;
+  }
+
+  body.modo-impresion-a4 {
+    background: #fff !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  body.modo-impresion-a4 .no-print,
+  body.modo-impresion-a4 .print-ticket-58mm {
+    display: none !important;
+  }
+
+  body.modo-impresion-a4 .print-hoja-a4 {
+    display: block !important;
+    width: 100%;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+    color: #111;
+  }
+
+  .a4-header { display: flex; justify-content: space-between; align-items: center; }
+  .a4-logo { max-height: 70px; width: auto; }
+  .a4-empresa { text-align: right; }
+  .a4-empresa h2 { margin: 0; font-size: 18px; color: #0056b3; font-weight: bold; }
+  .a4-empresa .a4-sub { font-size: 12px; font-weight: bold; color: #444; margin: 2px 0; }
+  .a4-empresa p { margin: 1px 0; font-size: 11px; color: #555; }
+  
+  .a4-line { border-bottom: 2px solid #0056b3; margin: 8px 0 10px 0; }
+
+  .a4-paciente-card {
+    display: flex;
+    justify-content: space-between;
+    background: #f8f9fa;
+    border: 1px solid #dcdcdc;
+    padding: 8px 12px;
+    border-radius: 4px;
+    margin-bottom: 15px;
+    font-size: 11.5px;
+  }
+  .a4-col p { margin: 3px 0; }
+
+  /* CONTENEDOR DE TABLAS */
+  #a4-container-examenes {
+    margin-bottom: 10px;
+  }
+
+  .a4-exam-block {
+    margin-bottom: 18px;
+    page-break-inside: avoid;
+  }
+
+  .a4-table { width: 100%; border-collapse: collapse; font-size: 11px; min-width: 0 !important; }
+  .a4-table th { border: 1px solid #0056b3; padding: 5px 8px; text-align: left; }
+  .a4-table td { border: 1px solid #e0e0e0; padding: 4px 8px; text-align: left; }
+
+  /* FIRMA: FLUYE AL FINAL Y SOLO SE MUESTRA EN LA ÚLTIMA PÁGINA */
+  .a4-footer { 
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 35px;
+    page-break-inside: avoid;
+  }
+
+  .a4-firma-container { text-align: center; width: 250px; position: relative; }
+  .a4-firma-img { max-height: 70px; width: auto; position: absolute; top: -40px; left: 50%; transform: translateX(-50%); }
+  .a4-firma-linea { border-top: 1px solid #000; margin-bottom: 4px; }
+  .a4-firma-nombre { font-size: 11px; font-weight: bold; margin: 2px 0; }
+  .a4-firma-cargo { font-size: 10px; margin: 1px 0; }
+  .a4-firma-colegiatura { font-size: 10px; font-weight: bold; margin: 1px 0; }
+
+  /* PIE DE PÁGINA FIJO EN EL FONDO DE TODAS LAS HOJAS */
+  .a4-bottom-info {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    text-align: center;
+    font-size: 10px;
+    font-weight: bold;
+    color: #0056b3;
+    border-top: 1px solid #0056b3;
+    padding-top: 4px;
+    background: #fff;
+    z-index: 1000;
+  }
+}
