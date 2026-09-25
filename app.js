@@ -2,7 +2,6 @@ let productos = [];
 let itemsVenta = [];
 let ordenes = JSON.parse(localStorage.getItem('ordenes_lab')) || [];
 
-// Plantillas por defecto
 const plantillasPredeterminadas = {
   "HEMOGRAMA": [
     { parametro: "Leucocitos", unidad: "Cél/uL", referencia: "4,500 - 13,500", metodo: "Citometría de flujo / Impedancia" },
@@ -49,7 +48,6 @@ const plantillasPredeterminadas = {
   ]
 };
 
-// Cargar o inicializar plantillas dinámicas
 let plantillasExamenes = JSON.parse(localStorage.getItem('plantillas_lab')) || plantillasPredeterminadas;
 
 fetch('productos.json')
@@ -280,7 +278,6 @@ function cargarTablaOrdenes() {
   });
 }
 
-// Cargar orden permitiendo edición ilimitada y reordenamiento de exámenes
 function cargarOrdenParaResultados(numOrden) {
   const orden = ordenes.find(o => o.num === numOrden);
   if (!orden) return;
@@ -390,6 +387,7 @@ function guardarResultadosOrden() {
   alert('¡Resultados guardados correctamente!');
 }
 
+/* IMPRESIÓN A4: TABLAS INDEPENDIENTES CON ESPACIAMIENTO ENTRE CADA EXAMEN */
 function imprimirResultadosPDF() {
   const paciente = document.getElementById('r-paciente').value;
   if (!paciente) { alert('No hay ninguna órden cargada.'); return; }
@@ -401,23 +399,38 @@ function imprimirResultadosPDF() {
   document.getElementById('a4-muestra').textContent = (document.getElementById('r-muestra').value || 'SUERO').toUpperCase();
   document.getElementById('a4-fecha').textContent = new Date().toLocaleDateString('es-PE');
 
-  const a4Items = document.getElementById('a4-items');
-  a4Items.innerHTML = '';
+  const container = document.getElementById('a4-container-examenes');
+  container.innerHTML = '';
 
   const numOrden = parseInt(document.getElementById('r-orden-num').value);
   const orden = ordenes.find(o => o.num === numOrden);
 
   if (orden) {
-    orden.items.forEach(examen => {
-      a4Items.innerHTML += `
-        <tr style="background:#e9ecef; font-weight:bold;">
-          <td colspan="5" style="border:1px solid #ccc; padding:6px; color:#0056b3;">${examen.Nombre.toUpperCase()}</td>
-        </tr>
+    orden.items.forEach((examen, index) => {
+      let tableHtml = `
+        <div class="a4-exam-block">
+          <table class="a4-table">
+            <thead>
+              <tr class="a4-exam-title-row">
+                <th colspan="5" style="background-color: #0056b3; color: white; font-weight: bold; font-size: 13px; text-transform: uppercase; padding: 6px 10px;">
+                  ${examen.Nombre.toUpperCase()}
+                </th>
+              </tr>
+              <tr style="background:#f2f2f2; font-size: 11px;">
+                <th style="width: 32%;">PRUEBA / EXAMEN</th>
+                <th style="width: 18%;">RESULTADO</th>
+                <th style="width: 15%;">UNIDAD</th>
+                <th style="width: 20%;">VALOR REFERENCIAL</th>
+                <th style="width: 15%;">MÉTODO</th>
+              </tr>
+            </thead>
+            <tbody>
       `;
+
       examen.detalles.forEach(det => {
-        a4Items.innerHTML += `
+        tableHtml += `
           <tr>
-            <td style="padding-left:15px;">${det.parametro}</td>
+            <td style="padding-left:12px;">${det.parametro}</td>
             <td><strong>${det.resultado || '-'}</strong></td>
             <td>${det.unidad || ''}</td>
             <td>${det.referencia || ''}</td>
@@ -425,6 +438,14 @@ function imprimirResultadosPDF() {
           </tr>
         `;
       });
+
+      tableHtml += `
+            </tbody>
+          </table>
+        </div>
+      `;
+
+      container.innerHTML += tableHtml;
     });
   }
 
@@ -433,7 +454,7 @@ function imprimirResultadosPDF() {
   setTimeout(() => { document.body.className = ''; }, 1000);
 }
 
-// FUNCIONES DEL MÓDULO 4: ADMINISTRACIÓN DE PLANTILLAS
+// FUNCIONES DEL MÓDULO 4: PLANTILLAS
 function pobladorSelectPlantillas() {
   const select = document.getElementById('p-select-examen');
   select.innerHTML = '';
