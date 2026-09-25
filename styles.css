@@ -1,4 +1,4 @@
-/* ESTILOS GENERALES PANTALLA */
+/* GENERALES */
 body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 20px; background: #f4f6f9; color: #333; }
 .main-header { background: #0056b3; color: white; padding: 15px 20px; border-radius: 8px; margin-bottom: 20px; }
 .main-header h1 { margin: 0 0 10px 0; font-size: 22px; }
@@ -46,7 +46,6 @@ th { background: #f0f0f0; font-size: 13px; }
 .dropdown-item { padding: 10px; cursor: pointer; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; }
 .dropdown-item:hover { background-color: #e9ecef; }
 
-/* Ocultar elementos de impresión en pantalla */
 .print-ticket-58mm, .print-hoja-a4 { display: none; }
 
 
@@ -54,11 +53,11 @@ th { background: #f0f0f0; font-size: 13px; }
    REGLAS DE IMPRESIÓN (@media print)
    =================================================== */
 
-/* --- CONFIGURACIÓN TICKET 58MM --- */
+/* TICKET 58MM */
 @media print {
   @page {
     size: 58mm auto;
-    margin: 0mm;
+    margin: 0;
   }
 
   body.modo-impresion-ticket {
@@ -74,9 +73,11 @@ th { background: #f0f0f0; font-size: 13px; }
   
   body.modo-impresion-ticket .print-ticket-58mm {
     display: block !important;
-    width: 48mm;
+    width: 100% !important;
+    max-width: 58mm;
     margin: 0 auto;
-    padding: 4mm 1mm;
+    padding: 2mm;
+    box-sizing: border-box;
     font-family: Arial, Helvetica, sans-serif !important;
     font-size: 11px;
     color: #000 !important;
@@ -85,7 +86,7 @@ th { background: #f0f0f0; font-size: 13px; }
 
   .t-center { text-align: center; }
   .t-right { text-align: right; }
-  .t-logo { max-width: 38mm; height: auto; margin-bottom: 4px; }
+  .t-logo { max-width: 40mm; height: auto; margin-bottom: 4px; }
   .t-title { font-size: 14px; font-weight: 900; }
   .t-sub { font-size: 11px; font-weight: bold; margin-bottom: 3px; }
   .t-info { font-size: 10px; margin: 2px 0; }
@@ -99,7 +100,7 @@ th { background: #f0f0f0; font-size: 13px; }
 }
 
 
-/* --- CONFIGURACIÓN HOJA DE RESULTADOS A4 --- */
+/* HOJA A4 RESULTADOS CON REPETICIÓN DE CABECERA */
 @media print {
   @page {
     size: A4 portrait;
@@ -149,7 +150,7 @@ th { background: #f0f0f0; font-size: 13px; }
   .a4-table th { background: #0056b3; color: white; border: 1px solid #0056b3; padding: 8px; text-align: left; }
   .a4-table td { border: 1px solid #e0e0e0; padding: 6px 8px; text-align: left; }
 
-  .a4-footer { margin-top: 90px; display: flex; justify-content: flex-end; }
+  .a4-footer { margin-top: 60px; display: flex; justify-content: flex-end; page-break-inside: avoid; }
   .a4-firma-container { text-align: center; width: 250px; position: relative; }
   .a4-firma-img { max-height: 80px; width: auto; position: absolute; top: -55px; left: 50%; transform: translateX(-50%); }
   .a4-firma-linea { border-top: 1px solid #000; margin-bottom: 5px; }
