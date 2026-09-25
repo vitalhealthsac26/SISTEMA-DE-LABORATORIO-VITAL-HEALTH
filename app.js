@@ -2,7 +2,7 @@ let productos = [];
 let itemsVenta = [];
 let ordenes = JSON.parse(localStorage.getItem('ordenes_lab')) || [];
 
-// Cargar el catálogo productos.json
+// Cargar catálogo de exámenes desde productos.json
 fetch('productos.json')
   .then(res => res.json())
   .then(data => { productos = data; })
@@ -20,6 +20,7 @@ document.addEventListener('DOMContentLoaded', () => {
   cargarTablaOrdenes();
 });
 
+// Cambiar de módulo
 function cambiarModulo(idModulo, event) {
   document.querySelectorAll('.modulo').forEach(m => m.classList.remove('active'));
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -30,7 +31,7 @@ function cambiarModulo(idModulo, event) {
   if (idModulo === 'modulo-ordenes') cargarTablaOrdenes();
 }
 
-// Calcular Edad desde Fecha de Nacimiento
+// Cálculo automático de edad
 function calcularEdad() {
   const fnac = document.getElementById('v-fnac').value;
   if (!fnac) return;
@@ -47,10 +48,12 @@ function calcularEdad() {
   document.getElementById('v-edad').value = `${edad} AÑOS`;
 }
 
-// Configuración del Buscador Desplegable
+// Buscador con lista interactiva
 function configurarBuscadorLive() {
   const input = document.getElementById('v-buscar');
   const sugerencias = document.getElementById('v-sugerencias');
+
+  if (!input) return;
 
   input.addEventListener('input', () => {
     const text = input.value.trim().toLowerCase();
@@ -89,10 +92,17 @@ function configurarBuscadorLive() {
 function seleccionarExamen(prod) {
   const existe = itemsVenta.find(i => i.Nombre === prod.Nombre);
   if (existe) {
-    alert('El examen ya está en la lista.');
+    alert('El examen ya está agregado en esta orden.');
     return;
   }
-  itemsVenta.push({ Nombre: prod.Nombre, Precio: parseFloat(prod.Precio) || 0 });
+  itemsVenta.push({
+    Nombre: prod.Nombre,
+    Precio: parseFloat(prod.Precio) || 0,
+    resultado: '',
+    unidad: '',
+    referencia: '',
+    metodo: ''
+  });
   renderizarVenta();
 }
 
@@ -111,7 +121,7 @@ function renderizarVenta() {
     total += item.Precio;
     const tr = document.createElement('tr');
     tr.innerHTML = `
-      <td>${item.Nombre}</td>
+      <td><strong>${item.Nombre}</strong></td>
       <td>S/ ${item.Precio.toFixed(2)}</td>
       <td><button style="color:red; cursor:pointer;" onclick="eliminarItemVenta(${index})">✕ Eliminar</button></td>
     `;
@@ -121,30 +131,33 @@ function renderizarVenta() {
   totalSpan.textContent = total.toFixed(2);
 }
 
-// Guardar Órden y Emitir Ticket
+// Guardar Órden en Sistema e Imprimir Ticket
 function guardarYEmitirTicket() {
-  const paciente = document.getElementById('v-paciente').value;
+  const paciente = document.getElementById('v-paciente').value.trim();
   if (!paciente || itemsVenta.length === 0) {
-    alert('Por favor ingrese el nombre del paciente y al menos un examen.');
+    alert('Por favor ingrese el nombre del paciente y agregue al menos un examen.');
     return;
   }
 
   const nuevaOrden = {
     num: ordenes.length + 1,
-    dni: document.getElementById('v-dni').value || '-',
+    dni: document.getElementById('v-dni').value.trim() || '-',
     paciente: paciente.toUpperCase(),
     fnac: document.getElementById('v-fnac').value,
     edad: document.getElementById('v-edad').value || '-',
     sexo: document.getElementById('v-sexo').value,
     fecha: document.getElementById('v-fecha').value,
-    items: [...itemsVenta],
+    doctor: '',
+    muestra: 'SUERO / SANGRE TOTAL',
+    completado: false,
+    items: JSON.parse(JSON.stringify(itemsVenta)),
     total: itemsVenta.reduce((acc, i) => acc + i.Precio, 0)
   };
 
   ordenes.push(nuevaOrden);
   localStorage.setItem('ordenes_lab', JSON.stringify(ordenes));
 
-  // Imprimir Ticket
+  // Llenar Plantilla Ticket
   document.getElementById('t-num').textContent = String(nuevaOrden.num).padStart(4, '0');
   document.getElementById('t-paciente').textContent = nuevaOrden.paciente;
   document.getElementById('t-dni').textContent = nuevaOrden.dni;
@@ -163,19 +176,23 @@ function guardarYEmitirTicket() {
 
   setTimeout(() => {
     document.body.className = '';
-    // Limpiar formulario venta
+    // Limpiar campos de recepción
     itemsVenta = [];
     renderizarVenta();
     document.getElementById('v-paciente').value = '';
     document.getElementById('v-dni').value = '';
+    document.getElementById('v-fnac').value = '';
+    document.getElementById('v-edad').value = '';
   }, 1000);
 }
 
-// Cargar Tabla de Órdenes del Día
+// Cargar Historial de Órdenes del Día
 function cargarTablaOrdenes() {
   const filtroFecha = document.getElementById('o-filtro-fecha').value;
   const filtroPaciente = document.getElementById('o-filtro-paciente').value.toLowerCase();
   const tbody = document.getElementById('o-lista');
+  if (!tbody) return;
+
   tbody.innerHTML = '';
 
   const filtradas = ordenes.filter(o => {
@@ -186,6 +203,10 @@ function cargarTablaOrdenes() {
 
   filtradas.forEach(o => {
     const listaExamenes = o.items.map(i => i.Nombre).join(', ');
+    const estadoBadge = o.completado 
+      ? '<span style="color:green; font-weight:bold;">✔ Completado</span>' 
+      : '<span style="color:#d9534f; font-weight:bold;">⏳ Pendiente</span>';
+
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td><strong>#${String(o.num).padStart(4, '0')}</strong></td>
@@ -194,57 +215,94 @@ function cargarTablaOrdenes() {
       <td>${o.dni}</td>
       <td><small>${listaExamenes}</small></td>
       <td>S/ ${o.total.toFixed(2)}</td>
-      <td><button class="btn-action" onclick="cargarOrdenParaResultados(${o.num})">Ingresar Resultados</button></td>
+      <td>${estadoBadge}</td>
+      <td><button class="btn-action" onclick="cargarOrdenParaResultados(${o.num})">Ingresar / Editar Resultados</button></td>
     `;
     tbody.appendChild(tr);
   });
 }
 
-// Cargar Órden para llenar Resultados
+// Cargar Datos de la Órden para Llenar o Editar Resultados
 function cargarOrdenParaResultados(numOrden) {
   const orden = ordenes.find(o => o.num === numOrden);
   if (!orden) return;
 
+  document.getElementById('r-orden-num').value = orden.num;
+  document.getElementById('r-num-orden-title').textContent = `(Órden #${String(orden.num).padStart(4, '0')})`;
   document.getElementById('r-paciente').value = orden.paciente;
   document.getElementById('r-edad').value = orden.edad;
   document.getElementById('r-sexo').value = orden.sexo;
+  document.getElementById('r-doctor').value = orden.doctor || '';
+  document.getElementById('r-muestra').value = orden.muestra || 'SUERO / SANGRE TOTAL';
 
   const tbody = document.getElementById('r-lista');
   tbody.innerHTML = '';
 
-  orden.items.forEach(item => {
+  orden.items.forEach((item, idx) => {
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td><strong>${item.Nombre}</strong></td>
-      <td><input type="text" class="r-val" placeholder="Resultado"></td>
-      <td><input type="text" class="r-uni" placeholder="Unidad"></td>
-      <td><input type="text" class="r-ref" placeholder="Val. Referencial"></td>
-      <td><input type="text" class="r-met" placeholder="Método"></td>
+      <td><input type="text" class="r-val" value="${item.resultado || ''}" placeholder="Ej: NEGATIVO o 12.5"></td>
+      <td><input type="text" class="r-uni" value="${item.unidad || ''}" placeholder="Ej: mg/dL"></td>
+      <td><input type="text" class="r-ref" value="${item.referencia || ''}" placeholder="Ej: 70 - 105"></td>
+      <td><input type="text" class="r-met" value="${item.metodo || ''}" placeholder="Ej: Espectrofotometría"></td>
     `;
     tbody.appendChild(tr);
   });
 
-  // Cambiar directamente a pestaña de resultados
   cambiarModulo('modulo-resultados');
 }
 
-// Imprimir PDF en Hoja A4
-function imprimirPDF() {
-  document.getElementById('a4-paciente').textContent = document.getElementById('r-paciente').value || '-';
-  document.getElementById('a4-edad').textContent = document.getElementById('r-edad').value || '-';
-  document.getElementById('a4-sexo').textContent = document.getElementById('r-sexo').value || '-';
-  document.getElementById('a4-doctor').textContent = document.getElementById('r-doctor').value || 'A QUIEN CORRESPONDA';
-  document.getElementById('a4-muestra').textContent = document.getElementById('r-muestra').value || 'SUERO';
+// Guardar los Resultados Editados en la Órden
+function guardarResultadosOrden() {
+  const numOrden = parseInt(document.getElementById('r-orden-num').value);
+  const orden = ordenes.find(o => o.num === numOrden);
+
+  if (!orden) {
+    alert('Seleccione una órden válida desde la sección "Órdenes del Día".');
+    return;
+  }
+
+  orden.paciente = document.getElementById('r-paciente').value.toUpperCase();
+  orden.edad = document.getElementById('r-edad').value;
+  orden.sexo = document.getElementById('r-sexo').value;
+  orden.doctor = document.getElementById('r-doctor').value.toUpperCase();
+  orden.muestra = document.getElementById('r-muestra').value.toUpperCase();
+
+  const filas = document.querySelectorAll('#r-lista tr');
+  filas.forEach((f, idx) => {
+    orden.items[idx].resultado = f.querySelector('.r-val').value;
+    orden.items[idx].unidad = f.querySelector('.r-uni').value;
+    orden.items[idx].referencia = f.querySelector('.r-ref').value;
+    orden.items[idx].metodo = f.querySelector('.r-met').value;
+  });
+
+  orden.completado = true;
+  localStorage.setItem('ordenes_lab', JSON.stringify(ordenes));
+  alert('¡Resultados guardados exitosamente!');
+}
+
+// Imprimir PDF en A4 con la Plantilla Oficial
+function imprimirResultadosPDF() {
+  const paciente = document.getElementById('r-paciente').value;
+  if (!paciente) {
+    alert('No hay ninguna órden cargada.');
+    return;
+  }
+
+  // Si el usuario no ingresó doctor, se deja el espacio en blanco (no muestra nada)
+  const doctorVal = document.getElementById('r-doctor').value.trim();
+
+  document.getElementById('a4-paciente').textContent = paciente.toUpperCase();
+  document.getElementById('a4-edad').textContent = document.getElementById('r-edad').value.toUpperCase() || '-';
+  document.getElementById('a4-sexo').textContent = document.getElementById('r-sexo').value.toUpperCase() || '-';
+  document.getElementById('a4-doctor').textContent = doctorVal ? doctorVal.toUpperCase() : '';
+  document.getElementById('a4-muestra').textContent = (document.getElementById('r-muestra').value || 'SUERO').toUpperCase();
   document.getElementById('a4-fecha').textContent = new Date().toLocaleDateString('es-PE');
 
   const a4Items = document.getElementById('a4-items');
   const filas = document.querySelectorAll('#r-lista tr');
   a4Items.innerHTML = '';
-
-  if (filas.length === 0) {
-    alert('No hay exámenes cargados.');
-    return;
-  }
 
   filas.forEach(f => {
     const nombre = f.cells[0].innerText;
