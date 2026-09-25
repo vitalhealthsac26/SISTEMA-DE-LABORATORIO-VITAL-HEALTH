@@ -206,11 +206,11 @@ th { background: #f8f9fa; color: #333; }
 }
 
 
-/* HOJA A4 RESULTADOS (CORREGIDO Y FLEXIBLE) */
+/* HOJA A4 RESULTADOS (POSICIONAMIENTO FIJO DE FIRMA Y PIE DE PÁGINA) */
 @media print {
   @page {
     size: A4 portrait;
-    margin: 8mm 10mm 12mm 10mm;
+    margin: 8mm 10mm 10mm 10mm;
   }
 
   body.modo-impresion-a4 {
@@ -225,14 +225,13 @@ th { background: #f8f9fa; color: #333; }
   }
 
   body.modo-impresion-a4 .print-hoja-a4 {
-    display: flex !important;
-    flex-direction: column !important;
+    display: block !important;
     width: 100%;
-    min-height: 267mm; /* Asegura el alto total útil de la página A4 */
+    min-height: 270mm; /* Altura de la hoja A4 útil */
+    position: relative; /* Permite posicionar firma y pie de página en el fondo */
     box-sizing: border-box;
     font-family: Arial, sans-serif;
     color: #111;
-    position: relative;
   }
 
   .a4-header { display: flex; justify-content: space-between; align-items: center; }
@@ -256,9 +255,9 @@ th { background: #f8f9fa; color: #333; }
   }
   .a4-col p { margin: 3px 0; }
 
-  /* CONTENEDOR DE EXÁMENES QUE SE EXPANDE */
+  /* CONTENEDOR DE TABLAS DE EXÁMENES */
   #a4-container-examenes {
-    flex-grow: 1; /* Ocupa el espacio intermedio dinámicamente */
+    margin-bottom: 160px; /* Margen inferior para garantizar espacio libre para la firma */
   }
 
   .a4-exam-block {
@@ -270,25 +269,27 @@ th { background: #f8f9fa; color: #333; }
   .a4-table th { border: 1px solid #0056b3; padding: 5px 8px; text-align: left; }
   .a4-table td { border: 1px solid #e0e0e0; padding: 4px 8px; text-align: left; }
 
-  /* FIRMA EMPUJADA AL FINAL DE LA HOJA */
+  /* FIRMA FIJA JUSTO ENCIMA DEL PIE DE PÁGINA */
   .a4-footer { 
-    margin-top: auto; /* Empuja la firma hacia abajo de forma dinámica */
-    padding-top: 50px; /* Crea espacio seguro de separación arriba del sello/firma */
-    display: flex; 
-    justify-content: flex-end; 
+    position: absolute;
+    bottom: 35px; /* Ubicada exactamente arriba de la barra azul inferior */
+    right: 0;
+    width: 250px;
     page-break-inside: avoid;
-    margin-bottom: 15px;
   }
 
-  .a4-firma-container { text-align: center; width: 250px; position: relative; }
-  .a4-firma-img { max-height: 80px; width: auto; position: absolute; top: -50px; left: 50%; transform: translateX(-50%); }
+  .a4-firma-container { text-align: center; width: 100%; position: relative; }
+  .a4-firma-img { max-height: 75px; width: auto; position: absolute; top: -45px; left: 50%; transform: translateX(-50%); }
   .a4-firma-linea { border-top: 1px solid #000; margin-bottom: 4px; }
   .a4-firma-nombre { font-size: 11.5px; font-weight: bold; margin: 2px 0; }
   .a4-firma-cargo { font-size: 10.5px; margin: 1px 0; }
   .a4-firma-colegiatura { font-size: 10.5px; font-weight: bold; margin: 1px 0; }
 
-  /* BARRA INFERIOR FINAL */
+  /* BARRA INFERIOR FIJA AL BORDE DE LA HOJA */
   .a4-bottom-info {
+    position: absolute;
+    bottom: 0;
+    left: 0;
     width: 100%;
     text-align: center;
     font-size: 10px;
@@ -296,7 +297,6 @@ th { background: #f8f9fa; color: #333; }
     color: #0056b3;
     border-top: 1px solid #0056b3;
     padding-top: 5px;
-    margin-top: 5px;
     background: #fff;
   }
 }
