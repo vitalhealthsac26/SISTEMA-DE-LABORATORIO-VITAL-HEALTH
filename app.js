@@ -155,7 +155,7 @@ function renderizarVenta() {
     tr.innerHTML = `
       <td><strong>${item.Nombre}</strong></td>
       <td>S/ ${item.Precio.toFixed(2)}</td>
-      <td><button style="color:red; cursor:pointer;" onclick="eliminarItemVenta(${index})">✕ Eliminar</button></td>
+      <td><button style="color:red; cursor:pointer; border:none; background:none; font-weight:bold;" onclick="eliminarItemVenta(${index})">✕ Eliminar</button></td>
     `;
     tbody.appendChild(tr);
   });
@@ -272,7 +272,7 @@ function cargarTablaOrdenes() {
       <td><small>${listaExamenes}</small></td>
       <td>S/ ${o.total.toFixed(2)}</td>
       <td>${estadoBadge}</td>
-      <td><button class="btn-action" onclick="cargarOrdenParaResultados(${o.num})">Ingresar / Editar</button></td>
+      <td><button class="btn-action" onclick="cargarOrdenParaResultados(${o.num})">Editar</button></td>
     `;
     tbody.appendChild(tr);
   });
@@ -304,31 +304,32 @@ function renderizarExamenesResultados(orden) {
     box.setAttribute('data-ex-index', exIndex);
 
     let html = `
-      <div style="background:#0056b3; color:white; padding:8px 12px; display:flex; justify-content:space-between; align-items:center; border-radius:4px 4px 0 0; margin-top:15px;">
-        <strong>${examen.Nombre.toUpperCase()}</strong>
+      <div style="background:#0056b3; color:white; padding:10px; display:flex; justify-content:space-between; align-items:center; border-radius:6px 6px 0 0; margin-top:15px;">
+        <strong style="font-size:14px;">${examen.Nombre.toUpperCase()}</strong>
         <div>
-          <button style="background:#ffc107; border:none; padding:3px 8px; font-weight:bold; cursor:pointer; border-radius:3px;" onclick="moverExamen(${exIndex}, -1)">🔼 Subir</button>
-          <button style="background:#ffc107; border:none; padding:3px 8px; font-weight:bold; cursor:pointer; border-radius:3px;" onclick="moverExamen(${exIndex}, 1)">🔽 Bajar</button>
+          <button style="background:#ffc107; border:none; padding:4px 8px; font-weight:bold; cursor:pointer; border-radius:4px;" onclick="moverExamen(${exIndex}, -1)">🔼</button>
+          <button style="background:#ffc107; border:none; padding:4px 8px; font-weight:bold; cursor:pointer; border-radius:4px;" onclick="moverExamen(${exIndex}, 1)">🔽</button>
         </div>
       </div>
-      <table>
-        <thead>
-          <tr>
-            <th style="width:30%;">Parámetro / Prueba</th>
-            <th style="width:20%;">Resultado</th>
-            <th style="width:15%;">Unidad</th>
-            <th style="width:20%;">Valores Referenciales</th>
-            <th style="width:15%;">Método</th>
-          </tr>
-        </thead>
-        <tbody>
+      <div class="table-responsive">
+        <table>
+          <thead>
+            <tr>
+              <th style="min-width:140px;">Parámetro</th>
+              <th style="min-width:110px;">Resultado</th>
+              <th style="min-width:90px;">Unidad</th>
+              <th style="min-width:140px;">Valores Ref.</th>
+              <th style="min-width:120px;">Método</th>
+            </tr>
+          </thead>
+          <tbody>
     `;
 
     examen.detalles.forEach((det, dIndex) => {
       html += `
         <tr class="r-row" data-ex="${exIndex}" data-det="${dIndex}">
           <td><strong>${det.parametro}</strong></td>
-          <td><input type="text" class="r-val" value="${det.resultado || ''}" placeholder="Resultado"></td>
+          <td><input type="text" class="r-val" value="${det.resultado || ''}" placeholder="Ingresar"></td>
           <td><input type="text" class="r-uni" value="${det.unidad || ''}"></td>
           <td><input type="text" class="r-ref" value="${det.referencia || ''}"></td>
           <td><input type="text" class="r-met" value="${det.metodo || ''}"></td>
@@ -336,7 +337,7 @@ function renderizarExamenesResultados(orden) {
       `;
     });
 
-    html += `</tbody></table>`;
+    html += `</tbody></table></div>`;
     box.innerHTML = html;
     cont.appendChild(box);
   });
@@ -481,7 +482,7 @@ function cargarPlantillaParaEditar() {
       <td><input type="text" class="p-uni" value="${p.unidad}"></td>
       <td><input type="text" class="p-ref" value="${p.referencia}"></td>
       <td><input type="text" class="p-met" value="${p.metodo}"></td>
-      <td><button style="color:red; cursor:pointer;" onclick="eliminarFilaParametro(${idx})">✕</button></td>
+      <td><button style="color:red; cursor:pointer; border:none; background:none; font-weight:bold;" onclick="eliminarFilaParametro(${idx})">✕</button></td>
     `;
     tbody.appendChild(tr);
   });
@@ -496,7 +497,7 @@ function agregarFilaParametro() {
     <td><input type="text" class="p-uni" placeholder="Ej: mg/dL"></td>
     <td><input type="text" class="p-ref" placeholder="Ej: 70 - 105"></td>
     <td><input type="text" class="p-met" placeholder="Método"></td>
-    <td><button style="color:red; cursor:pointer;" onclick="this.closest('tr').remove()">✕</button></td>
+    <td><button style="color:red; cursor:pointer; border:none; background:none; font-weight:bold;" onclick="this.closest('tr').remove()">✕</button></td>
   `;
   tbody.appendChild(tr);
 }
