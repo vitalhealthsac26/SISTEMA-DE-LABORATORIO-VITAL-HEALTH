@@ -58,8 +58,27 @@
           </table>
         </div>
 
+        <!-- SECCIÓN DE DESCUENTO Y TOTAL -->
         <div class="total-bar">
-          <h3>Total: S/ <span id="v-total">0.00</span></h3>
+          <div class="grid-3" style="align-items: flex-end;">
+            <div>
+              <label>Tipo Descuento:</label>
+              <select id="v-tipo-descuento" onchange="calcularTotalCobro()">
+                <option value="SIN">Sin Descuento</option>
+                <option value="PORCENTAJE">Porcentaje (%)</option>
+                <option value="MONTO">Monto en Soles (S/)</option>
+              </select>
+            </div>
+            <div>
+              <label>Valor Descuento:</label>
+              <input type="number" id="v-val-descuento" value="0" min="0" step="any" oninput="calcularTotalCobro()">
+            </div>
+            <div>
+              <p style="margin: 0; font-size: 13px; text-align: right;">Subtotal: S/ <span id="v-subtotal">0.00</span></p>
+              <p style="margin: 3px 0; font-size: 13px; text-align: right; color: #d9534f;">Descuento: S/ <span id="v-descuento-aplicado">0.00</span></p>
+              <h3 style="margin: 0; text-align: right;">Total Final: S/ <span id="v-total">0.00</span></h3>
+            </div>
+          </div>
           <button class="btn-print-ticket" onclick="guardarYEmitirTicket()">Guardar e Imprimir Ticket</button>
         </div>
       </div>
@@ -70,7 +89,7 @@
       <div class="card">
         <h2>Órdenes Registradas</h2>
         <div class="grid-2" style="margin-bottom:15px;">
-          <div><label>Filtrar por Fecha:</label><input type="date" id="o-filtro-fecha" onchange="cargarTablaOrdenes()"></div>
+          <div><label>Filtrar por Fecha Exacta:</label><input type="date" id="o-filtro-fecha" onchange="cargarTablaOrdenes()"></div>
           <div><label>Buscar Paciente o DNI:</label><input type="text" id="o-filtro-paciente" placeholder="Buscar..." onkeyup="cargarTablaOrdenes()"></div>
         </div>
         <div class="table-responsive">
@@ -232,7 +251,7 @@
     <!-- TABLAS DE RESULTADOS DE EXÁMENES -->
     <div id="a4-container-examenes"></div>
 
-    <!-- FIRMA POSICIONADA FIJA ABAJO A LA DERECHA -->
+    <!-- FIRMA FIJA EN LA HOJA A4 -->
     <div class="a4-footer">
       <div class="a4-firma-container">
         <img src="firma.png" alt="Firma Bióloga" class="a4-firma-img" onerror="this.style.visibility='hidden'">
@@ -243,7 +262,7 @@
       </div>
     </div>
 
-    <!-- PIE DE PÁGINA POSICIONADO FIJO AL BORDE INFERIOR -->
+    <!-- PIE DE PÁGINA FIJO EN LA HOJA A4 -->
     <div class="a4-bottom-info">
       📱 WhatsApp: 984 089 927 &nbsp;|&nbsp; 🏠 Análisis a domicilio &nbsp;|&nbsp; "Tu salud es nuestra prioridad"
     </div>
