@@ -1,0 +1,2797 @@
+[
+  {
+    "Codigo": "12",
+    "Nombre": "6 DROGAS DE ABUSO PRUEBA URINARIA CUALITATIVA",
+    "Precio": 300.00
+  },
+  {
+    "Codigo": "17",
+    "Nombre": "ACETIL COLINA",
+    "Precio": 350.00
+  },
+  {
+    "Codigo": "19",
+    "Nombre": "ACETIL COLINA, ANTICUERPOS",
+    "Precio": 400.00
+  },
+  {
+    "Codigo": "27",
+    "Nombre": "ACIDO LACTICO (LACTATO)",
+    "Precio": 75.00
+  },
+  {
+    "Codigo": "36",
+    "Nombre": "ACIDO URICO EN ORINA DE 24 HORAS",
+    "Precio": 35.00
+  },
+  {
+    "Codigo": "38",
+    "Nombre": "ACIDO VALPROICO",
+    "Precio": 100.00
+  },
+  {
+    "Codigo": "24",
+    "Nombre": "ACIDO HIALURONICO",
+    "Precio": 660.00
+  },
+  {
+    "Codigo": "46",
+    "Nombre": "ADA LIQUIDO PLEURAL",
+    "Precio": 70.00
+  },
+  {
+    "Codigo": "28",
+    "Nombre": "ACIDO LACTICO EN LCR (HN)",
+    "Precio": 42.00
+  },
+  {
+    "Codigo": "59",
+    "Nombre": "AGLUTINACIONES EN LAMINA",
+    "Precio": 15.00
+  },
+  {
+    "Codigo": "64",
+    "Nombre": "ALBUMINA SÉRICA",
+    "Precio": 20.00
+  },
+  {
+    "Codigo": "66",
+    "Nombre": "ALCOHOL ETILICO EN SANGRE (HN)",
+    "Precio": 120.00
+  },
+  {
+    "Codigo": "79",
+    "Nombre": "AMILASA SERICA",
+    "Precio": 35.00
+  },
+  {
+    "Codigo": "81",
+    "Nombre": "ANCA (ANTICITOPLASMA DEL NEUTROFILO)",
+    "Precio": 80.00
+  },
+  {
+    "Codigo": "34",
+    "Nombre": "ACIDO URICO",
+    "Precio": 15.00
+  },
+  {
+    "Codigo": "106",
+    "Nombre": "ANTI TIROGLOBULINA-ANTI ATG",
+    "Precio": 50.00
+  },
+  {
+    "Codigo": "110",
+    "Nombre": "ANTI-CCP (PEPTIDO CICLICO CITRULINADO) IGG (IM)",
+    "Precio": 180.00
+  },
+  {
+    "Codigo": "115",
+    "Nombre": "ANTI-DNA NATIVO (DS-DOBLE CADENA)",
+    "Precio": 70.00
+  },
+  {
+    "Codigo": "39",
+    "Nombre": "ACIDO VANILMANDELICO (ORINA 24 HORAS)",
+    "Precio": 150.00
+  },
+  {
+    "Codigo": "117",
+    "Nombre": "ANTIFOSFOLIPIDOS (PANEL COMPLETO) IGG+IGM",
+    "Precio": 500.00
+  },
+  {
+    "Codigo": "119",
+    "Nombre": "ANTIGENO CARCINOEMBRIOGENICO - CEA",
+    "Precio": 60.00
+  },
+  {
+    "Codigo": "123",
+    "Nombre": "ANTINUCLEARES, ANTICUERPOS (ANA)",
+    "Precio": 45.00
+  },
+  {
+    "Codigo": "43",
+    "Nombre": "ADA LCR (ADENOSIN DEAMINASA)",
+    "Precio": 70.00
+  },
+  {
+    "Codigo": "44",
+    "Nombre": "ADA LIQUIDO ASCITICO (PERITONEAL)",
+    "Precio": 70.00
+  },
+  {
+    "Codigo": "45",
+    "Nombre": "ADA LIQUIDO PERICARDIO",
+    "Precio": 42.00
+  },
+  {
+    "Codigo": "164",
+    "Nombre": "BIOPSIA CERVIX",
+    "Precio": 130.00
+  },
+  {
+    "Codigo": "165",
+    "Nombre": "BIOPSIA DE MAMA",
+    "Precio": 150.00
+  },
+  {
+    "Codigo": "167",
+    "Nombre": "BIOPSIA DE PROSTATA",
+    "Precio": 290.00
+  },
+  {
+    "Codigo": "49",
+    "Nombre": "ADA SUERO",
+    "Precio": 42.00
+  },
+  {
+    "Codigo": "169",
+    "Nombre": "BIOPSIA MENTON",
+    "Precio": 150.00
+  },
+  {
+    "Codigo": "177",
+    "Nombre": "BK CULTIVO (ED)",
+    "Precio": 70.00
+  },
+  {
+    "Codigo": "182",
+    "Nombre": "BK DIRECTO",
+    "Precio": 45.00
+  },
+  {
+    "Codigo": "184",
+    "Nombre": "BK DIRECTO - LCR",
+    "Precio": 60.00
+  },
+  {
+    "Codigo": "193",
+    "Nombre": "BK ESPUTO (3 MUESTRAS)",
+    "Precio": 80.00
+  },
+  {
+    "Codigo": "213",
+    "Nombre": "CA19-9 (PANCREAS)",
+    "Precio": 60.00
+  },
+  {
+    "Codigo": "220",
+    "Nombre": "CALCIO EN ORINA DE 24 HORAS",
+    "Precio": 40.00
+  },
+  {
+    "Codigo": "221",
+    "Nombre": "CALCIO EN ORINA SIMPLE",
+    "Precio": 30.00
+  },
+  {
+    "Codigo": "223",
+    "Nombre": "CALCIO SERICO",
+    "Precio": 30.00
+  },
+  {
+    "Codigo": "224",
+    "Nombre": "CALCITONINA",
+    "Precio": 90.00
+  },
+  {
+    "Codigo": "63",
+    "Nombre": "ALBUMINA EN ORINA",
+    "Precio": 15.00
+  },
+  {
+    "Codigo": "232",
+    "Nombre": "CARBAMATOS EN ORINA",
+    "Precio": 200.00
+  },
+  {
+    "Codigo": "234",
+    "Nombre": "CARBAMAZEPIΝΑ (TEGRETOL)",
+    "Precio": 80.00
+  },
+  {
+    "Codigo": "266",
+    "Nombre": "CISTICERCUS WESTERN BLOT",
+    "Precio": 240.00
+  },
+  {
+    "Codigo": "269",
+    "Nombre": "CITOMEGALOVIRUS ANTICUERPOS IGG, LCR",
+    "Precio": 120.00
+  },
+  {
+    "Codigo": "270",
+    "Nombre": "CITOMEGALOVIRUS ANTICUERPOS IGM, LCR",
+    "Precio": 80.00
+  },
+  {
+    "Codigo": "72",
+    "Nombre": "ALFA-1 ANTITRIPSINA",
+    "Precio": 112.00
+  },
+  {
+    "Codigo": "73",
+    "Nombre": "ALFA-2 ANTIPLASMINA",
+    "Precio": 477.00
+  },
+  {
+    "Codigo": "276",
+    "Nombre": "CITOQUIMICO - LCR",
+    "Precio": 60.00
+  },
+  {
+    "Codigo": "75",
+    "Nombre": "AMEBAS HISTOLITICA, ANTICUERPOS TOTALES",
+    "Precio": 128.00
+  },
+  {
+    "Codigo": "279",
+    "Nombre": "CLOBAZAM, NORCLOBAZAM Y RATIO, SUERO",
+    "Precio": 320.00
+  },
+  {
+    "Codigo": "328",
+    "Nombre": "COPROCULTIVO",
+    "Precio": 40.00
+  },
+  {
+    "Codigo": "330",
+    "Nombre": "CORONAVIRUS SARS COV-2",
+    "Precio": 60.00
+  },
+  {
+    "Codigo": "86",
+    "Nombre": "ANFETAMINAS Y METANFETAMINAS CUANTITATIVO",
+    "Precio": 380.00
+  },
+  {
+    "Codigo": "339",
+    "Nombre": "COVID-PRUEBA RAPIDA",
+    "Precio": 50.00
+  },
+  {
+    "Codigo": "88",
+    "Nombre": "ANTI ACUAPORINA 4 IGG (NMO AQP4 IGG)",
+    "Precio": 2164.00
+  },
+  {
+    "Codigo": "89",
+    "Nombre": "ANTI ATG-ANTI TIROGLOBULINA",
+    "Precio": 50.00
+  },
+  {
+    "Codigo": "347",
+    "Nombre": "CREATININA - DEPURACION ORINA 12 HRS",
+    "Precio": 45.00
+  },
+  {
+    "Codigo": "348",
+    "Nombre": "CREATININA - ORINA 24 HRS",
+    "Precio": 30.00
+  },
+  {
+    "Codigo": "349",
+    "Nombre": "CREATININA (ORINA SIMPLE)",
+    "Precio": 30.00
+  },
+  {
+    "Codigo": "93",
+    "Nombre": "ANTI CCP (PEPTIDO CICLICO CITRULINADO) IGG (IM)",
+    "Precio": 120.00
+  },
+  {
+    "Codigo": "359",
+    "Nombre": "CRYPTOCOCCUS ANTIGENO (LATEX)",
+    "Precio": 170.00
+  },
+  {
+    "Codigo": "95",
+    "Nombre": "ANTI DNA-SS AUTO ANTICUERPO (CADENA SIMPLE)",
+    "Precio": 89.00
+  },
+  {
+    "Codigo": "366",
+    "Nombre": "CULTIVO DE ESPUTO",
+    "Precio": 60.00
+  },
+  {
+    "Codigo": "97",
+    "Nombre": "ANTI ESTREPTOLISINA - ASO (SEMICUANTITATIVO)",
+    "Precio": 30.00
+  },
+  {
+    "Codigo": "369",
+    "Nombre": "CULTIVO DE LIQUIDO ASCITICO",
+    "Precio": 70.00
+  },
+  {
+    "Codigo": "372",
+    "Nombre": "CULTIVO DE SECRECION FARINGEA",
+    "Precio": 60.00
+  },
+  {
+    "Codigo": "375",
+    "Nombre": "CULTIVO DE SECRECION URETRAL",
+    "Precio": 42.00
+  },
+  {
+    "Codigo": "377",
+    "Nombre": "CULTIVO DE SECRECION VAGINAL",
+    "Precio": 60.00
+  },
+  {
+    "Codigo": "378",
+    "Nombre": "CULTIVO DE SEMEN (ESPERMA) (ED + ATB)",
+    "Precio": 100.00
+  },
+  {
+    "Codigo": "379",
+    "Nombre": "CULTIVO LCR",
+    "Precio": 60.00
+  },
+  {
+    "Codigo": "382",
+    "Nombre": "CULTIVO OTROS",
+    "Precio": 60.00
+  },
+  {
+    "Codigo": "384",
+    "Nombre": "CULTIVOS DE GERMENES COMUNES",
+    "Precio": 70.00
+  },
+  {
+    "Codigo": "394",
+    "Nombre": "DEPURACION DE CREATININA",
+    "Precio": 45.00
+  },
+  {
+    "Codigo": "107",
+    "Nombre": "ANTI TIROPEROXIDASA (ΑΤΡΟ-MICROSOMAL)",
+    "Precio": 60.00
+  },
+  {
+    "Codigo": "108",
+    "Nombre": "ANTI TIROPEROXIDASA (ΑΤΡΟ-MICROSOMAL) ΑΝΤΙ ΤΡΟ",
+    "Precio": 50.00
+  },
+  {
+    "Codigo": "398",
+    "Nombre": "DESPISTAJE ALERGICO BASICO (32 ALERGENOS)",
+    "Precio": 250.00
+  },
+  {
+    "Codigo": "399",
+    "Nombre": "DESPISTAJE ALERGICO BASICO (36 ALERGENOS) (IM)",
+    "Precio": 280.00
+  },
+  {
+    "Codigo": "408",
+    "Nombre": "DIMERO D",
+    "Precio": 80.00
+  },
+  {
+    "Codigo": "112",
+    "Nombre": "ANTICUERPOS ANTIMITOCONDRIALES (AMA)",
+    "Precio": 80.00
+  },
+  {
+    "Codigo": "425",
+    "Nombre": "ELECTROLITOS (NA,K,CL)",
+    "Precio": 90.00
+  },
+  {
+    "Codigo": "436",
+    "Nombre": "EPSTEIN BARR (EBNA) IGG",
+    "Precio": 80.00
+  },
+  {
+    "Codigo": "437",
+    "Nombre": "EPSTEIN BARR (EBNA) IGG - IGM",
+    "Precio": 150.00
+  },
+  {
+    "Codigo": "438",
+    "Nombre": "EPSTEIN BARR (EBNA) IGM",
+    "Precio": 90.00
+  },
+  {
+    "Codigo": "441",
+    "Nombre": "ERITROPOYΕΤΙΝΑ",
+    "Precio": 110.00
+  },
+  {
+    "Codigo": "443",
+    "Nombre": "ESPECIALES",
+    "Precio": 100.00
+  },
+  {
+    "Codigo": "444",
+    "Nombre": "ESPERMATOGRAMA",
+    "Precio": 100.00
+  },
+  {
+    "Codigo": "449",
+    "Nombre": "ESTRADIOL",
+    "Precio": 55.00
+  },
+  {
+    "Codigo": "451",
+    "Nombre": "ESTRADIOL LIBRE",
+    "Precio": 70.00
+  },
+  {
+    "Codigo": "459",
+    "Nombre": "EXAMEN COMPLETO DE ORINA",
+    "Precio": 15.00
+  },
+  {
+    "Codigo": "461",
+    "Nombre": "EXAMEN DIRECTO (HONGO KOH)",
+    "Precio": 30.00
+  },
+  {
+    "Codigo": "124",
+    "Nombre": "ANTIOXIDANTES TOTALES",
+    "Precio": 319.00
+  },
+  {
+    "Codigo": "484",
+    "Nombre": "FENITOINA (DIFENILHIDANTOINA DPH)",
+    "Precio": 90.00
+  },
+  {
+    "Codigo": "127",
+    "Nombre": "ANTIOXIDANTES: SOD (SUPEROXIDO-DISMUT)",
+    "Precio": 343.00
+  },
+  {
+    "Codigo": "128",
+    "Nombre": "ANTI-P53 (AUTOANTICUERPOS P53)",
+    "Precio": 371.00
+  },
+  {
+    "Codigo": "490",
+    "Nombre": "FERRITINA SERICA",
+    "Precio": 45.00
+  },
+  {
+    "Codigo": "491",
+    "Nombre": "FIBRINOGENO",
+    "Precio": 30.00
+  },
+  {
+    "Codigo": "497",
+    "Nombre": "FOSFATASA ALCALINA",
+    "Precio": 20.00
+  },
+  {
+    "Codigo": "132",
+    "Nombre": "ARBOVIRUS ANTICUERPOS IGM",
+    "Precio": 618.00
+  },
+  {
+    "Codigo": "513",
+    "Nombre": "FROTIS DIRECTO (GERMENES)",
+    "Precio": 30.00
+  },
+  {
+    "Codigo": "516",
+    "Nombre": "FSH HORMONA FOLICULOESTIMULANTE",
+    "Precio": 60.00
+  },
+  {
+    "Codigo": "517",
+    "Nombre": "FTA ABS",
+    "Precio": 80.00
+  },
+  {
+    "Codigo": "136",
+    "Nombre": "ASCA (ANTI-SACCHAROMYCES CEREVISIAE), IGA",
+    "Precio": 298.00
+  },
+  {
+    "Codigo": "137",
+    "Nombre": "ASCA (ANTI-SACCHAROMYCES CEREVISIAE), IGG",
+    "Precio": 256.00
+  },
+  {
+    "Codigo": "529",
+    "Nombre": "GASES ARTERIALES (AGA) Y ELECTROLITOS",
+    "Precio": 190.00
+  },
+  {
+    "Codigo": "530",
+    "Nombre": "GASES ARTERIALES",
+    "Precio": 190.00
+  },
+  {
+    "Codigo": "532",
+    "Nombre": "GeneXpert",
+    "Precio": 750.00
+  },
+  {
+    "Codigo": "533",
+    "Nombre": "GERMENES COMUNES (OTROS)",
+    "Precio": 70.00
+  },
+  {
+    "Codigo": "548",
+    "Nombre": "GLUCOSA BASAL",
+    "Precio": 15.00
+  },
+  {
+    "Codigo": "553",
+    "Nombre": "GLUCOSA POST PRANDIAL",
+    "Precio": 15.00
+  },
+  {
+    "Codigo": "557",
+    "Nombre": "GRUPO Y FACTOR",
+    "Precio": 15.00
+  },
+  {
+    "Codigo": "145",
+    "Nombre": "BARTONELLA HENSELAE IGM",
+    "Precio": 535.00
+  },
+  {
+    "Codigo": "563",
+    "Nombre": "SUB-UNIDAD HCG BETA CUANTITATIVO",
+    "Precio": 70.00
+  },
+  {
+    "Codigo": "565",
+    "Nombre": "HECES SIMPLE",
+    "Precio": 10.00
+  },
+  {
+    "Codigo": "568",
+    "Nombre": "HELICOBACTER PYLORI",
+    "Precio": 70.00
+  },
+  {
+    "Codigo": "573",
+    "Nombre": "HEMATOLOGIA",
+    "Precio": 25.00
+  },
+  {
+    "Codigo": "574",
+    "Nombre": "HEMATOLOGY",
+    "Precio": 50.00
+  },
+  {
+    "Codigo": "577",
+    "Nombre": "HEMOCULTIVO",
+    "Precio": 150.00
+  },
+  {
+    "Codigo": "584",
+    "Nombre": "HEMOGLOBINA + HEMATOCRITO",
+    "Precio": 20.00
+  },
+  {
+    "Codigo": "587",
+    "Nombre": "HEMOGLOBINA GLICOSILADA",
+    "Precio": 50.00
+  },
+  {
+    "Codigo": "593",
+    "Nombre": "HEMOGRAMA",
+    "Precio": 25.00
+  },
+  {
+    "Codigo": "158",
+    "Nombre": "BETA-HCG LIBRE",
+    "Precio": 200.00
+  },
+  {
+    "Codigo": "159",
+    "Nombre": "BICARBONATO SERICO CO2 (HN)",
+    "Precio": 63.00
+  },
+  {
+    "Codigo": "160",
+    "Nombre": "BILIRRUBINA DIRECTА",
+    "Precio": 20.00
+  },
+  {
+    "Codigo": "612",
+    "Nombre": "HEPATITIS B, HBSAG (AG AUSTR)",
+    "Precio": 50.00
+  },
+  {
+    "Codigo": "618",
+    "Nombre": "HEPATITIS C, ANTI HCV AC TOTALES",
+    "Precio": 80.00
+  },
+  {
+    "Codigo": "626",
+    "Nombre": "HERPES I ANTICUERPOS IGG",
+    "Precio": 60.00
+  },
+  {
+    "Codigo": "627",
+    "Nombre": "HERPES I ANTICUERPOS IGM",
+    "Precio": 70.00
+  },
+  {
+    "Codigo": "630",
+    "Nombre": "HERPES II ANTICUERPOS IGG",
+    "Precio": 60.00
+  },
+  {
+    "Codigo": "631",
+    "Nombre": "HERPES II ANTICUERPOS IGM",
+    "Precio": 70.00
+  },
+  {
+    "Codigo": "634",
+    "Nombre": "HERPES SIMPLE I ANTICUERPOS IgGLCR,",
+    "Precio": 120.00
+  },
+  {
+    "Codigo": "635",
+    "Nombre": "HERPES SIMPLE I ANTICUERPOS IgM, LCR",
+    "Precio": 120.00
+  },
+  {
+    "Codigo": "636",
+    "Nombre": "HERPES SIMPLE II ANTICUERPOS IgG, LCR",
+    "Precio": 120.00
+  },
+  {
+    "Codigo": "637",
+    "Nombre": "HERPES SIMPLE II ANTICUERPOS IgM, LCR",
+    "Precio": 120.00
+  },
+  {
+    "Codigo": "641",
+    "Nombre": "HERPES VIRUS HUMANO TIPO 6 (HVH-6) ΑΝTICUERPOS IgG",
+    "Precio": 280.00
+  },
+  {
+    "Codigo": "642",
+    "Nombre": "HERPES VIRUS HUMANO TIPO 6 (HVH-6) ΑΝTICUERPOS IgG/IgM",
+    "Precio": 500.00
+  },
+  {
+    "Codigo": "643",
+    "Nombre": "HERPES VIRUS HUMANO TIPO 6 (HVH-6) ΑΝTICUERPOS IgM",
+    "Precio": 130.00
+  },
+  {
+    "Codigo": "646",
+    "Nombre": "HIDATIDOSIS WESTERN BLOT",
+    "Precio": 240.00
+  },
+  {
+    "Codigo": "176",
+    "Nombre": "BK (ORINA 24 HORAS)",
+    "Precio": 24.00
+  },
+  {
+    "Codigo": "654",
+    "Nombre": "HIV (TEST ELISA)",
+    "Precio": 40.00
+  },
+  {
+    "Codigo": "663",
+    "Nombre": "HORMONA ANTI MULLERIANA (AMH/MIS), SUERO",
+    "Precio": 250.00
+  },
+  {
+    "Codigo": "678",
+    "Nombre": "INDICE ALBUMINA/CREATININA EN ORINA (IPC)",
+    "Precio": 50.00
+  },
+  {
+    "Codigo": "681",
+    "Nombre": "INFLUENZA",
+    "Precio": 90.00
+  },
+  {
+    "Codigo": "682",
+    "Nombre": "INFLUENZA POR PCR EN SECRECION RHINOFARINGEA",
+    "Precio": 830.00
+  },
+  {
+    "Codigo": "690",
+    "Nombre": "INMUNOFIJACION EN ORINA",
+    "Precio": 180.00
+  },
+  {
+    "Codigo": "691",
+    "Nombre": "INMUNOFIJACION EN SUERO",
+    "Precio": 180.00
+  },
+  {
+    "Codigo": "694",
+    "Nombre": "INMUNOGLOBULINA A,GYM (HN)",
+    "Precio": 140.00
+  },
+  {
+    "Codigo": "696",
+    "Nombre": "INMUNOGLOBULINA E",
+    "Precio": 50.00
+  },
+  {
+    "Codigo": "701",
+    "Nombre": "INMUNOGLOBULINA IgG",
+    "Precio": 70.00
+  },
+  {
+    "Codigo": "705",
+    "Nombre": "INMUNOHISTOQUÍMICA - 4",
+    "Precio": 1300.00
+  },
+  {
+    "Codigo": "714",
+    "Nombre": "INSULINA BASAL",
+    "Precio": 50.00
+  },
+  {
+    "Codigo": "189",
+    "Nombre": "BK DIRECTO-LIQUIDO PLEURAL",
+    "Precio": 30.00
+  },
+  {
+    "Codigo": "718",
+    "Nombre": "INYECTABLES",
+    "Precio": 15.00
+  },
+  {
+    "Codigo": "724",
+    "Nombre": "LAMINA PERIFERICA",
+    "Precio": 40.00
+  },
+  {
+    "Codigo": "726",
+    "Nombre": "LAMOTRIGINE",
+    "Precio": 300.00
+  },
+  {
+    "Codigo": "735",
+    "Nombre": "LEUCOCITOS EN HECES REACCION INFLAMATORIA (PMN)",
+    "Precio": 25.00
+  },
+  {
+    "Codigo": "738",
+    "Nombre": "LEVETIRACETAM (KEPPRA), SUERO",
+    "Precio": 390.00
+  },
+  {
+    "Codigo": "739",
+    "Nombre": "LH HORMONA LUTEINIZANTE",
+    "Precio": 60.00
+  },
+  {
+    "Codigo": "743",
+    "Nombre": "LIPASA SERICA",
+    "Precio": 30.00
+  },
+  {
+    "Codigo": "198",
+    "Nombre": "BORDETELLA PERTUSIS (COQUELUCHE) IGG",
+    "Precio": 311.00
+  },
+  {
+    "Codigo": "783",
+    "Nombre": "MICROALBUMINURIA - ORINA SIMPLE",
+    "Precio": 70.00
+  },
+  {
+    "Codigo": "784",
+    "Nombre": "MICROALBUMINURIA (ORINA 24 HORAS)",
+    "Precio": 55.00
+  },
+  {
+    "Codigo": "804",
+    "Nombre": "NEISSERIA GONORRHOEAE, ANTICUERPOS",
+    "Precio": 395.00
+  },
+  {
+    "Codigo": "820",
+    "Nombre": "OXALATOS EN ORINA DE 24 HORAS",
+    "Precio": 160.00
+  },
+  {
+    "Codigo": "203",
+    "Nombre": "BRUCELLA ANTIC. IG-G (IM)",
+    "Precio": 177.00
+  },
+  {
+    "Codigo": "204",
+    "Nombre": "BRUCELLA ANTIC. IG-M (IM)",
+    "Precio": 177.00
+  },
+  {
+    "Codigo": "205",
+    "Nombre": "BRUCELLA ANTICUERPOS BLOQUEADORES",
+    "Precio": 50.00
+  },
+  {
+    "Codigo": "831",
+    "Nombre": "PAPILOMAVIRUS ANTICUERPO",
+    "Precio": 250.00
+  },
+  {
+    "Codigo": "207",
+    "Nombre": "C1 INHIBIDOR DE LA ESTERASA",
+    "Precio": 158.00
+  },
+  {
+    "Codigo": "842",
+    "Nombre": "PARASITOLOGICO SIMPLE X 1 MUESTRA",
+    "Precio": 10.00
+  },
+  {
+    "Codigo": "844",
+    "Nombre": "PARATOHORMONA INTACTA (PTH-INTACTA)",
+    "Precio": 60.00
+  },
+  {
+    "Codigo": "210",
+    "Nombre": "CA 27-29 (MARCADOR MAMA)",
+    "Precio": 511.00
+  },
+  {
+    "Codigo": "858",
+    "Nombre": "PERFIL DE DROGAS DE ABUSO 5 (CUALITATIVO)",
+    "Precio": 50.00
+  },
+  {
+    "Codigo": "212",
+    "Nombre": "CA 72-4 (ESTOMAGO)",
+    "Precio": 50.00
+  },
+  {
+    "Codigo": "861",
+    "Nombre": "PERFIL DE PRECLANCIA",
+    "Precio": 80.00
+  },
+  {
+    "Codigo": "214",
+    "Nombre": "CADENAS LIGERAS KAPPA LIBRES EN ORINA",
+    "Precio": 681.00
+  },
+  {
+    "Codigo": "215",
+    "Nombre": "CADENAS LIGERAS KAPPA LIBRES EN SUERO",
+    "Precio": 828.00
+  },
+  {
+    "Codigo": "216",
+    "Nombre": "CADENAS LIGERAS LAMBDA LIBRES EN ORINA",
+    "Precio": 365.00
+  },
+  {
+    "Codigo": "879",
+    "Nombre": "PERFIL TORCH",
+    "Precio": 320.00
+  },
+  {
+    "Codigo": "218",
+    "Nombre": "CADMIO (ORINA 24 HRS.)",
+    "Precio": 202.00
+  },
+  {
+    "Codigo": "219",
+    "Nombre": "CADMIO EN SANGRE TOTAL",
+    "Precio": 202.00
+  },
+  {
+    "Codigo": "896",
+    "Nombre": "PROCALCITONINA",
+    "Precio": 130.00
+  },
+  {
+    "Codigo": "899",
+    "Nombre": "PROLACTINA",
+    "Precio": 60.00
+  },
+  {
+    "Codigo": "222",
+    "Nombre": "CALCIO IONICO",
+    "Precio": 40.00
+  },
+  {
+    "Codigo": "909",
+    "Nombre": "PROTEINA C-REACTIVA (PCR-LATEX)",
+    "Precio": 50.00
+  },
+  {
+    "Codigo": "913",
+    "Nombre": "PROTEINA S FUNCIONAL DE LA COAGULACION, PLASMA",
+    "Precio": 170.00
+  },
+  {
+    "Codigo": "916",
+    "Nombre": "PROTEINAS CUALITATIVAS",
+    "Precio": 10.00
+  },
+  {
+    "Codigo": "917",
+    "Nombre": "PROTEINAS CUANTITATIVAS AI AZAR",
+    "Precio": 10.00
+  },
+  {
+    "Codigo": "918",
+    "Nombre": "PROTEINAS EN 24 HORAS",
+    "Precio": 15.00
+  },
+  {
+    "Codigo": "921",
+    "Nombre": "PROTEINAS TOTALES Y FRACCIONADAS",
+    "Precio": 30.00
+  },
+  {
+    "Codigo": "229",
+    "Nombre": "CAMPYLOBACTER (HECES)",
+    "Precio": 40.00
+  },
+  {
+    "Codigo": "230",
+    "Nombre": "CANDIDA ALBICANS, ANTICUERPOS (IGG)",
+    "Precio": 174.00
+  },
+  {
+    "Codigo": "934",
+    "Nombre": "PRUEBA DE PATERNIDAD",
+    "Precio": 1500.00
+  },
+  {
+    "Codigo": "940",
+    "Nombre": "PSA LIBRE (ANTIGENO PROSTATICO LIBRE)",
+    "Precio": 60.00
+  },
+  {
+    "Codigo": "941",
+    "Nombre": "PSA PANEL COMPLETO",
+    "Precio": 120.00
+  },
+  {
+    "Codigo": "943",
+    "Nombre": "PSA TOTAL (ANTIGENO PROSTATICO TOTAL)",
+    "Precio": 50.00
+  },
+  {
+    "Codigo": "951",
+    "Nombre": "REACCION INFLAMATORIA EN HECES",
+    "Precio": 15.00
+  },
+  {
+    "Codigo": "952",
+    "Nombre": "REACCION INFLAMATORIA EN HECES (3 MUESTRAS)",
+    "Precio": 35.00
+  },
+  {
+    "Codigo": "954",
+    "Nombre": "RECUENTO DE PLAQUETAS",
+    "Precio": 25.00
+  },
+  {
+    "Codigo": "961",
+    "Nombre": "RETICULOCITOS",
+    "Precio": 35.00
+  },
+  {
+    "Codigo": "240",
+    "Nombre": "CATECOLAMINAS FRACCIONADAS (ORINA 24H)",
+    "Precio": 354.00
+  },
+  {
+    "Codigo": "241",
+    "Nombre": "CATECOLAMINAS PLASMATICAS FRACCIONADAS",
+    "Precio": 620.00
+  },
+  {
+    "Codigo": "242",
+    "Nombre": "CD34-STEM CELL (SC)",
+    "Precio": 687.00
+  },
+  {
+    "Codigo": "243",
+    "Nombre": "CELULAS DEL ISLOTE LANGERHANS. AUTOANTICUERPOS",
+    "Precio": 229.00
+  },
+  {
+    "Codigo": "987",
+    "Nombre": "SEROLOGIA",
+    "Precio": 30.00
+  },
+  {
+    "Codigo": "245",
+    "Nombre": "CELULAS PARIETALES AUTO ANTIC.",
+    "Precio": 236.00
+  },
+  {
+    "Codigo": "1006",
+    "Nombre": "SUB-UNIDAD HCG BETA CUALITATIVO",
+    "Precio": 25.00
+  },
+  {
+    "Codigo": "1010",
+    "Nombre": "T3 LIBRE",
+    "Precio": 50.00
+  },
+  {
+    "Codigo": "248",
+    "Nombre": "CH 50 COMPLEMENTO",
+    "Precio": 236.00
+  },
+  {
+    "Codigo": "1016",
+    "Nombre": "T4 LIBRE",
+    "Precio": 50.00
+  },
+  {
+    "Codigo": "1018",
+    "Nombre": "T4 TOTAL",
+    "Precio": 50.00
+  },
+  {
+    "Codigo": "1029",
+    "Nombre": "TEST DE COOMBS DIRECTO",
+    "Precio": 40.00
+  },
+  {
+    "Codigo": "1032",
+    "Nombre": "TEST DE GRAHAM",
+    "Precio": 10.00
+  },
+  {
+    "Codigo": "1033",
+    "Nombre": "TESTOSTERONA LIBRE",
+    "Precio": 60.00
+  },
+  {
+    "Codigo": "1035",
+    "Nombre": "TESTOSTERONA TOTAL",
+    "Precio": 50.00
+  },
+  {
+    "Codigo": "255",
+    "Nombre": "CHLAMYDIA TRACHOMATIS, ADN X PCR",
+    "Precio": 1112.00
+  },
+  {
+    "Codigo": "1094",
+    "Nombre": "TRANSAMINASAS",
+    "Precio": 30.00
+  },
+  {
+    "Codigo": "1040",
+    "Nombre": "THEVENON (SANGRE OCULTA)",
+    "Precio": 30.00
+  },
+  {
+    "Codigo": "1041",
+    "Nombre": "THEVENON (SANGRE OCULTA) INMUNOLOGICO",
+    "Precio": 60.00
+  },
+  {
+    "Codigo": "1047",
+    "Nombre": "TIEMPO DE COAGULACION Y SANGRIA",
+    "Precio": 20.00
+  },
+  {
+    "Codigo": "1049",
+    "Nombre": "TIEMPO DE PROTOMBINA + INR",
+    "Precio": 35.00
+  },
+  {
+    "Codigo": "1052",
+    "Nombre": "TIEMPO DE TROMBOPLASTINA",
+    "Precio": 35.00
+  },
+  {
+    "Codigo": "1055",
+    "Nombre": "TINTA CHINA (CRYPTOCOCOS)",
+    "Precio": 40.00
+  },
+  {
+    "Codigo": "1059",
+    "Nombre": "TIROGLOBULINA (TG)",
+    "Precio": 70.00
+  },
+  {
+    "Codigo": "265",
+    "Nombre": "CISTICERCUS LCR EIA",
+    "Precio": 240.00
+  },
+  {
+    "Codigo": "1078",
+    "Nombre": "TORCH IGG",
+    "Precio": 200.00
+  },
+  {
+    "Codigo": "1079",
+    "Nombre": "TORCH IGM",
+    "Precio": 200.00
+  },
+  {
+    "Codigo": "268",
+    "Nombre": "CITOBIOQUIMICO",
+    "Precio": 50.00
+  },
+  {
+    "Codigo": "1086",
+    "Nombre": "TOXOPLASMA GONDII ANTICUERPOS IgM, LCR",
+    "Precio": 60.00
+  },
+  {
+    "Codigo": "1088",
+    "Nombre": "TOXOPLASMA IGG",
+    "Precio": 60.00
+  },
+  {
+    "Codigo": "1090",
+    "Nombre": "TOXOPLASMA IGM",
+    "Precio": 60.00
+  },
+  {
+    "Codigo": "1095",
+    "Nombre": "TRANSFERRINA",
+    "Precio": 40.00
+  },
+  {
+    "Codigo": "1100",
+    "Nombre": "TRATAMIENTO",
+    "Precio": 80.00
+  },
+  {
+    "Codigo": "1102",
+    "Nombre": "TRIGLICERIDOS",
+    "Precio": 15.00
+  },
+  {
+    "Codigo": "1104",
+    "Nombre": "TROPONINA I",
+    "Precio": 130.00
+  },
+  {
+    "Codigo": "1106",
+    "Nombre": "TROPONINA T",
+    "Precio": 110.00
+  },
+  {
+    "Codigo": "1108",
+    "Nombre": "TSH ULTRASENSIBLE",
+    "Precio": 50.00
+  },
+  {
+    "Codigo": "1112",
+    "Nombre": "UREA",
+    "Precio": 15.00
+  },
+  {
+    "Codigo": "1118",
+    "Nombre": "UROCULTIVO",
+    "Precio": 60.00
+  },
+  {
+    "Codigo": "1119",
+    "Nombre": "UROCULTIVO + ARD (CON REMOVEDOR DE ANTIBIOTICO)",
+    "Precio": 160.00
+  },
+  {
+    "Codigo": "1126",
+    "Nombre": "VDRL (SUERO) SIFILIS CUALITATIVO",
+    "Precio": 30.00
+  },
+  {
+    "Codigo": "1127",
+    "Nombre": "VDRL (SIFILIS) EN LCR",
+    "Precio": 60.00
+  },
+  {
+    "Codigo": "1130",
+    "Nombre": "VELOCIDAD DE SEDIMENTACION/VSG",
+    "Precio": 20.00
+  },
+  {
+    "Codigo": "1131",
+    "Nombre": "VIH",
+    "Precio": 20.00
+  },
+  {
+    "Codigo": "1138",
+    "Nombre": "VITAMINA B12",
+    "Precio": 50.00
+  },
+  {
+    "Codigo": "286",
+    "Nombre": "COCAÍNA EN ORINA",
+    "Precio": 45.00
+  },
+  {
+    "Codigo": "287",
+    "Nombre": "COCAINA PBC (ORINA SIMPLE) - AUTOMATIZADO (HN)",
+    "Precio": 40.00
+  },
+  {
+    "Codigo": "1148",
+    "Nombre": "VITAMINA E (ALFA TOCOFEROL), SUERO",
+    "Precio": 170.00
+  },
+  {
+    "Codigo": "1150",
+    "Nombre": "WESTERN BLOT HIV",
+    "Precio": 350.00
+  },
+  {
+    "Codigo": "1156",
+    "Nombre": "ZINC SERICO",
+    "Precio": 160.00
+  },
+  {
+    "Codigo": "292",
+    "Nombre": "COCCIDIOSIS, ANTICUERPOS (COCCIDIOMICOSIS)",
+    "Precio": 664.00
+  },
+  {
+    "Codigo": "293",
+    "Nombre": "COCIENTE SFLT-1/PIGF (PREDICCIÓN DEL RIESGO DE PREECLAMPSIA)",
+    "Precio": 2242.00
+  },
+  {
+    "Codigo": "294",
+    "Nombre": "COFACTOR DE LA RISTOCETINA (VWF)",
+    "Precio": 607.00
+  },
+  {
+    "Codigo": "295",
+    "Nombre": "COLESTEROL - HDL",
+    "Precio": 20.00
+  },
+  {
+    "Codigo": "296",
+    "Nombre": "COLESTEROL LDL",
+    "Precio": 15.00
+  },
+  {
+    "Codigo": "297",
+    "Nombre": "COLESTEROL TOTAL",
+    "Precio": 15.00
+  },
+  {
+    "Codigo": "298",
+    "Nombre": "COLESTEROL VLDL",
+    "Precio": 20.00
+  },
+  {
+    "Codigo": "299",
+    "Nombre": "COLESTEROL-ESTERES",
+    "Precio": 68.00
+  },
+  {
+    "Codigo": "300",
+    "Nombre": "COLINESTERASA ERITROCITARIA",
+    "Precio": 114.00
+  },
+  {
+    "Codigo": "301",
+    "Nombre": "COLORACION ALCIAN BLUE PARA BIOPSIA",
+    "Precio": 177.00
+  },
+  {
+    "Codigo": "302",
+    "Nombre": "COLORACION BK FITE FARACO PARA BIOPSIA",
+    "Precio": 177.00
+  },
+  {
+    "Codigo": "303",
+    "Nombre": "COLORACION GIEMSA PARA BIOPSIA",
+    "Precio": 177.00
+  },
+  {
+    "Codigo": "304",
+    "Nombre": "COLORACION GRAM PARA BIOPSIA",
+    "Precio": 177.00
+  },
+  {
+    "Codigo": "305",
+    "Nombre": "COLORACION GROCOT PARA BIOPSIA",
+    "Precio": 177.00
+  },
+  {
+    "Codigo": "306",
+    "Nombre": "COLORACION HIERRO COLOIDAL PARA BIOPSIA",
+    "Precio": 177.00
+  },
+  {
+    "Codigo": "307",
+    "Nombre": "COLORACION MALLORY PARA BIOPSIA",
+    "Precio": 177.00
+  },
+  {
+    "Codigo": "308",
+    "Nombre": "COLORACION MASSON FONTANA PARA BIOPSIA",
+    "Precio": 177.00
+  },
+  {
+    "Codigo": "309",
+    "Nombre": "COLORACION PAS ALCIAN BLUE PARA BIOPSIA",
+    "Precio": 177.00
+  },
+  {
+    "Codigo": "310",
+    "Nombre": "COLORACION PAS DIASTASA PARA BIOPSIA",
+    "Precio": 177.00
+  },
+  {
+    "Codigo": "311",
+    "Nombre": "COLORACION PAS PARA BIOPSIA",
+    "Precio": 177.00
+  },
+  {
+    "Codigo": "312",
+    "Nombre": "COLORACION PERLS PARA BIOPSIA",
+    "Precio": 177.00
+  },
+  {
+    "Codigo": "313",
+    "Nombre": "COLORACION PLATA METALAMINE PARA BIOPSIA",
+    "Precio": 177.00
+  },
+  {
+    "Codigo": "315",
+    "Nombre": "COLORACION ROJO CONGO PARA BIOPSIA",
+    "Precio": 177.00
+  },
+  {
+    "Codigo": "5",
+    "Nombre": "11-DESOXICORTISOL (COMPUESTOS)",
+    "Precio": 475.00
+  },
+  {
+    "Codigo": "318",
+    "Nombre": "COMPLEMENTO C1",
+    "Precio": 511.00
+  },
+  {
+    "Codigo": "319",
+    "Nombre": "COMPLEMENTO C1Q",
+    "Precio": 177.00
+  },
+  {
+    "Codigo": "8",
+    "Nombre": "17 OH PROGESTERONA BASAL, 30 Y 60 POST ESTIMULACIÓN CON ACTH",
+    "Precio": 105.00
+  },
+  {
+    "Codigo": "321",
+    "Nombre": "COMPLEMENTO C3",
+    "Precio": 50.00
+  },
+  {
+    "Codigo": "11",
+    "Nombre": "5-NUCLEOTIDASA",
+    "Precio": 117.00
+  },
+  {
+    "Codigo": "13",
+    "Nombre": "7-DEHIDROCOLESTEROL, SUERO",
+    "Precio": 1747.00
+  },
+  {
+    "Codigo": "15",
+    "Nombre": "ACARO TEST",
+    "Precio": 30.00
+  },
+  {
+    "Codigo": "326",
+    "Nombre": "COMPLEMENTO C8",
+    "Precio": 744.00
+  },
+  {
+    "Codigo": "327",
+    "Nombre": "CONSTANTES CORPUSCULARES",
+    "Precio": 20.00
+  },
+  {
+    "Codigo": "21",
+    "Nombre": "ACETONA URINARIA",
+    "Precio": 66.00
+  },
+  {
+    "Codigo": "329",
+    "Nombre": "COPROLOGICO FUNCIONAL",
+    "Precio": 40.00
+  },
+  {
+    "Codigo": "25",
+    "Nombre": "ACIDO HIPURICO EN ORINA",
+    "Precio": 170.00
+  },
+  {
+    "Codigo": "26",
+    "Nombre": "ACIDO HOMOVALINICO ORINA 24 HRS",
+    "Precio": 295.00
+  },
+  {
+    "Codigo": "29",
+    "Nombre": "ACIDO METILHIPURICO EN ORINA",
+    "Precio": 264.00
+  },
+  {
+    "Codigo": "335",
+    "Nombre": "CORTISOL SALIVA A.M.",
+    "Precio": 127.00
+  },
+  {
+    "Codigo": "336",
+    "Nombre": "CORTISOL SALIVA P.M.",
+    "Precio": 127.00
+  },
+  {
+    "Codigo": "337",
+    "Nombre": "COTININA EN ORINA SIMPLE (NICOTINA)",
+    "Precio": 62.00
+  },
+  {
+    "Codigo": "33",
+    "Nombre": "ACIDO SALICILICO (SALICILATO)",
+    "Precio": 135.00
+  },
+  {
+    "Codigo": "35",
+    "Nombre": "ACIDO URICO EN LIQUIDO ASCITICO",
+    "Precio": 20.00
+  },
+  {
+    "Codigo": "37",
+    "Nombre": "ACIDO URICO EN ORINA SIMPLE",
+    "Precio": 15.00
+  },
+  {
+    "Codigo": "342",
+    "Nombre": "COXSACKIE B (1-6) ANTICUERPOS IGG SUERO",
+    "Precio": 439.00
+  },
+  {
+    "Codigo": "41",
+    "Nombre": "ACIDOS ORGANICOS-SCREENING CORTA Y MEDIA EN ORINA",
+    "Precio": 756.00
+  },
+  {
+    "Codigo": "42",
+    "Nombre": "ACILCARNITINA",
+    "Precio": 1669.00
+  },
+  {
+    "Codigo": "47",
+    "Nombre": "ADA LIQUIDO SINOVIAL",
+    "Precio": 42.00
+  },
+  {
+    "Codigo": "48",
+    "Nombre": "ADA LIQUIDOS BIOLOGICOS",
+    "Precio": 42.00
+  },
+  {
+    "Codigo": "1",
+    "Nombre": "ACIDOS BILIARES TOTALES (HM)",
+    "Precio": 110.00
+  },
+  {
+    "Codigo": "2",
+    "Nombre": "DESPISTAJE ALERGICO BASICO (44 ALERGENOS) PANEL PERUANO (IM)",
+    "Precio": 350.00
+  },
+  {
+    "Codigo": "3",
+    "Nombre": "INFLUENZA TIPO A - CUALITATIVA (PRUEBA RÁPIDA)",
+    "Precio": 70.00
+  },
+  {
+    "Codigo": "4",
+    "Nombre": "INFLUENZA TIPO B - CUALITATIVA (PRUEBA RÁPIDA)",
+    "Precio": 70.00
+  },
+  {
+    "Codigo": "6",
+    "Nombre": "17- HIDROXICORTICOIDES (ORINA 24H)",
+    "Precio": 100.00
+  },
+  {
+    "Codigo": "7",
+    "Nombre": "17 KETOESTEROIDES (ORINA 24 HRS.)",
+    "Precio": 134.00
+  },
+  {
+    "Codigo": "9",
+    "Nombre": "17- OH PROGESTERONA SERICA",
+    "Precio": 91.00
+  },
+  {
+    "Codigo": "10",
+    "Nombre": "5-HIDROXIINDOLACETICO (5-HIAA) (ORINA 24H)",
+    "Precio": 136.00
+  },
+  {
+    "Codigo": "14",
+    "Nombre": "A.N.C.A. ANTI-NEUTROFILOS (ANCA) (IM)",
+    "Precio": 90.00
+  },
+  {
+    "Codigo": "16",
+    "Nombre": "ACETAMINOPHEN - PARACETAMOL",
+    "Precio": 173.00
+  },
+  {
+    "Codigo": "18",
+    "Nombre": "ACETIL COLINA RECEPTOR, ANTICUERPOS",
+    "Precio": 1127.00
+  },
+  {
+    "Codigo": "20",
+    "Nombre": "ACETONA SERICA",
+    "Precio": 74.00
+  },
+  {
+    "Codigo": "22",
+    "Nombre": "ACIDO FOLICO (VITAMINA Β9)",
+    "Precio": 70.00
+  },
+  {
+    "Codigo": "23",
+    "Nombre": "ACIDO FOLICO INTRAERITROCITARIO",
+    "Precio": 169.00
+  },
+  {
+    "Codigo": "30",
+    "Nombre": "ACIDO METILMALONICO",
+    "Precio": 314.00
+  },
+  {
+    "Codigo": "31",
+    "Nombre": "ACIDO METILMALONICO (ORINA SIMPLE)",
+    "Precio": 314.00
+  },
+  {
+    "Codigo": "32",
+    "Nombre": "ACIDO PIRUVICO (PIRUVATO)",
+    "Precio": 236.00
+  },
+  {
+    "Codigo": "40",
+    "Nombre": "ACIDOS BILIARES",
+    "Precio": 120.00
+  },
+  {
+    "Codigo": "50",
+    "Nombre": "ADDIS PRUEBA",
+    "Precio": 204.00
+  },
+  {
+    "Codigo": "51",
+    "Nombre": "ADENOVIRUS ADN X PCR",
+    "Precio": 1689.00
+  },
+  {
+    "Codigo": "52",
+    "Nombre": "ADENOVIRUS ANTICUERPOS IGG",
+    "Precio": 266.00
+  },
+  {
+    "Codigo": "53",
+    "Nombre": "ADENOVIRUS ANTICUERPOS IGM",
+    "Precio": 266.00
+  },
+  {
+    "Codigo": "54",
+    "Nombre": "ADRENALES AUTOANTICUERPOS",
+    "Precio": 586.00
+  },
+  {
+    "Codigo": "56",
+    "Nombre": "AGA Y ELECTROLITOS",
+    "Precio": 150.00
+  },
+  {
+    "Codigo": "57",
+    "Nombre": "AGLUTINACIONES",
+    "Precio": 30.00
+  },
+  {
+    "Codigo": "58",
+    "Nombre": "AGLUTINACIONES 2-MERCAPTO ETANOL",
+    "Precio": 75.00
+  },
+  {
+    "Codigo": "60",
+    "Nombre": "AGLUTINACIONES EN TUBO (BRUCELAS)",
+    "Precio": 35.00
+  },
+  {
+    "Codigo": "61",
+    "Nombre": "AGLUTINACIONES EN TUBO (SALMONELOSIS)",
+    "Precio": 62.00
+  },
+  {
+    "Codigo": "62",
+    "Nombre": "AGLUTINACIONES FENΟΜΕΝΟ ΖΟΝΑ",
+    "Precio": 25.00
+  },
+  {
+    "Codigo": "65",
+    "Nombre": "ALCOHOL ETILICO EN ORINA (ΗΝ)",
+    "Precio": 138.00
+  },
+  {
+    "Codigo": "67",
+    "Nombre": "ALDOLASA",
+    "Precio": 122.00
+  },
+  {
+    "Codigo": "68",
+    "Nombre": "ALDOSTERONA",
+    "Precio": 128.00
+  },
+  {
+    "Codigo": "69",
+    "Nombre": "ALDOSTERONA EN ORINA 24 HRS",
+    "Precio": 209.00
+  },
+  {
+    "Codigo": "70",
+    "Nombre": "ALFA 1 ANTITRIPSINA FECAL",
+    "Precio": 174.00
+  },
+  {
+    "Codigo": "71",
+    "Nombre": "ALFA FETO PROTEINA (AFP)",
+    "Precio": 60.00
+  },
+  {
+    "Codigo": "74",
+    "Nombre": "ALUMINIO SERICO",
+    "Precio": 227.00
+  },
+  {
+    "Codigo": "76",
+    "Nombre": "AMILASA EN ORINA DE 24 HORAS (HN)",
+    "Precio": 19.00
+  },
+  {
+    "Codigo": "77",
+    "Nombre": "AMILASA ISOENZIMAS",
+    "Precio": 371.00
+  },
+  {
+    "Codigo": "78",
+    "Nombre": "AMILASA PANCREATICA",
+    "Precio": 0.00
+  },
+  {
+    "Codigo": "80",
+    "Nombre": "AMIODARONA SERICA - DOSAJE",
+    "Precio": 613.00
+  },
+  {
+    "Codigo": "82",
+    "Nombre": "ANCA ANTICUERPOS ANTI-NEUTROFILOS, SUERO",
+    "Precio": 120.00
+  },
+  {
+    "Codigo": "83",
+    "Nombre": "ANDROSTANDIOL GLUCURONIDO (3-ALFA-DIOL)",
+    "Precio": 347.00
+  },
+  {
+    "Codigo": "84",
+    "Nombre": "ANDROSTENEDIONA",
+    "Precio": 90.00
+  },
+  {
+    "Codigo": "85",
+    "Nombre": "ANFETAMINAS (DROGAS) CUALITATIVO en orina",
+    "Precio": 75.00
+  },
+  {
+    "Codigo": "87",
+    "Nombre": "ANGIOTENSINA II",
+    "Precio": 765.00
+  },
+  {
+    "Codigo": "90",
+    "Nombre": "ANTI CARDIOLIPINA IGA",
+    "Precio": 144.00
+  },
+  {
+    "Codigo": "91",
+    "Nombre": "ANTI CARDIOLIPINA IGG (IM)",
+    "Precio": 75.00
+  },
+  {
+    "Codigo": "92",
+    "Nombre": "ANTI CARDIOLIPINA IGM",
+    "Precio": 65.00
+  },
+  {
+    "Codigo": "94",
+    "Nombre": "ANTI DNA-DS NATIVO Ó DOBLE CADENA (IM)",
+    "Precio": 60.00
+  },
+  {
+    "Codigo": "96",
+    "Nombre": "ANTI ESTREPTOLISINA - ASO (CUANTITATIVO)",
+    "Precio": 70.00
+  },
+  {
+    "Codigo": "98",
+    "Nombre": "ANTI HU - ANTICUERPOS NEURONAL NUCLEAR (ANNA-1)",
+    "Precio": 439.00
+  },
+  {
+    "Codigo": "99",
+    "Nombre": "ANTI JO",
+    "Precio": 142.00
+  },
+  {
+    "Codigo": "100",
+    "Nombre": "ANTI LKM1 (LIVER/KIDNEY MICROSOMAS- ANTI HIGADO/RIÑON) (IM)",
+    "Precio": 281.00
+  },
+  {
+    "Codigo": "101",
+    "Nombre": "ANTI MITOCONDRIALES (AMA) (IM)",
+    "Precio": 65.00
+  },
+  {
+    "Codigo": "102",
+    "Nombre": "ANTI MUSCULO LISO (ASMA) (IM)",
+    "Precio": 65.00
+  },
+  {
+    "Codigo": "103",
+    "Nombre": "ANTI MUSK (MIASTENIA)",
+    "Precio": 3642.00
+  },
+  {
+    "Codigo": "104",
+    "Nombre": "ANTI RNP-N (IM)",
+    "Precio": 74.00
+  },
+  {
+    "Codigo": "105",
+    "Nombre": "ANTI SCL 70, AUTOANTICUERPOS (IM)",
+    "Precio": 84.00
+  },
+  {
+    "Codigo": "109",
+    "Nombre": "ANTI YO ANTICUERPOS (PURKINJE CELL CYTOPASMIC ANTIBODIES)",
+    "Precio": 902.00
+  },
+  {
+    "Codigo": "111",
+    "Nombre": "ANTICOAGULANTE LUPICO",
+    "Precio": 85.00
+  },
+  {
+    "Codigo": "113",
+    "Nombre": "ANTICUERPOS ANTINUCLEARES (ANA) (IM)",
+    "Precio": 60.00
+  },
+  {
+    "Codigo": "114",
+    "Nombre": "ANTICUERPOS ANTITIROIDES",
+    "Precio": 122.00
+  },
+  {
+    "Codigo": "121",
+    "Nombre": "ANTIGENO POLIPEPTIDO TISULAR-ΤΡΑ",
+    "Precio": 421.00
+  },
+  {
+    "Codigo": "122",
+    "Nombre": "ANTI-LMA (MEMBRANA HEPATICA, AUTO ANTICUERPOS)",
+    "Precio": 506.00
+  },
+  {
+    "Codigo": "125",
+    "Nombre": "ANTIOXIDANTES: GLUTATHIONE PEROXI",
+    "Precio": 343.00
+  },
+  {
+    "Codigo": "126",
+    "Nombre": "ANTIOXIDANTES: GLUTATHIONE REDUCT",
+    "Precio": 343.00
+  },
+  {
+    "Codigo": "129",
+    "Nombre": "ANTITROMBINA III FUNCIONAL",
+    "Precio": 107.00
+  },
+  {
+    "Codigo": "130",
+    "Nombre": "APOLIPOPROTEINA A1",
+    "Precio": 96.00
+  },
+  {
+    "Codigo": "131",
+    "Nombre": "APOLIPOPROTEINA B",
+    "Precio": 99.00
+  },
+  {
+    "Codigo": "133",
+    "Nombre": "ARSENICO (ORINA 24 HORAS)",
+    "Precio": 176.00
+  },
+  {
+    "Codigo": "134",
+    "Nombre": "ARSENICO EN ORINA",
+    "Precio": 179.00
+  },
+  {
+    "Codigo": "135",
+    "Nombre": "ARSENICO SANGRE TOTAL",
+    "Precio": 202.00
+  },
+  {
+    "Codigo": "138",
+    "Nombre": "ASPERGILLUS ANTICUERPOS",
+    "Precio": 160.00
+  },
+  {
+    "Codigo": "139",
+    "Nombre": "AUTO ANTICUERPOS MEMBRANA BASAL GLOMERULAR",
+    "Precio": 224.00
+  },
+  {
+    "Codigo": "140",
+    "Nombre": "BANDAS OLIGOCLONALES EN LCR IGG",
+    "Precio": 603.00
+  },
+  {
+    "Codigo": "141",
+    "Nombre": "BANDAS OLIGOCLONALES EN LCR IGM",
+    "Precio": 3717.00
+  },
+  {
+    "Codigo": "142",
+    "Nombre": "BANDAS OLIGOCLONALES IGG, LÍQUIDO CEFALORRAQUÍDEO",
+    "Precio": 1400.00
+  },
+  {
+    "Codigo": "143",
+    "Nombre": "BARBITURATOS EN ORINA",
+    "Precio": 287.00
+  },
+  {
+    "Codigo": "144",
+    "Nombre": "BARTONELLA HENSELAE IGG",
+    "Precio": 535.00
+  },
+  {
+    "Codigo": "146",
+    "Nombre": "BCR/ABL T (9;22) (P190), DETECCION X PCR",
+    "Precio": 2398.00
+  },
+  {
+    "Codigo": "147",
+    "Nombre": "BCR/ABL T(9:22) (P210) CUANTIFICACION X PCR",
+    "Precio": 744.00
+  },
+  {
+    "Codigo": "148",
+    "Nombre": "BENCENO EN ORINA",
+    "Precio": 493.00
+  },
+  {
+    "Codigo": "149",
+    "Nombre": "BENZODIAZEPINAS (DROGAS) CUALITATIVO EN ORINA",
+    "Precio": 70.00
+  },
+  {
+    "Codigo": "150",
+    "Nombre": "BENZODIAZEPINAS CUANTITATIVO EN ORINA",
+    "Precio": 216.00
+  },
+  {
+    "Codigo": "151",
+    "Nombre": "BETA 2 GLICOPROTEINA I IGG (IM)",
+    "Precio": 187.00
+  },
+  {
+    "Codigo": "152",
+    "Nombre": "BETA 2 GLICOPROTEINA I IGM (IM)",
+    "Precio": 187.00
+  },
+  {
+    "Codigo": "153",
+    "Nombre": "BETA 2 MICROGLOBULINA ORINA 24 HRS",
+    "Precio": 120.00
+  },
+  {
+    "Codigo": "154",
+    "Nombre": "BETA 2 MICROGLOBULINA ORINA SIMPLE",
+    "Precio": 105.00
+  },
+  {
+    "Codigo": "155",
+    "Nombre": "BETA 2 MICROGLOBULINA SERICA",
+    "Precio": 50.00
+  },
+  {
+    "Codigo": "161",
+    "Nombre": "BILIRRUBINA INDIRECTА",
+    "Precio": 20.00
+  },
+  {
+    "Codigo": "162",
+    "Nombre": "BILIRRUBINAS FRACCIONADAS",
+    "Precio": 25.00
+  },
+  {
+    "Codigo": "163",
+    "Nombre": "BILIRRUBINAS TOTALES Y FRACCIONADAS (79, 79A Y 79B)",
+    "Precio": 20.00
+  },
+  {
+    "Codigo": "166",
+    "Nombre": "BIOPSIA DE PIEL/HISTOQUÍMICA",
+    "Precio": 150.00
+  },
+  {
+    "Codigo": "168",
+    "Nombre": "BIOPSIA DE PROSTATA ESTUDIO ANATOMOPATOLOGICO",
+    "Precio": 580.00
+  },
+  {
+    "Codigo": "170",
+    "Nombre": "BIOPSIA PIEZA OPERATORIA EXTRA GRANDE >10CM",
+    "Precio": 420.00
+  },
+  {
+    "Codigo": "171",
+    "Nombre": "BIOPSIA PIEZA OPERATORIA CHICA >5 MM <= 2CM",
+    "Precio": 110.00
+  },
+  {
+    "Codigo": "172",
+    "Nombre": "BIOPSIA PIEZA OPERATORIA MEDIANA >2 MM <= 5CM",
+    "Precio": 125.00
+  },
+  {
+    "Codigo": "173",
+    "Nombre": "BIOPSIA PIEZA OPERATORIA <=5 MM",
+    "Precio": 90.00
+  },
+  {
+    "Codigo": "174",
+    "Nombre": "BIOPSIA PIEZA OPERATORIA GRANDE >5 CM Y <=10 CM",
+    "Precio": 260.00
+  },
+  {
+    "Codigo": "175",
+    "Nombre": "BIOPSIA POR ASPIRACION (BAAF)",
+    "Precio": 116.00
+  },
+  {
+    "Codigo": "178",
+    "Nombre": "BK CULTIVO EN ESPUTO",
+    "Precio": 55.00
+  },
+  {
+    "Codigo": "179",
+    "Nombre": "BK CULTIVO EN ESPUTO MX 01",
+    "Precio": 55.00
+  },
+  {
+    "Codigo": "180",
+    "Nombre": "BK CULTIVO EN ESPUTO MX 02",
+    "Precio": 55.00
+  },
+  {
+    "Codigo": "181",
+    "Nombre": "BK CULTIVO EN ESPUTO MX 03",
+    "Precio": 55.00
+  },
+  {
+    "Codigo": "185",
+    "Nombre": "BK DIRECTO EN ESPUTO (PRIMERA MUESTRA)",
+    "Precio": 15.00
+  },
+  {
+    "Codigo": "186",
+    "Nombre": "BK DIRECTO EN ESPUTO (SEGUNDA MUESTRA)",
+    "Precio": 15.00
+  },
+  {
+    "Codigo": "187",
+    "Nombre": "BK DIRECTO EN ESPUTO (TERCERA MUESTRA)",
+    "Precio": 15.00
+  },
+  {
+    "Codigo": "188",
+    "Nombre": "BK DIRECTO-LCR",
+    "Precio": 24.00
+  },
+  {
+    "Codigo": "191",
+    "Nombre": "BK DIRECTO-LIQUIDO SINOVIAL",
+    "Precio": 24.00
+  },
+  {
+    "Codigo": "194",
+    "Nombre": "BK VIRUS POR PCR EN TIEMPO REAL",
+    "Precio": 1813.00
+  },
+  {
+    "Codigo": "195",
+    "Nombre": "BLASTOMYCES ANTICUERPOS",
+    "Precio": 313.00
+  },
+  {
+    "Codigo": "196",
+    "Nombre": "BLOCK CELL - BIOPSIA",
+    "Precio": 177.00
+  },
+  {
+    "Codigo": "197",
+    "Nombre": "BLOCK CELL-BIOPSIA",
+    "Precio": 145.00
+  },
+  {
+    "Codigo": "199",
+    "Nombre": "BORDETELLA PERTUSIS (COQUELUCHE) IGM",
+    "Precio": 315.00
+  },
+  {
+    "Codigo": "200",
+    "Nombre": "BORRELIA BURGDORFERI IGG",
+    "Precio": 298.00
+  },
+  {
+    "Codigo": "201",
+    "Nombre": "BORRELIA BURGDORFERI IGM",
+    "Precio": 298.00
+  },
+  {
+    "Codigo": "202",
+    "Nombre": "BRUCELA SP. X PCR EN TIEMPO REAL",
+    "Precio": 1242.00
+  },
+  {
+    "Codigo": "206",
+    "Nombre": "BTA EN ORINA (MARCADOR TUMORAL VEJIGA)",
+    "Precio": 1813.00
+  },
+  {
+    "Codigo": "208",
+    "Nombre": "CA 125 (OVARIO)",
+    "Precio": 70.00
+  },
+  {
+    "Codigo": "209",
+    "Nombre": "CA 15-3 (MAMA)",
+    "Precio": 55.00
+  },
+  {
+    "Codigo": "211",
+    "Nombre": "CA 549 (MARCADOR MAMA)",
+    "Precio": 260.00
+  },
+  {
+    "Codigo": "217",
+    "Nombre": "CADENAS LIGERAS LAMBDA LIBRES SUERO",
+    "Precio": 652.00
+  },
+  {
+    "Codigo": "226",
+    "Nombre": "CALCULO BILIAR",
+    "Precio": 45.00
+  },
+  {
+    "Codigo": "227",
+    "Nombre": "CALCULO URINARIO ANALISIS (RENAL/VESICAL)",
+    "Precio": 102.00
+  },
+  {
+    "Codigo": "228",
+    "Nombre": "CALPROTECTINA FECAL",
+    "Precio": 479.00
+  },
+  {
+    "Codigo": "233",
+    "Nombre": "CARBAMATOS EN ORINA AL SIMPLE CUALITATIVO",
+    "Precio": 200.00
+  },
+  {
+    "Codigo": "235",
+    "Nombre": "CARBOXIHEMOGLOBINA \"COHB\" (HN)",
+    "Precio": 107.00
+  },
+  {
+    "Codigo": "236",
+    "Nombre": "CARIOTIPO MEDULA OSEA (ESTUDIO CROMOSOMICO)",
+    "Precio": 2431.00
+  },
+  {
+    "Codigo": "237",
+    "Nombre": "CARIOTIPO SANGRE PERIFERICA (ESTUDIO CROMOSOMICO)",
+    "Precio": 2337.00
+  },
+  {
+    "Codigo": "238",
+    "Nombre": "CARNITINA TOTAL",
+    "Precio": 389.00
+  },
+  {
+    "Codigo": "239",
+    "Nombre": "CAROTENO SERICO",
+    "Precio": 75.00
+  },
+  {
+    "Codigo": "244",
+    "Nombre": "CELULAS NK NATURAL KILLER (CD56), SANGRE TOTAL",
+    "Precio": 661.00
+  },
+  {
+    "Codigo": "246",
+    "Nombre": "CENTROMERO, AUTOANTICUERPOS (IM)",
+    "Precio": 159.00
+  },
+  {
+    "Codigo": "247",
+    "Nombre": "CERULOPLASMINA",
+    "Precio": 140.00
+  },
+  {
+    "Codigo": "249",
+    "Nombre": "CHAGAS - HEMOAGLUTINACIÓN (HAI)",
+    "Precio": 147.00
+  },
+  {
+    "Codigo": "250",
+    "Nombre": "CHAGAS (TRIPANOZOMA CRUZI) ANTICUERPOS",
+    "Precio": 174.00
+  },
+  {
+    "Codigo": "251",
+    "Nombre": "CHLAMYDIA PNEUMONIAE (IGG)",
+    "Precio": 156.00
+  },
+  {
+    "Codigo": "252",
+    "Nombre": "CHLAMYDIA PNEUMONIAE (IGM)",
+    "Precio": 164.00
+  },
+  {
+    "Codigo": "253",
+    "Nombre": "CHLAMYDIA PSITACCI IGG",
+    "Precio": 162.00
+  },
+  {
+    "Codigo": "254",
+    "Nombre": "CHLAMYDIA PSITACCI IGM",
+    "Precio": 162.00
+  },
+  {
+    "Codigo": "257",
+    "Nombre": "CHLAMYDIA TRACHOMATIS IGG (IM)",
+    "Precio": 60.00
+  },
+  {
+    "Codigo": "258",
+    "Nombre": "CHLAMYDIA TRACHOMATIS IGM (IM)",
+    "Precio": 60.00
+  },
+  {
+    "Codigo": "259",
+    "Nombre": "CICLOSPORA (HECES)",
+    "Precio": 29.00
+  },
+  {
+    "Codigo": "260",
+    "Nombre": "CICLOSPORINA A",
+    "Precio": 236.00
+  },
+  {
+    "Codigo": "261",
+    "Nombre": "CISTATINA C",
+    "Precio": 540.00
+  },
+  {
+    "Codigo": "262",
+    "Nombre": "CISTICERCOS ANTIC.TOTALES ELISA",
+    "Precio": 132.00
+  },
+  {
+    "Codigo": "263",
+    "Nombre": "CISTICERCOSIS (WESTER BLOT) SUERO",
+    "Precio": 445.00
+  },
+  {
+    "Codigo": "264",
+    "Nombre": "CISTICERCUS (WESTER BLOT) L.C.R",
+    "Precio": 479.00
+  },
+  {
+    "Codigo": "267",
+    "Nombre": "CISTINA ORINA 24 HORAS",
+    "Precio": 187.00
+  },
+  {
+    "Codigo": "271",
+    "Nombre": "CITOMEGALOVIRUS CARGA VIRAL (CUANTITATIVO)",
+    "Precio": 1390.00
+  },
+  {
+    "Codigo": "272",
+    "Nombre": "CITOMEGALOVIRUS DNA DETECTOR (CUALITATIVO)",
+    "Precio": 911.00
+  },
+  {
+    "Codigo": "273",
+    "Nombre": "CITOMELOGAVIRUS IGG",
+    "Precio": 90.00
+  },
+  {
+    "Codigo": "274",
+    "Nombre": "CITOMELOGAVIRUS IGM",
+    "Precio": 90.00
+  },
+  {
+    "Codigo": "275",
+    "Nombre": "CITOMETRIA DE FLUJO",
+    "Precio": 2596.00
+  },
+  {
+    "Codigo": "277",
+    "Nombre": "CITRATO (ORINA 24HRS) (ACIDO CITRICO)",
+    "Precio": 250.00
+  },
+  {
+    "Codigo": "280",
+    "Nombre": "CLONAZEPAM (RIVOTRIL)",
+    "Precio": 360.00
+  },
+  {
+    "Codigo": "281",
+    "Nombre": "CLORO EN SUERO",
+    "Precio": 28.00
+  },
+  {
+    "Codigo": "282",
+    "Nombre": "CLOSTRIDIUM DIFFICILE TOXINA A/B",
+    "Precio": 191.00
+  },
+  {
+    "Codigo": "283",
+    "Nombre": "COAGLUTINACION, ANTIGENOS BACTERIANOS LCR",
+    "Precio": 348.00
+  },
+  {
+    "Codigo": "284",
+    "Nombre": "COBRE (ORINA 24 HORAS)",
+    "Precio": 174.00
+  },
+  {
+    "Codigo": "285",
+    "Nombre": "COBRE SERICO",
+    "Precio": 174.00
+  },
+  {
+    "Codigo": "288",
+    "Nombre": "COCAINA PBC (ORINA SIMPLE) - CCF CONFIRMATORIO CUALITOXICOLOGICO",
+    "Precio": 281.00
+  },
+  {
+    "Codigo": "289",
+    "Nombre": "COCAINA PBC (ORINA SIMPLE) - CUALITATIVO",
+    "Precio": 30.00
+  },
+  {
+    "Codigo": "290",
+    "Nombre": "COCAINA PBC (ORINA SIMPLE) - HPLC CONFIRMATORIO CON CROMATOGRAMA",
+    "Precio": 1416.00
+  },
+  {
+    "Codigo": "291",
+    "Nombre": "COCAINA PBC (ORINA SIMPLE) - HPLC CONFIRMATORIO SIN CROMATOGRAMA",
+    "Precio": 705.00
+  },
+  {
+    "Codigo": "314",
+    "Nombre": "COLORACION RETICULINA PARA BIOPSIA",
+    "Precio": 177.00
+  },
+  {
+    "Codigo": "316",
+    "Nombre": "COLORACION VERHOFF - FIBRAS ELÁSTICAS PARA BIOPSIA",
+    "Precio": 177.00
+  },
+  {
+    "Codigo": "317",
+    "Nombre": "COLORACION VON KOSSA PARA BIOPSIA",
+    "Precio": 177.00
+  },
+  {
+    "Codigo": "320",
+    "Nombre": "COMPLEMENTO C2",
+    "Precio": 307.00
+  },
+  {
+    "Codigo": "323",
+    "Nombre": "COMPLEMENTO C4",
+    "Precio": 50.00
+  },
+  {
+    "Codigo": "325",
+    "Nombre": "COMPLEMENTO C5",
+    "Precio": 402.00
+  },
+  {
+    "Codigo": "332",
+    "Nombre": "CORTISOL AM",
+    "Precio": 50.00
+  },
+  {
+    "Codigo": "333",
+    "Nombre": "CORTISOL LIBRE (ORINA 24 HORAS)",
+    "Precio": 105.00
+  },
+  {
+    "Codigo": "334",
+    "Nombre": "CORTISOL P.M.",
+    "Precio": 40.00
+  },
+  {
+    "Codigo": "338",
+    "Nombre": "COTININA EN SANGRE",
+    "Precio": 229.00
+  },
+  {
+    "Codigo": "340",
+    "Nombre": "COVID-19 MOLECULAR PCR (PROCESAMIENTO)",
+    "Precio": 156.00
+  },
+  {
+    "Codigo": "341",
+    "Nombre": "COXSACKIE A VIRUS, ANTICUERPO",
+    "Precio": 671.00
+  },
+  {
+    "Codigo": "343",
+    "Nombre": "COXSACKIE B ANTICUERPOS IGM",
+    "Precio": 327.00
+  },
+  {
+    "Codigo": "344",
+    "Nombre": "CPK MB (CREATIN FOSOFOKINASA-MB)",
+    "Precio": 60.00
+  },
+  {
+    "Codigo": "345",
+    "Nombre": "CPK TOTAL (CREATIN FOSFOKINASA TOTAL)",
+    "Precio": 50.00
+  },
+  {
+    "Codigo": "346",
+    "Nombre": "CREATINFOSFOQUINASA (CPK TOTAL) (HN)",
+    "Precio": 80.00
+  },
+  {
+    "Codigo": "350",
+    "Nombre": "CREATININA POST",
+    "Precio": 15.00
+  },
+  {
+    "Codigo": "351",
+    "Nombre": "CREATININA SERICA",
+    "Precio": 15.00
+  },
+  {
+    "Codigo": "352",
+    "Nombre": "CRIOAGLUTININAS",
+    "Precio": 69.00
+  },
+  {
+    "Codigo": "353",
+    "Nombre": "CRIOGLOBULINAS",
+    "Precio": 75.00
+  },
+  {
+    "Codigo": "354",
+    "Nombre": "CRIPTOSPORIDIUM (HECES)",
+    "Precio": 43.00
+  },
+  {
+    "Codigo": "355",
+    "Nombre": "CROMO EN ORINA 24 HORAS",
+    "Precio": 164.00
+  },
+  {
+    "Codigo": "356",
+    "Nombre": "CROMO SANGRE TOTAL",
+    "Precio": 202.00
+  },
+  {
+    "Codigo": "357",
+    "Nombre": "CROMOGRANINA A",
+    "Precio": 608.00
+  },
+  {
+    "Codigo": "358",
+    "Nombre": "CRYPTOCOCCUS ANTICUERPOS",
+    "Precio": 300.00
+  },
+  {
+    "Codigo": "360",
+    "Nombre": "CRYPTOCOCCUS ANTIGENO LATEX (EN SUERO)",
+    "Precio": 196.00
+  },
+  {
+    "Codigo": "361",
+    "Nombre": "CRYPTOCOCCUS, ANTIGENO LATEX (EN LCR)",
+    "Precio": 298.00
+  },
+  {
+    "Codigo": "362",
+    "Nombre": "CTX BETA CROSSLAPS (BETA C-TELOPEPTIDO)",
+    "Precio": 206.00
+  },
+  {
+    "Codigo": "363",
+    "Nombre": "CULTIVO (GERMENES COMUNES)",
+    "Precio": 70.00
+  },
+  {
+    "Codigo": "364",
+    "Nombre": "CULTIVO DE BK",
+    "Precio": 95.00
+  },
+  {
+    "Codigo": "365",
+    "Nombre": "CULTIVO DE ESPUTO (GERMENES COMUNES)",
+    "Precio": 50.00
+  },
+  {
+    "Codigo": "367",
+    "Nombre": "CULTIVO DE HONGOS",
+    "Precio": 50.00
+  },
+  {
+    "Codigo": "368",
+    "Nombre": "CULTIVO DE LCR",
+    "Precio": 42.00
+  },
+  {
+    "Codigo": "370",
+    "Nombre": "CULTIVO DE SECRECIÓN CON MIC",
+    "Precio": 110.00
+  },
+  {
+    "Codigo": "371",
+    "Nombre": "CULTIVO DE SECRECION CONJUNTIVAL",
+    "Precio": 40.00
+  },
+  {
+    "Codigo": "373",
+    "Nombre": "CULTIVO DE SECRECION OTICA",
+    "Precio": 50.00
+  },
+  {
+    "Codigo": "374",
+    "Nombre": "CULTIVO DE SECRECION PARANASAL",
+    "Precio": 42.00
+  },
+  {
+    "Codigo": "380",
+    "Nombre": "CULTIVO LIQUIDO PLEURAL",
+    "Precio": 42.00
+  },
+  {
+    "Codigo": "381",
+    "Nombre": "CULTIVO LIQUIDO SINOVIAL",
+    "Precio": 42.00
+  },
+  {
+    "Codigo": "383",
+    "Nombre": "CULTIVOS (OTROS)",
+    "Precio": 42.00
+  },
+  {
+    "Codigo": "385",
+    "Nombre": "CYFRA 21-1 (CK19)",
+    "Precio": 130.00
+  },
+  {
+    "Codigo": "386",
+    "Nombre": "DEMODEX FOLICULORUM",
+    "Precio": 29.00
+  },
+  {
+    "Codigo": "387",
+    "Nombre": "DENGUE ANTIGENO NS1 CUALITATIVO",
+    "Precio": 40.00
+  },
+  {
+    "Codigo": "388",
+    "Nombre": "DENGUE VIRUS ANTICUERPOS IGG + IGM CUALITATIVO (IM)",
+    "Precio": 80.00
+  },
+  {
+    "Codigo": "389",
+    "Nombre": "DENGUE VIRUS ANTICUERPOS IGG CUANTITATIVO (IM)",
+    "Precio": 147.00
+  },
+  {
+    "Codigo": "390",
+    "Nombre": "DENGUE VIRUS ANTICUERPOS IGM CUANTITATIVO (IM)",
+    "Precio": 112.00
+  },
+  {
+    "Codigo": "391",
+    "Nombre": "DENSIDAD URINARIA",
+    "Precio": 48.00
+  },
+  {
+    "Codigo": "392",
+    "Nombre": "DEOXYPIRIDINOLINA D-PYR (ORINA 24H)",
+    "Precio": 691.00
+  },
+  {
+    "Codigo": "393",
+    "Nombre": "DEPURACION DE CREATININA ENDOGENA",
+    "Precio": 40.00
+  },
+  {
+    "Codigo": "395",
+    "Nombre": "DEPURACION DE CREATIΝΙΝΑ - ORINA 24 HORAS",
+    "Precio": 45.00
+  },
+  {
+    "Codigo": "396",
+    "Nombre": "DESHIDROGENASA LACTICA (LDH) DHL",
+    "Precio": 40.00
+  },
+  {
+    "Codigo": "397",
+    "Nombre": "DESPISTAJE ALERGICO AMPLIADO (295 ALERGENOS)",
+    "Precio": 1793.00
+  },
+  {
+    "Codigo": "400",
+    "Nombre": "DESPISTAJE ALERGICO BASICO (36 ALERGENOS) PANEL PERUANO (IM)",
+    "Precio": 250.00
+  },
+  {
+    "Codigo": "401",
+    "Nombre": "DHEA-S (SULFATO DE DESHIDROEPIANDROSTERONA)",
+    "Precio": 60.00
+  },
+  {
+    "Codigo": "402",
+    "Nombre": "DHL-ISOENZIMAS",
+    "Precio": 440.00
+  },
+  {
+    "Codigo": "403",
+    "Nombre": "DIAZEPAN",
+    "Precio": 313.00
+  },
+  {
+    "Codigo": "404",
+    "Nombre": "DIFENIL HIDANTOINA (FENITOINA) (EPAMIN, DILANTIN)",
+    "Precio": 75.00
+  },
+  {
+    "Codigo": "405",
+    "Nombre": "DIFENIL HIDANTOINA LIBRE",
+    "Precio": 262.00
+  },
+  {
+    "Codigo": "406",
+    "Nombre": "DIGOXINA",
+    "Precio": 108.00
+  },
+  {
+    "Codigo": "407",
+    "Nombre": "DIHIDROTESTOSTERONA DHT",
+    "Precio": 162.00
+  },
+  {
+    "Codigo": "410",
+    "Nombre": "DOSAJE DE ACTH",
+    "Precio": 80.00
+  },
+  {
+    "Codigo": "411",
+    "Nombre": "DOSAJE DE AMIKACINA",
+    "Precio": 520.00
+  },
+  {
+    "Codigo": "412",
+    "Nombre": "DOSAJE DE EVEROLIMUS (CDX)",
+    "Precio": 697.00
+  },
+  {
+    "Codigo": "413",
+    "Nombre": "DOSAJE DE INMUNOGLOBULINAS A.GY M",
+    "Precio": 110.00
+  },
+  {
+    "Codigo": "414",
+    "Nombre": "ECHOVIRUS, ANTC. (4, 9, 11, 30)",
+    "Precio": 534.00
+  },
+  {
+    "Codigo": "415",
+    "Nombre": "ECOGRAFÍA ABDOMINAL",
+    "Precio": 130.00
+  },
+  {
+    "Codigo": "416",
+    "Nombre": "ECOGRAFÍA OBSTETRICA/GINECO",
+    "Precio": 100.00
+  },
+  {
+    "Codigo": "417",
+    "Nombre": "ECOGRAFÍA PARTES BLANDAS",
+    "Precio": 100.00
+  },
+  {
+    "Codigo": "418",
+    "Nombre": "ECOGRAFÍA PELVICA",
+    "Precio": 100.00
+  },
+  {
+    "Codigo": "419",
+    "Nombre": "ECOGRAFÍA PROSTATICA (ABD)",
+    "Precio": 90.00
+  },
+  {
+    "Codigo": "420",
+    "Nombre": "ECOGRAFÍA PROSTATICA (TR)",
+    "Precio": 110.00
+  },
+  {
+    "Codigo": "421",
+    "Nombre": "ECOGRAFÍA RENO-VISECAL",
+    "Precio": 100.00
+  },
+  {
+    "Codigo": "422",
+    "Nombre": "EDN FECAL (NEUROTOXINA DERIVADA DE EOSINOFILOS)",
+    "Precio": 1039.00
+  },
+  {
+    "Codigo": "423",
+    "Nombre": "ELASTASA PANCREATICA FECAL (ESPECIAL)",
+    "Precio": 223.00
+  },
+  {
+    "Codigo": "424",
+    "Nombre": "ELECTROFORESIS DE HEMOGLOBINA",
+    "Precio": 149.00
+  },
+  {
+    "Codigo": "426",
+    "Nombre": "ELECTROLITOS (ORINA 24 HORAS)",
+    "Precio": 35.00
+  },
+  {
+    "Codigo": "427",
+    "Nombre": "ELECTROLITOS ORINA SIMPLE",
+    "Precio": 40.00
+  },
+  {
+    "Codigo": "428",
+    "Nombre": "ENA - PERFIL AUTOINMUNE (IM)",
+    "Precio": 325.00
+  },
+  {
+    "Codigo": "429",
+    "Nombre": "ENDOMISIO, AUTOANTIC. (EMA) AC TOTALES",
+    "Precio": 343.00
+  },
+  {
+    "Codigo": "430",
+    "Nombre": "EOSINOFILOS EN SECRECION (OTROS)",
+    "Precio": 59.00
+  },
+  {
+    "Codigo": "431",
+    "Nombre": "EOSINOFILOS EN SECRECION NASAL",
+    "Precio": 30.00
+  },
+  {
+    "Codigo": "432",
+    "Nombre": "EPSTEIN BAR VIRUS EBNA IGG (IM)",
+    "Precio": 75.00
+  },
+  {
+    "Codigo": "433",
+    "Nombre": "EPSTEIN BAR VIRUS EBNA IGM",
+    "Precio": 75.00
+  },
+  {
+    "Codigo": "434",
+    "Nombre": "EPSTEIN BAR VIRUS VCA IGG (IM)",
+    "Precio": 70.00
+  },
+  {
+    "Codigo": "435",
+    "Nombre": "EPSTEIN BAR VIRUS VCA IGM (IM)",
+    "Precio": 60.00
+  },
+  {
+    "Codigo": "439",
+    "Nombre": "EPSTEIN BARR VIRUS, CARGA VIRAL",
+    "Precio": 1242.00
+  },
+  {
+    "Codigo": "440",
+    "Nombre": "EPSTEIN BARR VIRUS, EARLY ANTIGEN (EA) (IM)",
+    "Precio": 256.00
+  },
+  {
+    "Codigo": "442",
+    "Nombre": "ERITROPOYETINA SERICA",
+    "Precio": 124.00
+  },
+  {
+    "Codigo": "446",
+    "Nombre": "ESPERMATOZOIDES, AC (SEMEN)",
+    "Precio": 174.00
+  },
+  {
+    "Codigo": "447",
+    "Nombre": "ESPERMATOZOIDES, AC. SUERO",
+    "Precio": 131.00
+  },
+  {
+    "Codigo": "448",
+    "Nombre": "ESTEATOCRITO (ACIDO)",
+    "Precio": 128.00
+  },
+  {
+    "Codigo": "453",
+    "Nombre": "ESTREPTOCOCO B-HEMOLITICO GRUPO A (PYOGENES)",
+    "Precio": 128.00
+  },
+  {
+    "Codigo": "454",
+    "Nombre": "ESTRIOL LIBRE",
+    "Precio": 85.00
+  },
+  {
+    "Codigo": "455",
+    "Nombre": "ESTRIOL TOTAL",
+    "Precio": 88.00
+  },
+  {
+    "Codigo": "456",
+    "Nombre": "ESTRONA SULFATO",
+    "Precio": 450.00
+  },
+  {
+    "Codigo": "457",
+    "Nombre": "ESTUDIO DE COCCIDIOS (HECES)",
+    "Precio": 158.00
+  }
+]
