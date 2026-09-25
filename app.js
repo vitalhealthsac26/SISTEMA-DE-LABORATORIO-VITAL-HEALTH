@@ -387,7 +387,6 @@ function guardarResultadosOrden() {
   alert('¡Resultados guardados correctamente!');
 }
 
-/* IMPRESIÓN A4: TABLAS INDEPENDIENTES CON ESPACIAMIENTO ENTRE CADA EXAMEN */
 function imprimirResultadosPDF() {
   const paciente = document.getElementById('r-paciente').value;
   if (!paciente) { alert('No hay ninguna órden cargada.'); return; }
@@ -406,7 +405,7 @@ function imprimirResultadosPDF() {
   const orden = ordenes.find(o => o.num === numOrden);
 
   if (orden) {
-    orden.items.forEach((examen, index) => {
+    orden.items.forEach((examen) => {
       let tableHtml = `
         <div class="a4-exam-block">
           <table class="a4-table">
