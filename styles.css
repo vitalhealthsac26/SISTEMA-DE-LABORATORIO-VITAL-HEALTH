@@ -36,7 +36,7 @@ th { background: #f0f0f0; font-size: 13px; }
   left: 0;
   right: 0;
   background: white;
-  border: 1fr solid #0056b3;
+  border: 1px solid #0056b3;
   max-height: 200px;
   overflow-y: auto;
   z-index: 1000;
@@ -147,7 +147,7 @@ th { background: #f0f0f0; font-size: 13px; }
 
   .a4-table { width: 100%; border-collapse: collapse; font-size: 12px; }
   .a4-table th { background: #0056b3; color: white; border: 1px solid #0056b3; padding: 8px; text-align: left; }
-  .a4-table td { border: 1px solid #e0e0e0; padding: 8px; text-align: left; }
+  .a4-table td { border: 1px solid #e0e0e0; padding: 6px 8px; text-align: left; }
 
   .a4-footer { margin-top: 90px; display: flex; justify-content: flex-end; }
   .a4-firma-container { text-align: center; width: 250px; position: relative; }
