@@ -3,129 +3,148 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sistema Integral de Laboratorio - Vital Health</title>
+  <title>Sistema de Gestión - Vital Health</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <div class="main-header no-print">
-    <h1>VITAL HEALTH - Sistema de Gestión de Laboratorio</h1>
-    <nav class="nav-tabs">
-      <button class="tab-btn active" onclick="showTab('recepcion')">1. Recepción y Cobro (Ticket)</button>
-      <button class="tab-btn" onclick="showTab('resultados')">2. Ingreso de Resultados y PDF</button>
-    </nav>
+
+  <!-- NAVEGACIÓN Y PANTALLA PRINCIPAL (No se imprime) -->
+  <div class="no-print">
+    <header class="main-header">
+      <h1>CENTRO MÉDICO VITAL HEALTH</h1>
+      <div class="tabs">
+        <button class="tab-btn active" onclick="cambiarModulo('modulo-venta')">1. Recepción y Cobro (Ticket 58mm)</button>
+        <button class="tab-btn" onclick="cambiarModulo('modulo-resultados')">2. Resultados (Hoja A4 / PDF)</button>
+      </div>
+    </header>
+
+    <!-- MÓDULO 1: RECEPCIÓN Y TICKET -->
+    <main id="modulo-venta" class="modulo active">
+      <div class="card">
+        <h2>Datos de la Venta</h2>
+        <div class="grid-3">
+          <div><label>DNI:</label><input type="text" id="v-dni" placeholder="DNI del paciente"></div>
+          <div><label>Paciente:</label><input type="text" id="v-paciente" placeholder="Nombre completo"></div>
+          <div><label>Fecha:</label><input type="date" id="v-fecha"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Agregar Exámenes</h2>
+        <div class="grid-2">
+          <input type="text" id="v-buscar" placeholder="Buscar examen...">
+          <button class="btn-add" onclick="agregarExamenAVenta()">+ Agregar</button>
+        </div>
+        <table>
+          <thead>
+            <tr><th>Examen</th><th>Precio (S/)</th><th>Acción</th></tr>
+          </thead>
+          <tbody id="v-lista"></tbody>
+        </table>
+        <div class="total-bar">
+          <h3>Total: S/ <span id="v-total">0.00</span></h3>
+          <button class="btn-print-ticket" onclick="imprimirTicket()">Imprimir Ticket (58mm)</button>
+        </div>
+      </div>
+    </main>
+
+    <!-- MÓDULO 2: INGRESO DE RESULTADOS Y PDF A4 -->
+    <main id="modulo-resultados" class="modulo">
+      <div class="card">
+        <h2>Reporte de Análisis Clínicos</h2>
+        <div class="grid-3">
+          <div><label>Paciente:</label><input type="text" id="r-paciente"></div>
+          <div><label>Edad:</label><input type="text" id="r-edad" placeholder="Ej: 35 AÑOS"></div>
+          <div><label>Doctor:</label><input type="text" id="r-doctor" placeholder="Médico tratante"></div>
+        </div>
+        
+        <h3>Resultados</h3>
+        <table>
+          <thead>
+            <tr><th>Examen</th><th>Resultado</th><th>Unidad</th><th>Valores Referenciales</th></tr>
+          </thead>
+          <tbody id="r-lista"></tbody>
+        </table>
+        <br>
+        <button class="btn-print-pdf" onclick="imprimirPDF()">Imprimir / Guardar PDF (A4)</button>
+      </div>
+    </main>
   </div>
 
-  <!-- SECCIÓN 1: RECEPCIÓN Y COBRO -->
-  <div id="tab-recepcion" class="tab-content active no-print">
-    <div class="card">
-      <h2>Datos del Cliente / Paciente</h2>
-      <div class="grid-3">
-        <input type="text" id="rec-dni" placeholder="DNI / Documento">
-        <input type="text" id="rec-nombre" placeholder="Nombre completo">
-        <input type="text" id="rec-telefono" placeholder="Teléfono / WhatsApp">
-      </div>
-    </div>
 
-    <div class="card">
-      <h2>Venta de Exámenes</h2>
-      <div class="grid-2">
-        <input type="text" id="rec-buscar" placeholder="Buscar examen por nombre...">
-        <button class="btn-primary" onclick="agregarExamenAVenta()">Agregar a la Orden</button>
-      </div>
-      <table id="tabla-venta">
-        <thead>
-          <tr>
-            <th>Examen</th>
-            <th>Precio (S/)</th>
-            <th>Acción</th>
-          </tr>
-        </thead>
-        <tbody id="lista-venta"></tbody>
-      </table>
-      <div class="total-box">
-        <h3>Total: S/ <span id="total-monto">0.00</span></h3>
-        <button class="btn-success" onclick="procesarVentaEImprimirTicket()">Cobrar e Imprimir Ticket</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- SECCIÓN 2: RESULTADOS Y PDF -->
-  <div id="tab-resultados" class="tab-content no-print">
-    <div class="card">
-      <h2>Generar Informe de Resultados</h2>
-      <div class="grid-3">
-        <input type="text" id="res-paciente" placeholder="Nombre del Paciente">
-        <input type="text" id="res-edad" placeholder="Edad">
-        <input type="text" id="res-doctor" placeholder="Doctor Tratante">
-      </div>
-      
-      <h3>Resultados</h3>
-      <table id="tabla-resultados-ingreso">
-        <thead>
-          <tr>
-            <th>Examen</th>
-            <th>Resultado</th>
-            <th>Unidades</th>
-            <th>Valores de Referencia</th>
-          </tr>
-        </thead>
-        <tbody id="lista-resultados-ingreso"></tbody>
-      </table>
-      <br>
-      <button class="btn-primary" onclick="window.print()">Generar e Imprimir PDF</button>
-    </div>
-  </div>
-
-  <!-- PLANTILLA DE TICKET DE VENTA (SOLO IMPRESIÓN) -->
-  <div id="ticket-print" class="print-only-ticket">
-    <div class="ticket-header">
-      <h2>CENTRO MÉDICO VITAL HEALTH</h2>
+  <!-- ==========================================
+       PLANTILLA 1: TICKET 58MM (Solo Impresión)
+       ========================================== -->
+  <div id="print-ticket" class="print-ticket-58mm">
+    <div class="t-center">
+      <h3>VITAL HEALTH</h3>
       <p>RUC: 20600000001</p>
       <p>Av. Grau N° 1799, Piura</p>
-      <p>TKT-VENTA N°: <span id="tkt-numero">001-00012</span></p>
-      <hr>
+      <p>--------------------------------</p>
+      <p><strong>TICKET DE VENTA</strong></p>
+      <p>N°: <span id="t-num">0001</span></p>
+      <p>--------------------------------</p>
     </div>
-    <p><strong>Cliente:</strong> <span id="tkt-cliente"></span></p>
-    <p><strong>DNI:</strong> <span id="tkt-dni"></span></p>
-    <p><strong>Fecha:</strong> <span id="tkt-fecha"></span></p>
-    <hr>
-    <table class="ticket-table">
+    <p><strong>Fecha:</strong> <span id="t-fecha"></span></p>
+    <p><strong>DNI:</strong> <span id="t-dni"></span></p>
+    <p><strong>Cliente:</strong> <span id="t-paciente"></span></p>
+    <p>--------------------------------</p>
+    <table class="t-table">
       <thead>
-        <tr><th>Desc.</th><th>Total</th></tr>
+        <tr><th>DESCRIPCIÓN</th><th class="t-right">TOTAL</th></tr>
       </thead>
-      <tbody id="tkt-items"></tbody>
+      <tbody id="t-items"></tbody>
     </table>
-    <hr>
-    <p class="ticket-total"><strong>TOTAL: S/ <span id="tkt-total"></span></strong></p>
-    <p class="center">¡Gracias por su preferencia!</p>
+    <p>--------------------------------</p>
+    <p class="t-right t-bold">TOTAL: S/ <span id="t-total">0.00</span></p>
+    <p>--------------------------------</p>
+    <div class="t-center">
+      <p>¡Gracias por su preferencia!</p>
+      <p>Conserve su ticket para el recojo de sus resultados.</p>
+    </div>
   </div>
 
-  <!-- PLANTILLA DE RESULTADOS EN PDF (SOLO IMPRESIÓN) -->
-  <div id="pdf-print" class="print-only-pdf">
-    <div class="pdf-header">
-      <img src="logo.png" alt="Logo" class="pdf-logo">
-      <div>
+
+  <!-- ==========================================
+       PLANTILLA 2: HOJA A4 RESULTADOS (Solo Impresión)
+       ========================================== -->
+  <div id="print-a4" class="print-hoja-a4">
+    <div class="a4-header">
+      <img src="logo.png" alt="Vital Health" class="a4-logo">
+      <div class="a4-empresa">
         <h2>CENTRO MÉDICO VITAL HEALTH</h2>
         <p>Laboratorio de Análisis Clínicos</p>
+        <p>Av. Grau N° 1799, Piura - Tel: (073) 123456</p>
       </div>
     </div>
-    <hr>
-    <div class="pdf-paciente">
-      <p><strong>PACIENTE:</strong> <span id="pdf-nombre"></span></p>
-      <p><strong>EDAD:</strong> <span id="pdf-edad"></span></p>
-      <p><strong>DOCTOR:</strong> <span id="pdf-doctor"></span></p>
+    <hr class="a4-line">
+
+    <div class="a4-paciente-box">
+      <p><strong>PACIENTE:</strong> <span id="a4-paciente"></span></p>
+      <p><strong>EDAD:</strong> <span id="a4-edad"></span></p>
+      <p><strong>DOCTOR:</strong> <span id="a4-doctor"></span></p>
+      <p><strong>FECHA:</strong> <span id="a4-fecha"></span></p>
     </div>
-    <table class="pdf-table">
+
+    <table class="a4-table">
       <thead>
         <tr>
-          <th>EXAMEN</th>
+          <th>PRUEBA / EXAMEN</th>
           <th>RESULTADO</th>
           <th>UNIDAD</th>
           <th>VALOR REFERENCIAL</th>
         </tr>
       </thead>
-      <tbody id="pdf-items"></tbody>
+      <tbody id="a4-items"></tbody>
     </table>
+
+    <div class="a4-footer">
+      <div class="a4-firma">
+        <p>___________________________________</p>
+        <p><strong>Firma y Sello del Responsable</strong></p>
+        <p>Tecnólogo Médico / Biólogo</p>
+      </div>
+    </div>
   </div>
 
   <script src="app.js"></script>
