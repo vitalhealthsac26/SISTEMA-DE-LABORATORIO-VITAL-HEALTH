@@ -144,7 +144,7 @@ th { background: #f8f9fa; color: #333; }
 
 .print-ticket-58mm, .print-hoja-a4 { display: none; }
 
-/* REGLAS MÓVILES (PANTALLAS MENORES A 768px) */
+/* REGLAS MÓVILES */
 @media screen and (max-width: 768px) {
   body { padding: 8px; }
   .main-header h1 { font-size: 17px; }
@@ -205,11 +205,11 @@ th { background: #f8f9fa; color: #333; }
 }
 
 
-/* HOJA A4 RESULTADOS (CORREGIDO PARA EVITAR SOBREPOSICIÓN) */
+/* HOJA A4 RESULTADOS (CORREGIDO PARA FIRMA EN ÚLTIMA HOJA) */
 @media print {
   @page {
     size: A4 portrait;
-    margin: 10mm 12mm 25mm 12mm; /* Margen inferior reservado para evitar choques con el pie fijo */
+    margin: 10mm 12mm 15mm 12mm;
   }
 
   body.modo-impresion-a4 {
@@ -252,9 +252,9 @@ th { background: #f8f9fa; color: #333; }
   }
   .a4-col p { margin: 3px 0; }
 
-  /* CONTENEDOR DE TABLAS DE EXÁMENES CON MARGEN INFERIOR */
+  /* CONTENEDOR DE TABLAS */
   #a4-container-examenes {
-    padding-bottom: 110px; /* Evita que el contenido tape la firma */
+    margin-bottom: 10px;
   }
 
   .a4-exam-block {
@@ -266,24 +266,22 @@ th { background: #f8f9fa; color: #333; }
   .a4-table th { border: 1px solid #0056b3; padding: 5px 8px; text-align: left; }
   .a4-table td { border: 1px solid #e0e0e0; padding: 4px 8px; text-align: left; }
 
-  /* FIRMA FIJA EN LA PARTE INFERIOR DERECHA DE LA HOJA */
+  /* FIRMA: FLUYE AL FINAL Y SOLO SE MUESTRA EN LA ÚLTIMA PÁGINA */
   .a4-footer { 
-    position: fixed;
-    bottom: 28px;
-    right: 0;
-    width: 250px;
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 35px;
     page-break-inside: avoid;
-    z-index: 1000;
   }
 
-  .a4-firma-container { text-align: center; width: 100%; position: relative; }
+  .a4-firma-container { text-align: center; width: 250px; position: relative; }
   .a4-firma-img { max-height: 70px; width: auto; position: absolute; top: -40px; left: 50%; transform: translateX(-50%); }
   .a4-firma-linea { border-top: 1px solid #000; margin-bottom: 4px; }
   .a4-firma-nombre { font-size: 11px; font-weight: bold; margin: 2px 0; }
   .a4-firma-cargo { font-size: 10px; margin: 1px 0; }
   .a4-firma-colegiatura { font-size: 10px; font-weight: bold; margin: 1px 0; }
 
-  /* BARRA INFERIOR DE PIE DE PÁGINA FIJA EN EL FONDO */
+  /* PIE DE PÁGINA FIJO EN EL FONDO DE TODAS LAS HOJAS */
   .a4-bottom-info {
     position: fixed;
     bottom: 0;
