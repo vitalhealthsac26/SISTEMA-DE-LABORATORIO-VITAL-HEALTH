@@ -145,12 +145,9 @@ function eliminarItemVenta(index) {
 
 function renderizarVenta() {
   const tbody = document.getElementById('v-lista');
-  const totalSpan = document.getElementById('v-total');
   tbody.innerHTML = '';
-  let total = 0;
 
   itemsVenta.forEach((item, index) => {
-    total += item.Precio;
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td><strong>${item.Nombre}</strong></td>
@@ -159,7 +156,39 @@ function renderizarVenta() {
     `;
     tbody.appendChild(tr);
   });
-  totalSpan.textContent = total.toFixed(2);
+
+  calcularTotalCobro();
+}
+
+/* FUNCIÓN DE CÁLCULO DE DESCUENTO AUTOMÁTICO */
+function calcularTotalCobro() {
+  const subtotal = itemsVenta.reduce((sum, item) => sum + item.Precio, 0);
+
+  const selectTipo = document.getElementById('v-tipo-descuento');
+  const inputVal = document.getElementById('v-val-descuento');
+  
+  const tipo = selectTipo ? selectTipo.value : 'SIN';
+  const valInput = inputVal ? parseFloat(inputVal.value) || 0 : 0;
+
+  let descuento = 0;
+
+  if (tipo === 'PORCENTAJE') {
+    descuento = subtotal * (valInput / 100);
+  } else if (tipo === 'MONTO') {
+    descuento = valInput;
+  }
+
+  if (descuento > subtotal) descuento = subtotal;
+
+  const totalFinal = subtotal - descuento;
+
+  const subtotalElem = document.getElementById('v-subtotal');
+  const descElem = document.getElementById('v-descuento-aplicado');
+  const totalElem = document.getElementById('v-total');
+
+  if (subtotalElem) subtotalElem.innerText = subtotal.toFixed(2);
+  if (descElem) descElem.innerText = descuento.toFixed(2);
+  if (totalElem) totalElem.innerText = totalFinal.toFixed(2);
 }
 
 function guardarYEmitirTicket() {
@@ -199,6 +228,17 @@ function guardarYEmitirTicket() {
     return { Nombre: item.Nombre, Precio: item.Precio, detalles: subParametros };
   });
 
+  const subtotal = itemsVenta.reduce((acc, i) => acc + i.Precio, 0);
+  const tipoDesc = document.getElementById('v-tipo-descuento').value;
+  const valDesc = parseFloat(document.getElementById('v-val-descuento').value) || 0;
+  
+  let descuento = 0;
+  if (tipoDesc === 'PORCENTAJE') descuento = subtotal * (valDesc / 100);
+  else if (tipoDesc === 'MONTO') descuento = valDesc;
+  if (descuento > subtotal) descuento = subtotal;
+
+  const totalFinal = subtotal - descuento;
+
   const nuevaOrden = {
     num: ordenes.length + 1,
     dni: document.getElementById('v-dni').value.trim() || '-',
@@ -211,7 +251,9 @@ function guardarYEmitirTicket() {
     muestra: 'SUERO / SANGRE TOTAL',
     completado: false,
     items: itemsConEstructura,
-    total: itemsVenta.reduce((acc, i) => acc + i.Precio, 0)
+    subtotal: subtotal,
+    descuento: descuento,
+    total: totalFinal
   };
 
   ordenes.push(nuevaOrden);
@@ -228,6 +270,11 @@ function guardarYEmitirTicket() {
   nuevaOrden.items.forEach(i => {
     tItems.innerHTML += `<tr><td>${i.Nombre}</td><td class="t-right">S/${i.Precio.toFixed(2)}</td></tr>`;
   });
+
+  if (descuento > 0) {
+    tItems.innerHTML += `<tr><td><strong>DESCUENTO AP.</strong></td><td class="t-right">-S/${descuento.toFixed(2)}</td></tr>`;
+  }
+
   document.getElementById('t-total').textContent = nuevaOrden.total.toFixed(2);
 
   document.body.className = 'modo-impresion-ticket';
@@ -236,6 +283,8 @@ function guardarYEmitirTicket() {
   setTimeout(() => {
     document.body.className = '';
     itemsVenta = [];
+    document.getElementById('v-tipo-descuento').value = 'SIN';
+    document.getElementById('v-val-descuento').value = '0';
     renderizarVenta();
     document.getElementById('v-paciente').value = '';
     document.getElementById('v-dni').value = '';
@@ -244,23 +293,28 @@ function guardarYEmitirTicket() {
   }, 1000);
 }
 
+/* FILTRADO DE ÓRDENES CON FECHA EXACTA Y TEXTO */
 function cargarTablaOrdenes() {
   const filtroFecha = document.getElementById('o-filtro-fecha').value;
-  const filtroPaciente = document.getElementById('o-filtro-paciente').value.toLowerCase();
+  const filtroPaciente = document.getElementById('o-filtro-paciente').value.toLowerCase().trim();
   const tbody = document.getElementById('o-lista');
   if (!tbody) return;
 
   tbody.innerHTML = '';
+
   const filtradas = ordenes.filter(o => {
     const coincideFecha = !filtroFecha || o.fecha === filtroFecha;
-    const coincidePaciente = !filtroPaciente || o.paciente.toLowerCase().includes(filtroPaciente) || o.dni.includes(filtroPaciente);
+    const coincidePaciente = !filtroPaciente || 
+      (o.paciente && o.paciente.toLowerCase().includes(filtroPaciente)) || 
+      (o.dni && o.dni.includes(filtroPaciente));
+    
     return coincideFecha && coincidePaciente;
   });
 
   filtradas.forEach(o => {
-    const listaExamenes = o.items.map(i => i.Nombre).join(', ');
+    const listaExamenes = o.items ? o.items.map(i => i.Nombre).join(', ') : '';
     const estadoBadge = o.completado 
-      ? '<span style="color:green; font-weight:bold;">✔ Completado</span>' 
+      ? '<span style="color:#28a745; font-weight:bold;">✔ Completado</span>' 
       : '<span style="color:#d9534f; font-weight:bold;">⏳ Pendiente</span>';
 
     const tr = document.createElement('tr');
@@ -270,9 +324,9 @@ function cargarTablaOrdenes() {
       <td>${o.paciente}</td>
       <td>${o.dni}</td>
       <td><small>${listaExamenes}</small></td>
-      <td>S/ ${o.total.toFixed(2)}</td>
+      <td>S/ ${parseFloat(o.total || 0).toFixed(2)}</td>
       <td>${estadoBadge}</td>
-      <td><button class="btn-action" onclick="cargarOrdenParaResultados(${o.num})">Editar</button></td>
+      <td><button class="btn-action" onclick="cargarOrdenParaResultados(${o.num})">Atender</button></td>
     `;
     tbody.appendChild(tr);
   });
@@ -457,6 +511,7 @@ function imprimirResultadosPDF() {
 // FUNCIONES DEL MÓDULO 4: PLANTILLAS
 function pobladorSelectPlantillas() {
   const select = document.getElementById('p-select-examen');
+  if (!select) return;
   select.innerHTML = '';
 
   for (let key in plantillasExamenes) {
@@ -468,8 +523,11 @@ function pobladorSelectPlantillas() {
 }
 
 function cargarPlantillaParaEditar() {
-  const key = document.getElementById('p-select-examen').value;
+  const select = document.getElementById('p-select-examen');
+  if (!select) return;
+  const key = select.value;
   const tbody = document.getElementById('p-lista-parametros');
+  if (!tbody) return;
   tbody.innerHTML = '';
 
   if (!plantillasExamenes[key]) return;
@@ -490,6 +548,7 @@ function cargarPlantillaParaEditar() {
 
 function agregarFilaParametro() {
   const tbody = document.getElementById('p-lista-parametros');
+  if (!tbody) return;
   const tr = document.createElement('tr');
   tr.className = 'p-row';
   tr.innerHTML = `
