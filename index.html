@@ -8,29 +8,31 @@
 </head>
 <body>
 
-  <!-- PANTALLAS DE TRABAJO (No se imprimen) -->
+  <!-- PANTALLAS DE TRABAJO -->
   <div class="no-print">
     <header class="main-header">
       <h1>CENTRO MÉDICO VITAL HEALTH</h1>
       <div class="tabs">
-        <button class="tab-btn active" onclick="cambiarModulo('modulo-venta', event)">1. Recepción y Cobro (Ticket 58mm)</button>
+        <button class="tab-btn active" onclick="cambiarModulo('modulo-venta', event)">1. Recepción y Cobro (Ticket)</button>
         <button class="tab-btn" onclick="cambiarModulo('modulo-ordenes', event)">2. Órdenes del Día</button>
-        <button class="tab-btn" onclick="cambiarModulo('modulo-resultados', event)">3. Resultados (Hoja A4 / PDF)</button>
+        <button class="tab-btn" onclick="cambiarModulo('modulo-resultados', event)">3. Resultados (A4 / PDF)</button>
+        <button class="tab-btn" onclick="cambiarModulo('modulo-plantillas', event)">4. Configurar Plantillas</button>
       </div>
     </header>
 
-    <!-- MÓDULO 1: RECEPCIÓN Y TICKET -->
+    <!-- MÓDULO 1: RECEPCIÓN -->
     <main id="modulo-venta" class="modulo active">
       <div class="card">
         <h2>Datos del Paciente</h2>
         <div class="grid-4">
           <div><label>DNI / Doc:</label><input type="text" id="v-dni" placeholder="Ej: 72750998"></div>
-          <div><label>Paciente:</label><input type="text" id="v-paciente" placeholder="Nombres y apellidos completos"></div>
+          <div><label>Paciente:</label><input type="text" id="v-paciente" placeholder="Nombres y apellidos"></div>
           <div><label>Fecha Nacimiento:</label><input type="date" id="v-fnac" onchange="calcularEdad()"></div>
           <div><label>Edad:</label><input type="text" id="v-edad" placeholder="Ej: 27 AÑOS" readonly></div>
         </div>
         <div class="grid-2" style="margin-top:10px;">
-          <div><label>Sexo:</label>
+          <div>
+            <label>Sexo:</label>
             <select id="v-sexo">
               <option value="FEMENINO">FEMENINO</option>
               <option value="MASCULINO">MASCULINO</option>
@@ -43,7 +45,7 @@
       <div class="card">
         <h2>Agregar Exámenes</h2>
         <div class="search-container">
-          <input type="text" id="v-buscar" placeholder="Escriba para buscar examen (ej: Hemograma)..." autocomplete="off">
+          <input type="text" id="v-buscar" placeholder="Buscar examen..." autocomplete="off">
           <div id="v-sugerencias" class="dropdown-list"></div>
         </div>
 
@@ -55,12 +57,12 @@
         </table>
         <div class="total-bar">
           <h3>Total: S/ <span id="v-total">0.00</span></h3>
-          <button class="btn-print-ticket" onclick="guardarYEmitirTicket()">Guardar e Imprimir Ticket (58mm)</button>
+          <button class="btn-print-ticket" onclick="guardarYEmitirTicket()">Guardar e Imprimir Ticket</button>
         </div>
       </div>
     </main>
 
-    <!-- MÓDULO 2: ÓRDENES DEL DÍA -->
+    <!-- MÓDULO 2: ÓRDENES -->
     <main id="modulo-ordenes" class="modulo">
       <div class="card">
         <h2>Órdenes Registradas</h2>
@@ -86,7 +88,7 @@
       </div>
     </main>
 
-    <!-- MÓDULO 3: INGRESO DE RESULTADOS Y GENERACIÓN A4 -->
+    <!-- MÓDULO 3: RESULTADOS -->
     <main id="modulo-resultados" class="modulo">
       <div class="card">
         <h2>Ingreso / Edición de Resultados <span id="r-num-orden-title" style="color:#0056b3;"></span></h2>
@@ -101,19 +103,8 @@
           <div><label>Muestra / Tipo:</label><input type="text" id="r-muestra" value="SUERO / SANGRE TOTAL"></div>
         </div>
         
-        <h3 style="margin-top:20px;">Resultados por Examen</h3>
-        <table>
-          <thead>
-            <tr>
-              <th style="width:30%;">Parámetro / Prueba</th>
-              <th style="width:20%;">Resultado</th>
-              <th style="width:15%;">Unidad</th>
-              <th style="width:20%;">Valores Referenciales</th>
-              <th style="width:15%;">Método</th>
-            </tr>
-          </thead>
-          <tbody id="r-lista"></tbody>
-        </table>
+        <h3 style="margin-top:20px;">Resultados y Orden de Exámenes</h3>
+        <div id="r-lista-examenes"></div>
         <br>
         <div style="display:flex; gap:15px;">
           <button class="btn-save" onclick="guardarResultadosOrden()">💾 Guardar Resultados</button>
@@ -121,12 +112,45 @@
         </div>
       </div>
     </main>
+
+    <!-- MÓDULO 4: ADMINISTRADOR DE PLANTILLAS -->
+    <main id="modulo-plantillas" class="modulo">
+      <div class="card">
+        <h2>Configurar Plantillas de Exámenes</h2>
+        <p>Añada o modifique los parámetros y valores por defecto para no modificar el código manualmente.</p>
+        <div class="grid-2" style="margin-bottom:15px;">
+          <div>
+            <label>Seleccionar Examen a Configurar:</label>
+            <select id="p-select-examen" onchange="cargarPlantillaParaEditar()"></select>
+          </div>
+          <div style="display:flex; align-items:flex-end; gap:10px;">
+            <input type="text" id="p-nuevo-examen" placeholder="Nombre nuevo examen...">
+            <button class="btn-action" style="padding:10px;" onclick="crearNuevaPlantilla()">+ Crear Examen</button>
+          </div>
+        </div>
+
+        <table>
+          <thead>
+            <tr>
+              <th style="width:25%;">Parámetro / Analito</th>
+              <th style="width:15%;">Unidad</th>
+              <th style="width:30%;">Valores Referenciales</th>
+              <th style="width:20%;">Método</th>
+              <th style="width:10%;">Acción</th>
+            </tr>
+          </thead>
+          <tbody id="p-lista-parametros"></tbody>
+        </table>
+        <br>
+        <div style="display:flex; gap:10px;">
+          <button class="btn-action" onclick="agregarFilaParametro()">+ Agregar Parámetro</button>
+          <button class="btn-save" onclick="guardarPlantillaActual()">💾 Guardar Cambios de Plantilla</button>
+        </div>
+      </div>
+    </main>
   </div>
 
-
-  <!-- ==========================================
-       PLANTILLA IMPRESIÓN 1: TICKET 58MM
-       ========================================== -->
+  <!-- IMPRESIÓN 1: TICKET 58MM -->
   <div id="print-ticket" class="print-ticket-58mm">
     <div class="t-center">
       <img src="logo.png" alt="Logo" class="t-logo" onerror="this.style.display='none'">
@@ -167,10 +191,7 @@
     </div>
   </div>
 
-
-  <!-- ==========================================
-       PLANTILLA IMPRESIÓN 2: HOJA A4 RESULTADOS
-       ========================================== -->
+  <!-- IMPRESIÓN 2: HOJA A4 RESULTADOS -->
   <div id="print-a4" class="print-hoja-a4">
     <div class="a4-header">
       <div class="a4-logo-box">
