@@ -1,230 +1,272 @@
-// Variable global para almacenar el catálogo de exámenes desde productos.json
 let productos = [];
 let itemsVenta = [];
+let ordenes = JSON.parse(localStorage.getItem('ordenes_lab')) || [];
 
-// Cargar catálogo de exámenes al iniciar
+// Cargar el catálogo productos.json
 fetch('productos.json')
-  .then(response => response.json())
-  .then(data => {
-    productos = data;
-    console.log('Catálogo cargado con éxito:', productos.length, 'exámenes.');
-  })
-  .catch(err => console.error('Error al cargar productos.json:', err));
+  .then(res => res.json())
+  .then(data => { productos = data; })
+  .catch(err => console.error('Error cargando catálogo:', err));
 
-// Configurar fecha por defecto en la interfaz
 document.addEventListener('DOMContentLoaded', () => {
   const inputFecha = document.getElementById('v-fecha');
-  if (inputFecha) {
-    inputFecha.valueAsDate = new Date();
-  }
+  const inputFiltroFecha = document.getElementById('o-filtro-fecha');
+  const hoy = new Date().toISOString().split('T')[0];
+
+  if (inputFecha) inputFecha.value = hoy;
+  if (inputFiltroFecha) inputFiltroFecha.value = hoy;
+
+  configurarBuscadorLive();
+  cargarTablaOrdenes();
 });
 
-// ----------------------------------------------------
-// NAVEGACIÓN ENTRE PESTAÑAS
-// ----------------------------------------------------
-function cambiarModulo(idModulo) {
+function cambiarModulo(idModulo, event) {
   document.querySelectorAll('.modulo').forEach(m => m.classList.remove('active'));
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
 
   document.getElementById(idModulo).classList.add('active');
-  if (event && event.target) {
-    event.target.classList.add('active');
-  }
+  if (event && event.target) event.target.classList.add('active');
+
+  if (idModulo === 'modulo-ordenes') cargarTablaOrdenes();
 }
 
-// ----------------------------------------------------
-// BÚSQUEDA Y GESTIÓN DE VENTA (RECEPCIÓN Y TICKET)
-// ----------------------------------------------------
-const inputBuscar = document.getElementById('v-buscar');
+// Calcular Edad desde Fecha de Nacimiento
+function calcularEdad() {
+  const fnac = document.getElementById('v-fnac').value;
+  if (!fnac) return;
 
-if (inputBuscar) {
-  // Evento para autocompletar / agregar examen al presionar Enter o buscar
-  inputBuscar.addEventListener('keyup', (e) => {
-    if (e.key === 'Enter') {
-      agregarExamenAVenta();
+  const fechaNac = new Date(fnac);
+  const hoy = new Date();
+  let edad = hoy.getFullYear() - fechaNac.getFullYear();
+  const mes = hoy.getMonth() - fechaNac.getMonth();
+
+  if (mes < 0 || (mes === 0 && hoy.getDate() < fechaNac.getDate())) {
+    edad--;
+  }
+
+  document.getElementById('v-edad').value = `${edad} AÑOS`;
+}
+
+// Configuración del Buscador Desplegable
+function configurarBuscadorLive() {
+  const input = document.getElementById('v-buscar');
+  const sugerencias = document.getElementById('v-sugerencias');
+
+  input.addEventListener('input', () => {
+    const text = input.value.trim().toLowerCase();
+    sugerencias.innerHTML = '';
+
+    if (!text) {
+      sugerencias.style.display = 'none';
+      return;
     }
+
+    const coincidencias = productos.filter(p => p.Nombre.toLowerCase().includes(text));
+
+    if (coincidencias.length > 0) {
+      coincidencias.slice(0, 8).forEach(prod => {
+        const div = document.createElement('div');
+        div.className = 'dropdown-item';
+        div.innerHTML = `<span>${prod.Nombre}</span> <strong>S/ ${parseFloat(prod.Precio).toFixed(2)}</strong>`;
+        div.onclick = () => {
+          seleccionarExamen(prod);
+          sugerencias.style.display = 'none';
+          input.value = '';
+        };
+        sugerencias.appendChild(div);
+      });
+      sugerencias.style.display = 'block';
+    } else {
+      sugerencias.style.display = 'none';
+    }
+  });
+
+  document.addEventListener('click', (e) => {
+    if (e.target !== input) sugerencias.style.display = 'none';
   });
 }
 
-function agregarExamenAVenta() {
-  const query = inputBuscar.value.trim().toLowerCase();
-  if (!query) return;
-
-  // Buscar coincidencia en el catálogo productos.json
-  const encontrado = productos.find(p => p.Nombre.toLowerCase().includes(query) || (p.Codigo && p.Codigo.toLowerCase() === query));
-
-  if (encontrado) {
-    // Verificar si ya está en la lista de venta
-    const existe = itemsVenta.find(item => item.Nombre === encontrado.Nombre);
-    if (!existe) {
-      itemsVenta.push({
-        Nombre: encontrado.Nombre,
-        Precio: parseFloat(encontrado.Precio || 0)
-      });
-      renderizarTablaVenta();
-    } else {
-      alert('El examen ya está agregado a la orden.');
-    }
-    inputBuscar.value = '';
-  } else {
-    // Si no está registrado en el JSON, permite agregarlo manualmente
-    const precioManual = prompt(`Examen "${inputBuscar.value}" no encontrado en el catálogo. Ingresa el precio (S/):`, "0.00");
-    if (precioManual !== null) {
-      itemsVenta.push({
-        Nombre: inputBuscar.value.toUpperCase(),
-        Precio: parseFloat(precioManual) || 0
-      });
-      renderizarTablaVenta();
-      inputBuscar.value = '';
-    }
+function seleccionarExamen(prod) {
+  const existe = itemsVenta.find(i => i.Nombre === prod.Nombre);
+  if (existe) {
+    alert('El examen ya está en la lista.');
+    return;
   }
+  itemsVenta.push({ Nombre: prod.Nombre, Precio: parseFloat(prod.Precio) || 0 });
+  renderizarVenta();
 }
 
 function eliminarItemVenta(index) {
   itemsVenta.splice(index, 1);
-  renderizarTablaVenta();
+  renderizarVenta();
 }
 
-function renderizarTablaVenta() {
-  const tbodyVenta = document.getElementById('v-lista');
+function renderizarVenta() {
+  const tbody = document.getElementById('v-lista');
   const totalSpan = document.getElementById('v-total');
-  tbodyVenta.innerHTML = '';
-
+  tbody.innerHTML = '';
   let total = 0;
 
   itemsVenta.forEach((item, index) => {
     total += item.Precio;
     const tr = document.createElement('tr');
     tr.innerHTML = `
-      <td><strong>${item.Nombre}</strong></td>
+      <td>${item.Nombre}</td>
       <td>S/ ${item.Precio.toFixed(2)}</td>
-      <td><button type="button" style="color:red; cursor:pointer;" onclick="eliminarItemVenta(${index})">✕ Eliminar</button></td>
+      <td><button style="color:red; cursor:pointer;" onclick="eliminarItemVenta(${index})">✕ Eliminar</button></td>
     `;
-    tbodyVenta.appendChild(tr);
+    tbody.appendChild(tr);
   });
 
   totalSpan.textContent = total.toFixed(2);
-
-  // Sincronizar automáticamente la lista para el módulo de Resultados
-  actualizarTablaResultadosIngreso();
 }
 
-// ----------------------------------------------------
-// SINCRONIZACIÓN DE MÓDULO DE RESULTADOS
-// ----------------------------------------------------
-function actualizarTablaResultadosIngreso() {
-  const tbodyResultados = document.getElementById('r-lista');
-  if (!tbodyResultados) return;
-
-  tbodyResultados.innerHTML = '';
-
-  itemsVenta.forEach((item) => {
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td><strong>${item.Nombre}</strong></td>
-      <td><input type="text" class="r-val" placeholder="Ej: Negativo / 12.5"></td>
-      <td><input type="text" class="r-uni" placeholder="Ej: mg/dL o S/U"></td>
-      <td><input type="text" class="r-ref" placeholder="Ej: 70 - 105"></td>
-    `;
-    tbodyResultados.appendChild(tr);
-  });
-
-  // Copiar datos del cliente al paciente de resultados si no se han escrito
-  const pVenta = document.getElementById('v-paciente').value;
-  const pRes = document.getElementById('r-paciente');
-  if (pVenta && pRes && !pRes.value) {
-    pRes.value = pVenta;
-  }
-}
-
-// ----------------------------------------------------
-// 1. IMPRIMIR TICKET DE 58 MM
-// ----------------------------------------------------
-function imprimirTicket() {
-  if (itemsVenta.length === 0) {
-    alert('Agrega al menos un examen antes de imprimir el ticket.');
+// Guardar Órden y Emitir Ticket
+function guardarYEmitirTicket() {
+  const paciente = document.getElementById('v-paciente').value;
+  if (!paciente || itemsVenta.length === 0) {
+    alert('Por favor ingrese el nombre del paciente y al menos un examen.');
     return;
   }
 
-  // Transferir datos de cabecera
-  document.getElementById('t-paciente').textContent = document.getElementById('v-paciente').value.toUpperCase() || 'PÚBLICO GENERAL';
-  document.getElementById('t-dni').textContent = document.getElementById('v-dni').value || '-';
-  document.getElementById('t-fecha').textContent = document.getElementById('v-fecha').value;
+  const nuevaOrden = {
+    num: ordenes.length + 1,
+    dni: document.getElementById('v-dni').value || '-',
+    paciente: paciente.toUpperCase(),
+    fnac: document.getElementById('v-fnac').value,
+    edad: document.getElementById('v-edad').value || '-',
+    sexo: document.getElementById('v-sexo').value,
+    fecha: document.getElementById('v-fecha').value,
+    items: [...itemsVenta],
+    total: itemsVenta.reduce((acc, i) => acc + i.Precio, 0)
+  };
 
-  // Llenar tabla del ticket
+  ordenes.push(nuevaOrden);
+  localStorage.setItem('ordenes_lab', JSON.stringify(ordenes));
+
+  // Imprimir Ticket
+  document.getElementById('t-num').textContent = String(nuevaOrden.num).padStart(4, '0');
+  document.getElementById('t-paciente').textContent = nuevaOrden.paciente;
+  document.getElementById('t-dni').textContent = nuevaOrden.dni;
+  document.getElementById('t-edad').textContent = nuevaOrden.edad;
+  document.getElementById('t-fecha').textContent = nuevaOrden.fecha;
+
   const tItems = document.getElementById('t-items');
-  const tTotal = document.getElementById('t-total');
   tItems.innerHTML = '';
-
-  let total = 0;
-  itemsVenta.forEach(item => {
-    total += item.Precio;
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td>${item.Nombre}</td>
-      <td class="t-right">S/${item.Precio.toFixed(2)}</td>
-    `;
-    tItems.appendChild(tr);
+  nuevaOrden.items.forEach(i => {
+    tItems.innerHTML += `<tr><td>${i.Nombre}</td><td class="t-right">S/${i.Precio.toFixed(2)}</td></tr>`;
   });
+  document.getElementById('t-total').textContent = nuevaOrden.total.toFixed(2);
 
-  tTotal.textContent = total.toFixed(2);
-
-  // Activar clase CSS exclusiva para Ticket de 58mm
   document.body.className = 'modo-impresion-ticket';
-
-  // Lanzar cuadro de diálogo de impresión
   window.print();
 
-  // Restaurar vista de pantalla
   setTimeout(() => {
     document.body.className = '';
+    // Limpiar formulario venta
+    itemsVenta = [];
+    renderizarVenta();
+    document.getElementById('v-paciente').value = '';
+    document.getElementById('v-dni').value = '';
   }, 1000);
 }
 
-// ----------------------------------------------------
-// 2. IMPRIMIR RESULTADOS EN A4 / PDF
-// ----------------------------------------------------
+// Cargar Tabla de Órdenes del Día
+function cargarTablaOrdenes() {
+  const filtroFecha = document.getElementById('o-filtro-fecha').value;
+  const filtroPaciente = document.getElementById('o-filtro-paciente').value.toLowerCase();
+  const tbody = document.getElementById('o-lista');
+  tbody.innerHTML = '';
+
+  const filtradas = ordenes.filter(o => {
+    const coincideFecha = !filtroFecha || o.fecha === filtroFecha;
+    const coincidePaciente = !filtroPaciente || o.paciente.toLowerCase().includes(filtroPaciente) || o.dni.includes(filtroPaciente);
+    return coincideFecha && coincidePaciente;
+  });
+
+  filtradas.forEach(o => {
+    const listaExamenes = o.items.map(i => i.Nombre).join(', ');
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td><strong>#${String(o.num).padStart(4, '0')}</strong></td>
+      <td>${o.fecha}</td>
+      <td>${o.paciente}</td>
+      <td>${o.dni}</td>
+      <td><small>${listaExamenes}</small></td>
+      <td>S/ ${o.total.toFixed(2)}</td>
+      <td><button class="btn-action" onclick="cargarOrdenParaResultados(${o.num})">Ingresar Resultados</button></td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+// Cargar Órden para llenar Resultados
+function cargarOrdenParaResultados(numOrden) {
+  const orden = ordenes.find(o => o.num === numOrden);
+  if (!orden) return;
+
+  document.getElementById('r-paciente').value = orden.paciente;
+  document.getElementById('r-edad').value = orden.edad;
+  document.getElementById('r-sexo').value = orden.sexo;
+
+  const tbody = document.getElementById('r-lista');
+  tbody.innerHTML = '';
+
+  orden.items.forEach(item => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td><strong>${item.Nombre}</strong></td>
+      <td><input type="text" class="r-val" placeholder="Resultado"></td>
+      <td><input type="text" class="r-uni" placeholder="Unidad"></td>
+      <td><input type="text" class="r-ref" placeholder="Val. Referencial"></td>
+      <td><input type="text" class="r-met" placeholder="Método"></td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  // Cambiar directamente a pestaña de resultados
+  cambiarModulo('modulo-resultados');
+}
+
+// Imprimir PDF en Hoja A4
 function imprimirPDF() {
-  // Transferir datos del paciente
-  document.getElementById('a4-paciente').textContent = (document.getElementById('r-paciente').value || document.getElementById('v-paciente').value || '-').toUpperCase();
-  document.getElementById('a4-edad').textContent = document.getElementById('r-edad').value.toUpperCase() || '-';
-  document.getElementById('a4-doctor').textContent = (document.getElementById('r-doctor').value || 'A QUIEN CORRESPONDA').toUpperCase();
+  document.getElementById('a4-paciente').textContent = document.getElementById('r-paciente').value || '-';
+  document.getElementById('a4-edad').textContent = document.getElementById('r-edad').value || '-';
+  document.getElementById('a4-sexo').textContent = document.getElementById('r-sexo').value || '-';
+  document.getElementById('a4-doctor').textContent = document.getElementById('r-doctor').value || 'A QUIEN CORRESPONDA';
+  document.getElementById('a4-muestra').textContent = document.getElementById('r-muestra').value || 'SUERO';
   document.getElementById('a4-fecha').textContent = new Date().toLocaleDateString('es-PE');
 
-  // Llenar tabla A4 con los valores ingresados en los inputs
   const a4Items = document.getElementById('a4-items');
-  const filasResultados = document.querySelectorAll('#r-lista tr');
-
+  const filas = document.querySelectorAll('#r-lista tr');
   a4Items.innerHTML = '';
 
-  if (filasResultados.length === 0) {
-    alert('No hay resultados cargados para imprimir.');
+  if (filas.length === 0) {
+    alert('No hay exámenes cargados.');
     return;
   }
 
-  filasResultados.forEach(row => {
-    const nombre = row.cells[0].innerText;
-    const valor = row.querySelector('.r-val') ? row.querySelector('.r-val').value : '';
-    const unidad = row.querySelector('.r-uni') ? row.querySelector('.r-uni').value : '';
-    const ref = row.querySelector('.r-ref') ? row.querySelector('.r-ref').value : '';
+  filas.forEach(f => {
+    const nombre = f.cells[0].innerText;
+    const val = f.querySelector('.r-val').value;
+    const uni = f.querySelector('.r-uni').value;
+    const ref = f.querySelector('.r-ref').value;
+    const met = f.querySelector('.r-met').value;
 
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td><strong>${nombre}</strong></td>
-      <td>${valor}</td>
-      <td>${unidad}</td>
-      <td>${ref}</td>
+    a4Items.innerHTML += `
+      <tr>
+        <td><strong>${nombre}</strong></td>
+        <td>${val}</td>
+        <td>${uni}</td>
+        <td>${ref}</td>
+        <td>${met}</td>
+      </tr>
     `;
-    a4Items.appendChild(tr);
   });
 
-  // Activar clase CSS exclusiva para Hoja A4
   document.body.className = 'modo-impresion-a4';
-
-  // Lanzar ventana de impresión
   window.print();
 
-  // Restaurar vista de pantalla
   setTimeout(() => {
     document.body.className = '';
   }, 1000);
