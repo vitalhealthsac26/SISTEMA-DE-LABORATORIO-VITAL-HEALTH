@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Sistema de Laboratorio - Vital Health</title>
   <link rel="stylesheet" href="styles.css">
 </head>
@@ -13,9 +13,9 @@
     <header class="main-header">
       <h1>CENTRO MÉDICO VITAL HEALTH</h1>
       <div class="tabs">
-        <button class="tab-btn active" onclick="cambiarModulo('modulo-venta', event)">1. Recepción y Cobro (Ticket)</button>
+        <button class="tab-btn active" onclick="cambiarModulo('modulo-venta', event)">1. Recepción y Cobro</button>
         <button class="tab-btn" onclick="cambiarModulo('modulo-ordenes', event)">2. Órdenes del Día</button>
-        <button class="tab-btn" onclick="cambiarModulo('modulo-resultados', event)">3. Resultados (A4 / PDF)</button>
+        <button class="tab-btn" onclick="cambiarModulo('modulo-resultados', event)">3. Resultados</button>
         <button class="tab-btn" onclick="cambiarModulo('modulo-plantillas', event)">4. Configurar Plantillas</button>
       </div>
     </header>
@@ -45,16 +45,19 @@
       <div class="card">
         <h2>Agregar Exámenes</h2>
         <div class="search-container">
-          <input type="text" id="v-buscar" placeholder="Buscar examen..." autocomplete="off">
+          <input type="text" id="v-buscar" placeholder="Escriba para buscar examen..." autocomplete="off">
           <div id="v-sugerencias" class="dropdown-list"></div>
         </div>
 
-        <table>
-          <thead>
-            <tr><th>Examen / Prueba</th><th>Precio (S/)</th><th>Acción</th></tr>
-          </thead>
-          <tbody id="v-lista"></tbody>
-        </table>
+        <div class="table-responsive">
+          <table>
+            <thead>
+              <tr><th>Examen / Prueba</th><th>Precio (S/)</th><th>Acción</th></tr>
+            </thead>
+            <tbody id="v-lista"></tbody>
+          </table>
+        </div>
+
         <div class="total-bar">
           <h3>Total: S/ <span id="v-total">0.00</span></h3>
           <button class="btn-print-ticket" onclick="guardarYEmitirTicket()">Guardar e Imprimir Ticket</button>
@@ -70,28 +73,30 @@
           <div><label>Filtrar por Fecha:</label><input type="date" id="o-filtro-fecha" onchange="cargarTablaOrdenes()"></div>
           <div><label>Buscar Paciente o DNI:</label><input type="text" id="o-filtro-paciente" placeholder="Buscar..." onkeyup="cargarTablaOrdenes()"></div>
         </div>
-        <table>
-          <thead>
-            <tr>
-              <th>N° Órden</th>
-              <th>Fecha</th>
-              <th>Paciente</th>
-              <th>DNI</th>
-              <th>Exámenes</th>
-              <th>Total</th>
-              <th>Estado</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-          <tbody id="o-lista"></tbody>
-        </table>
+        <div class="table-responsive">
+          <table>
+            <thead>
+              <tr>
+                <th>N° Órden</th>
+                <th>Fecha</th>
+                <th>Paciente</th>
+                <th>DNI</th>
+                <th>Exámenes</th>
+                <th>Total</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="o-lista"></tbody>
+          </table>
+        </div>
       </div>
     </main>
 
     <!-- MÓDULO 3: RESULTADOS -->
     <main id="modulo-resultados" class="modulo">
       <div class="card">
-        <h2>Ingreso / Edición de Resultados <span id="r-num-orden-title" style="color:#0056b3;"></span></h2>
+        <h2>Ingreso de Resultados <span id="r-num-orden-title" style="color:#0056b3;"></span></h2>
         <input type="hidden" id="r-orden-num">
         <div class="grid-3">
           <div><label>Paciente:</label><input type="text" id="r-paciente"></div>
@@ -103,10 +108,10 @@
           <div><label>Muestra / Tipo:</label><input type="text" id="r-muestra" value="SUERO / SANGRE TOTAL"></div>
         </div>
         
-        <h3 style="margin-top:20px;">Resultados y Orden de Exámenes</h3>
+        <h3 style="margin-top:20px; color:#0056b3;">Resultados de Exámenes</h3>
         <div id="r-lista-examenes"></div>
         <br>
-        <div style="display:flex; gap:15px;">
+        <div class="btn-container-flex">
           <button class="btn-save" onclick="guardarResultadosOrden()">💾 Guardar Resultados</button>
           <button class="btn-print-pdf" onclick="imprimirResultadosPDF()">🖨️ Imprimir / Descargar A4 (PDF)</button>
         </div>
@@ -117,33 +122,37 @@
     <main id="modulo-plantillas" class="modulo">
       <div class="card">
         <h2>Configurar Plantillas de Exámenes</h2>
-        <p>Añada o modifique los parámetros y valores por defecto para no modificar el código manualmente.</p>
         <div class="grid-2" style="margin-bottom:15px;">
           <div>
             <label>Seleccionar Examen a Configurar:</label>
             <select id="p-select-examen" onchange="cargarPlantillaParaEditar()"></select>
           </div>
-          <div style="display:flex; align-items:flex-end; gap:10px;">
-            <input type="text" id="p-nuevo-examen" placeholder="Nombre nuevo examen...">
-            <button class="btn-action" style="padding:10px;" onclick="crearNuevaPlantilla()">+ Crear Examen</button>
+          <div style="display:flex; flex-direction:column; justify-content:flex-end; gap:5px;">
+            <label>Crear Nuevo Examen:</label>
+            <div style="display:flex; gap:5px;">
+              <input type="text" id="p-nuevo-examen" placeholder="Nombre nuevo examen...">
+              <button class="btn-action" style="white-space:nowrap;" onclick="crearNuevaPlantilla()">+ Crear</button>
+            </div>
           </div>
         </div>
 
-        <table>
-          <thead>
-            <tr>
-              <th style="width:25%;">Parámetro / Analito</th>
-              <th style="width:15%;">Unidad</th>
-              <th style="width:30%;">Valores Referenciales</th>
-              <th style="width:20%;">Método</th>
-              <th style="width:10%;">Acción</th>
-            </tr>
-          </thead>
-          <tbody id="p-lista-parametros"></tbody>
-        </table>
+        <div class="table-responsive">
+          <table>
+            <thead>
+              <tr>
+                <th style="min-width:150px;">Parámetro / Analito</th>
+                <th style="min-width:100px;">Unidad</th>
+                <th style="min-width:180px;">Valores Referenciales</th>
+                <th style="min-width:150px;">Método</th>
+                <th style="width:50px;">Acción</th>
+              </tr>
+            </thead>
+            <tbody id="p-lista-parametros"></tbody>
+          </table>
+        </div>
         <br>
-        <div style="display:flex; gap:10px;">
-          <button class="btn-action" onclick="agregarFilaParametro()">+ Agregar Parámetro</button>
+        <div class="btn-container-flex">
+          <button class="btn-action" onclick="agregarFilaParametro()" style="padding:12px;">+ Agregar Parámetro</button>
           <button class="btn-save" onclick="guardarPlantillaActual()">💾 Guardar Cambios de Plantilla</button>
         </div>
       </div>
@@ -220,7 +229,7 @@
       </div>
     </div>
 
-    <!-- CONTENEDOR DE LAS TABLAS INDEPENDIENTES DE EXÁMENES -->
+    <!-- CONTENEDOR DE TABLAS INDEPENDIENTES DE EXÁMENES -->
     <div id="a4-container-examenes"></div>
 
     <div class="a4-footer">
