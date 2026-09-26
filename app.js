@@ -79,11 +79,14 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 /* ========================================================
-   FUNCIÓN DE CONSULTA DNI (CON SOPORTE MULTI-API Y CORS)
+   FUNCIÓN DE CONSULTA DNI AUTOMÁTICA (NOMBRE, SEXO, FECHA NAC Y EDAD)
    ======================================================== */
 async function consultarDNI() {
   const inputDni = document.getElementById('v-dni');
   const inputPaciente = document.getElementById('v-paciente');
+  const inputFnac = document.getElementById('v-fnac');
+  const inputSexo = document.getElementById('v-sexo');
+
   const dni = inputDni.value.trim();
 
   if (dni.length !== 8 || isNaN(dni)) {
@@ -94,38 +97,68 @@ async function consultarDNI() {
   const textoAnterior = inputPaciente.value;
   inputPaciente.value = "Consultando RENIEC...";
 
+  // 1. API Primaria con CORS habilitado y datos completos (Nombres, Apellidos, Sexo, Fecha Nac)
+  const urlPrimary = `https://api.dni.pe/dni/${dni}`;
+  
+  // 2. API Secundarias de respaldo usando Proxies CORS para evitar bloqueos en GitHub Pages
+  const proxyCors = 'https://corsproxy.io/?';
+  const urlSecondary = encodeURI(`https://api.apis.net.pe/v1/dni?numero=${dni}`);
+
   try {
-    // Intento 1: API pública sin bloqueo CORS
-    const response = await fetch(`https://dniruc.apisperu.com/api/v1/dni/${dni}?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjo2NTcwfQ.sample_token_disabled`);
-    if (response.ok) {
+    // Intento 1: API Directa
+    let response = await fetch(urlPrimary).catch(() => null);
+    
+    if (response && response.ok) {
       const data = await response.json();
-      if (data.nombres) {
-        inputPaciente.value = `${data.nombres} ${data.apellidoPaterno} ${data.apellidoMaterno}`.toUpperCase();
-        return;
-      }
-    }
-    
-    // Intento 2: API Secundaria vía Proxy CORS (evita el bloqueo en GitHub Pages)
-    const proxyUrl = 'https://api.allorigins.win/get?url=';
-    const targetUrl = encodeURIComponent(`https://api.apis.net.pe/v1/dni?numero=${dni}`);
-    
-    const resProxy = await fetch(proxyUrl + targetUrl);
-    if (resProxy.ok) {
-      const wrapper = await resProxy.json();
-      const data = JSON.parse(wrapper.contents);
-      if (data.nombre) {
-        inputPaciente.value = data.nombre.toUpperCase();
-        return;
-      } else if (data.nombres) {
-        inputPaciente.value = `${data.nombres} ${data.apellidoPaterno} ${data.apellidoMaterno}`.toUpperCase();
+      
+      if (data.nombres || data.nombre) {
+        const nombres = data.nombres || data.nombre;
+        const apePaterno = data.apellidoPaterno || data.apellido_paterno || '';
+        const apeMaterno = data.apellidoMaterno || data.apellido_materno || '';
+        
+        inputPaciente.value = `${nombres} ${apePaterno} ${apeMaterno}`.trim().toUpperCase();
+
+        // Autocompletar Sexo si viene en la respuesta
+        if (data.sexo) {
+          const sexoUpper = String(data.sexo).toUpperCase();
+          if (sexoUpper.startsWith('M') || sexoUpper === 'MASCULINO') {
+            inputSexo.value = 'MASCULINO';
+          } else if (sexoUpper.startsWith('F') || sexoUpper === 'FEMENINO') {
+            inputSexo.value = 'FEMENINO';
+          }
+        }
+
+        // Autocompletar Fecha Nacimiento y Calcular Edad
+        if (data.fechaNacimiento || data.fecha_nacimiento) {
+          const rawFecha = data.fechaNacimiento || data.fecha_nacimiento;
+          let fechaFormatted = rawFecha;
+          if (rawFecha.includes('/')) {
+            const parts = rawFecha.split('/');
+            if (parts.length === 3) fechaFormatted = `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
+          }
+          inputFnac.value = fechaFormatted;
+          calcularEdad(); // Ejecuta directamente el cálculo
+        }
         return;
       }
     }
 
-    throw new Error('Servicios no disponibles');
+    // Intento 2: Proxy de respaldo si falla la primaria
+    let resProxy = await fetch(proxyCors + encodeURIComponent(urlSecondary));
+    if (resProxy.ok) {
+      const data = await resProxy.json();
+      if (data.nombre || data.nombres) {
+        const nombreCompleto = data.nombre || `${data.nombres} ${data.apellidoPaterno} ${data.apellidoMaterno}`;
+        inputPaciente.value = nombreCompleto.toUpperCase();
+        return;
+      }
+    }
+
+    throw new Error('No se pudo obtener la información automáticamente.');
+
   } catch (error) {
-    console.warn('Consulta RENIEC no completada. Permitiendo ingreso manual:', error);
-    // En caso de fallo no borra lo que haya ni lanza alertas invasivas
+    console.warn('Consulta RENIEC no completada:', error);
+    alert('No se pudo obtener los datos automáticamente. Por favor ingréselos manualmente.');
     inputPaciente.value = (textoAnterior === "Consultando RENIEC...") ? '' : textoAnterior;
     inputPaciente.focus();
   }
