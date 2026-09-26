@@ -28,7 +28,7 @@ document.addEventListener('DOMContentLoaded', () => {
     actualizarControlCaja();
 });
 
-// Toggle para Menú Responsivo Móvil
+// Toggle para menú móvil
 function toggleSidebar() {
     document.getElementById('sidebar').classList.toggle('active');
     document.getElementById('sidebar-overlay').classList.toggle('active');
@@ -83,7 +83,7 @@ function calcularEdad() {
     document.getElementById('pac-edad').value = `${edad} AÑOS`;
 }
 
-// CONSULTA DNI CON API EXTERNA RENIEC + HISTORIAL
+// CONSULTA AUTOMÁTICA DNI (RENIEC / API + HISTORIAL LOCAL)
 async function buscarPaciente() {
     const dniInput = document.getElementById('pac-dni');
     const dni = dniInput.value.trim();
@@ -100,25 +100,23 @@ async function buscarPaciente() {
         return;
     }
 
-    // 2. Consulta a API de RENIEC para autocompletar nombres
+    // 2. Consulta a API para autocompletar desde RENIEC
     const btnText = document.getElementById('btn-text');
     btnText.innerText = 'Buscando...';
 
     try {
-        // Intento 1: API Gratuita de RENIEC
         const response = await fetch(`https://api.apis.net.pe/v1/dni?numero=${dni}`);
         if (response.ok) {
             const data = await response.json();
             const nombreCompleto = `${data.nombres} ${data.apellidoPaterno} ${data.apellidoMaterno}`.trim();
             document.getElementById('pac-nombre').value = nombreCompleto;
         } else {
-            // Intento 2 (Fallback)
             const resFallback = await fetch(`https://dniruc.apisperu.com/api/v1/dni/${dni}`);
             if (resFallback.ok) {
                 const data2 = await resFallback.json();
                 document.getElementById('pac-nombre').value = data2.nombre || `${data2.nombres} ${data2.apellidoPaterno}`;
             } else {
-                alert('No se pudo consultar el DNI automáticamente. Puede continuar ingresando los datos manualmente.');
+                alert('No se pudo consultar el DNI automáticamente. Ingrese los datos manualmente.');
             }
         }
     } catch (error) {
