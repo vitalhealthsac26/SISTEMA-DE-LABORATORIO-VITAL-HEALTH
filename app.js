@@ -11,26 +11,26 @@ const db = (typeof firebase !== 'undefined') ? firebase.database() : null;
 // Catálogo base con plantillas
 let catalogoExamenes = [
     {
-        codigo: 'EX001',
-        nombre: 'ÁCIDO ÚRICO',
-        precio: 25.00,
+        codigo: '5',
+        nombre: '11 - DESOXICORTISOL (COMPUESTOS)',
+        precio: 475.00,
         muestra: 'Suero',
-        unidad: 'mg/dL',
-        refMin: '2.50',
-        refMax: '7.00',
-        refTexto: '',
-        metodo: 'Colorimétrico enzimático o Espectrofotometría EC9200'
-    },
-    {
-        codigo: 'EX002',
-        nombre: 'HEMOGLOBINA GLICOSILADA (HbA1c)',
-        precio: 50.00,
-        muestra: 'Sangre',
-        unidad: '%',
+        unidad: 'ng/dL',
         refMin: '',
         refMax: '',
-        refTexto: 'Normal: Menos del 5.7%\nPrediabetes: 5.7- 6.4%\nDiabetes: 6.5% a más',
-        metodo: 'Inmunoturbidimetría'
+        refTexto: '',
+        metodo: 'Estándar'
+    },
+    {
+        codigo: '6',
+        nombre: '17 - HIDROXICORTICOIDES (ORINA 24H)',
+        precio: 100.00,
+        muestra: 'Suero',
+        unidad: 'mg/24h',
+        refMin: '',
+        refMax: '',
+        refTexto: '',
+        metodo: 'Estándar'
     }
 ];
 
@@ -49,6 +49,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     cargarOrdenes();
     actualizarControlCaja();
     renderizarTablaCatalogo();
+
+    // Cerrar desplegable si se hace clic fuera del buscador
+    document.addEventListener('click', (e) => {
+        const drop = document.getElementById('cat-dropdown-sugerencias');
+        const searchInput = document.getElementById('cat-search-input');
+        if (drop && !drop.contains(e.target) && e.target !== searchInput) {
+            drop.style.display = 'none';
+        }
+    });
 });
 
 async function cargarProductosJSON() {
@@ -75,7 +84,7 @@ async function cargarProductosJSON() {
                     refMin: prod.refMin || '',
                     refMax: prod.refMax || '',
                     refTexto: prod.refTexto || '',
-                    metodo: prod.metodo || ''
+                    metodo: prod.metodo || 'Estándar'
                 }));
                 guardarCatalogoLocal();
             }
@@ -247,6 +256,45 @@ function eliminarExamen(index) {
     renderExamenes();
 }
 
+// FUNCIONALIDAD DE BUSCADOR CON DESPLEGABLE EN CATÁLOGO / PLANTILLAS
+function filtrarExamenesEditar(texto) {
+    const container = document.getElementById('cat-dropdown-sugerencias');
+    container.innerHTML = '';
+    const busqueda = texto.trim().toLowerCase();
+
+    if (!busqueda) {
+        container.style.display = 'none';
+        return;
+    }
+
+    const filtrados = catalogoExamenes.filter(e => 
+        e.codigo.toLowerCase().includes(busqueda) || 
+        e.nombre.toLowerCase().includes(busqueda)
+    ).slice(0, 12); // Mostrar hasta 12 opciones
+
+    if (filtrados.length === 0) {
+        container.innerHTML = '<div class="list-group-item text-muted">No se encontraron exámenes</div>';
+        container.style.display = 'block';
+        return;
+    }
+
+    filtrados.forEach(ex => {
+        const item = document.createElement('a');
+        item.className = 'list-group-item list-group-item-action d-flex justify-content-between align-items-center';
+        item.innerHTML = `
+            <span><strong>[${ex.codigo}]</strong> ${ex.nombre}</span>
+            <span class="badge bg-light text-primary border">S/ ${ex.precio.toFixed(2)}</span>
+        `;
+        item.onclick = () => {
+            seleccionarExamenParaEditar(ex.codigo);
+            container.style.display = 'none';
+        };
+        container.appendChild(item);
+    });
+
+    container.style.display = 'block';
+}
+
 function renderizarTablaCatalogo(filtro = '') {
     const tbody = document.getElementById('tabla-catalogo-body');
     const countEl = document.getElementById('total-cat-count');
@@ -271,7 +319,6 @@ function renderizarTablaCatalogo(filtro = '') {
         const tr = document.createElement('tr');
         tr.style.cursor = 'pointer';
         tr.onclick = (e) => {
-            // Si hace clic en la papelera no selecciona
             if (e.target.closest('button')) return;
             seleccionarExamenParaEditar(ex.codigo);
         };
@@ -294,7 +341,7 @@ function renderizarTablaCatalogo(filtro = '') {
 }
 
 function seleccionarExamenParaEditar(codigo) {
-    const ex = catalogoExamenes.find(e => e.codigo === codigo);
+    const ex = catalogoExamenes.find(e => e.codigo === String(codigo));
     if (!ex) return;
     cargarDatosEnFormularioCatalogo(ex);
 }
@@ -311,14 +358,18 @@ function cargarDatosEnFormularioCatalogo(ex) {
     document.getElementById('cat-ref-texto').value = ex.refTexto || '';
     document.getElementById('cat-metodo').value = ex.metodo || '';
 
+    // Colocar el nombre del examen en la caja de búsqueda
+    document.getElementById('cat-search-input').value = `[${ex.codigo}] ${ex.nombre}`;
+
     document.getElementById('catalogo-form-titulo').innerHTML = `<i class="bi bi-pencil-square me-2"></i>Editando: ${ex.nombre}`;
     document.getElementById('btn-guardar-cat').innerHTML = '<i class="bi bi-check-circle me-1"></i>Guardar Cambios del Examen';
 }
 
 function prepararNuevoExamen() {
     document.getElementById('form-catalogo').reset();
+    document.getElementById('cat-search-input').value = '';
     document.getElementById('cat-id-original').value = ''; // Vacío indica que es NUEVO
-    const nuevoCodigo = 'EX-' + String(catalogoExamenes.length + 100);
+    const nuevoCodigo = String(catalogoExamenes.length + 100);
     document.getElementById('cat-codigo').value = nuevoCodigo;
     document.getElementById('catalogo-form-titulo').innerHTML = '<i class="bi bi-plus-circle me-2"></i>Crear Nuevo Examen';
     document.getElementById('btn-guardar-cat').innerHTML = '<i class="bi bi-save me-1"></i>Registrar Nuevo Examen';
@@ -368,7 +419,7 @@ function guardarExamenCatalogo() {
 
 function eliminarExamenCatalogo(codigo) {
     if (confirm(`¿Desea eliminar del catálogo el examen con código ${codigo}?`)) {
-        catalogoExamenes = catalogoExamenes.filter(e => e.codigo !== codigo);
+        catalogoExamenes = catalogoExamenes.filter(e => e.codigo !== String(codigo));
         guardarCatalogoLocal();
         renderizarTablaCatalogo();
         if (catalogoExamenes.length > 0) {
