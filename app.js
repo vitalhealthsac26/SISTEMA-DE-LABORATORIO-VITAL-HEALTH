@@ -4,9 +4,13 @@ const firebaseConfig = {
 };
 
 if (typeof firebase !== 'undefined' && !firebase.apps.length) {
-    firebase.initializeApp(firebaseConfig);
+    try {
+        firebase.initializeApp(firebaseConfig);
+    } catch (e) {
+        console.warn("Error inicializando Firebase:", e);
+    }
 }
-const db = (typeof firebase !== 'undefined') ? firebase.database() : null;
+const db = (typeof firebase !== 'undefined' && firebase.apps.length) ? firebase.database() : null;
 
 // Catálogo base predeterminado de respaldo
 let catalogoExamenes = [
@@ -172,12 +176,12 @@ function guardarEnNubeYLocal() {
 
 function showSection(sectionId) {
     document.querySelectorAll('.section-content').forEach(el => el.classList.add('d-none'));
-    document.querySelectorAll('.nav-link').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.sidebar .nav-link').forEach(el => el.classList.remove('active'));
     
     const sec = document.getElementById(`sec-${sectionId}`);
     if (sec) sec.classList.remove('d-none');
     
-    const activeNav = document.querySelector(`.nav-link[onclick*="'${sectionId}'"]`);
+    const activeNav = document.querySelector(`.sidebar .nav-link[onclick*="'${sectionId}'"]`);
     if (activeNav) activeNav.classList.add('active');
 
     if (window.innerWidth < 768) {
@@ -843,15 +847,14 @@ function generarTablaEspecializada(ex, catEx, orden) {
         params.forEach((p, idx) => {
             const resKey = `${ex.codigo}_${idx}`;
             const resData = (orden.resultados && orden.resultados[resKey]) ? orden.resultados[resKey] : {};
+            const refVal = p.refTexto ? p.refTexto : `${p.refMin || '-'} - ${p.refMax || '-'}`;
 
             filasHTML += `
                 <tr>
                     <td style="padding: 8px; border: 1px solid #cbd5e1; font-weight:bold; text-align:left;">${p.nombre}</td>
                     <td style="padding: 8px; border: 1px solid #cbd5e1; font-weight:bold; text-align:center; font-size:13px;">${resData.resultado || '-'}</td>
                     <td style="padding: 8px; border: 1px solid #cbd5e1; text-align:center;">${p.unidad || ''}</td>
-                    <td style="padding: 8px; border: 1px solid #cbd5e1; text-align:left; font-size:10px;">
-                        ${p.refTexto ? p.refTexto : `${p.refMin \vert{}\vert{} '-'} -${p.refMax || '-'}`}
-                    </td>
+                    <td style="padding: 8px; border: 1px solid #cbd5e1; text-align:left; font-size:10px;">${refVal}</td>
                     <td style="padding: 8px; border: 1px solid #cbd5e1; text-align:center; font-style:italic; font-size:10px;">${catEx.metodo || 'Colorimétrico'}</td>
                 </tr>
             `;
