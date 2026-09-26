@@ -67,11 +67,11 @@ document.addEventListener('DOMContentLoaded', () => {
   cargarTablaOrdenes();
   pobladorSelectPlantillas();
 
-  // Escuchar tecla Enter o autocompletar al llegar a 8 dígitos en el campo DNI
   const inputDni = document.getElementById('v-dni');
   if (inputDni) {
-    inputDni.addEventListener('keyup', (e) => {
-      if (e.key === 'Enter' || inputDni.value.trim().length === 8) {
+    inputDni.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
         consultarDNI();
       }
     });
@@ -79,7 +79,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 /* ========================================================
-   FUNCIÓN DE CONSULTA RENIEC VÍA API (PERÚ)
+   FUNCIÓN DE CONSULTA DNI (CON SOPORTE MULTI-API Y CORS)
    ======================================================== */
 async function consultarDNI() {
   const inputDni = document.getElementById('v-dni');
@@ -91,38 +91,43 @@ async function consultarDNI() {
     return;
   }
 
+  const textoAnterior = inputPaciente.value;
   inputPaciente.value = "Consultando RENIEC...";
 
-  // Token predeterminado para pruebas (reemplazar por token de producción si aplica)
-  const token = 'apisnet_testing'; 
-  const url = `https://api.apis.net.pe/v2/reniec/dni?numero=${dni}`;
-
   try {
-    const response = await fetch(url, {
-      method: 'GET',
-      headers: {
-        'Referer': 'https://apis.net.pe/consulta-dni-api',
-        'Authorization': `Bearer ${token}`
+    // Intento 1: API pública sin bloqueo CORS
+    const response = await fetch(`https://dniruc.apisperu.com/api/v1/dni/${dni}?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjo2NTcwfQ.sample_token_disabled`);
+    if (response.ok) {
+      const data = await response.json();
+      if (data.nombres) {
+        inputPaciente.value = `${data.nombres} ${data.apellidoPaterno} ${data.apellidoMaterno}`.toUpperCase();
+        return;
       }
-    });
-
-    if (!response.ok) {
-      throw new Error('DNI no encontrado o límite de consultas superado.');
+    }
+    
+    // Intento 2: API Secundaria vía Proxy CORS (evita el bloqueo en GitHub Pages)
+    const proxyUrl = 'https://api.allorigins.win/get?url=';
+    const targetUrl = encodeURIComponent(`https://api.apis.net.pe/v1/dni?numero=${dni}`);
+    
+    const resProxy = await fetch(proxyUrl + targetUrl);
+    if (resProxy.ok) {
+      const wrapper = await resProxy.json();
+      const data = JSON.parse(wrapper.contents);
+      if (data.nombre) {
+        inputPaciente.value = data.nombre.toUpperCase();
+        return;
+      } else if (data.nombres) {
+        inputPaciente.value = `${data.nombres} ${data.apellidoPaterno} ${data.apellidoMaterno}`.toUpperCase();
+        return;
+      }
     }
 
-    const data = await response.json();
-
-    if (data.nombres) {
-      const nombreCompleto = `${data.nombres} ${data.apellidoPaterno} ${data.apellidoMaterno}`;
-      inputPaciente.value = nombreCompleto.toUpperCase();
-    } else {
-      alert('No se encontraron datos para el DNI ingresado.');
-      inputPaciente.value = '';
-    }
+    throw new Error('Servicios no disponibles');
   } catch (error) {
-    console.error('Error al consultar DNI:', error);
-    alert('No se pudo obtener el nombre automáticamente. Por favor ingréselo manualmente.');
-    inputPaciente.value = '';
+    console.warn('Consulta RENIEC no completada. Permitiendo ingreso manual:', error);
+    // En caso de fallo no borra lo que haya ni lanza alertas invasivas
+    inputPaciente.value = (textoAnterior === "Consultando RENIEC...") ? '' : textoAnterior;
+    inputPaciente.focus();
   }
 }
 
@@ -559,7 +564,6 @@ function imprimirResultadosPDF() {
     });
   }
 
-  // Generación/Impresión del documento PDF
   if (typeof html2pdf !== 'undefined') {
     const elemento = document.getElementById('print-a4');
     elemento.style.display = 'block';
