@@ -9,7 +9,7 @@ if (typeof firebase !== 'undefined' && !firebase.apps.length) {
 const db = (typeof firebase !== 'undefined') ? firebase.database() : null;
 
 // Catálogo base de exámenes
-const catalogoExamenes = [
+let catalogoExamenes = [
     { codigo: 'EX001', nombre: 'HEMOGRAMA COMPLETO', precio: 25.00 },
     { codigo: 'EX002', nombre: 'PERFIL LIPÍDICO: Colesterol Total, Triglicéridos, HDL, LDL', precio: 50.00 },
     { codigo: 'EX003', nombre: 'PERFIL DE COAGULACIÓN', precio: 130.00 },
@@ -22,11 +22,42 @@ let ordenesLocales = JSON.parse(localStorage.getItem('vitalhealth_ordenes')) || 
 let ordenActualVisualizando = null;
 
 document.addEventListener('DOMContentLoaded', () => {
-    document.getElementById('current-date').innerText = new Date().toLocaleDateString('es-PE', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+    const dateEl = document.getElementById('current-date');
+    if (dateEl) {
+        dateEl.innerText = new Date().toLocaleDateString('es-PE', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+    }
+    cargarProductosJSON();
     escucharSincronizacion();
     cargarOrdenes();
     actualizarControlCaja();
 });
+
+// Cargar catálogo de exámenes desde productos.json
+async function cargarProductosJSON() {
+    try {
+        const response = await fetch('productos.json');
+        if (response.ok) {
+            const data = await response.json();
+            if (Array.isArray(data) && data.length > 0) {
+                // Mapeo flexible para adaptarse al formato del JSON
+                const productosCargados = data.map((prod, index) => ({
+                    codigo: prod.codigo || prod.id || `EX-${String(index + 1).padStart(3, '0')}`,
+                    nombre: (prod.nombre || prod.descripcion || prod.examen || '').toUpperCase(),
+                    precio: parseFloat(prod.precio || prod.costo || prod.precioUnitario || 0)
+                }));
+                
+                // Fusionar productos evitando duplicados por código
+                productosCargados.forEach(prod => {
+                    if (!catalogoExamenes.some(c => c.codigo === prod.codigo)) {
+                        catalogoExamenes.push(prod);
+                    }
+                });
+            }
+        }
+    } catch (error) {
+        console.warn('No se pudo cargar productos.json, utilizando catálogo predeterminado.', error);
+    }
+}
 
 // Toggle para menú móvil
 function toggleSidebar() {
@@ -60,7 +91,8 @@ function showSection(sectionId) {
     document.querySelectorAll('.section-content').forEach(el => el.classList.add('d-none'));
     document.querySelectorAll('.nav-link').forEach(el => el.classList.remove('active'));
     
-    document.getElementById(`sec-${sectionId}`).classList.remove('d-none');
+    const sec = document.getElementById(`sec-${sectionId}`);
+    if (sec) sec.classList.remove('d-none');
     
     if (window.innerWidth < 768) {
         document.getElementById('sidebar').classList.remove('active');
@@ -100,31 +132,47 @@ async function buscarPaciente() {
         return;
     }
 
-    // 2. Consulta a API para autocompletar desde RENIEC
+    // 2. Consulta a APIs externas de RENIEC
     const btnText = document.getElementById('btn-text');
-    btnText.innerText = 'Buscando...';
+    if (btnText) btnText.innerText = 'Buscando...';
 
+    let encontrado = false;
+
+    // Intento 1: API PeruDev
     try {
-        const response = await fetch(`https://api.apis.net.pe/v1/dni?numero=${dni}`);
+        const response = await fetch(`https://apiperu.dev/api/dni/${dni}`);
         if (response.ok) {
-            const data = await response.json();
-            const nombreCompleto = `${data.nombres} ${data.apellidoPaterno} ${data.apellidoMaterno}`.trim();
-            document.getElementById('pac-nombre').value = nombreCompleto;
-        } else {
-            const resFallback = await fetch(`https://dniruc.apisperu.com/api/v1/dni/${dni}`);
-            if (resFallback.ok) {
-                const data2 = await resFallback.json();
-                document.getElementById('pac-nombre').value = data2.nombre || `${data2.nombres} ${data2.apellidoPaterno}`;
-            } else {
-                alert('No se pudo consultar el DNI automáticamente. Ingrese los datos manualmente.');
+            const res = await response.json();
+            if (res.data) {
+                const nombreCompleto = `${res.data.nombres} ${res.data.apellido_paterno} ${res.data.apellido_materno}`.trim();
+                document.getElementById('pac-nombre').value = nombreCompleto;
+                encontrado = true;
             }
         }
-    } catch (error) {
-        console.warn('Error al consultar API RENIEC:', error);
-        alert('No se obtuvo respuesta de RENIEC. Por favor, ingrese el nombre manualmente.');
-    } finally {
-        btnText.innerText = 'Consultar';
+    } catch (e) {
+        console.warn('Falló intento 1 DNI:', e);
     }
+
+    // Intento 2: Fallback APISnet
+    if (!encontrado) {
+        try {
+            const response = await fetch(`https://api.apis.net.pe/v1/dni?numero=${dni}`);
+            if (response.ok) {
+                const data = await response.json();
+                const nombreCompleto = `${data.nombres} ${data.apellidoPaterno} ${data.apellidoMaterno}`.trim();
+                document.getElementById('pac-nombre').value = nombreCompleto;
+                encontrado = true;
+            }
+        } catch (e) {
+            console.warn('Falló intento 2 DNI:', e);
+        }
+    }
+
+    if (!encontrado) {
+        alert('No se obtuvo respuesta automática de RENIEC. Por favor, ingrese el nombre manualmente.');
+    }
+
+    if (btnText) btnText.innerText = 'Consultar';
 }
 
 function filtrarExamenes(texto) {
@@ -133,6 +181,7 @@ function filtrarExamenes(texto) {
     if (!texto.trim()) return;
 
     const filtrados = catalogoExamenes.filter(e => e.nombre.toLowerCase().includes(texto.toLowerCase()));
+    
     filtrados.forEach(ex => {
         const item = document.createElement('a');
         item.className = 'list-group-item list-group-item-action cursor-pointer';
@@ -277,6 +326,7 @@ function imprimirTicket58mm(orden) {
 
 function cargarOrdenes() {
     const tbody = document.getElementById('lista-ordenes-body');
+    if (!tbody) return;
     tbody.innerHTML = '';
 
     ordenesLocales.forEach((orden) => {
@@ -353,9 +403,11 @@ function guardarResultados() {
     if (!ordenActualVisualizando) return;
 
     ordenActualVisualizando.examenes.forEach(ex => {
-        const val = document.getElementById(`res-${ex.codigo}`).value;
-        if (!ordenActualVisualizando.resultados) ordenActualVisualizando.resultados = {};
-        ordenActualVisualizando.resultados[ex.codigo] = val;
+        const el = document.getElementById(`res-${ex.codigo}`);
+        if (el) {
+            if (!ordenActualVisualizando.resultados) ordenActualVisualizando.resultados = {};
+            ordenActualVisualizando.resultados[ex.codigo] = el.value;
+        }
     });
 
     ordenActualVisualizando.estado = 'COMPLETADO';
