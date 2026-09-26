@@ -85,6 +85,18 @@ body {
     z-index: 1030;
 }
 
+/* ESTILOS DE AUTOCOMPLETADO Y DESPLEGABLE */
+#cat-dropdown-sugerencias .list-group-item {
+    font-size: 0.88rem;
+    padding: 8px 12px;
+    cursor: pointer;
+}
+
+#cat-dropdown-sugerencias .list-group-item:hover {
+    background-color: #0072bc;
+    color: #ffffff;
+}
+
 /* RESPONSIVE DESIGN */
 @media (max-width: 767.98px) {
     .sidebar {
