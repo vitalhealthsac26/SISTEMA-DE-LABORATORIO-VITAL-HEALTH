@@ -5,6 +5,10 @@
     --bg-light: #f8fafc;
 }
 
+* {
+    box-sizing: border-box;
+}
+
 body {
     background-color: var(--bg-light);
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -19,6 +23,7 @@ body {
     min-height: 100vh;
 }
 
+/* SIDEBAR Y LOGO CONTROLADO */
 .sidebar {
     width: var(--sidebar-width);
     min-height: 100vh;
@@ -32,14 +37,30 @@ body {
     z-index: 1040;
 }
 
+.sidebar-header {
+    background-color: #09101d;
+}
+
+/* REGLA CRÍTICA PARA FIX DEL LOGO GIGANTE */
+.sidebar-logo {
+    max-width: 100% !important;
+    max-height: 70px !important;
+    height: auto !important;
+    width: auto !important;
+    object-fit: contain;
+    display: block;
+    margin: 0 auto 10px auto;
+}
+
 .sidebar .nav-link {
     color: #94a3b8;
-    padding: 14px 22px;
-    font-size: 0.95rem;
+    padding: 12px 20px;
+    font-size: 0.92rem;
     font-weight: 500;
     display: flex;
     align-items: center;
     text-decoration: none;
+    transition: background 0.2s;
 }
 
 .sidebar .nav-link:hover, .sidebar .nav-link.active {
@@ -47,10 +68,12 @@ body {
     background-color: var(--primary-color);
 }
 
+/* ÁREA DE CONTENIDO PRINCIPAL */
 .content-area {
     flex-grow: 1;
     padding: 20px;
     max-width: calc(100vw - var(--sidebar-width));
+    overflow-x: hidden;
 }
 
 #sidebar-overlay {
@@ -64,7 +87,8 @@ body {
     z-index: 1030;
 }
 
-@media (max-width: 767.98px) {
+/* AJUSTES RESPONSIVOS */
+@media (max-width: 991.98px) {
     .sidebar {
         position: fixed;
         left: -260px;
