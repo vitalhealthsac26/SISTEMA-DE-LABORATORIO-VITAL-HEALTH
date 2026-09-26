@@ -3,326 +3,237 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Centro Médico Vital Health - Sistema de Laboratorio</title>
-
-    <!-- Fuente Inter para tipografía médica moderna -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-
-    <!-- CSS Personalizado -->
+    <title>Centro Médico Vital Health - Sistema de Recepción</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <link rel="stylesheet" href="styles.css">
-
-    <!-- Librería html2pdf -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 </head>
 <body>
-
-<div class="app-container">
-
-    <!-- BARRA LATERAL -->
-    <aside class="sidebar">
-        <div class="sidebar-header">
-            <div class="logo-container">
-                <img src="logo.png" alt="Vital Health" class="logo" onerror="this.style.display='none'">
-                <div class="logo-fallback">🏥</div>
+    <div class="d-flex" id="wrapper">
+        <!-- Sidebar -->
+        <div class="sidebar" id="sidebar">
+            <div class="brand-section text-center py-4">
+                <img src="logo.png" alt="Vital Health" class="brand-logo mb-2" onerror="this.style.display='none'">
+                <h4 class="fw-bold mb-0">VITAL HEALTH</h4>
+                <small class="text-muted">CENTRO MÉDICO & LABORATORIO</small>
             </div>
-            <h1>VITAL HEALTH</h1>
-            <p>Centro Médico & Laboratorio</p>
+            <nav class="nav flex-column mt-3">
+                <a class="nav-link active" href="#" onclick="showSection('recepcion')">
+                    <i class="bi bi-person-badge"></i> Recepción
+                </a>
+                <a class="nav-link" href="#" onclick="showSection('ordenes')">
+                    <i class="bi bi-journal-text"></i> Órdenes
+                </a>
+                <a class="nav-link" href="#" onclick="showSection('resultados')">
+                    <i class="bi bi-journal-medical"></i> Resultados
+                </a>
+                <a class="nav-link" href="#" onclick="showSection('caja')">
+                    <i class="bi bi-cash-stack"></i> Control de Caja
+                </a>
+            </nav>
+            <div class="sidebar-footer p-3 text-muted">
+                <small><strong>Centro Médico Vital Health</strong><br>Av. Grau N° 1799<br>Veintiséis de Octubre - Piura<br>📱 984 089 927</small>
+            </div>
         </div>
 
-        <nav class="menu">
-            <button type="button" class="menu-item active" onclick="cambiarModulo('recepcion', this)">
-                <span class="icon">👤</span>
-                <span>Recepción</span>
-            </button>
-            <button type="button" class="menu-item" onclick="cambiarModulo('ordenes', this)">
-                <span class="icon">📋</span>
-                <span>Órdenes</span>
-            </button>
-            <button type="button" class="menu-item" onclick="cambiarModulo('resultados', this)">
-                <span class="icon">🧪</span>
-                <span>Resultados</span>
-            </button>
-            <button type="button" class="menu-item" onclick="cambiarModulo('plantillas', this)">
-                <span class="icon">⚙️</span>
-                <span>Plantillas</span>
-            </button>
-        </nav>
-
-        <div class="sidebar-footer">
-            <strong>Centro Médico Vital Health</strong>
-            <span>Av. Grau N° 1799</span>
-            <span>Veintiséis de Octubre - Piura</span>
-            <span class="phone">📱 984 089 927</span>
-        </div>
-    </aside>
-
-    <!-- CONTENIDO PRINCIPAL -->
-    <main class="main-content">
-
-        <!-- CABECERA PRINCIPAL -->
-        <header class="topbar">
-            <div>
-                <h2 id="tituloModulo">Recepción</h2>
-                <p id="subtituloModulo">Registro y atención de pacientes</p>
+        <!-- Content Area -->
+        <div class="content-area w-100" id="page-content-wrapper">
+            <!-- Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2 id="section-title" class="fw-bold mb-0">Recepción</h2>
+                    <p id="section-subtitle" class="text-muted mb-0">Registro y atención de pacientes</p>
+                </div>
+                <div class="date-badge bg-white px-3 py-2 rounded-3 shadow-sm text-secondary fw-semibold">
+                    <i class="bi bi-calendar3 me-2"></i><span id="current-date"></span>
+                </div>
             </div>
-            <div class="topbar-info">
-                <span id="fechaActual" class="badge-date"></span>
-            </div>
-        </header>
 
-        <!-- MÓDULO RECEPCIÓN -->
-        <section id="modulo-recepcion" class="module active-module">
-            
-            <!-- DATOS DEL PACIENTE -->
-            <div class="card">
-                <div class="card-header">
-                    <h3>👤 Datos del Paciente</h3>
-                    <p>Ingresa el DNI para consultar automáticamente en RENIEC o historial local.</p>
+            <!-- SECTION: RECEPCIÓN -->
+            <div id="sec-recepcion" class="section-content">
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-white py-3">
+                        <h5 class="mb-0 fw-bold text-primary"><i class="bi bi-person-fill me-2"></i>Datos del Paciente</h5>
+                        <small class="text-muted">Ingresa el DNI para consultar o registrar datos del paciente.</small>
+                    </div>
+                    <div class="card-body">
+                        <form id="form-paciente">
+                            <div class="row g-3">
+                                <div class="col-md-4">
+                                    <label class="form-label fw-semibold">DNI / Documento</label>
+                                    <div class="input-group">
+                                        <input type="text" id="pac-dni" class="form-control" placeholder="02878376" required>
+                                        <button class="btn btn-primary" type="button" onclick="buscarPaciente()"><i class="bi bi-search"></i> Consultar</button>
+                                    </div>
+                                </div>
+                                <div class="col-md-8">
+                                    <label class="form-label fw-semibold">Nombres y Apellidos</label>
+                                    <input type="text" id="pac-nombre" class="form-control" placeholder="Apellidos y Nombres completos" required>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label fw-semibold">Fecha de Nacimiento</label>
+                                    <input type="date" id="pac-fnac" class="form-control" onchange="calcularEdad()">
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label fw-semibold">Edad</label>
+                                    <input type="text" id="pac-edad" class="form-control bg-light" placeholder="0" readonly>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label fw-semibold">Sexo</label>
+                                    <select id="pac-sexo" class="form-select">
+                                        <option value="">Seleccionar</option>
+                                        <option value="MASCULINO">MASCULINO</option>
+                                        <option value="FEMENINO">FEMENINO</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
                 </div>
 
-                <div class="form-grid grid-4">
-                    <div class="form-group span-2">
-                        <label for="v-dni">DNI / Documento</label>
-                        <div class="input-button-group">
-                            <input type="text" id="v-dni" maxlength="8" inputmode="numeric" placeholder="Ingrese 8 dígitos" autocomplete="off">
-                            <button type="button" id="btnConsultarDNI" class="btn btn-primary" onclick="consultarDNI()">
-                                🔍 Consultar
-                            </button>
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-white py-3">
+                        <h5 class="mb-0 fw-bold text-primary"><i class="bi bi-eyedropper me-2"></i>Exámenes Solicitados</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Buscar examen individual</label>
+                                <input type="text" id="busqueda-examen" class="form-control" placeholder="Escribe el nombre del examen..." onkeyup="filtrarExamenes(this.value)">
+                                <div id="sugerencias-examenes" class="list-group position-absolute w-50 z-3"></div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Método de Pago</label>
+                                <select id="metodo-pago" class="form-select">
+                                    <option value="Efectivo">Efectivo</option>
+                                    <option value="Yape/Plin">Yape / Plin</option>
+                                    <option value="Tarjeta">Tarjeta de Débito/Crédito</option>
+                                </select>
+                            </div>
                         </div>
-                        <small id="dniMensaje" class="form-message"></small>
-                    </div>
 
-                    <div class="form-group span-2">
-                        <label for="v-paciente">Nombres y Apellidos</label>
-                        <input type="text" id="v-paciente" placeholder="Apellidos y Nombres completos">
-                    </div>
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle" id="tabla-examenes-seleccionados">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Código</th>
+                                        <th>Examen</th>
+                                        <th>Cant.</th>
+                                        <th>P. Unitario</th>
+                                        <th>Importe</th>
+                                        <th>Acción</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr id="empty-row"><td colspan="6" class="text-center text-muted">No hay exámenes agregados.</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
 
-                    <div class="form-group">
-                        <label for="v-fnac">Fecha de Nacimiento</label>
-                        <input type="date" id="v-fnac" onchange="calcularEdad()">
-                    </div>
-
-                    <div class="form-group">
-                        <label for="v-edad">Edad</label>
-                        <input type="number" id="v-edad" readonly placeholder="0">
-                    </div>
-
-                    <div class="form-group">
-                        <label for="v-sexo">Sexo</label>
-                        <select id="v-sexo">
-                            <option value="">Seleccionar</option>
-                            <option value="MASCULINO">Masculino</option>
-                            <option value="FEMENINO">Femenino</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
-
-            <!-- BÚSQUEDA Y SELECCIÓN DE EXÁMENES -->
-            <div class="card">
-                <div class="card-header">
-                    <h3>🧪 Exámenes Solicitados</h3>
-                    <p>Busca exámenes individualmente o carga un paquete predefinido.</p>
-                </div>
-
-                <div class="form-grid grid-2">
-                    <div class="form-group search-container">
-                        <label for="v-buscar">Buscar examen individual</label>
-                        <input type="text" id="v-buscar" placeholder="Escribe el nombre del examen..." autocomplete="off">
-                        <div id="v-resultados" class="search-results"></div>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="selectorPlantilla">Cargar plantilla rápida</label>
-                        <div class="input-button-group">
-                            <select id="selectorPlantilla">
-                                <option value="">Seleccionar plantilla...</option>
-                            </select>
-                            <button type="button" class="btn btn-secondary" onclick="cargarPlantillaEnVenta()">
-                                ⚡ Cargar
-                            </button>
+                        <div class="d-flex justify-content-end align-items-center mt-3 gap-3">
+                            <h4 class="mb-0">Total: S/ <span id="total-cobrar">0.00</span></h4>
+                            <button class="btn btn-success btn-lg" onclick="guardarOrdenGenerarTicket()"><i class="bi bi-printer-fill me-2"></i>Guardar e Imprimir Ticket</button>
                         </div>
                     </div>
                 </div>
-
-                <div class="table-container">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Código</th>
-                                <th>Examen</th>
-                                <th>Cant.</th>
-                                <th>P. Unitario</th>
-                                <th>Importe</th>
-                                <th class="text-center">Acción</th>
-                            </tr>
-                        </thead>
-                        <tbody id="v-lista">
-                            <!-- Filas dinámicas -->
-                        </tbody>
-                    </table>
-                </div>
-
-                <!-- RESUMEN DE VENTA -->
-                <div class="sale-summary">
-                    <div class="summary-item">
-                        <span>Subtotal:</span>
-                        <strong id="v-subtotal">S/ 0.00</strong>
-                    </div>
-
-                    <div class="summary-item input-item">
-                        <label for="v-descuento">Descuento (S/):</label>
-                        <input type="number" id="v-descuento" value="0" min="0" step="0.50" oninput="calcularTotalCobro()">
-                    </div>
-
-                    <div class="summary-item total-item">
-                        <span>Total Cobrar:</span>
-                        <strong id="v-total">S/ 0.00</strong>
-                    </div>
-                </div>
-
-                <div class="actions">
-                    <button type="button" class="btn btn-success btn-lg" onclick="guardarYEmitirTicket()">
-                        💾 Guardar y Generar Ticket
-                    </button>
-                    <button type="button" class="btn btn-outline" onclick="limpiarFormularioRecepcion()">
-                        🧹 Limpiar
-                    </button>
-                </div>
             </div>
-        </section>
 
-        <!-- MÓDULO ÓRDENES -->
-        <section id="modulo-ordenes" class="module">
-            <div class="card">
-                <div class="card-header header-flex">
-                    <div>
-                        <h3>📋 Historial de Órdenes</h3>
-                        <p>Gestión y seguimiento de órdenes de laboratorio registradas.</p>
+            <!-- SECTION: ÓRDENES -->
+            <div id="sec-ordenes" class="section-content d-none">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0 fw-bold"><i class="bi bi-journal-text me-2"></i>Historial de Órdenes</h5>
+                        <button class="btn btn-outline-primary btn-sm" onclick="cargarOrdenes()"><i class="bi bi-arrow-clockwise"></i> Actualizar</button>
                     </div>
-                    <button type="button" class="btn btn-secondary" onclick="cargarTablaOrdenes()">
-                        🔄 Actualizar
-                    </button>
-                </div>
-
-                <div class="form-group search-box">
-                    <input type="text" id="o-buscar" placeholder="🔍 Buscar por DNI, paciente o N° de orden..." oninput="cargarTablaOrdenes()">
-                </div>
-
-                <div class="table-container">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>N° Orden</th>
-                                <th>Fecha</th>
-                                <th>DNI</th>
-                                <th>Paciente</th>
-                                <th>Total</th>
-                                <th>Estado</th>
-                                <th class="text-center">Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody id="o-lista">
-                            <!-- Filas dinámicas -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </section>
-
-        <!-- MÓDULO RESULTADOS -->
-        <section id="modulo-resultados" class="module">
-            <div class="card">
-                <div class="card-header">
-                    <h3>🧪 Ingreso y Validación de Resultados</h3>
-                    <p>Busca una orden registrada para ingresar sus valores analíticos.</p>
-                </div>
-
-                <div class="form-group">
-                    <input type="text" id="r-buscar" placeholder="🔍 Buscar orden por DNI o paciente..." oninput="cargarTablaOrdenesResultados()">
-                </div>
-
-                <div id="r-lista" class="orders-selection-grid">
-                    <!-- Lista rápida de órdenes -->
-                </div>
-
-                <div id="panelResultados" class="results-panel">
-                    <div id="r-paciente" class="result-patient-header"></div>
-                    <div id="r-examenes" class="results-exams-container"></div>
-
-                    <div class="actions">
-                        <button type="button" class="btn btn-success btn-lg" onclick="guardarResultadosOrden()">
-                            💾 Guardar Resultados
-                        </button>
-                        <button type="button" class="btn btn-primary btn-lg" onclick="imprimirResultadosPDF()">
-                            📄 Generar e Imprimir PDF
-                        </button>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>N° Orden</th>
+                                        <th>Fecha</th>
+                                        <th>DNI</th>
+                                        <th>Paciente</th>
+                                        <th>Edad</th>
+                                        <th>Total</th>
+                                        <th>Estado</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="lista-ordenes-body"></tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
-        </section>
 
-        <!-- MÓDULO PLANTILLAS -->
-        <section id="modulo-plantillas" class="module">
-            <div class="card">
-                <div class="card-header header-flex">
-                    <div>
-                        <h3>⚙️ Configuración de Plantillas</h3>
-                        <p>Añade o modifica los parámetros de los exámenes de laboratorio.</p>
+            <!-- SECTION: RESULTADOS -->
+            <div id="sec-resultados" class="section-content d-none">
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-white py-3">
+                        <h5 class="mb-0 fw-bold"><i class="bi bi-file-earmark-medical me-2"></i>Ingreso y Visualización de Resultados</h5>
                     </div>
-                    <button type="button" class="btn btn-success" onclick="crearNuevaPlantilla()">
-                        ➕ Nueva Plantilla
-                    </button>
-                </div>
-
-                <div class="form-grid grid-2">
-                    <div class="form-group">
-                        <label for="selectorPlantillaEditar">Seleccionar examen / plantilla</label>
-                        <select id="selectorPlantillaEditar" onchange="cargarPlantillaParaEditar()">
-                            <option value="">Seleccionar...</option>
-                        </select>
+                    <div class="card-body">
+                        <div id="resultados-editor">
+                            <p class="text-muted">Seleccione una orden desde la sección "Órdenes" para cargar y editar los resultados.</p>
+                        </div>
                     </div>
-
-                    <div class="form-group">
-                        <label for="nombrePlantilla">Nombre de la Plantilla</label>
-                        <input type="text" id="nombrePlantilla" placeholder="Ej: HEMOGRAMA COMPLETO">
-                    </div>
-                </div>
-
-                <div class="table-container">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Parámetro</th>
-                                <th>Unidad</th>
-                                <th>Valores Referencia</th>
-                                <th>Método</th>
-                                <th class="text-center">Acción</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tablaParametrosPlantilla">
-                            <!-- Parámetros editables -->
-                        </tbody>
-                    </table>
-                </div>
-
-                <div class="actions">
-                    <button type="button" class="btn btn-secondary" onclick="agregarFilaParametro()">
-                        ➕ Agregar Parámetro
-                    </button>
-                    <button type="button" class="btn btn-success" onclick="guardarPlantillaActual()">
-                        💾 Guardar Plantilla
-                    </button>
                 </div>
             </div>
-        </section>
 
-    </main>
-</div>
+            <!-- SECTION: CONTROL DE CAJA -->
+            <div id="sec-caja" class="section-content d-none">
+                <div class="row g-3 mb-4">
+                    <div class="col-md-4">
+                        <div class="card border-0 bg-primary text-white shadow-sm p-3">
+                            <h6>Total Ingresos (Hoy)</h6>
+                            <h2 class="fw-bold mb-0">S/ <span id="caja-total-hoy">0.00</span></h2>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card border-0 bg-success text-white shadow-sm p-3">
+                            <h6>Efectivo</h6>
+                            <h2 class="fw-bold mb-0">S/ <span id="caja-efectivo">0.00</span></h2>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card border-0 bg-info text-white shadow-sm p-3">
+                            <h6>Digital (Yape/Plin/Tarjeta)</h6>
+                            <h2 class="fw-bold mb-0">S/ <span id="caja-digital">0.00</span></h2>
+                        </div>
+                    </div>
+                </div>
+                <div class="card shadow-sm">
+                    <div class="card-header bg-white py-3">
+                        <h5 class="mb-0 fw-bold"><i class="bi bi-receipt me-2"></i>Detalle de Transacciones del Día</h5>
+                    </div>
+                    <div class="card-body">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Hora/Fecha</th>
+                                    <th>N° Orden</th>
+                                    <th>Paciente</th>
+                                    <th>Método</th>
+                                    <th>Monto</th>
+                                </tr>
+                            </thead>
+                            <tbody id="caja-tabla-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
 
-<!-- JAVASCRIPT PRINCIPAL -->
-<script src="app.js"></script>
+        </div>
+    </div>
+
+    <!-- AREA DE IMPRESIÓN PARA TICKET DE 58MM -->
+    <div id="ticket-print-area"></div>
+
+    <script src="app.js"></script>
 </body>
 </html>
