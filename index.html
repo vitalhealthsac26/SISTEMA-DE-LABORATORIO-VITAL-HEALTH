@@ -14,6 +14,9 @@
 </head>
 <body>
     <div class="d-flex" id="wrapper">
+        <!-- Overlay para móvil -->
+        <div id="sidebar-overlay" onclick="toggleSidebar()"></div>
+
         <!-- Sidebar -->
         <div class="sidebar" id="sidebar">
             <div class="brand-section text-center py-4">
@@ -42,8 +45,16 @@
 
         <!-- Content Area -->
         <div class="content-area w-100" id="page-content-wrapper">
+            <!-- Mobile Header Controls -->
+            <div class="d-flex justify-content-between align-items-center mb-3 d-md-none">
+                <button class="btn btn-primary" onclick="toggleSidebar()">
+                    <i class="bi bi-list fs-5"></i> Menú
+                </button>
+                <span class="fw-bold text-primary">VITAL HEALTH</span>
+            </div>
+
             <!-- Header -->
-            <div class="d-flex justify-content-between align-items-center mb-4">
+            <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-2">
                 <div>
                     <h2 id="section-title" class="fw-bold mb-0">Recepción</h2>
                     <p id="section-subtitle" class="text-muted mb-0">Registro y atención de pacientes</p>
@@ -58,31 +69,33 @@
                 <div class="card shadow-sm mb-4">
                     <div class="card-header bg-white py-3">
                         <h5 class="mb-0 fw-bold text-primary"><i class="bi bi-person-fill me-2"></i>Datos del Paciente</h5>
-                        <small class="text-muted">Ingresa el DNI para consultar o registrar datos del paciente.</small>
+                        <small class="text-muted">Ingresa el DNI para consultar automáticamente en RENIEC o historial local.</small>
                     </div>
                     <div class="card-body">
-                        <form id="form-paciente">
+                        <form id="form-paciente" onsubmit="return false;">
                             <div class="row g-3">
-                                <div class="col-md-4">
+                                <div class="col-12 col-md-4">
                                     <label class="form-label fw-semibold">DNI / Documento</label>
                                     <div class="input-group">
-                                        <input type="text" id="pac-dni" class="form-control" placeholder="02878376" required>
-                                        <button class="btn btn-primary" type="button" onclick="buscarPaciente()"><i class="bi bi-search"></i> Consultar</button>
+                                        <input type="text" id="pac-dni" class="form-control" placeholder="02878376" maxlength="8" required>
+                                        <button class="btn btn-primary" type="button" id="btn-consultar-dni" onclick="buscarPaciente()">
+                                            <i class="bi bi-search"></i> <span id="btn-text">Consultar</span>
+                                        </button>
                                     </div>
                                 </div>
-                                <div class="col-md-8">
+                                <div class="col-12 col-md-8">
                                     <label class="form-label fw-semibold">Nombres y Apellidos</label>
                                     <input type="text" id="pac-nombre" class="form-control" placeholder="Apellidos y Nombres completos" required>
                                 </div>
-                                <div class="col-md-4">
+                                <div class="col-12 col-sm-4">
                                     <label class="form-label fw-semibold">Fecha de Nacimiento</label>
                                     <input type="date" id="pac-fnac" class="form-control" onchange="calcularEdad()">
                                 </div>
-                                <div class="col-md-4">
+                                <div class="col-12 col-sm-4">
                                     <label class="form-label fw-semibold">Edad</label>
-                                    <input type="text" id="pac-edad" class="form-control bg-light" placeholder="0" readonly>
+                                    <input type="text" id="pac-edad" class="form-control bg-light" placeholder="0 AÑOS" readonly>
                                 </div>
-                                <div class="col-md-4">
+                                <div class="col-12 col-sm-4">
                                     <label class="form-label fw-semibold">Sexo</label>
                                     <select id="pac-sexo" class="form-select">
                                         <option value="">Seleccionar</option>
@@ -101,12 +114,12 @@
                     </div>
                     <div class="card-body">
                         <div class="row g-3 mb-3">
-                            <div class="col-md-6">
+                            <div class="col-12 col-md-6 position-relative">
                                 <label class="form-label fw-semibold">Buscar examen individual</label>
                                 <input type="text" id="busqueda-examen" class="form-control" placeholder="Escribe el nombre del examen..." onkeyup="filtrarExamenes(this.value)">
-                                <div id="sugerencias-examenes" class="list-group position-absolute w-50 z-3"></div>
+                                <div id="sugerencias-examenes" class="list-group position-absolute w-100 z-3 shadow-lg"></div>
                             </div>
-                            <div class="col-md-6">
+                            <div class="col-12 col-md-6">
                                 <label class="form-label fw-semibold">Método de Pago</label>
                                 <select id="metodo-pago" class="form-select">
                                     <option value="Efectivo">Efectivo</option>
@@ -134,9 +147,11 @@
                             </table>
                         </div>
 
-                        <div class="d-flex justify-content-end align-items-center mt-3 gap-3">
-                            <h4 class="mb-0">Total: S/ <span id="total-cobrar">0.00</span></h4>
-                            <button class="btn btn-success btn-lg" onclick="guardarOrdenGenerarTicket()"><i class="bi bi-printer-fill me-2"></i>Guardar e Imprimir Ticket</button>
+                        <div class="d-flex flex-wrap justify-content-between align-items-center mt-3 gap-3">
+                            <h4 class="mb-0 fw-bold">Total: S/ <span id="total-cobrar">0.00</span></h4>
+                            <button class="btn btn-success btn-lg w-100 w-md-auto" onclick="guardarOrdenGenerarTicket()">
+                                <i class="bi bi-printer-fill me-2"></i>Guardar e Imprimir Ticket
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -151,8 +166,8 @@
                     </div>
                     <div class="card-body">
                         <div class="table-responsive">
-                            <table class="table table-hover">
-                                <thead>
+                            <table class="table table-hover align-middle">
+                                <thead class="table-light">
                                     <tr>
                                         <th>N° Orden</th>
                                         <th>Fecha</th>
@@ -188,19 +203,19 @@
             <!-- SECTION: CONTROL DE CAJA -->
             <div id="sec-caja" class="section-content d-none">
                 <div class="row g-3 mb-4">
-                    <div class="col-md-4">
+                    <div class="col-12 col-md-4">
                         <div class="card border-0 bg-primary text-white shadow-sm p-3">
                             <h6>Total Ingresos (Hoy)</h6>
                             <h2 class="fw-bold mb-0">S/ <span id="caja-total-hoy">0.00</span></h2>
                         </div>
                     </div>
-                    <div class="col-md-4">
+                    <div class="col-12 col-md-4">
                         <div class="card border-0 bg-success text-white shadow-sm p-3">
                             <h6>Efectivo</h6>
                             <h2 class="fw-bold mb-0">S/ <span id="caja-efectivo">0.00</span></h2>
                         </div>
                     </div>
-                    <div class="col-md-4">
+                    <div class="col-12 col-md-4">
                         <div class="card border-0 bg-info text-white shadow-sm p-3">
                             <h6>Digital (Yape/Plin/Tarjeta)</h6>
                             <h2 class="fw-bold mb-0">S/ <span id="caja-digital">0.00</span></h2>
@@ -212,18 +227,20 @@
                         <h5 class="mb-0 fw-bold"><i class="bi bi-receipt me-2"></i>Detalle de Transacciones del Día</h5>
                     </div>
                     <div class="card-body">
-                        <table class="table table-striped">
-                            <thead>
-                                <tr>
-                                    <th>Hora/Fecha</th>
-                                    <th>N° Orden</th>
-                                    <th>Paciente</th>
-                                    <th>Método</th>
-                                    <th>Monto</th>
-                                </tr>
-                            </thead>
-                            <tbody id="caja-tabla-body"></tbody>
-                        </table>
+                        <div class="table-responsive">
+                            <table class="table table-striped align-middle">
+                                <thead>
+                                    <tr>
+                                        <th>Hora/Fecha</th>
+                                        <th>N° Orden</th>
+                                        <th>Paciente</th>
+                                        <th>Método</th>
+                                        <th>Monto</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="caja-tabla-body"></tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
