@@ -256,15 +256,25 @@
                                             <input type="text" id="cat-nombre" class="form-control form-control-sm" placeholder="Ej. HELICOBACTER PYLORI" required>
                                         </div>
 
-                                        <div class="row g-2 mb-3">
+                                        <div class="row g-2 mb-2">
                                             <div class="col-6">
                                                 <label class="form-label fw-semibold small mb-1">Tipo de Muestra</label>
                                                 <input type="text" id="cat-muestra" class="form-control form-control-sm" placeholder="Ej. Suero / Sangre">
                                             </div>
                                             <div class="col-6">
                                                 <label class="form-label fw-semibold small mb-1">Método de Análisis</label>
-                                                <input type="text" id="cat-metodo" class="form-control form-control-sm" placeholder="Ej. Inmunocromatografía / Colorimétrico">
+                                                <input type="text" id="cat-metodo" class="form-control form-control-sm" placeholder="Ej. Colorimétrico / PCR">
                                             </div>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label class="form-label fw-semibold small mb-1 text-primary">Plantilla Visual de Resultado</label>
+                                            <select id="cat-plantilla" class="form-select form-select-sm border-primary">
+                                                <option value="estandar">Estándar (Parámetro | Resultado | Unidad | Valor Ref. | Método)</option>
+                                                <option value="hemograma">Hemograma (Mínimo | Máximo | Fórmula Leucocitaria %)</option>
+                                                <option value="bioquimica">Bioquímica (Múltiples Valores Referenciales / Edad)</option>
+                                                <option value="hba1c">Hemoglobina Glicosilada (HbA1c)</option>
+                                            </select>
                                         </div>
                                         
                                         <hr class="my-3">
@@ -316,7 +326,7 @@
                                                 <tr>
                                                     <th>Código</th>
                                                     <th>Examen</th>
-                                                    <th>Muestra / Método</th>
+                                                    <th>Plantilla</th>
                                                     <th>Precio</th>
                                                     <th class="text-end px-3">Acción</th>
                                                 </tr>
