@@ -66,7 +66,65 @@ document.addEventListener('DOMContentLoaded', () => {
   configurarBuscadorLive();
   cargarTablaOrdenes();
   pobladorSelectPlantillas();
+
+  // Escuchar tecla Enter o autocompletar al llegar a 8 dígitos en el campo DNI
+  const inputDni = document.getElementById('v-dni');
+  if (inputDni) {
+    inputDni.addEventListener('keyup', (e) => {
+      if (e.key === 'Enter' || inputDni.value.trim().length === 8) {
+        consultarDNI();
+      }
+    });
+  }
 });
+
+/* ========================================================
+   FUNCIÓN DE CONSULTA RENIEC VÍA API (PERÚ)
+   ======================================================== */
+async function consultarDNI() {
+  const inputDni = document.getElementById('v-dni');
+  const inputPaciente = document.getElementById('v-paciente');
+  const dni = inputDni.value.trim();
+
+  if (dni.length !== 8 || isNaN(dni)) {
+    alert('Ingrese un número de DNI válido de 8 dígitos.');
+    return;
+  }
+
+  inputPaciente.value = "Consultando RENIEC...";
+
+  // Token predeterminado para pruebas (reemplazar por token de producción si aplica)
+  const token = 'apisnet_testing'; 
+  const url = `https://api.apis.net.pe/v2/reniec/dni?numero=${dni}`;
+
+  try {
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Referer': 'https://apis.net.pe/consulta-dni-api',
+        'Authorization': `Bearer ${token}`
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error('DNI no encontrado o límite de consultas superado.');
+    }
+
+    const data = await response.json();
+
+    if (data.nombres) {
+      const nombreCompleto = `${data.nombres} ${data.apellidoPaterno} ${data.apellidoMaterno}`;
+      inputPaciente.value = nombreCompleto.toUpperCase();
+    } else {
+      alert('No se encontraron datos para el DNI ingresado.');
+      inputPaciente.value = '';
+    }
+  } catch (error) {
+    console.error('Error al consultar DNI:', error);
+    alert('No se pudo obtener el nombre automáticamente. Por favor ingréselo manualmente.');
+    inputPaciente.value = '';
+  }
+}
 
 function cambiarModulo(idModulo, event) {
   document.querySelectorAll('.modulo').forEach(m => m.classList.remove('active'));
