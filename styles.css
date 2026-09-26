@@ -20,7 +20,7 @@ body {
     min-height: 100vh;
 }
 
-/* SIDEBAR LAYOUT */
+/* SIDEBAR NAVIGATION */
 .sidebar {
     width: var(--sidebar-width);
     min-height: 100vh;
@@ -85,14 +85,14 @@ body {
     z-index: 1030;
 }
 
-/* CARD DE PARÁMETRO DINÁMICO */
+/* TARJETA DE PARÁMETRO DINÁMICO */
 .parametro-card {
     background-color: #ffffff;
     border: 1px solid #cbd5e1;
     border-radius: 8px;
 }
 
-/* RESPONSIVO PARA DISPOSITIVOS MÓVILES Y TABLETS */
+/* RESPONSIVO MÓVIL Y TABLET */
 @media (max-width: 767.98px) {
     .sidebar {
         position: fixed;
