@@ -73,15 +73,7 @@ async function cargarProductosJSON() {
                     muestra: prod.muestra || 'Suero',
                     metodo: prod.metodo || 'Estándar',
                     refTexto: prod.refTexto || '',
-                    parametros: prod.parametros || [
-                        {
-                            nombre: prod.Nombre || prod.nombre || 'Indicador',
-                            unidad: prod.unidad || '',
-                            refMin: prod.refMin || '',
-                            refMax: prod.refMax || '',
-                            refTexto: prod.refTexto || ''
-                        }
-                    ]
+                    parametros: Array.isArray(prod.parametros) ? prod.parametros : []
                 }));
                 guardarCatalogoLocal();
             }
@@ -318,15 +310,13 @@ function cargarDatosEnFormularioCatalogo(ex) {
     const contenedor = document.getElementById('contenedor-parametros');
     contenedor.innerHTML = '';
 
-    const params = (ex.parametros && ex.parametros.length > 0) ? ex.parametros : [{
-        nombre: ex.nombre,
-        unidad: '',
-        refMin: '',
-        refMax: '',
-        refTexto: ''
-    }];
+    const params = Array.isArray(ex.parametros) ? ex.parametros : [];
 
-    params.forEach(p => agregarFilaParametro(p));
+    if (params.length > 0) {
+        params.forEach(p => agregarFilaParametro(p));
+    } else {
+        actualizarEstadoVacioParametros();
+    }
 
     document.getElementById('catalogo-form-titulo').innerHTML = `<i class="bi bi-pencil-square me-2"></i>Editando: ${ex.nombre}`;
     document.getElementById('btn-guardar-cat').innerHTML = '<i class="bi bi-check-circle me-1"></i>Guardar Cambios del Examen';
@@ -334,12 +324,17 @@ function cargarDatosEnFormularioCatalogo(ex) {
 
 function agregarFilaParametro(p = {}) {
     const contenedor = document.getElementById('contenedor-parametros');
+    
+    // Remover aviso de sin parámetros si existe
+    const avisoVacio = contenedor.querySelector('.no-params-msg');
+    if (avisoVacio) avisoVacio.remove();
+
     const div = document.createElement('div');
     div.className = 'parametro-card';
     div.innerHTML = `
         <div class="d-flex justify-content-between align-items-center mb-2">
             <span class="fw-bold small text-primary"><i class="bi bi-card-list me-1"></i>Indicador / Parámetro</span>
-            <button type="button" class="btn btn-sm btn-link text-danger p-0" onclick="this.closest('.parametro-card').remove()">
+            <button type="button" class="btn btn-sm btn-link text-danger p-0" onclick="quitarFilaParametro(this)">
                 <i class="bi bi-x-circle-fill"></i> Quitar
             </button>
         </div>
@@ -364,14 +359,37 @@ function agregarFilaParametro(p = {}) {
     contenedor.appendChild(div);
 }
 
+function quitarFilaParametro(btn) {
+    const card = btn.closest('.parametro-card');
+    if (card) card.remove();
+    actualizarEstadoVacioParametros();
+}
+
+function vaciarTodosLosParametros() {
+    const contenedor = document.getElementById('contenedor-parametros');
+    contenedor.innerHTML = '';
+    actualizarEstadoVacioParametros();
+}
+
+function actualizarEstadoVacioParametros() {
+    const contenedor = document.getElementById('contenedor-parametros');
+    const tarjetas = contenedor.querySelectorAll('.parametro-card');
+    if (tarjetas.length === 0) {
+        contenedor.innerHTML = `
+            <div class="no-params-msg text-center text-muted p-3 border rounded bg-light small">
+                <i class="bi bi-info-circle me-1"></i> Este examen no requiere cuadro de parámetros/indicadores.
+            </div>
+        `;
+    }
+}
+
 function prepararNuevoExamen() {
     document.getElementById('form-catalogo').reset();
     document.getElementById('cat-id-original').value = '';
     const nuevoCodigo = String(catalogoExamenes.length + 100);
     document.getElementById('cat-codigo').value = nuevoCodigo;
 
-    document.getElementById('contenedor-parametros').innerHTML = '';
-    agregarFilaParametro();
+    vaciarTodosLosParametros();
 
     document.getElementById('catalogo-form-titulo').innerHTML = '<i class="bi bi-plus-circle me-2"></i>Crear Nuevo Examen';
     document.getElementById('btn-guardar-cat').innerHTML = '<i class="bi bi-save me-1"></i>Registrar Nuevo Examen';
@@ -574,33 +592,32 @@ function abrirResultados(ordenId) {
 
     orden.examenes.forEach((ex) => {
         const catEx = catalogoExamenes.find(c => c.codigo === ex.codigo) || ex;
-        const params = (catEx.parametros && catEx.parametros.length > 0) ? catEx.parametros : [{
-            nombre: ex.nombre,
-            unidad: catEx.unidad || '',
-            refMin: catEx.refMin || '',
-            refMax: catEx.refMax || '',
-            refTexto: catEx.refTexto || ''
-        }];
+        const params = Array.isArray(catEx.parametros) ? catEx.parametros : [];
 
         let filasParamsHTML = '';
-        params.forEach((p, idx) => {
-            const resKey = `${ex.codigo}_${idx}`;
-            const valRes = (orden.resultados && orden.resultados[resKey]) ? orden.resultados[resKey].resultado : '';
 
-            filasParamsHTML += `
-                <div class="row g-2 align-items-center mb-2 pb-2 border-bottom">
-                    <div class="col-12 col-md-4">
-                        <label class="form-label small fw-bold mb-0">${p.nombre}</label>
+        if (params.length > 0) {
+            params.forEach((p, idx) => {
+                const resKey = `${ex.codigo}_${idx}`;
+                const valRes = (orden.resultados && orden.resultados[resKey]) ? orden.resultados[resKey].resultado : '';
+
+                filasParamsHTML += `
+                    <div class="row g-2 align-items-center mb-2 pb-2 border-bottom">
+                        <div class="col-12 col-md-4">
+                            <label class="form-label small fw-bold mb-0">${p.nombre}</label>
+                        </div>
+                        <div class="col-12 col-md-4">
+                            <input type="text" id="res-val-${resKey}" class="form-control form-control-sm border-primary fw-bold" placeholder="Resultado..." value="${valRes}">
+                        </div>
+                        <div class="col-12 col-md-4">
+                            <small class="text-muted">${p.unidad ? 'Unidad: ' + p.unidad : ''} ${p.refTexto ? '| Ref: ' + p.refTexto : ''}</small>
+                        </div>
                     </div>
-                    <div class="col-12 col-md-4">
-                        <input type="text" id="res-val-${resKey}" class="form-control form-control-sm border-primary fw-bold" placeholder="Resultado..." value="${valRes}">
-                    </div>
-                    <div class="col-12 col-md-4">
-                        <small class="text-muted">${p.unidad ? 'Unidad: ' + p.unidad : ''} ${p.refTexto ? '| Ref: ' + p.refTexto : ''}</small>
-                    </div>
-                </div>
-            `;
-        });
+                `;
+            });
+        } else {
+            filasParamsHTML = `<p class="text-muted small mb-0">Este examen no requiere carga de parámetros específicos.</p>`;
+        }
 
         camposHTML += `
             <div class="card mb-3 shadow-sm border">
@@ -636,7 +653,7 @@ function guardarResultados() {
 
     ordenActualVisualizando.examenes.forEach(ex => {
         const catEx = catalogoExamenes.find(c => c.codigo === ex.codigo) || ex;
-        const params = (catEx.parametros && catEx.parametros.length > 0) ? catEx.parametros : [{ nombre: ex.nombre }];
+        const params = Array.isArray(catEx.parametros) ? catEx.parametros : [];
 
         params.forEach((p, idx) => {
             const resKey = `${ex.codigo}_${idx}`;
@@ -660,43 +677,40 @@ function visualizarEImprimirResultados() {
 
     ordenActualVisualizando.examenes.forEach(ex => {
         const catEx = catalogoExamenes.find(c => c.codigo === ex.codigo) || ex;
-        const params = (catEx.parametros && catEx.parametros.length > 0) ? catEx.parametros : [{
-            nombre: ex.nombre,
-            unidad: '',
-            refMin: '',
-            refMax: '',
-            refTexto: ''
-        }];
+        const params = Array.isArray(catEx.parametros) ? catEx.parametros : [];
 
         let filasTablaHTML = '';
 
-        params.forEach((p, idx) => {
-            const resKey = `${ex.codigo}_${idx}`;
-            const resData = ordenActualVisualizando.resultados[resKey] || {};
+        if (params.length > 0) {
+            params.forEach((p, idx) => {
+                const resKey = `${ex.codigo}_${idx}`;
+                const resData = ordenActualVisualizando.resultados[resKey] || {};
 
-            let valRefHTML = '';
-            if (p.refMin || p.refMax) {
-                valRefHTML = `${p.refMin || '-'} - ${p.refMax || '-'}`;
-            } else {
-                valRefHTML = p.refTexto || '-';
-            }
+                let valRefHTML = '';
+                if (p.refMin || p.refMax) {
+                    valRefHTML = `${p.refMin || '-'} - ${p.refMax || '-'}`;
+                } else {
+                    valRefHTML = p.refTexto || '-';
+                }
 
-            filasTablaHTML += `
-                <tr style="background-color: #f8fafc;">
-                    <td style="padding: 8px; border: 1px solid #e2e8f0; font-weight: bold; text-align:left;">${p.nombre}</td>
-                    <td style="padding: 8px; border: 1px solid #e2e8f0; font-weight: bold; font-size:13px;">${resData.resultado || '-'}</td>
-                    <td style="padding: 8px; border: 1px solid #e2e8f0;">${p.unidad || '-'}</td>
-                    <td style="padding: 8px; border: 1px solid #e2e8f0;">${valRefHTML}</td>
-                    <td style="padding: 8px; border: 1px solid #e2e8f0; font-style: italic; font-size: 11px;">${catEx.metodo || 'Estándar'}</td>
-                </tr>
-            `;
-        });
+                filasTablaHTML += `
+                    <tr style="background-color: #f8fafc;">
+                        <td style="padding: 8px; border: 1px solid #e2e8f0; font-weight: bold; text-align:left;">${p.nombre}</td>
+                        <td style="padding: 8px; border: 1px solid #e2e8f0; font-weight: bold; font-size:13px;">${resData.resultado || '-'}</td>
+                        <td style="padding: 8px; border: 1px solid #e2e8f0;">${p.unidad || '-'}</td>
+                        <td style="padding: 8px; border: 1px solid #e2e8f0;">${valRefHTML}</td>
+                        <td style="padding: 8px; border: 1px solid #e2e8f0; font-style: italic; font-size: 11px;">${catEx.metodo || 'Estándar'}</td>
+                    </tr>
+                `;
+            });
+        }
 
         bloquesExamenesHTML += `
             <div style="margin-top:20px;">
                 <h3 style="text-align:center; font-size:16px; font-weight:bold; margin-bottom:8px; font-family:'Segoe UI', sans-serif; color: #0072bc;">
                     ${ex.nombre}
                 </h3>
+                ${params.length > 0 ? `
                 <table style="width:100%; border-collapse:collapse; font-size:11px; text-align:center;">
                     <thead>
                         <tr style="background-color: #dbeafe; color: #1e3a8a;">
@@ -711,6 +725,7 @@ function visualizarEImprimirResultados() {
                         ${filasTablaHTML}
                     </tbody>
                 </table>
+                ` : `<p style="text-align:center; font-size:12px; color:#64748b; font-style:italic;">Examen sin plantilla de parámetros específicos.</p>`}
             </div>
         `;
     });
