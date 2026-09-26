@@ -8,7 +8,7 @@ if (typeof firebase !== 'undefined' && !firebase.apps.length) {
 }
 const db = (typeof firebase !== 'undefined') ? firebase.database() : null;
 
-// Catálogo de exámenes (se llenará dinámicamente desde productos.json)
+// Catálogo base de exámenes
 let catalogoExamenes = [
     { codigo: 'EX001', nombre: 'HEMOGRAMA COMPLETO', precio: 25.00 },
     { codigo: 'EX002', nombre: 'PERFIL LIPÍDICO: Colesterol Total, Triglicéridos, HDL, LDL', precio: 50.00 },
@@ -27,38 +27,43 @@ document.addEventListener('DOMContentLoaded', async () => {
         dateEl.innerText = new Date().toLocaleDateString('es-PE', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
     }
     
-    // Cargar productos del JSON inmediatamente al iniciar
+    // Cargar catálogo desde JSON o localStorage
     await cargarProductosJSON();
     
     escucharSincronizacion();
     cargarOrdenes();
     actualizarControlCaja();
+    renderizarTablaCatalogo();
 });
 
-// Cargar catálogo de exámenes desde productos.json
+// Cargar catálogo de exámenes desde productos.json o localStorage
 async function cargarProductosJSON() {
+    const catalogoGuardado = localStorage.getItem('vitalhealth_catalogo');
+    if (catalogoGuardado) {
+        catalogoExamenes = JSON.parse(catalogoGuardado);
+        return;
+    }
+
     try {
-        // Agregamos timestamp para evitar problemas de caché del archivo JSON
         const response = await fetch('productos.json?v=' + new Date().getTime());
         if (response.ok) {
             const data = await response.json();
             if (Array.isArray(data) && data.length > 0) {
-                const productosCargados = data.map((prod, index) => ({
+                catalogoExamenes = data.map((prod, index) => ({
                     codigo: String(prod.Codigo || prod.codigo || index + 1),
                     nombre: String(prod.Nombre || prod.nombre || '').toUpperCase(),
                     precio: parseFloat(prod.Precio || prod.precio || 0)
                 }));
-                
-                // Reemplazamos/Fusionamos el catálogo con los datos del JSON
-                catalogoExamenes = productosCargados;
-                console.log(`Se cargaron con éxito ${catalogoExamenes.length} exámenes.`);
+                guardarCatalogoLocal();
             }
-        } else {
-            console.warn('Error al leer productos.json. Código HTTP:', response.status);
         }
     } catch (error) {
         console.error('No se pudo cargar productos.json:', error);
     }
+}
+
+function guardarCatalogoLocal() {
+    localStorage.setItem('vitalhealth_catalogo', JSON.stringify(catalogoExamenes));
 }
 
 // Toggle para menú móvil
@@ -101,7 +106,8 @@ function showSection(sectionId) {
         document.getElementById('sidebar-overlay').classList.remove('active');
     }
 
-    if(sectionId === 'caja') actualizarControlCaja();
+    if (sectionId === 'caja') actualizarControlCaja();
+    if (sectionId === 'catalogo') renderizarTablaCatalogo();
 }
 
 function calcularEdad() {
@@ -126,7 +132,6 @@ async function buscarPaciente() {
         return alert('Por favor, ingrese un número de DNI válido de 8 dígitos.');
     }
 
-    // 1. Verificar si existe en el historial local/Firebase
     const encontrada = ordenesLocales.find(o => o.dni === dni);
     if (encontrada) {
         document.getElementById('pac-nombre').value = encontrada.paciente;
@@ -134,13 +139,11 @@ async function buscarPaciente() {
         return;
     }
 
-    // 2. Consulta a APIs externas de RENIEC
     const btnText = document.getElementById('btn-text');
     if (btnText) btnText.innerText = 'Buscando...';
 
     let encontrado = false;
 
-    // Intento 1: API PeruDev
     try {
         const response = await fetch(`https://apiperu.dev/api/dni/${dni}`);
         if (response.ok) {
@@ -155,7 +158,6 @@ async function buscarPaciente() {
         console.warn('Falló intento 1 DNI:', e);
     }
 
-    // Intento 2: Fallback APISnet
     if (!encontrado) {
         try {
             const response = await fetch(`https://api.apis.net.pe/v1/dni?numero=${dni}`);
@@ -177,7 +179,7 @@ async function buscarPaciente() {
     if (btnText) btnText.innerText = 'Consultar';
 }
 
-// FILTRADO RÁPIDO DE EXÁMENES (MÁXIMO 15 RESULTADOS)
+// FILTRADO RÁPIDO DE EXÁMENES EN RECEPCIÓN (MÁXIMO 15 RESULTADOS)
 function filtrarExamenes(texto) {
     const contenedor = document.getElementById('sugerencias-examenes');
     contenedor.innerHTML = '';
@@ -185,7 +187,6 @@ function filtrarExamenes(texto) {
     
     if (!busqueda) return;
 
-    // Filtra y muestra solo los primeros 15 coincidencias
     const filtrados = catalogoExamenes
         .filter(e => e.nombre.toLowerCase().includes(busqueda) || e.codigo.toLowerCase().includes(busqueda))
         .slice(0, 15);
@@ -246,6 +247,108 @@ function eliminarExamen(index) {
     renderExamenes();
 }
 
+// FUNCIONES PARA LA GESTIÓN DEL CATÁLOGO
+function renderizarTablaCatalogo(filtro = '') {
+    const tbody = document.getElementById('tabla-catalogo-body');
+    const countEl = document.getElementById('total-cat-count');
+    if (!tbody) return;
+
+    tbody.innerHTML = '';
+    const busqueda = filtro.trim().toLowerCase();
+
+    const filtrados = catalogoExamenes.filter(ex => 
+        ex.codigo.toLowerCase().includes(busqueda) || 
+        ex.nombre.toLowerCase().includes(busqueda)
+    );
+
+    if (countEl) countEl.innerText = filtrados.length;
+
+    if (filtrados.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="4" class="text-center text-muted py-3">No hay exámenes registrados.</td></tr>';
+        return;
+    }
+
+    // Renderizamos máximo 100 elementos por rendimiento visual
+    filtrados.slice(0, 100).forEach(ex => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td><span class="badge bg-light text-dark border">${ex.codigo}</span></td>
+            <td><strong>${ex.nombre}</strong></td>
+            <td>S/ ${ex.precio.toFixed(2)}</td>
+            <td class="text-end">
+                <button class="btn btn-sm btn-outline-primary me-1" onclick="editarExamenCatalogo('${ex.codigo}')">
+                    <i class="bi bi-pencil"></i>
+                </button>
+                <button class="btn btn-sm btn-outline-danger" onclick="eliminarExamenCatalogo('${ex.codigo}')">
+                    <i class="bi bi-trash"></i>
+                </button>
+            </td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
+
+function guardarExamenCatalogo() {
+    const idOrig = document.getElementById('cat-id-original').value;
+    const codigo = document.getElementById('cat-codigo').value.trim();
+    const nombre = document.getElementById('cat-nombre').value.trim().toUpperCase();
+    const precio = parseFloat(document.getElementById('cat-precio').value);
+
+    if (!codigo || !nombre || isNaN(precio)) {
+        return alert('Por favor complete todos los campos del examen.');
+    }
+
+    if (idOrig) {
+        // Modo Edición
+        const idx = catalogoExamenes.findIndex(e => e.codigo === idOrig);
+        if (idx !== -1) {
+            catalogoExamenes[idx] = { codigo, nombre, precio };
+        }
+    } else {
+        // Modo Creación
+        if (catalogoExamenes.some(e => e.codigo === codigo)) {
+            return alert('Ya existe un examen con este mismo código.');
+        }
+        catalogoExamenes.unshift({ codigo, nombre, precio });
+    }
+
+    guardarCatalogoLocal();
+    renderizarTablaCatalogo();
+    cancelarEdicionCatalogo();
+    alert('Examen guardado correctamente.');
+}
+
+function editarExamenCatalogo(codigo) {
+    const ex = catalogoExamenes.find(e => e.codigo === codigo);
+    if (!ex) return;
+
+    document.getElementById('cat-id-original').value = ex.codigo;
+    document.getElementById('cat-codigo').value = ex.codigo;
+    document.getElementById('cat-nombre').value = ex.nombre;
+    document.getElementById('cat-precio').value = ex.precio;
+
+    document.getElementById('catalogo-form-titulo').innerHTML = '<i class="bi bi-pencil-square me-2"></i>Editar Examen';
+    document.getElementById('btn-guardar-cat').innerHTML = '<i class="bi bi-check-circle me-1"></i>Actualizar Examen';
+    document.getElementById('btn-cancelar-cat').classList.remove('d-none');
+}
+
+function cancelarEdicionCatalogo() {
+    document.getElementById('form-catalogo').reset();
+    document.getElementById('cat-id-original').value = '';
+    document.getElementById('catalogo-form-titulo').innerHTML = '<i class="bi bi-plus-circle me-2"></i>Agregar Nuevo Examen';
+    document.getElementById('btn-guardar-cat').innerHTML = '<i class="bi bi-save me-1"></i>Guardar Examen';
+    document.getElementById('btn-cancelar-cat').classList.add('d-none');
+}
+
+function eliminarExamenCatalogo(codigo) {
+    if (confirm(`¿Está seguro de eliminar el examen con código ${codigo}?`)) {
+        catalogoExamenes = catalogoExamenes.filter(e => e.codigo !== codigo);
+        guardarCatalogoLocal();
+        renderizarTablaCatalogo();
+    }
+}
+
+// GENERACIÓN DE TICKET Y ÓRDENES
 function guardarOrdenGenerarTicket() {
     const dni = document.getElementById('pac-dni').value.trim();
     const paciente = document.getElementById('pac-nombre').value.trim();
