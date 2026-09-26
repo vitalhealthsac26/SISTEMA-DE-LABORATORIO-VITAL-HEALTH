@@ -8,7 +8,7 @@ if (typeof firebase !== 'undefined' && !firebase.apps.length) {
 }
 const db = (typeof firebase !== 'undefined') ? firebase.database() : null;
 
-// Catálogo base de exámenes
+// Catálogo base de exámenes con tipos de plantillas
 let catalogoExamenes = [
     {
         codigo: '568',
@@ -16,20 +16,62 @@ let catalogoExamenes = [
         precio: 70.00,
         muestra: 'Suero',
         metodo: 'Inmunocromatografía',
+        plantilla: 'estandar',
         refTexto: '',
         parametros: [
             { nombre: 'HELICOBACTER PYLORI', unidad: '', refMin: '', refMax: '', refTexto: 'NO REACTIVO / REACTIVO' }
         ]
     },
     {
-        codigo: '935',
-        nombre: 'PRUEBA DE PATERNIDAD LEGAL',
-        precio: 1200.00,
-        muestra: 'Sangre / Saliva',
-        metodo: 'ADN por PCR',
-        refTexto: 'Marcadores STR analizados.',
+        codigo: '101',
+        nombre: 'HEMOGRAMA COMPLETO',
+        precio: 35.00,
+        muestra: 'Sangre Total (EDTA)',
+        metodo: 'Citometría de flujo / Impedancia',
+        plantilla: 'hemograma',
+        refTexto: '',
         parametros: [
-            { nombre: 'Probabilidad de Paternidad', unidad: '%', refMin: '', refMax: '', refTexto: '> 99.99%' }
+            { nombre: 'Leucocitos', unidad: 'Cél/uL', refMin: '4500', refMax: '13500' },
+            { nombre: 'Glóbulos Rojos (hematíes)', unidad: 'Cél/uL', refMin: '4000000', refMax: '5200000' },
+            { nombre: 'Hemoglobina', unidad: 'g/dL', refMin: '11.5', refMax: '15.5' },
+            { nombre: 'Hematocrito', unidad: '%', refMin: '35', refMax: '45' },
+            { nombre: 'Volumen Corpuscular medio - VCM', unidad: 'fL', refMin: '77', refMax: '95' },
+            { nombre: 'Hemoglobina Corpuscular media - HCM', unidad: 'pg', refMin: '25', refMax: '33' },
+            { nombre: 'Concentración de Hemoglobina Corpuscular media - CHCM', unidad: 'g/dL', refMin: '30', refMax: '36' },
+            { nombre: 'Recuento Plaquetario', unidad: 'Cél/uL', refMin: '150000', refMax: '475000' },
+            { nombre: 'RDW-SD', unidad: 'fL', refMin: '37', refMax: '54' },
+            { nombre: 'RDW-CV', unidad: '%', refMin: '11.5', refMax: '15.6' },
+            { nombre: 'Vol. plaquetario medio - VPM', unidad: 'fL', refMin: '7.6', refMax: '10.8' },
+            { nombre: 'Neutrófilos Segmentados', unidad: '%', refMin: '31', refMax: '51' },
+            { nombre: 'Neutrófilos Abastonados', unidad: '%', refMin: '0', refMax: '5' },
+            { nombre: 'Linfocitos', unidad: '%', refMin: '4', refMax: '28' },
+            { nombre: 'Monocitos', unidad: '%', refMin: '0', refMax: '10' },
+            { nombre: 'Eosinófilos', unidad: '%', refMin: '0', refMax: '2.5' },
+            { nombre: 'Basófilo', unidad: '%', refMin: '0', refMax: '2' }
+        ]
+    },
+    {
+        codigo: '102',
+        nombre: 'GLUCOSA EN AYUNAS',
+        precio: 15.00,
+        muestra: 'Suero',
+        metodo: 'Colorimétrico enzimático',
+        plantilla: 'bioquimica',
+        refTexto: '',
+        parametros: [
+            { nombre: 'Glucosa', unidad: 'mg/dL', refTexto: 'Adultos: 74 - 106 | Niños: 60 - 100 | Neonatos: 50 - 80' }
+        ]
+    },
+    {
+        codigo: '103',
+        nombre: 'HEMOGLOBINA GLICOSILADA (HbA1c)',
+        precio: 60.00,
+        muestra: 'Sangre Total (EDTA)',
+        metodo: 'HPLC / Inmunoturbidimetría',
+        plantilla: 'hba1c',
+        refTexto: '',
+        parametros: [
+            { nombre: 'Hemoglobina Glicosilada (HbA1c)', unidad: '%', refTexto: 'Normal: < 5.7% | Prediabetes: 5.7 - 6.4% | Diabetes: >= 6.5%' }
         ]
     }
 ];
@@ -72,6 +114,7 @@ async function cargarProductosJSON() {
                     precio: parseFloat(prod.Precio || prod.precio || 0),
                     muestra: prod.muestra || 'Suero',
                     metodo: prod.metodo || 'Estándar',
+                    plantilla: prod.plantilla || 'estandar',
                     refTexto: prod.refTexto || '',
                     parametros: Array.isArray(prod.parametros) ? prod.parametros : []
                 }));
@@ -245,7 +288,7 @@ function eliminarExamen(index) {
     renderExamenes();
 }
 
-// GESTIÓN DEL CATÁLOGO CON PARÁMETROS DINÁMICOS
+// GESTIÓN DE CATÁLOGO CON PLANTILLAS Y PARÁMETROS DINÁMICOS
 function renderizarTablaCatalogo(filtro = '') {
     const tbody = document.getElementById('tabla-catalogo-body');
     const countEl = document.getElementById('total-cat-count');
@@ -276,7 +319,7 @@ function renderizarTablaCatalogo(filtro = '') {
         tr.innerHTML = `
             <td><span class="badge bg-light text-dark border">${ex.codigo}</span></td>
             <td><strong>${ex.nombre}</strong></td>
-            <td><small class="text-muted">${ex.muestra || 'Suero'} | ${ex.metodo || 'Estándar'}</small></td>
+            <td><small class="text-muted">${ex.muestra || 'Suero'} | <span class="badge bg-info text-dark">${ex.plantilla || 'estandar'}</span></small></td>
             <td>S/ ${ex.precio.toFixed(2)}</td>
             <td class="text-end px-3">
                 <button class="btn btn-sm btn-outline-primary me-1" onclick="seleccionarExamenParaEditar('${ex.codigo}')" title="Editar Examen">
@@ -304,9 +347,9 @@ function cargarDatosEnFormularioCatalogo(ex) {
     document.getElementById('cat-precio').value = ex.precio;
     document.getElementById('cat-muestra').value = ex.muestra || '';
     document.getElementById('cat-metodo').value = ex.metodo || '';
+    document.getElementById('cat-plantilla').value = ex.plantilla || 'estandar';
     document.getElementById('cat-ref-texto').value = ex.refTexto || '';
 
-    // Cargar parámetros dinámicos
     const contenedor = document.getElementById('contenedor-parametros');
     contenedor.innerHTML = '';
 
@@ -325,7 +368,6 @@ function cargarDatosEnFormularioCatalogo(ex) {
 function agregarFilaParametro(p = {}) {
     const contenedor = document.getElementById('contenedor-parametros');
     
-    // Remover aviso de sin parámetros si existe
     const avisoVacio = contenedor.querySelector('.no-params-msg');
     if (avisoVacio) avisoVacio.remove();
 
@@ -340,10 +382,10 @@ function agregarFilaParametro(p = {}) {
         </div>
         <div class="row g-2">
             <div class="col-7">
-                <input type="text" class="form-control form-control-sm param-nombre" placeholder="Nombre (Ej: Helicobacter Pylori / Ácido Úrico)" value="${p.nombre || ''}">
+                <input type="text" class="form-control form-control-sm param-nombre" placeholder="Nombre (Ej: Hemoglobina)" value="${p.nombre || ''}">
             </div>
             <div class="col-5">
-                <input type="text" class="form-control form-control-sm param-unidad" placeholder="Unidad (Ej: mg/dL, %)" value="${p.unidad || ''}">
+                <input type="text" class="form-control form-control-sm param-unidad" placeholder="Unidad (Ej: g/dL)" value="${p.unidad || ''}">
             </div>
             <div class="col-6">
                 <input type="text" class="form-control form-control-sm param-ref-min" placeholder="Ref. Mínimo" value="${p.refMin || ''}">
@@ -352,7 +394,7 @@ function agregarFilaParametro(p = {}) {
                 <input type="text" class="form-control form-control-sm param-ref-max" placeholder="Ref. Máximo" value="${p.refMax || ''}">
             </div>
             <div class="col-12">
-                <input type="text" class="form-control form-control-sm param-ref-texto" placeholder="Texto Ref. (Ej: No Reactivo / Normal: < 200)" value="${p.refTexto || ''}">
+                <input type="text" class="form-control form-control-sm param-ref-texto" placeholder="Texto Ref. (Ej: Adultos: 74 - 106)" value="${p.refTexto || ''}">
             </div>
         </div>
     `;
@@ -403,13 +445,13 @@ function guardarExamenCatalogo() {
 
     const muestra = document.getElementById('cat-muestra').value.trim();
     const metodo = document.getElementById('cat-metodo').value.trim();
+    const plantilla = document.getElementById('cat-plantilla').value;
     const refTexto = document.getElementById('cat-ref-texto').value.trim();
 
     if (!codigo || !nombre || isNaN(precio)) {
         return alert('Por favor complete el Código, Nombre y Precio del examen.');
     }
 
-    // Extraer todos los parámetros dinámicos configurados
     const filasParam = document.querySelectorAll('#contenedor-parametros .parametro-card');
     const parametros = [];
 
@@ -431,7 +473,7 @@ function guardarExamenCatalogo() {
         }
     });
 
-    const examenObj = { codigo, nombre, precio, muestra, metodo, refTexto, parametros };
+    const examenObj = { codigo, nombre, precio, muestra, metodo, plantilla, refTexto, parametros };
 
     if (idOrig) {
         const idx = catalogoExamenes.findIndex(e => e.codigo === idOrig);
@@ -621,8 +663,9 @@ function abrirResultados(ordenId) {
 
         camposHTML += `
             <div class="card mb-3 shadow-sm border">
-                <div class="card-header bg-light">
+                <div class="card-header bg-light d-flex justify-content-between align-items-center">
                     <h6 class="fw-bold text-primary mb-0">${ex.nombre}</h6>
+                    <span class="badge bg-secondary">Plantilla: ${catEx.plantilla || 'estandar'}</span>
                 </div>
                 <div class="card-body">
                     ${filasParamsHTML}
@@ -668,6 +711,174 @@ function guardarResultados() {
     alert('Resultados guardados correctamente.');
 }
 
+// GENERADOR DINÁMICO DE SECCIONES IMPRESAS SEGÚN PLANTILLA
+function generarTablaEspecializada(ex, catEx, orden) {
+    const params = Array.isArray(catEx.parametros) ? catEx.parametros : [];
+    const tipoPlantilla = catEx.plantilla || 'estandar';
+
+    if (params.length === 0) {
+        return `<p style="text-align:center; font-size:12px; color:#64748b; font-style:italic;">Examen sin plantilla de parámetros específicos.</p>`;
+    }
+
+    // PLANTILLA: HEMOGRAMA COMPLETO
+    if (tipoPlantilla === 'hemograma') {
+        let filasSerieRojaBlanca = '';
+        let filasRecuentoDiferencial = '';
+
+        params.forEach((p, idx) => {
+            const resKey = `${ex.codigo}_${idx}`;
+            const resData = orden.resultados[resKey] || {};
+            const val = resData.resultado || '-';
+
+            const esDiferencial = ['Neutrófilos Segmentados', 'Neutrófilos Abastonados', 'Linfocitos', 'Monocitos', 'Eosinófilos', 'Basófilo'].includes(p.nombre);
+
+            const filaHTML = `
+                <tr>
+                    <td style="padding: 6px; border-bottom: 1px solid #e2e8f0; text-align:left; font-weight: 500;">${p.nombre}</td>
+                    <td style="padding: 6px; border-bottom: 1px solid #e2e8f0; font-weight: bold; text-align:right;">${val}</td>
+                    <td style="padding: 6px; border-bottom: 1px solid #e2e8f0; text-align:center;">${p.unidad || ''}</td>
+                    <td style="padding: 6px; border-bottom: 1px solid #e2e8f0; text-align:center;">${p.refMin || '-'}</td>
+                    <td style="padding: 6px; border-bottom: 1px solid #e2e8f0; text-align:center;">${p.refMax || '-'}</td>
+                </tr>
+            `;
+
+            if (esDiferencial) {
+                filasRecuentoDiferencial += filaHTML;
+            } else {
+                filasSerieRojaBlanca += filaHTML;
+            }
+        });
+
+        return `
+            <table style="width:100%; border-collapse:collapse; font-size:11px; margin-top:5px;">
+                <thead>
+                    <tr style="background-color: #cbd5e1; color: #0f172a; font-weight:bold;">
+                        <th style="padding: 6px; text-align:left;">SERIE / PARÁMETRO</th>
+                        <th style="padding: 6px; text-align:right;">RESULTADO</th>
+                        <th style="padding: 6px; text-align:center;">UNIDAD</th>
+                        <th style="padding: 6px; text-align:center;">MÍNIMO</th>
+                        <th style="padding: 6px; text-align:center;">MÁXIMO</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${filasSerieRojaBlanca}
+                    <tr style="background-color: #f1f5f9; font-weight:bold;">
+                        <td colspan="5" style="padding: 6px; text-align:left; color:#1e3a8a;">Recuento Diferencial Porcentual %</td>
+                    </tr>
+                    ${filasRecuentoDiferencial}
+                </tbody>
+            </table>
+            <div style="font-size:10px; font-style:italic; text-align:right; margin-top:4px; color:#475569;">Método: ${catEx.metodo || 'Citometría de flujo / Impedancia'}</div>
+        `;
+    }
+
+    // PLANTILLA: BIOQUÍMICA (Múltiples Rangos de Edad/Condición)
+    if (tipoPlantilla === 'bioquimica') {
+        let filasHTML = '';
+        params.forEach((p, idx) => {
+            const resKey = `${ex.codigo}_${idx}`;
+            const resData = orden.resultados[resKey] || {};
+
+            filasHTML += `
+                <tr>
+                    <td style="padding: 8px; border: 1px solid #cbd5e1; font-weight:bold; text-align:left;">${p.nombre}</td>
+                    <td style="padding: 8px; border: 1px solid #cbd5e1; font-weight:bold; text-align:center; font-size:13px;">${resData.resultado || '-'}</td>
+                    <td style="padding: 8px; border: 1px solid #cbd5e1; text-align:center;">${p.unidad || ''}</td>
+                    <td style="padding: 8px; border: 1px solid #cbd5e1; text-align:left; font-size:10px;">
+                        ${p.refTexto ? p.refTexto : `${p.refMin \vert{}\vert{} '-'} -${p.refMax || '-'}`}
+                    </td>
+                    <td style="padding: 8px; border: 1px solid #cbd5e1; text-align:center; font-style:italic; font-size:10px;">${catEx.metodo || 'Colorimétrico'}</td>
+                </tr>
+            `;
+        });
+
+        return `
+            <div style="font-size:11px; font-weight:bold; margin-bottom:4px;">Muestra: ${catEx.muestra || 'Suero'}</div>
+            <table style="width:100%; border-collapse:collapse; font-size:11px;">
+                <thead>
+                    <tr style="background-color: #bae6fd; color: #0369a1;">
+                        <th style="padding: 6px; border: 1px solid #7dd3fc; text-align:left;">Bioquímica</th>
+                        <th style="padding: 6px; border: 1px solid #7dd3fc; text-align:center;">Resultado</th>
+                        <th style="padding: 6px; border: 1px solid #7dd3fc; text-align:center;">Unidad</th>
+                        <th style="padding: 6px; border: 1px solid #7dd3fc; text-align:left;">Valor Referencial</th>
+                        <th style="padding: 6px; border: 1px solid #7dd3fc; text-align:center;">Método</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${filasHTML}
+                </tbody>
+            </table>
+        `;
+    }
+
+    // PLANTILLA: HEMOGLOBINA GLICOSILADA (HbA1c)
+    if (tipoPlantilla === 'hba1c') {
+        const resKey = `${ex.codigo}_0`;
+        const resData = orden.resultados[resKey] || {};
+
+        return `
+            <table style="width:100%; border-collapse:collapse; font-size:11px; margin-top:5px;">
+                <thead>
+                    <tr style="background-color: #bae6fd; color: #0369a1; text-align:center;">
+                        <th style="padding: 6px; border: 1px solid #7dd3fc;">MUESTRA</th>
+                        <th style="padding: 6px; border: 1px solid #7dd3fc;">RESULTADO</th>
+                        <th style="padding: 6px; border: 1px solid #7dd3fc;">UNIDAD</th>
+                        <th style="padding: 6px; border: 1px solid #7dd3fc;">VALOR REFERENCIAL</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td style="padding: 10px; border: 1px solid #cbd5e1; font-weight:bold; text-align:center;">${catEx.muestra || 'SANGRE'}</td>
+                        <td style="padding: 10px; border: 1px solid #cbd5e1; font-weight:bold; text-align:center; font-size:14px;">${resData.resultado || '-'}</td>
+                        <td style="padding: 10px; border: 1px solid #cbd5e1; text-align:center;">%</td>
+                        <td style="padding: 10px; border: 1px solid #cbd5e1; text-align:left; font-size:11px; line-height:1.4;">
+                            Normal: Menos del 5.7%<br>
+                            Prediabetes: 5.7% - 6.4%<br>
+                            Diabetes: 6.5% a más
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        `;
+    }
+
+    // PLANTILLA: ESTÁNDAR
+    let filasEstandar = '';
+    params.forEach((p, idx) => {
+        const resKey = `${ex.codigo}_${idx}`;
+        const resData = orden.resultados[resKey] || {};
+
+        let valRefHTML = p.refTexto || (p.refMin || p.refMax ? `${p.refMin || '-'} - ${p.refMax || '-'}` : '-');
+
+        filasEstandar += `
+            <tr style="background-color: #f8fafc;">
+                <td style="padding: 8px; border: 1px solid #e2e8f0; font-weight: bold; text-align:left;">${p.nombre}</td>
+                <td style="padding: 8px; border: 1px solid #e2e8f0; font-weight: bold; font-size:13px; text-align:center;">${resData.resultado || '-'}</td>
+                <td style="padding: 8px; border: 1px solid #e2e8f0; text-align:center;">${p.unidad || '-'}</td>
+                <td style="padding: 8px; border: 1px solid #e2e8f0; text-align:center;">${valRefHTML}</td>
+                <td style="padding: 8px; border: 1px solid #e2e8f0; font-style: italic; font-size: 11px; text-align:center;">${catEx.metodo || 'Estándar'}</td>
+            </tr>
+        `;
+    });
+
+    return `
+        <table style="width:100%; border-collapse:collapse; font-size:11px; text-align:center;">
+            <thead>
+                <tr style="background-color: #dbeafe; color: #1e3a8a;">
+                    <th style="padding: 6px; border: 1px solid #bfdbfe; text-align:left;">PARÁMETRO / PRUEBA</th>
+                    <th style="padding: 6px; border: 1px solid #bfdbfe;">RESULTADO</th>
+                    <th style="padding: 6px; border: 1px solid #bfdbfe;">UNIDAD</th>
+                    <th style="padding: 6px; border: 1px solid #bfdbfe;">VALOR REFERENCIAL</th>
+                    <th style="padding: 6px; border: 1px solid #bfdbfe;">MÉTODO</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${filasEstandar}
+            </tbody>
+        </table>
+    `;
+}
+
 function visualizarEImprimirResultados() {
     if (!ordenActualVisualizando) return;
 
@@ -677,55 +888,14 @@ function visualizarEImprimirResultados() {
 
     ordenActualVisualizando.examenes.forEach(ex => {
         const catEx = catalogoExamenes.find(c => c.codigo === ex.codigo) || ex;
-        const params = Array.isArray(catEx.parametros) ? catEx.parametros : [];
-
-        let filasTablaHTML = '';
-
-        if (params.length > 0) {
-            params.forEach((p, idx) => {
-                const resKey = `${ex.codigo}_${idx}`;
-                const resData = ordenActualVisualizando.resultados[resKey] || {};
-
-                let valRefHTML = '';
-                if (p.refMin || p.refMax) {
-                    valRefHTML = `${p.refMin || '-'} - ${p.refMax || '-'}`;
-                } else {
-                    valRefHTML = p.refTexto || '-';
-                }
-
-                filasTablaHTML += `
-                    <tr style="background-color: #f8fafc;">
-                        <td style="padding: 8px; border: 1px solid #e2e8f0; font-weight: bold; text-align:left;">${p.nombre}</td>
-                        <td style="padding: 8px; border: 1px solid #e2e8f0; font-weight: bold; font-size:13px;">${resData.resultado || '-'}</td>
-                        <td style="padding: 8px; border: 1px solid #e2e8f0;">${p.unidad || '-'}</td>
-                        <td style="padding: 8px; border: 1px solid #e2e8f0;">${valRefHTML}</td>
-                        <td style="padding: 8px; border: 1px solid #e2e8f0; font-style: italic; font-size: 11px;">${catEx.metodo || 'Estándar'}</td>
-                    </tr>
-                `;
-            });
-        }
+        const contenidoExamen = generarTablaEspecializada(ex, catEx, ordenActualVisualizando);
 
         bloquesExamenesHTML += `
-            <div style="margin-top:20px;">
-                <h3 style="text-align:center; font-size:16px; font-weight:bold; margin-bottom:8px; font-family:'Segoe UI', sans-serif; color: #0072bc;">
+            <div style="margin-top:20px; page-break-inside: avoid;">
+                <h3 style="text-align:center; font-size:16px; font-weight:bold; margin-bottom:8px; font-family:'Segoe UI', sans-serif; color: #0072bc; text-transform: uppercase;">
                     ${ex.nombre}
                 </h3>
-                ${params.length > 0 ? `
-                <table style="width:100%; border-collapse:collapse; font-size:11px; text-align:center;">
-                    <thead>
-                        <tr style="background-color: #dbeafe; color: #1e3a8a;">
-                            <th style="padding: 6px; border: 1px solid #bfdbfe; text-align:left;">PARÁMETRO / PRUEBA</th>
-                            <th style="padding: 6px; border: 1px solid #bfdbfe;">RESULTADO</th>
-                            <th style="padding: 6px; border: 1px solid #bfdbfe;">UNIDAD</th>
-                            <th style="padding: 6px; border: 1px solid #bfdbfe;">VALOR REFERENCIAL</th>
-                            <th style="padding: 6px; border: 1px solid #bfdbfe;">MÉTODO</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${filasTablaHTML}
-                    </tbody>
-                </table>
-                ` : `<p style="text-align:center; font-size:12px; color:#64748b; font-style:italic;">Examen sin plantilla de parámetros específicos.</p>`}
+                ${contenidoExamen}
             </div>
         `;
     });
