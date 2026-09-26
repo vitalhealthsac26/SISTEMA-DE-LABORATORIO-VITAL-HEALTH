@@ -79,7 +79,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 /* ========================================================
-   FUNCIÓN DE CONSULTA DNI AUTOMÁTICA (CON RESPALDOS ROBUSTOS)
+   FUNCIÓN DE CONSULTA DNI AUTOMÁTICA (OPTIMIZADA Y SIN CORS)
    ======================================================== */
 async function consultarDNI() {
   const inputDni = document.getElementById('v-dni');
@@ -97,30 +97,24 @@ async function consultarDNI() {
   const textoAnterior = inputPaciente.value;
   inputPaciente.value = "Consultando RENIEC...";
 
-  // Lista de servidores de consulta DNI en orden de respaldo
+  // Lista de servidores de consulta DNI abiertos en cascada
   const apis = [
     {
-      url: `https://dniruc.apisperu.com/api/v1/dni/${dni}?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjoicHJ1ZWJhIiwiaWF0IjoxNjE2Nzk2ODAwfQ.test`,
+      url: `https://api.apis.net.pe/v1/dni?numero=${dni}`,
       parse: (d) => ({
-        nombre: d.nombres ? `${d.nombres} ${d.apellidoPaterno} ${d.apellidoMaterno}` : null,
-        sexo: d.sexo || null,
-        fnac: d.fechaNacimiento || null
+        nombre: d.nombre ? d.nombre : (d.nombres ? `${d.nombres} ${d.apellidoPaterno} ${d.apellidoMaterno}` : null)
       })
     },
     {
-      url: `https://api.perudevs.com/api/v1/dni/complete?document=${dni}&key=cGVydWRldnMucHJvZHVjdGlvbi5zdWJzY3JpcHRpb24uNjVjNTcxNzlmN2FiMTYyYjIwMGI3YjI2`,
+      url: `https://apiperu.dev/api/dni/${dni}`,
       parse: (d) => ({
-        nombre: d.result ? `${d.result.nombres} ${d.result.apellido_paterno} ${d.result.apellido_materno}` : null,
-        sexo: d.result ? d.result.genero : null,
-        fnac: d.result ? d.result.fecha_nacimiento : null
+        nombre: d.data ? `${d.data.nombres} ${d.data.apellido_paterno} ${d.data.apellido_materno}` : null
       })
     },
     {
-      url: `https://api.facturactiva.com/dni/${dni}`,
+      url: `https://dni.myoutsourcing.com.pe/api/dni/${dni}`,
       parse: (d) => ({
-        nombre: d.nombres ? `${d.nombres} ${d.apellido_paterno} ${d.apellido_materno}` : null,
-        sexo: null,
-        fnac: null
+        nombre: d.nombres ? `${d.nombres} ${d.apellidoPaterno} ${d.apellidoMaterno}` : null
       })
     }
   ];
@@ -134,34 +128,15 @@ async function consultarDNI() {
 
         if (data.nombre && data.nombre.trim().length > 3) {
           inputPaciente.value = data.nombre.trim().toUpperCase();
-
-          // Autocompletar Sexo si la API lo devuelve
-          if (data.sexo) {
-            let s = String(data.sexo).toUpperCase();
-            if (s.startsWith('M') || s.includes('MASCULINO')) inputSexo.value = 'MASCULINO';
-            if (s.startsWith('F') || s.includes('FEMENINO')) inputSexo.value = 'FEMENINO';
-          }
-
-          // Autocompletar Fecha Nacimiento y Edad
-          if (data.fnac) {
-            let f = data.fnac;
-            if (f.includes('/')) {
-              let p = f.split('/');
-              if (p.length === 3) f = `${p[2]}-${p[1].padStart(2, '0')}-${p[0].padStart(2, '0')}`;
-            }
-            inputFnac.value = f;
-            calcularEdad();
-          }
-
           return; // Éxito en la consulta
         }
       }
     } catch (e) {
-      console.warn("Intento de consulta DNI fallido, probando siguiente servidor...", e);
+      console.warn("Error en servidor DNI, probando el siguiente...", e);
     }
   }
 
-  // Si todas las APIs fallan
+  // Si todos los servidores fallan
   alert('No se pudo obtener los datos automáticamente en este momento. Por favor ingréselos manualmente.');
   inputPaciente.value = (textoAnterior === "Consultando RENIEC...") ? '' : textoAnterior;
   inputPaciente.focus();
