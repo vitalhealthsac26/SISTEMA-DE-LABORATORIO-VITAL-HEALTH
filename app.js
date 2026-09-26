@@ -79,7 +79,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 /* ========================================================
-   FUNCIÓN DE CONSULTA DNI AUTOMÁTICA (OPTIMIZADA Y SIN CORS)
+   FUNCIÓN DE CONSULTA DNI DEFINITIVA (SOPORTE GITHUB PAGES)
    ======================================================== */
 async function consultarDNI() {
   const inputDni = document.getElementById('v-dni');
@@ -97,51 +97,59 @@ async function consultarDNI() {
   const textoAnterior = inputPaciente.value;
   inputPaciente.value = "Consultando RENIEC...";
 
-  // Lista de servidores de consulta DNI abiertos en cascada
-  const apis = [
-    {
-      url: `https://api.apis.net.pe/v1/dni?numero=${dni}`,
-      parse: (d) => ({
-        nombre: d.nombre ? d.nombre : (d.nombres ? `${d.nombres} ${d.apellidoPaterno} ${d.apellidoMaterno}` : null)
-      })
-    },
-    {
-      url: `https://apiperu.dev/api/dni/${dni}`,
-      parse: (d) => ({
-        nombre: d.data ? `${d.data.nombres} ${d.data.apellido_paterno} ${d.data.apellido_materno}` : null
-      })
-    },
-    {
-      url: `https://dni.myoutsourcing.com.pe/api/dni/${dni}`,
-      parse: (d) => ({
-        nombre: d.nombres ? `${d.nombres} ${d.apellidoPaterno} ${d.apellidoMaterno}` : null
-      })
-    }
+  // Lista de endpoints con Bypass de CORS para GitHub Pages
+  const endpoints = [
+    `https://api.allorigins.win/raw?url=${encodeURIComponent(`https://api.apisperu.com/api/v1/dni/${dni}?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjoicHJ1ZWJhIiwiaWF0IjoxNjE2Nzk2ODAwfQ.test`)}`,
+    `https://corsproxy.io/?${encodeURIComponent(`https://dniruc.apisperu.com/api/v1/dni/${dni}?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjoicHJ1ZWJhIiwiaWF0IjoxNjE2Nzk2ODAwfQ.test`)}`
   ];
 
-  for (let api of apis) {
+  for (let url of endpoints) {
     try {
-      let res = await fetch(api.url);
+      let res = await fetch(url);
       if (res.ok) {
-        let rawData = await res.json();
-        let data = api.parse(rawData);
+        let data = await res.json();
+        let nombreCompleto = "";
 
-        if (data.nombre && data.nombre.trim().length > 3) {
-          inputPaciente.value = data.nombre.trim().toUpperCase();
-          return; // Éxito en la consulta
+        if (data.nombres) {
+          nombreCompleto = `${data.nombres} ${data.apellidoPaterno || ''} ${data.apellidoMaterno || ''}`.trim();
+        } else if (data.nombre) {
+          nombreCompleto = data.nombre.trim();
+        }
+
+        if (nombreCompleto.length > 3) {
+          inputPaciente.value = nombreCompleto.toUpperCase();
+
+          // Autocompletar Sexo si viene disponible
+          if (data.sexo) {
+            let s = String(data.sexo).toUpperCase();
+            if (s.startsWith('M') || s.includes('MASCULINO')) inputSexo.value = 'MASCULINO';
+            if (s.startsWith('F') || s.includes('FEMENINO')) inputSexo.value = 'FEMENINO';
+          }
+
+          // Autocompletar Fecha de Nacimiento
+          if (data.fechaNacimiento) {
+            let f = data.fechaNacimiento;
+            if (f.includes('/')) {
+              let p = f.split('/');
+              if (p.length === 3) f = `${p[2]}-${p[1].padStart(2, '0')}-${p[0].padStart(2, '0')}`;
+            }
+            inputFnac.value = f;
+            if (typeof calcularEdad === 'function') calcularEdad();
+          }
+
+          return; // Consulta exitosa
         }
       }
     } catch (e) {
-      console.warn("Error en servidor DNI, probando el siguiente...", e);
+      console.warn("Proxy fallido, probando siguiente opción...", e);
     }
   }
 
-  // Si todos los servidores fallan
+  // Si no se logran obtener los datos
   alert('No se pudo obtener los datos automáticamente en este momento. Por favor ingréselos manualmente.');
   inputPaciente.value = (textoAnterior === "Consultando RENIEC...") ? '' : textoAnterior;
   inputPaciente.focus();
 }
-
 function cambiarModulo(idModulo, event) {
   document.querySelectorAll('.modulo').forEach(m => m.classList.remove('active'));
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
