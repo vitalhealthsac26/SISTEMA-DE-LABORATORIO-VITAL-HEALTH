@@ -225,13 +225,16 @@
                 <!-- SECCIÓN 4: CATÁLOGO Y CONFIGURACIÓN DE PLANTILLAS -->
                 <section id="sec-catalogo" class="section-content d-none">
                     <div class="row g-4">
-                        <!-- Formulario de Configuración de Plantillas -->
+                        <!-- Formulario de Edición / Creación -->
                         <div class="col-12 col-lg-5">
                             <div class="card shadow-sm border-0">
-                                <div class="card-header bg-white py-3 border-bottom">
+                                <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
                                     <h5 class="card-title fw-bold text-primary mb-0" id="catalogo-form-titulo">
-                                        <i class="bi bi-sliders me-2"></i>Configurar Examen y Plantilla
+                                        <i class="bi bi-sliders me-2"></i>Editar Examen Seleccionado
                                     </h5>
+                                    <button class="btn btn-sm btn-outline-success" type="button" onclick="prepararNuevoExamen()">
+                                        <i class="bi bi-plus-lg"></i> Nuevo Examen
+                                    </button>
                                 </div>
                                 <div class="card-body">
                                     <form id="form-catalogo" onsubmit="event.preventDefault(); guardarExamenCatalogo();">
@@ -288,10 +291,7 @@
 
                                         <div class="d-grid gap-2">
                                             <button type="submit" class="btn btn-primary fw-semibold" id="btn-guardar-cat">
-                                                <i class="bi bi-save me-1"></i>Guardar Examen y Plantilla
-                                            </button>
-                                            <button type="button" class="btn btn-outline-secondary d-none" id="btn-cancelar-cat" onclick="cancelarEdicionCatalogo()">
-                                                Cancelar Edición
+                                                <i class="bi bi-save me-1"></i>Guardar Cambios del Examen
                                             </button>
                                         </div>
                                     </form>
