@@ -8,13 +8,30 @@ if (typeof firebase !== 'undefined' && !firebase.apps.length) {
 }
 const db = (typeof firebase !== 'undefined') ? firebase.database() : null;
 
-// Catálogo base de exámenes
+// Catálogo base con plantillas
 let catalogoExamenes = [
-    { codigo: 'EX001', nombre: 'HEMOGRAMA COMPLETO', precio: 25.00 },
-    { codigo: 'EX002', nombre: 'PERFIL LIPÍDICO: Colesterol Total, Triglicéridos, HDL, LDL', precio: 50.00 },
-    { codigo: 'EX003', nombre: 'PERFIL DE COAGULACIÓN', precio: 130.00 },
-    { codigo: 'EX004', nombre: 'GLUCOSA EN AYUNAS', precio: 15.00 },
-    { codigo: 'EX005', nombre: 'EXAMEN COMPLETO DE ORINA', precio: 20.00 }
+    {
+        codigo: 'EX001',
+        nombre: 'ÁCIDO ÚRICO',
+        precio: 25.00,
+        muestra: 'Suero',
+        unidad: 'mg/dL',
+        refMin: '2.50',
+        refMax: '7.00',
+        refTexto: '',
+        metodo: 'Colorimétrico enzimático o Espectrofotometría EC9200'
+    },
+    {
+        codigo: 'EX002',
+        nombre: 'HEMOGLOBINA GLICOSILADA (HbA1c)',
+        precio: 50.00,
+        muestra: 'Sangre',
+        unidad: '%',
+        refMin: '',
+        refMax: '',
+        refTexto: 'Normal: Menos del 5.7%\nPrediabetes: 5.7- 6.4%\nDiabetes: 6.5% a más',
+        metodo: 'Inmunoturbidimetría'
+    }
 ];
 
 let examenesSeleccionados = [];
@@ -49,13 +66,19 @@ async function cargarProductosJSON() {
                 catalogoExamenes = data.map((prod, index) => ({
                     codigo: String(prod.Codigo || prod.codigo || index + 1),
                     nombre: String(prod.Nombre || prod.nombre || '').toUpperCase(),
-                    precio: parseFloat(prod.Precio || prod.precio || 0)
+                    precio: parseFloat(prod.Precio || prod.precio || 0),
+                    muestra: prod.muestra || 'Suero',
+                    unidad: prod.unidad || '',
+                    refMin: prod.refMin || '',
+                    refMax: prod.refMax || '',
+                    refTexto: prod.refTexto || '',
+                    metodo: prod.metodo || ''
                 }));
                 guardarCatalogoLocal();
             }
         }
     } catch (error) {
-        console.error('No se pudo cargar productos.json:', error);
+        console.warn('Cargando catálogo básico.');
     }
 }
 
@@ -96,7 +119,6 @@ function showSection(sectionId) {
     const sec = document.getElementById(`sec-${sectionId}`);
     if (sec) sec.classList.remove('d-none');
     
-    // Activar el enlace del menú dinámicamente
     const activeNav = document.querySelector(`.nav-link[onclick*="'${sectionId}'"]`);
     if (activeNav) activeNav.classList.add('active');
 
@@ -127,54 +149,28 @@ async function buscarPaciente() {
     const dni = dniInput.value.trim();
 
     if (dni.length !== 8 || isNaN(dni)) {
-        return alert('Por favor, ingrese un número de DNI válido de 8 dígitos.');
+        return alert('Por favor, ingrese un DNI de 8 dígitos.');
     }
 
     const encontrada = ordenesLocales.find(o => o.dni === dni);
     if (encontrada) {
         document.getElementById('pac-nombre').value = encontrada.paciente;
         document.getElementById('pac-edad').value = encontrada.edad;
+        document.getElementById('pac-sexo').value = encontrada.sexo || 'MASCULINO';
         return;
     }
-
-    const btnText = document.getElementById('btn-text');
-    if (btnText) btnText.innerText = 'Buscando...';
-
-    let encontrado = false;
 
     try {
         const response = await fetch(`https://apiperu.dev/api/dni/${dni}`);
         if (response.ok) {
             const res = await response.json();
             if (res.data) {
-                const nombreCompleto = `${res.data.nombres} ${res.data.apellido_paterno} ${res.data.apellido_materno}`.trim();
-                document.getElementById('pac-nombre').value = nombreCompleto;
-                encontrado = true;
+                document.getElementById('pac-nombre').value = `${res.data.nombres} ${res.data.apellido_paterno} ${res.data.apellido_materno}`.trim();
             }
         }
     } catch (e) {
-        console.warn('Falló intento 1 DNI:', e);
+        alert('No se pudo conectar a RENIEC. Ingrese el nombre manualmente.');
     }
-
-    if (!encontrado) {
-        try {
-            const response = await fetch(`https://api.apis.net.pe/v1/dni?numero=${dni}`);
-            if (response.ok) {
-                const data = await response.json();
-                const nombreCompleto = `${data.nombres} ${data.apellidoPaterno} ${data.apellidoMaterno}`.trim();
-                document.getElementById('pac-nombre').value = nombreCompleto;
-                encontrado = true;
-            }
-        } catch (e) {
-            console.warn('Falló intento 2 DNI:', e);
-        }
-    }
-
-    if (!encontrado) {
-        alert('No se obtuvo respuesta automática de RENIEC. Por favor, ingrese el nombre manualmente.');
-    }
-
-    if (btnText) btnText.innerText = 'Consultar';
 }
 
 function filtrarExamenes(texto) {
@@ -260,15 +256,16 @@ function renderizarTablaCatalogo(filtro = '') {
     if (countEl) countEl.innerText = filtrados.length;
 
     if (filtrados.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="4" class="text-center text-muted py-3">No hay exámenes registrados.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted py-3">No hay exámenes registrados.</td></tr>';
         return;
     }
 
-    filtrados.slice(0, 100).forEach(ex => {
+    filtrados.forEach(ex => {
         const tr = document.createElement('tr');
         tr.innerHTML = `
             <td><span class="badge bg-light text-dark border">${ex.codigo}</span></td>
             <td><strong>${ex.nombre}</strong></td>
+            <td><small class="text-muted">${ex.muestra || 'Suero'} | ${ex.metodo || 'Estándar'}</small></td>
             <td>S/ ${ex.precio.toFixed(2)}</td>
             <td class="text-end px-3">
                 <button class="btn btn-sm btn-outline-primary me-1" onclick="editarExamenCatalogo('${ex.codigo}')">
@@ -289,26 +286,33 @@ function guardarExamenCatalogo() {
     const nombre = document.getElementById('cat-nombre').value.trim().toUpperCase();
     const precio = parseFloat(document.getElementById('cat-precio').value);
 
+    const muestra = document.getElementById('cat-muestra').value.trim();
+    const unidad = document.getElementById('cat-unidad').value.trim();
+    const refMin = document.getElementById('cat-ref-min').value.trim();
+    const refMax = document.getElementById('cat-ref-max').value.trim();
+    const refTexto = document.getElementById('cat-ref-texto').value.trim();
+    const metodo = document.getElementById('cat-metodo').value.trim();
+
     if (!codigo || !nombre || isNaN(precio)) {
-        return alert('Por favor complete todos los campos del examen.');
+        return alert('Por favor complete el Código, Nombre y Precio del examen.');
     }
+
+    const examenObj = { codigo, nombre, precio, muestra, unidad, refMin, refMax, refTexto, metodo };
 
     if (idOrig) {
         const idx = catalogoExamenes.findIndex(e => e.codigo === idOrig);
-        if (idx !== -1) {
-            catalogoExamenes[idx] = { codigo, nombre, precio };
-        }
+        if (idx !== -1) catalogoExamenes[idx] = examenObj;
     } else {
         if (catalogoExamenes.some(e => e.codigo === codigo)) {
-            return alert('Ya existe un examen con este mismo código.');
+            return alert('Ya existe un examen con este código.');
         }
-        catalogoExamenes.unshift({ codigo, nombre, precio });
+        catalogoExamenes.unshift(examenObj);
     }
 
     guardarCatalogoLocal();
     renderizarTablaCatalogo();
     cancelarEdicionCatalogo();
-    alert('Examen guardado correctamente.');
+    alert('Examen y plantilla guardados correctamente.');
 }
 
 function editarExamenCatalogo(codigo) {
@@ -319,8 +323,14 @@ function editarExamenCatalogo(codigo) {
     document.getElementById('cat-codigo').value = ex.codigo;
     document.getElementById('cat-nombre').value = ex.nombre;
     document.getElementById('cat-precio').value = ex.precio;
+    document.getElementById('cat-muestra').value = ex.muestra || '';
+    document.getElementById('cat-unidad').value = ex.unidad || '';
+    document.getElementById('cat-ref-min').value = ex.refMin || '';
+    document.getElementById('cat-ref-max').value = ex.refMax || '';
+    document.getElementById('cat-ref-texto').value = ex.refTexto || '';
+    document.getElementById('cat-metodo').value = ex.metodo || '';
 
-    document.getElementById('catalogo-form-titulo').innerHTML = '<i class="bi bi-pencil-square me-2"></i>Editar Examen';
+    document.getElementById('catalogo-form-titulo').innerHTML = '<i class="bi bi-pencil-square me-2"></i>Editar Examen / Plantilla';
     document.getElementById('btn-guardar-cat').innerHTML = '<i class="bi bi-check-circle me-1"></i>Actualizar Examen';
     document.getElementById('btn-cancelar-cat').classList.remove('d-none');
 }
@@ -328,13 +338,13 @@ function editarExamenCatalogo(codigo) {
 function cancelarEdicionCatalogo() {
     document.getElementById('form-catalogo').reset();
     document.getElementById('cat-id-original').value = '';
-    document.getElementById('catalogo-form-titulo').innerHTML = '<i class="bi bi-plus-circle me-2"></i>Agregar Nuevo Examen';
-    document.getElementById('btn-guardar-cat').innerHTML = '<i class="bi bi-save me-1"></i>Guardar Examen';
+    document.getElementById('catalogo-form-titulo').innerHTML = '<i class="bi bi-sliders me-2"></i>Configurar Examen y Plantilla';
+    document.getElementById('btn-guardar-cat').innerHTML = '<i class="bi bi-save me-1"></i>Guardar Examen y Plantilla';
     document.getElementById('btn-cancelar-cat').classList.add('d-none');
 }
 
 function eliminarExamenCatalogo(codigo) {
-    if (confirm(`¿Está seguro de eliminar el examen con código ${codigo}?`)) {
+    if (confirm(`¿Desea eliminar el examen ${codigo}?`)) {
         catalogoExamenes = catalogoExamenes.filter(e => e.codigo !== codigo);
         guardarCatalogoLocal();
         renderizarTablaCatalogo();
@@ -344,11 +354,13 @@ function eliminarExamenCatalogo(codigo) {
 function guardarOrdenGenerarTicket() {
     const dni = document.getElementById('pac-dni').value.trim();
     const paciente = document.getElementById('pac-nombre').value.trim();
+    const doctor = document.getElementById('pac-doctor').value.trim() || 'Particular';
     const edad = document.getElementById('pac-edad').value.trim();
+    const sexo = document.getElementById('pac-sexo').value;
     const metodo = document.getElementById('metodo-pago').value;
 
     if (!dni || !paciente || examenesSeleccionados.length === 0) {
-        return alert('Por favor complete todos los datos requeridos y añada al menos un examen.');
+        return alert('Complete los datos obligatorios del paciente y agregue al menos un examen.');
     }
 
     const numOrden = `VH-2026-${String(ordenesLocales.length + 1).padStart(5, '0')}`;
@@ -362,11 +374,13 @@ function guardarOrdenGenerarTicket() {
         timestamp: ahora.getTime(),
         dni: dni,
         paciente: paciente,
+        doctor: doctor,
         edad: edad || 'N/A',
+        sexo: sexo,
         examenes: [...examenesSeleccionados],
         total: total,
         metodoPago: metodo,
-        estado: 'EN PROCESO',
+        estado: 'PENDIENTE',
         resultados: {}
     };
 
@@ -378,7 +392,7 @@ function guardarOrdenGenerarTicket() {
     examenesSeleccionados = [];
     renderExamenes();
     document.getElementById('form-paciente').reset();
-    alert('Orden guardada correctamente.');
+    alert('Orden registrada correctamente.');
 }
 
 function imprimirTicket58mm(orden) {
@@ -408,25 +422,12 @@ function imprimirTicket58mm(orden) {
         <div><strong>FECHA:</strong> ${orden.fecha} ${orden.hora}</div>
         <div><strong>DNI:</strong> ${orden.dni}</div>
         <div><strong>PACIENTE:</strong> ${orden.paciente}</div>
-        <div><strong>EDAD:</strong> ${orden.edad}</div>
         <div class="ticket-divider"></div>
         <table class="ticket-table">
-            <thead>
-                <tr>
-                    <th>Examen</th>
-                    <th class="text-end">Importe</th>
-                </tr>
-            </thead>
-            <tbody>
-                ${listaHTML}
-            </tbody>
+            <tbody>${listaHTML}</tbody>
         </table>
         <div class="ticket-divider"></div>
         <div class="text-end"><strong>TOTAL: S/ ${orden.total.toFixed(2)}</strong></div>
-        <div class="ticket-divider"></div>
-        <div class="text-center" style="margin-top: 5px;">
-            Gracias por confiar en Vital Health.<br>Tu salud es nuestra prioridad.
-        </div>
     `;
 
     window.print();
@@ -444,11 +445,9 @@ function cargarOrdenes() {
             <td>${orden.fecha}</td>
             <td>${orden.dni}</td>
             <td>${orden.paciente}</td>
-            <td>${orden.edad}</td>
-            <td>S/ ${orden.total.toFixed(2)}</td>
-            <td><span class="badge bg-warning text-dark">${orden.estado}</span></td>
+            <td><span class="badge ${orden.estado === 'COMPLETADO' ? 'bg-success' : 'bg-warning text-dark'}">${orden.estado}</span></td>
             <td class="text-end px-3">
-                <button class="btn btn-sm btn-primary me-1" onclick="abrirResultados('${orden.id}')"><i class="bi bi-journal-medical"></i> Resultados</button>
+                <button class="btn btn-sm btn-primary me-1" onclick="abrirResultados('${orden.id}')"><i class="bi bi-journal-medical"></i> Cargar Resultados</button>
                 <button class="btn btn-sm btn-outline-danger" onclick="eliminarOrden('${orden.id}')"><i class="bi bi-trash"></i></button>
             </td>
         `;
@@ -457,7 +456,7 @@ function cargarOrdenes() {
 }
 
 function eliminarOrden(id) {
-    if (confirm(`¿Está seguro de que desea eliminar la orden ${id}? Esta acción no se puede deshacer.`)) {
+    if (confirm(`¿Eliminar la orden ${id}?`)) {
         ordenesLocales = ordenesLocales.filter(o => o.id !== id);
         guardarEnNubeYLocal();
         cargarOrdenes();
@@ -476,18 +475,32 @@ function abrirResultados(ordenId) {
     let camposHTML = '';
 
     orden.examenes.forEach((ex) => {
-        const val = (orden.resultados && orden.resultados[ex.codigo]) ? orden.resultados[ex.codigo] : '';
+        const catEx = catalogoExamenes.find(c => c.codigo === ex.codigo) || ex;
+        const valRes = (orden.resultados && orden.resultados[ex.codigo]) ? orden.resultados[ex.codigo].resultado : '';
+
         camposHTML += `
-            <div class="mb-3 p-3 border rounded bg-light">
-                <h6 class="fw-bold text-primary">${ex.nombre}</h6>
-                <div class="row g-2">
-                    <div class="col-12 col-md-8">
-                        <label class="form-label small fw-semibold">Resultado</label>
-                        <input type="text" id="res-${ex.codigo}" class="form-control" value="${val}">
-                    </div>
-                    <div class="col-12 col-md-4">
-                        <label class="form-label small fw-semibold">Unidad / Observaciones</label>
-                        <input type="text" id="obs-${ex.codigo}" class="form-control" placeholder="Valores normales...">
+            <div class="card mb-3 shadow-sm border">
+                <div class="card-header bg-light">
+                    <h6 class="fw-bold text-primary mb-0">${ex.nombre}</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-12 col-md-3">
+                            <label class="form-label small fw-semibold">Muestra</label>
+                            <input type="text" id="res-muestra-${ex.codigo}" class="form-control form-control-sm" value="${catEx.muestra || 'Suero'}">
+                        </div>
+                        <div class="col-12 col-md-3">
+                            <label class="form-label small fw-semibold">Resultado obtenido</label>
+                            <input type="text" id="res-val-${ex.codigo}" class="form-control form-control-sm border-primary fw-bold" value="${valRes}">
+                        </div>
+                        <div class="col-12 col-md-2">
+                            <label class="form-label small fw-semibold">Unidad</label>
+                            <input type="text" id="res-unidad-${ex.codigo}" class="form-control form-control-sm" value="${catEx.unidad || ''}">
+                        </div>
+                        <div class="col-12 col-md-4">
+                            <label class="form-label small fw-semibold">Método</label>
+                            <input type="text" id="res-metodo-${ex.codigo}" class="form-control form-control-sm" value="${catEx.metodo || ''}">
+                        </div>
                     </div>
                 </div>
             </div>
@@ -497,7 +510,9 @@ function abrirResultados(ordenId) {
     container.innerHTML = `
         <div class="p-3 mb-3 bg-light border rounded">
             <h5 class="fw-bold mb-1">Paciente: ${orden.paciente}</h5>
-            <div class="text-muted small"><strong>DNI:</strong> ${orden.dni} | <strong>Edad:</strong> ${orden.edad} | <strong>N° Orden:</strong> ${orden.id}</div>
+            <div class="text-muted small">
+                <strong>DNI:</strong> ${orden.dni} | <strong>Edad:</strong> ${orden.edad} | <strong>Doctor:</strong> ${orden.doctor || 'Particular'}
+            </div>
         </div>
         ${camposHTML}
         <div class="d-flex flex-wrap gap-2 mt-4">
@@ -510,17 +525,21 @@ function abrirResultados(ordenId) {
 function guardarResultados() {
     if (!ordenActualVisualizando) return;
 
+    if (!ordenActualVisualizando.resultados) ordenActualVisualizando.resultados = {};
+
     ordenActualVisualizando.examenes.forEach(ex => {
-        const el = document.getElementById(`res-${ex.codigo}`);
-        if (el) {
-            if (!ordenActualVisualizando.resultados) ordenActualVisualizando.resultados = {};
-            ordenActualVisualizando.resultados[ex.codigo] = el.value;
-        }
+        const resVal = document.getElementById(`res-val-${ex.codigo}`)?.value || '';
+        const muestra = document.getElementById(`res-muestra-${ex.codigo}`)?.value || '';
+        const unidad = document.getElementById(`res-unidad-${ex.codigo}`)?.value || '';
+        const metodo = document.getElementById(`res-metodo-${ex.codigo}`)?.value || '';
+
+        ordenActualVisualizando.resultados[ex.codigo] = { resultado: resVal, muestra, unidad, metodo };
     });
 
     ordenActualVisualizando.estado = 'COMPLETADO';
     guardarEnNubeYLocal();
-    alert('Resultados guardados exitosamente.');
+    cargarOrdenes();
+    alert('Resultados guardados correctamente.');
 }
 
 function visualizarEImprimirResultados() {
@@ -528,14 +547,56 @@ function visualizarEImprimirResultados() {
 
     guardarResultados();
 
-    let filasResultados = '';
+    let bloquesExamenesHTML = '';
+
     ordenActualVisualizando.examenes.forEach(ex => {
-        const val = ordenActualVisualizando.resultados[ex.codigo] || 'Pendiente';
-        filasResultados += `
-            <tr>
-                <td style="padding: 10px; border-bottom: 1px solid #e2e8f0;"><strong>${ex.nombre}</strong></td>
-                <td style="padding: 10px; border-bottom: 1px solid #e2e8f0;">${val}</td>
-            </tr>
+        const catEx = catalogoExamenes.find(c => c.codigo === ex.codigo) || ex;
+        const resData = ordenActualVisualizando.resultados[ex.codigo] || {};
+
+        let valRefHTML = '';
+        if (catEx.refMin || catEx.refMax) {
+            valRefHTML = `
+                <table style="width:100%; text-align:center; border-collapse:collapse; font-size:12px;">
+                    <tr>
+                        <td style="border-bottom:1px solid #ccc; padding-bottom:2px;">Mínimo</td>
+                        <td style="border-bottom:1px solid #ccc; padding-bottom:2px;">Máximo</td>
+                    </tr>
+                    <tr>
+                        <td style="padding-top:2px;">${catEx.refMin || '-'}</td>
+                        <td style="padding-top:2px;">${catEx.refMax || '-'}</td>
+                    </tr>
+                </table>
+            `;
+        } else {
+            valRefHTML = (catEx.refTexto || '-').replace(/\n/g, '<br>');
+        }
+
+        bloquesExamenesHTML += `
+            <div style="margin-top:25px;">
+                <h3 style="text-align:center; font-size:18px; font-weight:bold; margin-bottom:12px; font-family:'Segoe UI', sans-serif;">
+                    ${ex.nombre}
+                </h3>
+                <table style="width:100%; border-collapse:collapse; font-size:12px; text-align:center;">
+                    <thead>
+                        <tr style="background-color: #dbeafe; color: #1e3a8a;">
+                            <th style="padding: 8px; border: 1px solid #bfdbfe;">MUESTRA: ${resData.muestra || catEx.muestra || 'Suero'}</th>
+                            <th style="padding: 8px; border: 1px solid #bfdbfe;">RESULTADO</th>
+                            <th style="padding: 8px; border: 1px solid #bfdbfe;">UNIDAD</th>
+                            <th style="padding: 8px; border: 1px solid #bfdbfe;">VALOR REFERENCIAL</th>
+                            <th style="padding: 8px; border: 1px solid #bfdbfe;">MÉTODO</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr style="background-color: #f8fafc;">
+                            <td style="padding: 10px; border: 1px solid #e2e8f0; font-weight: bold;">${ex.nombre}</td>
+                            <td style="padding: 10px; border: 1px solid #e2e8f0; font-weight: bold; font-size:14px;">${resData.resultado || ''}</td>
+                            <td style="padding: 10px; border: 1px solid #e2e8f0;">${resData.unidad || catEx.unidad || ''}</td>
+                            <td style="padding: 10px; border: 1px solid #e2e8f0;">${valRefHTML}</td>
+                            <td style="padding: 10px; border: 1px solid #e2e8f0; font-style: italic; font-size: 11px;">${resData.metodo || catEx.metodo || ''}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
         `;
     });
 
@@ -544,42 +605,99 @@ function visualizarEImprimirResultados() {
         <!DOCTYPE html>
         <html>
         <head>
-            <title>Informe de Resultados - ${ordenActualVisualizando.id}</title>
+            <title>Resultado - ${ordenActualVisualizando.paciente}</title>
             <style>
-                body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 30px; color: #334155; }
-                .header { text-align: center; border-bottom: 2px solid #0072bc; padding-bottom: 12px; margin-bottom: 20px; }
-                .patient-info { background: #f8fafc; padding: 15px; border-radius: 6px; margin-bottom: 20px; border: 1px solid #e2e8f0; }
-                table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-                th { background: #0072bc; color: white; padding: 10px; text-align: left; font-size: 14px; }
-                .footer { margin-top: 40px; text-align: center; font-size: 12px; color: #64748b; }
+                @page { size: A4; margin: 15mm; }
+                body { font-family: 'Segoe UI', Arial, sans-serif; color: #1e293b; margin: 0; padding: 0; }
+                .header { display: flex; align-items: center; justify-content: space-between; border-bottom: 2px solid #0072bc; padding-bottom: 10px; }
+                .logo-section { display: flex; align-items: center; gap: 15px; }
+                .logo-img { height: 75px; }
+                .header-title h2 { margin: 0; color: #0072bc; font-size: 20px; font-weight: bold; }
+                .header-title p { margin: 2px 0; font-size: 12px; color: #475569; }
+                .header-info { font-size: 11px; color: #475569; text-align: right; }
+                
+                .patient-box {
+                    border: 1.5px solid #3b82f6;
+                    border-radius: 12px;
+                    padding: 12px 18px;
+                    margin-top: 15px;
+                    display: grid;
+                    grid-template-columns: 1fr 1fr;
+                    row-gap: 6px;
+                    font-size: 12px;
+                    font-weight: 600;
+                    color: #1e293b;
+                }
+
+                .footer-firma {
+                    margin-top: 60px;
+                    text-align: right;
+                    padding-right: 40px;
+                }
+                .firma-linea {
+                    display: inline-block;
+                    text-align: center;
+                    border-top: 1px solid #000;
+                    padding-top: 5px;
+                    width: 220px;
+                    font-size: 11px;
+                }
+
+                .footer-page {
+                    position: fixed;
+                    bottom: 0;
+                    left: 0;
+                    right: 0;
+                    border-top: 2px solid #0072bc;
+                    padding-top: 6px;
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    font-size: 11px;
+                    font-weight: bold;
+                    color: #0072bc;
+                }
             </style>
         </head>
         <body>
             <div class="header">
-                <h2 style="margin:0; color:#0072bc;">CENTRO MÉDICO VITAL HEALTH</h2>
-                <p style="margin:4px 0; font-weight:bold;">LABORATORIO CLÍNICO</p>
-                <small>Av. Grau N° 1799 - Piura | Tel: 984 089 927</small>
+                <div class="logo-section">
+                    <img src="logo.png" class="logo-img" onerror="this.style.display='none'">
+                    <div class="header-title">
+                        <h2>Centro Médico VITAL HEALTH</h2>
+                        <p>Laboratorio clínico, comprometido con tu salud.</p>
+                    </div>
+                </div>
+                <div class="header-info">
+                    📍 Av. Grau N° 1799 - Veintiséis de Octubre<br>
+                    📷 Vitalhealthlaboratorio | 👍 Vital Health's Lab
+                </div>
             </div>
-            <div class="patient-info">
-                <strong>PACIENTE:</strong> ${ordenActualVisualizando.paciente}<br>
-                <strong>DNI:</strong> ${ordenActualVisualizando.dni} | <strong>EDAD:</strong> ${ordenActualVisualizando.edad}<br>
-                <strong>N° ORDEN:</strong> ${ordenActualVisualizando.id} | <strong>FECHA:</strong> ${ordenActualVisualizando.fecha}
+
+            <div class="patient-box">
+                <div>PACIENTE: ${ordenActualVisualizando.paciente.toUpperCase()}</div>
+                <div>EDAD: ${ordenActualVisualizando.edad}</div>
+                <div>DNI: ${ordenActualVisualizando.dni}</div>
+                <div>SEXO: ${ordenActualVisualizando.sexo || 'MASCULINO'}</div>
+                <div>DOCTOR: ${ordenActualVisualizando.doctor || 'PARTICULAR'}</div>
+                <div>FECHA: ${ordenActualVisualizando.fecha}</div>
             </div>
-            <h3>RESULTADOS DE ANÁLISIS</h3>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Examen</th>
-                        <th>Resultado</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${filasResultados}
-                </tbody>
-            </table>
-            <div class="footer">
-                <p>Este informe refleja los resultados procesados electrónicamente por el laboratorio de Vital Health.</p>
+
+            ${bloquesExamenesHTML}
+
+            <div class="footer-firma">
+                <div class="firma-linea">
+                    <strong>Raysa Yadira Ursula Alberca Atarama</strong><br>
+                    Bióloga - C.B.P. 17763
+                </div>
             </div>
+
+            <div class="footer-page">
+                <div>📞 984 089 927</div>
+                <div>🏠 SERVICIO A DOMICILIO</div>
+                <div>"ANÁLISIS DE CALIDAD PARA EL CUIDADO DE TU SALUD"</div>
+            </div>
+
             <script>
                 window.onload = function() { window.print(); }
             </script>
@@ -593,20 +711,14 @@ function actualizarControlCaja() {
     const hoyStr = new Date().toLocaleDateString('es-PE');
     const ordenesHoy = ordenesLocales.filter(o => o.fecha === hoyStr);
 
-    let total = 0;
-    let efectivo = 0;
-    let digital = 0;
-
+    let total = 0, efectivo = 0, digital = 0;
     const tbody = document.getElementById('caja-tabla-body');
     if (tbody) tbody.innerHTML = '';
 
     ordenesHoy.forEach(o => {
         total += o.total;
-        if (o.metodoPago === 'Efectivo') {
-            efectivo += o.total;
-        } else {
-            digital += o.total;
-        }
+        if (o.metodoPago === 'Efectivo') efectivo += o.total;
+        else digital += o.total;
 
         if (tbody) {
             const tr = document.createElement('tr');
