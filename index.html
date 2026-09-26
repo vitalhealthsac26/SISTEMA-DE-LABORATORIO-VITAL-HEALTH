@@ -16,48 +16,49 @@
     <div id="sidebar-overlay" onclick="toggleSidebar()"></div>
 
     <div id="wrapper">
-        <!-- Sidebar Navigation -->
-        <aside id="sidebar" class="sidebar">
-            <div class="sidebar-header p-3 text-center border-bottom border-secondary border-opacity-25">
-                <img src="logo.png" alt="Vital Health" class="sidebar-logo mb-2" onerror="this.style.display='none'">
-                <h5 class="fw-bold mb-0 text-white">Vital Health</h5>
-                <small class="text-white-50">Laboratorio Clínico</small>
-            </div>
+        <!-- Reemplaza el bloque <aside id="sidebar"> por este -->
+<aside id="sidebar" class="sidebar">
+    <div class="sidebar-header p-3 text-center border-bottom border-secondary border-opacity-25">
+        <!-- Logo con clase restringida -->
+        <img src="logo.png" alt="Centro Médico Vital Health" class="sidebar-logo" onerror="this.style.display='none'">
+        <h5 class="fw-bold mb-0 text-white fs-6">Vital Health</h5>
+        <small class="text-white-50" style="font-size: 0.75rem;">Laboratorio Clínico</small>
+    </div>
 
-            <ul class="nav flex-column mt-3">
-                <li class="nav-item">
-                    <a class="nav-link active" href="#" onclick="showSection('recepcion'); return false;">
-                        <i class="bi bi-person-plus-fill me-2"></i> Recepción / Admisión
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#" onclick="showSection('ordenes'); return false;">
-                        <i class="bi bi-receipt me-2"></i> Órdenes de Trabajo
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#" onclick="showSection('resultados'); return false;">
-                        <i class="bi bi-file-earmark-medical-fill me-2"></i> Registro de Resultados
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#" onclick="showSection('catalogo'); return false;">
-                        <i class="bi bi-journal-bookmark-fill me-2"></i> Catálogo / Plantillas
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#" onclick="showSection('caja'); return false;">
-                        <i class="bi bi-cash-stack me-2"></i> Arqueo de Caja
-                    </a>
-                </li>
-            </ul>
+    <ul class="nav flex-column mt-3">
+        <li class="nav-item">
+            <a class="nav-link active" href="#" onclick="showSection('recepcion'); return false;">
+                <i class="bi bi-person-plus-fill me-2"></i> Recepción / Admisión
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="#" onclick="showSection('ordenes'); return false;">
+                <i class="bi bi-receipt me-2"></i> Órdenes de Trabajo
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="#" onclick="showSection('resultados'); return false;">
+                <i class="bi bi-file-earmark-medical-fill me-2"></i> Registro de Resultados
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="#" onclick="showSection('catalogo'); return false;">
+                <i class="bi bi-journal-bookmark-fill me-2"></i> Catálogo / Plantillas
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="#" onclick="showSection('caja'); return false;">
+                <i class="bi bi-cash-stack me-2"></i> Arqueo de Caja
+            </a>
+        </li>
+    </ul>
 
-            <div class="sidebar-footer p-3 text-white-50 text-center border-top border-secondary border-opacity-25">
-                <div class="fw-semibold">Centro Médico Vital Health</div>
-                <div class="small">Av. Grau N° 1799 - Veintiséis de Octubre</div>
-                <div class="small mt-1"><i class="bi bi-whatsapp me-1"></i> 984 089 927</div>
-            </div>
-        </aside>
+    <div class="sidebar-footer p-3 text-white-50 text-center border-top border-secondary border-opacity-25">
+        <div class="fw-semibold small">Centro Médico Vital Health</div>
+        <div class="small" style="font-size: 0.7rem;">Av. Grau N° 1799 - Veintiséis de Octubre</div>
+        <div class="small mt-1" style="font-size: 0.7rem;"><i class="bi bi-whatsapp me-1"></i> 984 089 927</div>
+    </div>
+</aside>
 
         <!-- Main Content Wrapper -->
         <main id="main-content" class="content-area">
