@@ -3,792 +3,326 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <title>Centro Médico Vital Health - Sistema de Laboratorio</title>
 
+    <!-- Fuente Inter para tipografía médica moderna -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- CSS Personalizado -->
     <link rel="stylesheet" href="styles.css">
 
-    <!-- Librería para generar PDF -->
+    <!-- Librería html2pdf -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </head>
-
 <body>
 
 <div class="app-container">
 
-    <!-- =====================================================
-         BARRA LATERAL
-    ====================================================== -->
+    <!-- BARRA LATERAL -->
     <aside class="sidebar">
-
         <div class="sidebar-header">
-
             <div class="logo-container">
-                <img
-                    src="logo.png"
-                    alt="Centro Médico Vital Health"
-                    class="logo"
-                    onerror="this.style.display='none'"
-                >
+                <img src="logo.png" alt="Vital Health" class="logo" onerror="this.style.display='none'">
+                <div class="logo-fallback">🏥</div>
             </div>
-
             <h1>VITAL HEALTH</h1>
-            <p>Centro Médico</p>
-
+            <p>Centro Médico & Laboratorio</p>
         </div>
 
         <nav class="menu">
-
-            <button
-                type="button"
-                class="menu-item active"
-                onclick="cambiarModulo('recepcion', this)"
-            >
-                <span>👤</span>
+            <button type="button" class="menu-item active" onclick="cambiarModulo('recepcion', this)">
+                <span class="icon">👤</span>
                 <span>Recepción</span>
             </button>
-
-            <button
-                type="button"
-                class="menu-item"
-                onclick="cambiarModulo('ordenes', this)"
-            >
-                <span>📋</span>
+            <button type="button" class="menu-item" onclick="cambiarModulo('ordenes', this)">
+                <span class="icon">📋</span>
                 <span>Órdenes</span>
             </button>
-
-            <button
-                type="button"
-                class="menu-item"
-                onclick="cambiarModulo('resultados', this)"
-            >
-                <span>🧪</span>
+            <button type="button" class="menu-item" onclick="cambiarModulo('resultados', this)">
+                <span class="icon">🧪</span>
                 <span>Resultados</span>
             </button>
-
-            <button
-                type="button"
-                class="menu-item"
-                onclick="cambiarModulo('plantillas', this)"
-            >
-                <span>⚙️</span>
+            <button type="button" class="menu-item" onclick="cambiarModulo('plantillas', this)">
+                <span class="icon">⚙️</span>
                 <span>Plantillas</span>
             </button>
-
         </nav>
 
         <div class="sidebar-footer">
             <strong>Centro Médico Vital Health</strong>
-            <small>Av. Grau N° 1799</small>
-            <small>Veintiséis de Octubre - Piura</small>
-            <small>📱 984 089 927</small>
+            <span>Av. Grau N° 1799</span>
+            <span>Veintiséis de Octubre - Piura</span>
+            <span class="phone">📱 984 089 927</span>
         </div>
-
     </aside>
 
-
-    <!-- =====================================================
-         CONTENIDO PRINCIPAL
-    ====================================================== -->
-
+    <!-- CONTENIDO PRINCIPAL -->
     <main class="main-content">
 
-        <!-- =================================================
-             CABECERA
-        ================================================== -->
-
+        <!-- CABECERA PRINCIPAL -->
         <header class="topbar">
-
             <div>
-                <h2 id="tituloModulo">
-                    Recepción
-                </h2>
-
-                <p id="subtituloModulo">
-                    Registro y atención de pacientes
-                </p>
+                <h2 id="tituloModulo">Recepción</h2>
+                <p id="subtituloModulo">Registro y atención de pacientes</p>
             </div>
-
             <div class="topbar-info">
-                <span id="fechaActual"></span>
+                <span id="fechaActual" class="badge-date"></span>
             </div>
-
         </header>
 
-
-        <!-- =================================================
-             MÓDULO RECEPCIÓN
-        ================================================== -->
-
-        <section
-            id="modulo-recepcion"
-            class="module active-module"
-        >
-
+        <!-- MÓDULO RECEPCIÓN -->
+        <section id="modulo-recepcion" class="module active-module">
+            
+            <!-- DATOS DEL PACIENTE -->
             <div class="card">
-
                 <div class="card-header">
-
-                    <div>
-                        <h3>Datos del paciente</h3>
-                        <p>
-                            Ingresa el DNI para consultar los datos del paciente.
-                        </p>
-                    </div>
-
+                    <h3>👤 Datos del Paciente</h3>
+                    <p>Ingresa el DNI para consultar automáticamente en RENIEC o historial local.</p>
                 </div>
 
-
-                <!-- DNI -->
-
-                <div class="form-grid">
-
-                    <div class="form-group">
-
-                        <label for="dniPaciente">
-                            DNI
-                        </label>
-
+                <div class="form-grid grid-4">
+                    <div class="form-group span-2">
+                        <label for="v-dni">DNI / Documento</label>
                         <div class="input-button-group">
-
-                            <input
-                                type="text"
-                                id="dniPaciente"
-                                maxlength="8"
-                                inputmode="numeric"
-                                autocomplete="off"
-                                placeholder="Ingrese DNI"
-                            >
-
-                            <button
-                                type="button"
-                                class="btn btn-primary"
-                                onclick="consultarDNI()"
-                            >
-                                🔎 Consultar
+                            <input type="text" id="v-dni" maxlength="8" inputmode="numeric" placeholder="Ingrese 8 dígitos" autocomplete="off">
+                            <button type="button" id="btnConsultarDNI" class="btn btn-primary" onclick="consultarDNI()">
+                                🔍 Consultar
                             </button>
-
                         </div>
-
                         <small id="dniMensaje" class="form-message"></small>
-
                     </div>
 
-                </div>
-
-
-                <!-- DATOS -->
-
-                <div class="form-grid">
-
-                    <div class="form-group">
-
-                        <label for="nombrePaciente">
-                            Nombres y apellidos
-                        </label>
-
-                        <input
-                            type="text"
-                            id="nombrePaciente"
-                            placeholder="Nombres y apellidos"
-                        >
-
+                    <div class="form-group span-2">
+                        <label for="v-paciente">Nombres y Apellidos</label>
+                        <input type="text" id="v-paciente" placeholder="Apellidos y Nombres completos">
                     </div>
 
-
                     <div class="form-group">
-
-                        <label for="fechaNacimiento">
-                            Fecha de nacimiento
-                        </label>
-
-                        <input
-                            type="date"
-                            id="fechaNacimiento"
-                        >
-
+                        <label for="v-fnac">Fecha de Nacimiento</label>
+                        <input type="date" id="v-fnac" onchange="calcularEdad()">
                     </div>
 
-
                     <div class="form-group">
-
-                        <label for="edadPaciente">
-                            Edad
-                        </label>
-
-                        <input
-                            type="number"
-                            id="edadPaciente"
-                            readonly
-                            placeholder="Edad"
-                        >
-
+                        <label for="v-edad">Edad</label>
+                        <input type="number" id="v-edad" readonly placeholder="0">
                     </div>
 
-
                     <div class="form-group">
-
-                        <label for="sexoPaciente">
-                            Sexo
-                        </label>
-
-                        <select id="sexoPaciente">
-
-                            <option value="">
-                                Seleccionar
-                            </option>
-
-                            <option value="M">
-                                Masculino
-                            </option>
-
-                            <option value="F">
-                                Femenino
-                            </option>
-
+                        <label for="v-sexo">Sexo</label>
+                        <select id="v-sexo">
+                            <option value="">Seleccionar</option>
+                            <option value="MASCULINO">Masculino</option>
+                            <option value="FEMENINO">Femenino</option>
                         </select>
-
                     </div>
-
                 </div>
-
             </div>
 
-
-            <!-- =================================================
-                 EXÁMENES
-            ================================================== -->
-
+            <!-- BÚSQUEDA Y SELECCIÓN DE EXÁMENES -->
             <div class="card">
-
                 <div class="card-header">
+                    <h3>🧪 Exámenes Solicitados</h3>
+                    <p>Busca exámenes individualmente o carga un paquete predefinido.</p>
+                </div>
 
-                    <div>
-
-                        <h3>
-                            Exámenes solicitados
-                        </h3>
-
-                        <p>
-                            Busca y agrega los exámenes del paciente.
-                        </p>
-
+                <div class="form-grid grid-2">
+                    <div class="form-group search-container">
+                        <label for="v-buscar">Buscar examen individual</label>
+                        <input type="text" id="v-buscar" placeholder="Escribe el nombre del examen..." autocomplete="off">
+                        <div id="v-resultados" class="search-results"></div>
                     </div>
 
+                    <div class="form-group">
+                        <label for="selectorPlantilla">Cargar plantilla rápida</label>
+                        <div class="input-button-group">
+                            <select id="selectorPlantilla">
+                                <option value="">Seleccionar plantilla...</option>
+                            </select>
+                            <button type="button" class="btn btn-secondary" onclick="cargarPlantillaEnVenta()">
+                                ⚡ Cargar
+                            </button>
+                        </div>
+                    </div>
                 </div>
-
-
-                <div class="form-group">
-
-                    <label for="buscadorExamen">
-                        Buscar examen
-                    </label>
-
-                    <input
-                        type="text"
-                        id="buscadorExamen"
-                        autocomplete="off"
-                        placeholder="Escribe el nombre del examen..."
-                    >
-
-                    <div
-                        id="resultadosBuscadorExamen"
-                        class="search-results"
-                    ></div>
-
-                </div>
-
 
                 <div class="table-container">
-
                     <table>
-
                         <thead>
-
                             <tr>
-
-                                <th>
-                                    Código
-                                </th>
-
-                                <th>
-                                    Examen
-                                </th>
-
-                                <th>
-                                    Precio
-                                </th>
-
-                                <th>
-                                    Acción
-                                </th>
-
+                                <th>Código</th>
+                                <th>Examen</th>
+                                <th>Cant.</th>
+                                <th>P. Unitario</th>
+                                <th>Importe</th>
+                                <th class="text-center">Acción</th>
                             </tr>
-
                         </thead>
-
-                        <tbody id="tablaVenta">
-
+                        <tbody id="v-lista">
+                            <!-- Filas dinámicas -->
                         </tbody>
-
                     </table>
-
                 </div>
 
-
+                <!-- RESUMEN DE VENTA -->
                 <div class="sale-summary">
-
-                    <div>
-                        <span>
-                            Subtotal
-                        </span>
-
-                        <strong id="subtotalVenta">
-                            S/ 0.00
-                        </strong>
+                    <div class="summary-item">
+                        <span>Subtotal:</span>
+                        <strong id="v-subtotal">S/ 0.00</strong>
                     </div>
 
-
-                    <div>
-
-                        <label for="descuentoVenta">
-                            Descuento
-                        </label>
-
-                        <input
-                            type="number"
-                            id="descuentoVenta"
-                            value="0"
-                            min="0"
-                            step="0.01"
-                            oninput="calcularTotalCobro()"
-                        >
-
+                    <div class="summary-item input-item">
+                        <label for="v-descuento">Descuento (S/):</label>
+                        <input type="number" id="v-descuento" value="0" min="0" step="0.50" oninput="calcularTotalCobro()">
                     </div>
 
-
-                    <div class="total">
-
-                        <span>
-                            Total
-                        </span>
-
-                        <strong id="totalVenta">
-                            S/ 0.00
-                        </strong>
-
+                    <div class="summary-item total-item">
+                        <span>Total Cobrar:</span>
+                        <strong id="v-total">S/ 0.00</strong>
                     </div>
-
                 </div>
-
-
-                <!-- PLANTILLA -->
-
-                <div class="form-group">
-
-                    <label for="selectorPlantilla">
-                        Cargar plantilla
-                    </label>
-
-                    <div class="input-button-group">
-
-                        <select id="selectorPlantilla">
-
-                            <option value="">
-                                Seleccionar plantilla
-                            </option>
-
-                        </select>
-
-                        <button
-                            type="button"
-                            class="btn btn-secondary"
-                            onclick="cargarPlantillaSeleccionada()"
-                        >
-                            Cargar
-                        </button>
-
-                    </div>
-
-                </div>
-
 
                 <div class="actions">
-
-                    <button
-                        type="button"
-                        class="btn btn-success"
-                        onclick="guardarYEmitirTicket()"
-                    >
-                        💾 Guardar orden
+                    <button type="button" class="btn btn-success btn-lg" onclick="guardarYEmitirTicket()">
+                        💾 Guardar y Generar Ticket
                     </button>
-
-                    <button
-                        type="button"
-                        class="btn btn-secondary"
-                        onclick="limpiarFormularioRecepcion()"
-                    >
+                    <button type="button" class="btn btn-outline" onclick="limpiarFormularioRecepcion()">
                         🧹 Limpiar
                     </button>
-
                 </div>
-
             </div>
-
         </section>
 
-
-        <!-- =================================================
-             MÓDULO ÓRDENES
-        ================================================== -->
-
-        <section
-            id="modulo-ordenes"
-            class="module"
-        >
-
+        <!-- MÓDULO ÓRDENES -->
+        <section id="modulo-ordenes" class="module">
             <div class="card">
-
-                <div class="card-header">
-
+                <div class="card-header header-flex">
                     <div>
-
-                        <h3>
-                            Órdenes de laboratorio
-                        </h3>
-
-                        <p>
-                            Consulta las órdenes registradas.
-                        </p>
-
+                        <h3>📋 Historial de Órdenes</h3>
+                        <p>Gestión y seguimiento de órdenes de laboratorio registradas.</p>
                     </div>
-
-                    <button
-                        type="button"
-                        class="btn btn-secondary"
-                        onclick="cargarTablaOrdenes()"
-                    >
+                    <button type="button" class="btn btn-secondary" onclick="cargarTablaOrdenes()">
                         🔄 Actualizar
                     </button>
-
                 </div>
 
-
-                <div class="form-group">
-
-                    <input
-                        type="text"
-                        id="buscarOrden"
-                        placeholder="Buscar por DNI, paciente u orden..."
-                        oninput="cargarTablaOrdenes()"
-                    >
-
+                <div class="form-group search-box">
+                    <input type="text" id="o-buscar" placeholder="🔍 Buscar por DNI, paciente o N° de orden..." oninput="cargarTablaOrdenes()">
                 </div>
-
 
                 <div class="table-container">
-
                     <table>
-
                         <thead>
-
                             <tr>
-
-                                <th>
-                                    Orden
-                                </th>
-
-                                <th>
-                                    Fecha
-                                </th>
-
-                                <th>
-                                    DNI
-                                </th>
-
-                                <th>
-                                    Paciente
-                                </th>
-
-                                <th>
-                                    Total
-                                </th>
-
-                                <th>
-                                    Estado
-                                </th>
-
-                                <th>
-                                    Acción
-                                </th>
-
+                                <th>N° Orden</th>
+                                <th>Fecha</th>
+                                <th>DNI</th>
+                                <th>Paciente</th>
+                                <th>Total</th>
+                                <th>Estado</th>
+                                <th class="text-center">Acciones</th>
                             </tr>
-
                         </thead>
-
-                        <tbody id="tablaOrdenes">
-
+                        <tbody id="o-lista">
+                            <!-- Filas dinámicas -->
                         </tbody>
-
                     </table>
-
                 </div>
-
             </div>
-
         </section>
 
-
-        <!-- =================================================
-             MÓDULO RESULTADOS
-        ================================================== -->
-
-        <section
-            id="modulo-resultados"
-            class="module"
-        >
-
+        <!-- MÓDULO RESULTADOS -->
+        <section id="modulo-resultados" class="module">
             <div class="card">
-
                 <div class="card-header">
-
-                    <div>
-
-                        <h3>
-                            Resultados de laboratorio
-                        </h3>
-
-                        <p>
-                            Selecciona una orden para ingresar y validar resultados.
-                        </p>
-
-                    </div>
-
+                    <h3>🧪 Ingreso y Validación de Resultados</h3>
+                    <p>Busca una orden registrada para ingresar sus valores analíticos.</p>
                 </div>
-
 
                 <div class="form-group">
-
-                    <label for="buscarOrdenResultados">
-                        Buscar orden
-                    </label>
-
-                    <input
-                        type="text"
-                        id="buscarOrdenResultados"
-                        placeholder="DNI, paciente o número de orden..."
-                    >
-
+                    <input type="text" id="r-buscar" placeholder="🔍 Buscar orden por DNI o paciente..." oninput="cargarTablaOrdenesResultados()">
                 </div>
 
-
-                <div id="listaOrdenesResultados">
-
+                <div id="r-lista" class="orders-selection-grid">
+                    <!-- Lista rápida de órdenes -->
                 </div>
 
-
-                <div
-                    id="panelResultados"
-                    class="results-panel"
-                >
-
-                    <div
-                        id="cabeceraResultado"
-                        class="result-header"
-                    >
-                    </div>
-
-
-                    <div
-                        id="contenedorExamenesResultados"
-                    >
-                    </div>
-
+                <div id="panelResultados" class="results-panel">
+                    <div id="r-paciente" class="result-patient-header"></div>
+                    <div id="r-examenes" class="results-exams-container"></div>
 
                     <div class="actions">
-
-                        <button
-                            type="button"
-                            class="btn btn-success"
-                            onclick="guardarResultadosOrden()"
-                        >
-                            💾 Guardar resultados
+                        <button type="button" class="btn btn-success btn-lg" onclick="guardarResultadosOrden()">
+                            💾 Guardar Resultados
                         </button>
-
-                        <button
-                            type="button"
-                            class="btn btn-primary"
-                            onclick="imprimirResultadosPDF()"
-                        >
-                            📄 Generar PDF
+                        <button type="button" class="btn btn-primary btn-lg" onclick="imprimirResultadosPDF()">
+                            📄 Generar e Imprimir PDF
                         </button>
-
                     </div>
-
                 </div>
-
             </div>
-
         </section>
 
-
-        <!-- =================================================
-             MÓDULO PLANTILLAS
-        ================================================== -->
-
-        <section
-            id="modulo-plantillas"
-            class="module"
-        >
-
+        <!-- MÓDULO PLANTILLAS -->
+        <section id="modulo-plantillas" class="module">
             <div class="card">
-
-                <div class="card-header">
-
+                <div class="card-header header-flex">
                     <div>
-
-                        <h3>
-                            Plantillas de exámenes
-                        </h3>
-
-                        <p>
-                            Configura los parámetros de tus exámenes.
-                        </p>
-
+                        <h3>⚙️ Configuración de Plantillas</h3>
+                        <p>Añade o modifica los parámetros de los exámenes de laboratorio.</p>
                     </div>
-
-                    <button
-                        type="button"
-                        class="btn btn-success"
-                        onclick="crearNuevaPlantilla()"
-                    >
-                        ➕ Nueva plantilla
+                    <button type="button" class="btn btn-success" onclick="crearNuevaPlantilla()">
+                        ➕ Nueva Plantilla
                     </button>
-
                 </div>
 
-
-                <div class="form-grid">
-
+                <div class="form-grid grid-2">
                     <div class="form-group">
-
-                        <label for="selectorPlantillaEditar">
-                            Plantilla
-                        </label>
-
-                        <select
-                            id="selectorPlantillaEditar"
-                            onchange="cargarPlantillaParaEditar()"
-                        >
-
-                            <option value="">
-                                Seleccionar
-                            </option>
-
+                        <label for="selectorPlantillaEditar">Seleccionar examen / plantilla</label>
+                        <select id="selectorPlantillaEditar" onchange="cargarPlantillaParaEditar()">
+                            <option value="">Seleccionar...</option>
                         </select>
-
                     </div>
-
 
                     <div class="form-group">
-
-                        <label for="nombrePlantilla">
-                            Nombre
-                        </label>
-
-                        <input
-                            type="text"
-                            id="nombrePlantilla"
-                            placeholder="Nombre del examen"
-                        >
-
+                        <label for="nombrePlantilla">Nombre de la Plantilla</label>
+                        <input type="text" id="nombrePlantilla" placeholder="Ej: HEMOGRAMA COMPLETO">
                     </div>
-
                 </div>
-
 
                 <div class="table-container">
-
                     <table>
-
                         <thead>
-
                             <tr>
-
-                                <th>
-                                    Parámetro
-                                </th>
-
-                                <th>
-                                    Unidad
-                                </th>
-
-                                <th>
-                                    Valor de referencia
-                                </th>
-
-                                <th>
-                                    Acción
-                                </th>
-
+                                <th>Parámetro</th>
+                                <th>Unidad</th>
+                                <th>Valores Referencia</th>
+                                <th>Método</th>
+                                <th class="text-center">Acción</th>
                             </tr>
-
                         </thead>
-
                         <tbody id="tablaParametrosPlantilla">
-
+                            <!-- Parámetros editables -->
                         </tbody>
-
                     </table>
-
                 </div>
-
 
                 <div class="actions">
-
-                    <button
-                        type="button"
-                        class="btn btn-secondary"
-                        onclick="agregarFilaParametro()"
-                    >
-                        ➕ Agregar parámetro
+                    <button type="button" class="btn btn-secondary" onclick="agregarFilaParametro()">
+                        ➕ Agregar Parámetro
                     </button>
-
-                    <button
-                        type="button"
-                        class="btn btn-success"
-                        onclick="guardarPlantillaActual()"
-                    >
-                        💾 Guardar plantilla
+                    <button type="button" class="btn btn-success" onclick="guardarPlantillaActual()">
+                        💾 Guardar Plantilla
                     </button>
-
                 </div>
-
             </div>
-
         </section>
 
     </main>
-
 </div>
 
-
-<!-- =========================================================
-     MODAL / MENSAJES
-========================================================== -->
-
-<div
-    id="toast"
-    class="toast"
->
-</div>
-
-
-<!-- =========================================================
-     JAVASCRIPT PRINCIPAL
-========================================================== -->
-
+<!-- JAVASCRIPT PRINCIPAL -->
 <script src="app.js"></script>
-
 </body>
 </html>
