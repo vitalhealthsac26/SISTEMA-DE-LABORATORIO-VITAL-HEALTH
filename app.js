@@ -8,7 +8,7 @@ if (typeof firebase !== 'undefined' && !firebase.apps.length) {
 }
 const db = (typeof firebase !== 'undefined') ? firebase.database() : null;
 
-// Catálogo base de exámenes con tipos de plantillas
+// Catálogo base predeterminado de respaldo
 let catalogoExamenes = [
     {
         codigo: '568',
@@ -92,7 +92,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         cargarOrdenes();
         actualizarControlCaja();
     } catch (e) {
-        console.error("Error inicializando la app:", e);
+        console.error("Inicialización segura:", e);
     }
 });
 
@@ -103,7 +103,7 @@ async function cargarProductosJSON() {
             catalogoExamenes = JSON.parse(catalogoGuardado);
             return;
         } catch (e) {
-            console.warn("Catálogo guardado corrupto, cargando por defecto.");
+            console.warn("Catálogo en caché no válido, reponiendo predeterminado.");
         }
     }
 
@@ -126,7 +126,7 @@ async function cargarProductosJSON() {
             }
         }
     } catch (error) {
-        console.warn('Usando catálogo base predeterminado.');
+        console.warn('Se utilizará el catálogo por defecto local.');
     }
 }
 
@@ -143,22 +143,30 @@ function toggleSidebar() {
 
 function escucharSincronizacion() {
     if (db) {
-        db.ref('ordenes').on('value', (snapshot) => {
-            const data = snapshot.val();
-            if (data) {
-                ordenesLocales = Object.values(data);
-                localStorage.setItem('vitalhealth_ordenes', JSON.stringify(ordenesLocales));
-                cargarOrdenes();
-                actualizarControlCaja();
-            }
-        });
+        try {
+            db.ref('ordenes').on('value', (snapshot) => {
+                const data = snapshot.val();
+                if (data) {
+                    ordenesLocales = Object.values(data);
+                    localStorage.setItem('vitalhealth_ordenes', JSON.stringify(ordenesLocales));
+                    cargarOrdenes();
+                    actualizarControlCaja();
+                }
+            });
+        } catch (err) {
+            console.warn("Sin conexión con Firebase, trabajando en modo local.");
+        }
     }
 }
 
 function guardarEnNubeYLocal() {
     localStorage.setItem('vitalhealth_ordenes', JSON.stringify(ordenesLocales));
     if (db) {
-        db.ref('ordenes').set(ordenesLocales);
+        try {
+            db.ref('ordenes').set(ordenesLocales);
+        } catch (e) {
+            console.warn("No se pudo guardar en la nube.");
+        }
     }
 }
 
@@ -214,9 +222,12 @@ async function buscarPaciente() {
 
     const encontrada = ordenesLocales.find(o => o.dni === dni);
     if (encontrada) {
-        document.getElementById('pac-nombre').value = encontrada.paciente;
-        document.getElementById('pac-edad').value = encontrada.edad;
-        document.getElementById('pac-sexo').value = encontrada.sexo || 'MASCULINO';
+        const elNom = document.getElementById('pac-nombre');
+        const elEdad = document.getElementById('pac-edad');
+        const elSexo = document.getElementById('pac-sexo');
+        if (elNom) elNom.value = encontrada.paciente;
+        if (elEdad) elEdad.value = encontrada.edad;
+        if (elSexo) elSexo.value = encontrada.sexo || 'MASCULINO';
         return;
     }
 
@@ -225,13 +236,14 @@ async function buscarPaciente() {
         if (response.ok) {
             const res = await response.json();
             if (res.data) {
-                document.getElementById('pac-nombre').value = `${res.data.nombres} ${res.data.apellido_paterno} ${res.data.apellido_materno}`.trim();
+                const elNom = document.getElementById('pac-nombre');
+                if (elNom) elNom.value = `${res.data.nombres} ${res.data.apellido_paterno} ${res.data.apellido_materno}`.trim();
                 return;
             }
         }
-        alert('DNI no encontrado. Ingrese el nombre manualmente.');
+        alert('DNI no encontrado. Ingrese los datos manualmente.');
     } catch (e) {
-        alert('No se pudo conectar al servicio DNI. Ingrese el nombre manualmente.');
+        alert('No se pudo conectar al servicio externo de DNI. Ingrese el nombre manualmente.');
     }
 }
 
@@ -249,7 +261,7 @@ function filtrarExamenes(texto) {
         .slice(0, 15);
     
     if (filtrados.length === 0) {
-        contenedor.innerHTML = '<div class="list-group-item text-muted">No se encontraron exámenes</div>';
+        contenedor.innerHTML = '<div class="list-group-item text-muted">No se encontraron coincidencias</div>';
         return;
     }
 
@@ -261,7 +273,8 @@ function filtrarExamenes(texto) {
         item.onclick = () => {
             agregarExamen(ex);
             contenedor.innerHTML = '';
-            document.getElementById('busqueda-examen').value = '';
+            const elBusqueda = document.getElementById('busqueda-examen');
+            if (elBusqueda) elBusqueda.value = '';
         };
         contenedor.appendChild(item);
     });
@@ -295,7 +308,11 @@ function renderExamenes() {
             <td>1</td>
             <td>S/ ${ex.precio.toFixed(2)}</td>
             <td>S/ ${ex.precio.toFixed(2)}</td>
-            <td class="text-center"><button class="btn btn-sm btn-outline-danger" onclick="eliminarExamen(${index})"><i class="bi bi-trash"></i></button></td>
+            <td class="text-center">
+                <button class="btn btn-sm btn-outline-danger" onclick="eliminarExamen(${index})">
+                    <i class="bi bi-trash"></i>
+                </button>
+            </td>
         `;
         tbody.appendChild(row);
     });
@@ -403,8 +420,8 @@ function agregarFilaParametro(p = {}) {
     div.className = 'parametro-card border p-2 mb-2 rounded bg-light';
     div.innerHTML = `
         <div class="d-flex justify-content-between align-items-center mb-2">
-            <span class="fw-bold small text-primary"><i class="bi bi-card-list me-1"></i>Indicador / Parámetro</span>
-            <button type="button" class="btn btn-sm btn-link text-danger p-0" onclick="quitarFilaParametro(this)">
+            <span class="fw-bold small text-primary"><i class="bi bi-card-list me-1"></i>Parámetro</span>
+            <button type="button" class="btn btn-sm btn-link text-danger p-0 text-decoration-none" onclick="quitarFilaParametro(this)">
                 <i class="bi bi-x-circle-fill"></i> Quitar
             </button>
         </div>
@@ -451,7 +468,7 @@ function actualizarEstadoVacioParametros() {
     if (tarjetas.length === 0) {
         contenedor.innerHTML = `
             <div class="no-params-msg text-center text-muted p-3 border rounded bg-light small">
-                <i class="bi bi-info-circle me-1"></i> Este examen no requiere cuadro de parámetros/indicadores.
+                <i class="bi bi-info-circle me-1"></i> Este examen no posee parámetros dinámicos asignados.
             </div>
         `;
     }
@@ -477,29 +494,36 @@ function prepararNuevoExamen() {
 }
 
 function guardarExamenCatalogo() {
-    const idOrig = document.getElementById('cat-id-original').value.trim();
-    const codigo = document.getElementById('cat-codigo').value.trim();
-    const nombre = document.getElementById('cat-nombre').value.trim().toUpperCase();
-    const precio = parseFloat(document.getElementById('cat-precio').value);
+    const idOrigEl = document.getElementById('cat-id-original');
+    const codEl = document.getElementById('cat-codigo');
+    const nomEl = document.getElementById('cat-nombre');
+    const precEl = document.getElementById('cat-precio');
 
-    const muestra = document.getElementById('cat-muestra').value.trim();
-    const metodo = document.getElementById('cat-metodo').value.trim();
-    const plantilla = document.getElementById('cat-plantilla').value;
-    const refTexto = document.getElementById('cat-ref-texto').value.trim();
+    if (!codEl || !nomEl || !precEl) return;
+
+    const idOrig = idOrigEl ? idOrigEl.value.trim() : '';
+    const codigo = codEl.value.trim();
+    const nombre = nomEl.value.trim().toUpperCase();
+    const precio = parseFloat(precEl.value);
+
+    const muestra = document.getElementById('cat-muestra')?.value.trim() || '';
+    const metodo = document.getElementById('cat-metodo')?.value.trim() || '';
+    const plantilla = document.getElementById('cat-plantilla')?.value || 'estandar';
+    const refTexto = document.getElementById('cat-ref-texto')?.value.trim() || '';
 
     if (!codigo || !nombre || isNaN(precio)) {
-        return alert('Por favor complete el Código, Nombre y Precio del examen.');
+        return alert('Complete el Código, Nombre y Precio del examen.');
     }
 
     const filasParam = document.querySelectorAll('#contenedor-parametros .parametro-card');
     const parametros = [];
 
     filasParam.forEach(card => {
-        const pNom = card.querySelector('.param-nombre').value.trim();
-        const pUni = card.querySelector('.param-unidad').value.trim();
-        const pMin = card.querySelector('.param-ref-min').value.trim();
-        const pMax = card.querySelector('.param-ref-max').value.trim();
-        const pTex = card.querySelector('.param-ref-texto').value.trim();
+        const pNom = card.querySelector('.param-nombre')?.value.trim() || '';
+        const pUni = card.querySelector('.param-unidad')?.value.trim() || '';
+        const pMin = card.querySelector('.param-ref-min')?.value.trim() || '';
+        const pMax = card.querySelector('.param-ref-max')?.value.trim() || '';
+        const pTex = card.querySelector('.param-ref-texto')?.value.trim() || '';
 
         if (pNom || pTex || pMin || pMax) {
             parametros.push({
@@ -521,13 +545,13 @@ function guardarExamenCatalogo() {
         } else {
             catalogoExamenes.unshift(examenObj);
         }
-        alert('Cambios guardados exitosamente.');
+        alert('Examen actualizado con éxito.');
     } else {
         if (catalogoExamenes.some(e => e.codigo === codigo)) {
             return alert('Ya existe un examen registrado con este código.');
         }
         catalogoExamenes.unshift(examenObj);
-        alert('Nuevo examen creado exitosamente.');
+        alert('Nuevo examen registrado.');
     }
 
     guardarCatalogoLocal();
@@ -536,7 +560,7 @@ function guardarExamenCatalogo() {
 }
 
 function eliminarExamenCatalogo(codigo) {
-    if (confirm(`¿Desea eliminar del catálogo el examen con código ${codigo}?`)) {
+    if (confirm(`¿Desea eliminar del catálogo el examen ${codigo}?`)) {
         catalogoExamenes = catalogoExamenes.filter(e => e.codigo !== String(codigo));
         guardarCatalogoLocal();
         renderizarTablaCatalogo();
@@ -549,15 +573,15 @@ function eliminarExamenCatalogo(codigo) {
 }
 
 function guardarOrdenGenerarTicket() {
-    const dni = document.getElementById('pac-dni').value.trim();
-    const paciente = document.getElementById('pac-nombre').value.trim();
-    const doctor = document.getElementById('pac-doctor').value.trim() || 'Particular';
-    const edad = document.getElementById('pac-edad').value.trim();
-    const sexo = document.getElementById('pac-sexo').value;
-    const metodo = document.getElementById('metodo-pago').value;
+    const dni = document.getElementById('pac-dni')?.value.trim() || '';
+    const paciente = document.getElementById('pac-nombre')?.value.trim() || '';
+    const doctor = document.getElementById('pac-doctor')?.value.trim() || 'Particular';
+    const edad = document.getElementById('pac-edad')?.value.trim() || '0 AÑOS';
+    const sexo = document.getElementById('pac-sexo')?.value || 'MASCULINO';
+    const metodo = document.getElementById('metodo-pago')?.value || 'Efectivo';
 
     if (!dni || !paciente || examenesSeleccionados.length === 0) {
-        return alert('Complete los datos obligatorios del paciente y agregue al menos un examen.');
+        return alert('Complete el DNI, Nombre del paciente y agregue al menos un examen.');
     }
 
     const numOrden = `VH-2026-${String(ordenesLocales.length + 1).padStart(5, '0')}`;
@@ -572,7 +596,7 @@ function guardarOrdenGenerarTicket() {
         dni: dni,
         paciente: paciente,
         doctor: doctor,
-        edad: edad || 'N/A',
+        edad: edad,
         sexo: sexo,
         examenes: [...examenesSeleccionados],
         total: total,
@@ -590,7 +614,7 @@ function guardarOrdenGenerarTicket() {
     renderExamenes();
     const formPac = document.getElementById('form-paciente');
     if (formPac) formPac.reset();
-    alert('Orden registrada correctamente.');
+    alert('Orden procesada e impresa.');
 }
 
 function imprimirTicket58mm(orden) {
@@ -702,7 +726,7 @@ function abrirResultados(ordenId) {
                 `;
             });
         } else {
-            filasParamsHTML = `<p class="text-muted small mb-0">Este examen no requiere carga de parámetros específicos.</p>`;
+            filasParamsHTML = `<p class="text-muted small mb-0">Examen sin parámetros editables.</p>`;
         }
 
         camposHTML += `
@@ -760,7 +784,7 @@ function generarTablaEspecializada(ex, catEx, orden) {
     const tipoPlantilla = catEx.plantilla || 'estandar';
 
     if (params.length === 0) {
-        return `<p style="text-align:center; font-size:12px; color:#64748b; font-style:italic;">Examen sin plantilla de parámetros específicos.</p>`;
+        return `<p style="text-align:center; font-size:12px; color:#64748b; font-style:italic;">Examen sin parámetros definidos.</p>`;
     }
 
     if (tipoPlantilla === 'hemograma') {
@@ -1072,9 +1096,11 @@ function actualizarControlCaja() {
         }
     });
 
-    if (document.getElementById('caja-total-hoy')) {
-        document.getElementById('caja-total-hoy').innerText = total.toFixed(2);
-        document.getElementById('caja-efectivo').innerText = efectivo.toFixed(2);
-        document.getElementById('caja-digital').innerText = digital.toFixed(2);
-    }
+    const elTot = document.getElementById('caja-total-hoy');
+    const elEf = document.getElementById('caja-efectivo');
+    const elDig = document.getElementById('caja-digital');
+
+    if (elTot) elTot.innerText = total.toFixed(2);
+    if (elEf) elEf.innerText = efectivo.toFixed(2);
+    if (elDig) elDig.innerText = digital.toFixed(2);
 }
