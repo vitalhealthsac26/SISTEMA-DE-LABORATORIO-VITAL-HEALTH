@@ -8,29 +8,29 @@ if (typeof firebase !== 'undefined' && !firebase.apps.length) {
 }
 const db = (typeof firebase !== 'undefined') ? firebase.database() : null;
 
-// Catálogo base con plantillas
+// Catálogo base de exámenes
 let catalogoExamenes = [
     {
-        codigo: '5',
-        nombre: '11 - DESOXICORTISOL (COMPUESTOS)',
-        precio: 475.00,
+        codigo: '568',
+        nombre: 'HELICOBACTER PYLORI',
+        precio: 70.00,
         muestra: 'Suero',
-        unidad: 'ng/dL',
-        refMin: '',
-        refMax: '',
+        metodo: 'Inmunocromatografía',
         refTexto: '',
-        metodo: 'Estándar'
+        parametros: [
+            { nombre: 'HELICOBACTER PYLORI', unidad: '', refMin: '', refMax: '', refTexto: 'NO REACTIVO / REACTIVO' }
+        ]
     },
     {
-        codigo: '6',
-        nombre: '17 - HIDROXICORTICOIDES (ORINA 24H)',
-        precio: 100.00,
-        muestra: 'Suero',
-        unidad: 'mg/24h',
-        refMin: '',
-        refMax: '',
-        refTexto: '',
-        metodo: 'Estándar'
+        codigo: '935',
+        nombre: 'PRUEBA DE PATERNIDAD LEGAL',
+        precio: 1200.00,
+        muestra: 'Sangre / Saliva',
+        metodo: 'ADN por PCR',
+        refTexto: 'Marcadores STR analizados.',
+        parametros: [
+            { nombre: 'Probabilidad de Paternidad', unidad: '%', refMin: '', refMax: '', refTexto: '> 99.99%' }
+        ]
     }
 ];
 
@@ -49,15 +49,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     cargarOrdenes();
     actualizarControlCaja();
     renderizarTablaCatalogo();
-
-    // Cerrar desplegable si se hace clic fuera del buscador
-    document.addEventListener('click', (e) => {
-        const drop = document.getElementById('cat-dropdown-sugerencias');
-        const searchInput = document.getElementById('cat-search-input');
-        if (drop && !drop.contains(e.target) && e.target !== searchInput) {
-            drop.style.display = 'none';
-        }
-    });
 });
 
 async function cargarProductosJSON() {
@@ -80,11 +71,17 @@ async function cargarProductosJSON() {
                     nombre: String(prod.Nombre || prod.nombre || '').toUpperCase(),
                     precio: parseFloat(prod.Precio || prod.precio || 0),
                     muestra: prod.muestra || 'Suero',
-                    unidad: prod.unidad || '',
-                    refMin: prod.refMin || '',
-                    refMax: prod.refMax || '',
+                    metodo: prod.metodo || 'Estándar',
                     refTexto: prod.refTexto || '',
-                    metodo: prod.metodo || 'Estándar'
+                    parametros: prod.parametros || [
+                        {
+                            nombre: prod.Nombre || prod.nombre || 'Indicador',
+                            unidad: prod.unidad || '',
+                            refMin: prod.refMin || '',
+                            refMax: prod.refMax || '',
+                            refTexto: prod.refTexto || ''
+                        }
+                    ]
                 }));
                 guardarCatalogoLocal();
             }
@@ -256,45 +253,7 @@ function eliminarExamen(index) {
     renderExamenes();
 }
 
-// FUNCIONALIDAD DE BUSCADOR CON DESPLEGABLE EN CATÁLOGO / PLANTILLAS
-function filtrarExamenesEditar(texto) {
-    const container = document.getElementById('cat-dropdown-sugerencias');
-    container.innerHTML = '';
-    const busqueda = texto.trim().toLowerCase();
-
-    if (!busqueda) {
-        container.style.display = 'none';
-        return;
-    }
-
-    const filtrados = catalogoExamenes.filter(e => 
-        e.codigo.toLowerCase().includes(busqueda) || 
-        e.nombre.toLowerCase().includes(busqueda)
-    ).slice(0, 12); // Mostrar hasta 12 opciones
-
-    if (filtrados.length === 0) {
-        container.innerHTML = '<div class="list-group-item text-muted">No se encontraron exámenes</div>';
-        container.style.display = 'block';
-        return;
-    }
-
-    filtrados.forEach(ex => {
-        const item = document.createElement('a');
-        item.className = 'list-group-item list-group-item-action d-flex justify-content-between align-items-center';
-        item.innerHTML = `
-            <span><strong>[${ex.codigo}]</strong> ${ex.nombre}</span>
-            <span class="badge bg-light text-primary border">S/ ${ex.precio.toFixed(2)}</span>
-        `;
-        item.onclick = () => {
-            seleccionarExamenParaEditar(ex.codigo);
-            container.style.display = 'none';
-        };
-        container.appendChild(item);
-    });
-
-    container.style.display = 'block';
-}
-
+// GESTIÓN DEL CATÁLOGO CON PARÁMETROS DINÁMICOS
 function renderizarTablaCatalogo(filtro = '') {
     const tbody = document.getElementById('tabla-catalogo-body');
     const countEl = document.getElementById('total-cat-count');
@@ -328,10 +287,10 @@ function renderizarTablaCatalogo(filtro = '') {
             <td><small class="text-muted">${ex.muestra || 'Suero'} | ${ex.metodo || 'Estándar'}</small></td>
             <td>S/ ${ex.precio.toFixed(2)}</td>
             <td class="text-end px-3">
-                <button class="btn btn-sm btn-outline-primary me-1" onclick="seleccionarExamenParaEditar('${ex.codigo}')" title="Editar en formulario">
+                <button class="btn btn-sm btn-outline-primary me-1" onclick="seleccionarExamenParaEditar('${ex.codigo}')" title="Editar Examen">
                     <i class="bi bi-pencil"></i>
                 </button>
-                <button class="btn btn-sm btn-outline-danger" onclick="eliminarExamenCatalogo('${ex.codigo}')" title="Eliminar">
+                <button class="btn btn-sm btn-outline-danger" onclick="eliminarExamenCatalogo('${ex.codigo}')" title="Eliminar Examen">
                     <i class="bi bi-trash"></i>
                 </button>
             </td>
@@ -352,25 +311,68 @@ function cargarDatosEnFormularioCatalogo(ex) {
     document.getElementById('cat-nombre').value = ex.nombre;
     document.getElementById('cat-precio').value = ex.precio;
     document.getElementById('cat-muestra').value = ex.muestra || '';
-    document.getElementById('cat-unidad').value = ex.unidad || '';
-    document.getElementById('cat-ref-min').value = ex.refMin || '';
-    document.getElementById('cat-ref-max').value = ex.refMax || '';
-    document.getElementById('cat-ref-texto').value = ex.refTexto || '';
     document.getElementById('cat-metodo').value = ex.metodo || '';
+    document.getElementById('cat-ref-texto').value = ex.refTexto || '';
 
-    // Colocar el nombre del examen en la caja de búsqueda
-    document.getElementById('cat-search-input').value = `[${ex.codigo}] ${ex.nombre}`;
+    // Cargar parámetros dinámicos
+    const contenedor = document.getElementById('contenedor-parametros');
+    contenedor.innerHTML = '';
+
+    const params = (ex.parametros && ex.parametros.length > 0) ? ex.parametros : [{
+        nombre: ex.nombre,
+        unidad: '',
+        refMin: '',
+        refMax: '',
+        refTexto: ''
+    }];
+
+    params.forEach(p => agregarFilaParametro(p));
 
     document.getElementById('catalogo-form-titulo').innerHTML = `<i class="bi bi-pencil-square me-2"></i>Editando: ${ex.nombre}`;
     document.getElementById('btn-guardar-cat').innerHTML = '<i class="bi bi-check-circle me-1"></i>Guardar Cambios del Examen';
 }
 
+function agregarFilaParametro(p = {}) {
+    const contenedor = document.getElementById('contenedor-parametros');
+    const div = document.createElement('div');
+    div.className = 'parametro-card';
+    div.innerHTML = `
+        <div class="d-flex justify-content-between align-items-center mb-2">
+            <span class="fw-bold small text-primary"><i class="bi bi-card-list me-1"></i>Indicador / Parámetro</span>
+            <button type="button" class="btn btn-sm btn-link text-danger p-0" onclick="this.closest('.parametro-card').remove()">
+                <i class="bi bi-x-circle-fill"></i> Quitar
+            </button>
+        </div>
+        <div class="row g-2">
+            <div class="col-7">
+                <input type="text" class="form-control form-control-sm param-nombre" placeholder="Nombre (Ej: Helicobacter Pylori / Ácido Úrico)" value="${p.nombre || ''}">
+            </div>
+            <div class="col-5">
+                <input type="text" class="form-control form-control-sm param-unidad" placeholder="Unidad (Ej: mg/dL, %)" value="${p.unidad || ''}">
+            </div>
+            <div class="col-6">
+                <input type="text" class="form-control form-control-sm param-ref-min" placeholder="Ref. Mínimo" value="${p.refMin || ''}">
+            </div>
+            <div class="col-6">
+                <input type="text" class="form-control form-control-sm param-ref-max" placeholder="Ref. Máximo" value="${p.refMax || ''}">
+            </div>
+            <div class="col-12">
+                <input type="text" class="form-control form-control-sm param-ref-texto" placeholder="Texto Ref. (Ej: No Reactivo / Normal: < 200)" value="${p.refTexto || ''}">
+            </div>
+        </div>
+    `;
+    contenedor.appendChild(div);
+}
+
 function prepararNuevoExamen() {
     document.getElementById('form-catalogo').reset();
-    document.getElementById('cat-search-input').value = '';
-    document.getElementById('cat-id-original').value = ''; // Vacío indica que es NUEVO
+    document.getElementById('cat-id-original').value = '';
     const nuevoCodigo = String(catalogoExamenes.length + 100);
     document.getElementById('cat-codigo').value = nuevoCodigo;
+
+    document.getElementById('contenedor-parametros').innerHTML = '';
+    agregarFilaParametro();
+
     document.getElementById('catalogo-form-titulo').innerHTML = '<i class="bi bi-plus-circle me-2"></i>Crear Nuevo Examen';
     document.getElementById('btn-guardar-cat').innerHTML = '<i class="bi bi-save me-1"></i>Registrar Nuevo Examen';
 }
@@ -382,20 +384,38 @@ function guardarExamenCatalogo() {
     const precio = parseFloat(document.getElementById('cat-precio').value);
 
     const muestra = document.getElementById('cat-muestra').value.trim();
-    const unidad = document.getElementById('cat-unidad').value.trim();
-    const refMin = document.getElementById('cat-ref-min').value.trim();
-    const refMax = document.getElementById('cat-ref-max').value.trim();
-    const refTexto = document.getElementById('cat-ref-texto').value.trim();
     const metodo = document.getElementById('cat-metodo').value.trim();
+    const refTexto = document.getElementById('cat-ref-texto').value.trim();
 
     if (!codigo || !nombre || isNaN(precio)) {
         return alert('Por favor complete el Código, Nombre y Precio del examen.');
     }
 
-    const examenObj = { codigo, nombre, precio, muestra, unidad, refMin, refMax, refTexto, metodo };
+    // Extraer todos los parámetros dinámicos configurados
+    const filasParam = document.querySelectorAll('#contenedor-parametros .parametro-card');
+    const parametros = [];
+
+    filasParam.forEach(card => {
+        const pNom = card.querySelector('.param-nombre').value.trim();
+        const pUni = card.querySelector('.param-unidad').value.trim();
+        const pMin = card.querySelector('.param-ref-min').value.trim();
+        const pMax = card.querySelector('.param-ref-max').value.trim();
+        const pTex = card.querySelector('.param-ref-texto').value.trim();
+
+        if (pNom || pTex || pMin || pMax) {
+            parametros.push({
+                nombre: pNom || nombre,
+                unidad: pUni,
+                refMin: pMin,
+                refMax: pMax,
+                refTexto: pTex
+            });
+        }
+    });
+
+    const examenObj = { codigo, nombre, precio, muestra, metodo, refTexto, parametros };
 
     if (idOrig) {
-        // ACTUALIZAR EXAMEN EXISTENTE
         const idx = catalogoExamenes.findIndex(e => e.codigo === idOrig);
         if (idx !== -1) {
             catalogoExamenes[idx] = examenObj;
@@ -404,7 +424,6 @@ function guardarExamenCatalogo() {
         }
         alert('Cambios guardados exitosamente.');
     } else {
-        // CREAR NUEVO EXAMEN
         if (catalogoExamenes.some(e => e.codigo === codigo)) {
             return alert('Ya existe un examen registrado con este código.');
         }
@@ -555,7 +574,33 @@ function abrirResultados(ordenId) {
 
     orden.examenes.forEach((ex) => {
         const catEx = catalogoExamenes.find(c => c.codigo === ex.codigo) || ex;
-        const valRes = (orden.resultados && orden.resultados[ex.codigo]) ? orden.resultados[ex.codigo].resultado : '';
+        const params = (catEx.parametros && catEx.parametros.length > 0) ? catEx.parametros : [{
+            nombre: ex.nombre,
+            unidad: catEx.unidad || '',
+            refMin: catEx.refMin || '',
+            refMax: catEx.refMax || '',
+            refTexto: catEx.refTexto || ''
+        }];
+
+        let filasParamsHTML = '';
+        params.forEach((p, idx) => {
+            const resKey = `${ex.codigo}_${idx}`;
+            const valRes = (orden.resultados && orden.resultados[resKey]) ? orden.resultados[resKey].resultado : '';
+
+            filasParamsHTML += `
+                <div class="row g-2 align-items-center mb-2 pb-2 border-bottom">
+                    <div class="col-12 col-md-4">
+                        <label class="form-label small fw-bold mb-0">${p.nombre}</label>
+                    </div>
+                    <div class="col-12 col-md-4">
+                        <input type="text" id="res-val-${resKey}" class="form-control form-control-sm border-primary fw-bold" placeholder="Resultado..." value="${valRes}">
+                    </div>
+                    <div class="col-12 col-md-4">
+                        <small class="text-muted">${p.unidad ? 'Unidad: ' + p.unidad : ''} ${p.refTexto ? '| Ref: ' + p.refTexto : ''}</small>
+                    </div>
+                </div>
+            `;
+        });
 
         camposHTML += `
             <div class="card mb-3 shadow-sm border">
@@ -563,24 +608,7 @@ function abrirResultados(ordenId) {
                     <h6 class="fw-bold text-primary mb-0">${ex.nombre}</h6>
                 </div>
                 <div class="card-body">
-                    <div class="row g-3">
-                        <div class="col-12 col-md-3">
-                            <label class="form-label small fw-semibold">Muestra</label>
-                            <input type="text" id="res-muestra-${ex.codigo}" class="form-control form-control-sm" value="${catEx.muestra || 'Suero'}">
-                        </div>
-                        <div class="col-12 col-md-3">
-                            <label class="form-label small fw-semibold">Resultado obtenido</label>
-                            <input type="text" id="res-val-${ex.codigo}" class="form-control form-control-sm border-primary fw-bold" value="${valRes}">
-                        </div>
-                        <div class="col-12 col-md-2">
-                            <label class="form-label small fw-semibold">Unidad</label>
-                            <input type="text" id="res-unidad-${ex.codigo}" class="form-control form-control-sm" value="${catEx.unidad || ''}">
-                        </div>
-                        <div class="col-12 col-md-4">
-                            <label class="form-label small fw-semibold">Método</label>
-                            <input type="text" id="res-metodo-${ex.codigo}" class="form-control form-control-sm" value="${catEx.metodo || ''}">
-                        </div>
-                    </div>
+                    ${filasParamsHTML}
                 </div>
             </div>
         `;
@@ -607,12 +635,14 @@ function guardarResultados() {
     if (!ordenActualVisualizando.resultados) ordenActualVisualizando.resultados = {};
 
     ordenActualVisualizando.examenes.forEach(ex => {
-        const resVal = document.getElementById(`res-val-${ex.codigo}`)?.value || '';
-        const muestra = document.getElementById(`res-muestra-${ex.codigo}`)?.value || '';
-        const unidad = document.getElementById(`res-unidad-${ex.codigo}`)?.value || '';
-        const metodo = document.getElementById(`res-metodo-${ex.codigo}`)?.value || '';
+        const catEx = catalogoExamenes.find(c => c.codigo === ex.codigo) || ex;
+        const params = (catEx.parametros && catEx.parametros.length > 0) ? catEx.parametros : [{ nombre: ex.nombre }];
 
-        ordenActualVisualizando.resultados[ex.codigo] = { resultado: resVal, muestra, unidad, metodo };
+        params.forEach((p, idx) => {
+            const resKey = `${ex.codigo}_${idx}`;
+            const resVal = document.getElementById(`res-val-${resKey}`)?.value || '';
+            ordenActualVisualizando.resultados[resKey] = { resultado: resVal, parametro: p.nombre };
+        });
     });
 
     ordenActualVisualizando.estado = 'COMPLETADO';
@@ -630,49 +660,55 @@ function visualizarEImprimirResultados() {
 
     ordenActualVisualizando.examenes.forEach(ex => {
         const catEx = catalogoExamenes.find(c => c.codigo === ex.codigo) || ex;
-        const resData = ordenActualVisualizando.resultados[ex.codigo] || {};
+        const params = (catEx.parametros && catEx.parametros.length > 0) ? catEx.parametros : [{
+            nombre: ex.nombre,
+            unidad: '',
+            refMin: '',
+            refMax: '',
+            refTexto: ''
+        }];
 
-        let valRefHTML = '';
-        if (catEx.refMin || catEx.refMax) {
-            valRefHTML = `
-                <table style="width:100%; text-align:center; border-collapse:collapse; font-size:12px;">
-                    <tr>
-                        <td style="border-bottom:1px solid #ccc; padding-bottom:2px;">Mínimo</td>
-                        <td style="border-bottom:1px solid #ccc; padding-bottom:2px;">Máximo</td>
-                    </tr>
-                    <tr>
-                        <td style="padding-top:2px;">${catEx.refMin || '-'}</td>
-                        <td style="padding-top:2px;">${catEx.refMax || '-'}</td>
-                    </tr>
-                </table>
+        let filasTablaHTML = '';
+
+        params.forEach((p, idx) => {
+            const resKey = `${ex.codigo}_${idx}`;
+            const resData = ordenActualVisualizando.resultados[resKey] || {};
+
+            let valRefHTML = '';
+            if (p.refMin || p.refMax) {
+                valRefHTML = `${p.refMin || '-'} - ${p.refMax || '-'}`;
+            } else {
+                valRefHTML = p.refTexto || '-';
+            }
+
+            filasTablaHTML += `
+                <tr style="background-color: #f8fafc;">
+                    <td style="padding: 8px; border: 1px solid #e2e8f0; font-weight: bold; text-align:left;">${p.nombre}</td>
+                    <td style="padding: 8px; border: 1px solid #e2e8f0; font-weight: bold; font-size:13px;">${resData.resultado || '-'}</td>
+                    <td style="padding: 8px; border: 1px solid #e2e8f0;">${p.unidad || '-'}</td>
+                    <td style="padding: 8px; border: 1px solid #e2e8f0;">${valRefHTML}</td>
+                    <td style="padding: 8px; border: 1px solid #e2e8f0; font-style: italic; font-size: 11px;">${catEx.metodo || 'Estándar'}</td>
+                </tr>
             `;
-        } else {
-            valRefHTML = (catEx.refTexto || '-').replace(/\n/g, '<br>');
-        }
+        });
 
         bloquesExamenesHTML += `
-            <div style="margin-top:25px;">
-                <h3 style="text-align:center; font-size:18px; font-weight:bold; margin-bottom:12px; font-family:'Segoe UI', sans-serif;">
+            <div style="margin-top:20px;">
+                <h3 style="text-align:center; font-size:16px; font-weight:bold; margin-bottom:8px; font-family:'Segoe UI', sans-serif; color: #0072bc;">
                     ${ex.nombre}
                 </h3>
-                <table style="width:100%; border-collapse:collapse; font-size:12px; text-align:center;">
+                <table style="width:100%; border-collapse:collapse; font-size:11px; text-align:center;">
                     <thead>
                         <tr style="background-color: #dbeafe; color: #1e3a8a;">
-                            <th style="padding: 8px; border: 1px solid #bfdbfe;">MUESTRA: ${resData.muestra || catEx.muestra || 'Suero'}</th>
-                            <th style="padding: 8px; border: 1px solid #bfdbfe;">RESULTADO</th>
-                            <th style="padding: 8px; border: 1px solid #bfdbfe;">UNIDAD</th>
-                            <th style="padding: 8px; border: 1px solid #bfdbfe;">VALOR REFERENCIAL</th>
-                            <th style="padding: 8px; border: 1px solid #bfdbfe;">MÉTODO</th>
+                            <th style="padding: 6px; border: 1px solid #bfdbfe; text-align:left;">PARÁMETRO / PRUEBA</th>
+                            <th style="padding: 6px; border: 1px solid #bfdbfe;">RESULTADO</th>
+                            <th style="padding: 6px; border: 1px solid #bfdbfe;">UNIDAD</th>
+                            <th style="padding: 6px; border: 1px solid #bfdbfe;">VALOR REFERENCIAL</th>
+                            <th style="padding: 6px; border: 1px solid #bfdbfe;">MÉTODO</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr style="background-color: #f8fafc;">
-                            <td style="padding: 10px; border: 1px solid #e2e8f0; font-weight: bold;">${ex.nombre}</td>
-                            <td style="padding: 10px; border: 1px solid #e2e8f0; font-weight: bold; font-size:14px;">${resData.resultado || ''}</td>
-                            <td style="padding: 10px; border: 1px solid #e2e8f0;">${resData.unidad || catEx.unidad || ''}</td>
-                            <td style="padding: 10px; border: 1px solid #e2e8f0;">${valRefHTML}</td>
-                            <td style="padding: 10px; border: 1px solid #e2e8f0; font-style: italic; font-size: 11px;">${resData.metodo || catEx.metodo || ''}</td>
-                        </tr>
+                        ${filasTablaHTML}
                     </tbody>
                 </table>
             </div>
@@ -709,7 +745,7 @@ function visualizarEImprimirResultados() {
                 }
 
                 .footer-firma {
-                    margin-top: 60px;
+                    margin-top: 50px;
                     text-align: right;
                     padding-right: 40px;
                 }
