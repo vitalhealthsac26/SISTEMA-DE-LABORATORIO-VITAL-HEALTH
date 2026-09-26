@@ -7,11 +7,13 @@
 body {
     background-color: #f8fafc;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    overflow-x: hidden;
 }
 
 #wrapper {
     display: flex;
     width: 100%;
+    position: relative;
 }
 
 .sidebar {
@@ -20,6 +22,8 @@ body {
     background-color: var(--dark-sidebar);
     color: white;
     flex-shrink: 0;
+    transition: all 0.3s ease-in-out;
+    z-index: 1040;
 }
 
 .sidebar .nav-link {
@@ -34,10 +38,44 @@ body {
 }
 
 .content-area {
-    padding: 30px;
+    padding: 25px;
+    max-width: 100%;
 }
 
-/* Ocultar elementos de impresión en pantalla */
+#sidebar-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1030;
+}
+
+/* RESPONSIVE DESIGN FOR MOBILE & TABLETS */
+@media (max-width: 767.98px) {
+    .sidebar {
+        position: fixed;
+        left: -250px;
+        top: 0;
+        bottom: 0;
+    }
+
+    .sidebar.active {
+        left: 0;
+    }
+
+    #sidebar-overlay.active {
+        display: block;
+    }
+
+    .content-area {
+        padding: 15px;
+    }
+}
+
+/* OCULTAR ELEMENTOS DE IMPRESIÓN EN PANTALLA */
 #ticket-print-area {
     display: none;
 }
