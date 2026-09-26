@@ -1,665 +1,432 @@
-/* ============================================================
-   CENTRO MÉDICO VITAL HEALTH - SISTEMA DE LABORATORIO
-   Código JS completo y corregido
-   ============================================================ */
-
-'use strict';
-
-const STORAGE = {
-  ORDENES: 'ordenes_lab',
-  PLANTILLAS: 'plantillas_lab',
-  CONFIG: 'vital_health_config',
-  DNI_CACHE: 'vital_health_dni_cache',
-  CONTADOR: 'vital_health_contador_orden',
-  PRODUCTOS: 'vital_health_productos'
+// CONFIGURACIÓN DE FIREBASE (Reemplaza los valores con tu proyecto Firebase si aplicable)
+const firebaseConfig = {
+    databaseURL: "https://vital-health-default-rtdb.firebaseio.com" // URL de BD genérica o tu propia URL
 };
 
-const APP_CONFIG_DEFAULT = {
-  nombreCentro: 'CENTRO MÉDICO VITAL HEALTH',
-  moneda: 'S/',
-  maxResultadosBusqueda: 10,
-  timeoutMs: 8000
-};
+// Inicializar Firebase si se declara la librería
+if (typeof firebase !== 'undefined' && !firebase.apps.length) {
+    firebase.initializeApp(firebaseConfig);
+}
+const db = (typeof firebase !== 'undefined') ? firebase.database() : null;
 
-let itemsVenta = [];
-let ordenes = cargarJSON(STORAGE.ORDENES, []) || [];
-let ordenResultadoActual = null;
-
-/* PLANTILLAS POR DEFECTO */
-const plantillasPredeterminadas = {
-  "HEMOGRAMA COMPLETO": [
-    { parametro: "Leucocitos", unidad: "Cél/uL", referencia: "4,500 - 11,000", metodo: "Automatizado" },
-    { parametro: "Hemoglobina", unidad: "g/dL", referencia: "12.0 - 16.0", metodo: "Espectrofotometría" },
-    { parametro: "Hematocrito", unidad: "%", referencia: "37.0 - 48.0", metodo: "Centrifugación" },
-    { parametro: "Plaquetas", unidad: "Cél/uL", referencia: "150,000 - 450,000", metodo: "Impedancia" }
-  ],
-  "PERFIL LIPIDICO": [
-    { parametro: "Colesterol Total", unidad: "mg/dL", referencia: "< 200", metodo: "Enzimático" },
-    { parametro: "Triglicéridos", unidad: "mg/dL", referencia: "< 150", metodo: "Enzimático" },
-    { parametro: "HDL Colesterol", unidad: "mg/dL", referencia: "> 40", metodo: "Directo" },
-    { parametro: "LDL Colesterol", unidad: "mg/dL", referencia: "< 100", metodo: "Calculado" }
-  ],
-  "GLUCOSA EN AYUNAS": [
-    { parametro: "Glucosa", unidad: "mg/dL", referencia: "70 - 106", metodo: "Enzimático" }
-  ]
-};
-
-let plantillasExamenes = cargarJSON(STORAGE.PLANTILLAS, plantillasPredeterminadas) || plantillasPredeterminadas;
-
-// EXÁMENES DISPONIBLES
-let productos = [
-  { Codigo: "EX-01", Nombre: "HEMOGRAMA COMPLETO", Precio: 25.00 },
-  { Codigo: "EX-02", Nombre: "PERFIL LIPIDICO", Precio: 45.00 },
-  { Codigo: "EX-03", Nombre: "GLUCOSA EN AYUNAS", Precio: 12.00 },
-  { Codigo: "EX-04", Nombre: "EXAMEN COMPLETO DE ORINA", Precio: 15.00 },
-  { Codigo: "EX-05", Nombre: "CREATININA EN SANGRE", Precio: 15.00 },
-  { Codigo: "EX-06", Nombre: "UREA EN SANGRE", Precio: 15.00 }
+// Catálogo base de exámenes
+const catalogoExamenes = [
+    { codigo: 'EX001', nombre: 'HEMOGRAMA COMPLETO', precio: 25.00 },
+    { codigo: 'EX002', nombre: 'PERFIL LIPÍDICO: Colesterol Total, Triglicéridos, HDL, LDL', precio: 50.00 },
+    { codigo: 'EX003', nombre: 'PERFIL DE COAGULACIÓN', precio: 130.00 },
+    { codigo: 'EX004', nombre: 'GLUCOSA EN AYUNAS', precio: 15.00 },
+    { codigo: 'EX005', nombre: 'EXAMEN COMPLETO DE ORINA', precio: 20.00 }
 ];
 
-/* INICIALIZACIÓN */
+let examenesSeleccionados = [];
+let ordenesLocales = JSON.parse(localStorage.getItem('vitalhealth_ordenes')) || [];
+let ordenActualVisualizando = null;
+
 document.addEventListener('DOMContentLoaded', () => {
-  actualizarFechaActual();
-  inicializarEventos();
-  poblarSelectPlantillas();
-  renderizarVenta();
-  cargarTablaOrdenes();
-  cargarTablaOrdenesResultados();
+    document.getElementById('current-date').innerText = new Date().toLocaleDateString('es-PE', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+    escucharSincronizacion();
+    cargarOrdenes();
+    actualizarControlCaja();
 });
 
-function actualizarFechaActual() {
-  const el = document.getElementById('fechaActual');
-  if (el) {
-    const opciones = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-    el.textContent = new Date().toLocaleDateString('es-PE', opciones);
-  }
-}
-
-function inicializarEventos() {
-  const dniInput = document.getElementById('v-dni');
-  if (dniInput) {
-    dniInput.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') {
-        e.preventDefault();
-        consultarDNI();
-      }
-    });
-  }
-
-  const busquedaExamen = document.getElementById('v-buscar');
-  if (busquedaExamen) {
-    busquedaExamen.addEventListener('input', (e) => {
-      mostrarResultadosBusqueda(e.target.value.trim());
-    });
-  }
-}
-
-/* ============================================================
-   BÚSQUEDA Y CONSULTA DNI (RENIEC / CACHÉ LOCAL)
-   ============================================================ */
-
-async function consultarDNI() {
-  const dniInput = document.getElementById('v-dni');
-  const nombreInput = document.getElementById('v-paciente');
-  const btn = document.getElementById('btnConsultarDNI');
-
-  if (!dniInput || !nombreInput) return;
-
-  const dni = dniInput.value.replace(/\D/g, '').trim();
-
-  if (dni.length !== 8) {
-    notificar('Ingrese un DNI válido de 8 dígitos.', 'warning');
-    return;
-  }
-
-  // 1. Revisar Caché local o Pacientes Previos
-  const cache = cargarJSON(STORAGE.DNI_CACHE, {}) || {};
-  if (cache[dni]) {
-    completarCamposPaciente(cache[dni]);
-    notificar('Paciente encontrado en historial.', 'success');
-    return;
-  }
-
-  // 2. Consulta API Externa (Respaldo RENIEC)
-  setLoading(btn, true, 'Buscando...');
-  try {
-    const res = await fetch(`https://dniruc.apisperu.com/api/v1/dni/${dni}?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjo2MzA5LCJpYXQiOjE3MDY4OTgwNDd9.3`);
-    
-    if (res.ok) {
-      const data = await res.json();
-      if (data && data.nombres) {
-        const nombreCompleto = `${data.nombres} ${data.apellidoPaterno} ${data.apellidoMaterno}`.trim();
-        const infoPaciente = {
-          nombreCompleto,
-          dni
-        };
-        
-        cache[dni] = infoPaciente;
-        guardarJSON(STORAGE.DNI_CACHE, cache);
-        
-        completarCamposPaciente(infoPaciente);
-        notificar('Datos obtenidos correctamente.', 'success');
-        return;
-      }
+// Sincronización multi-dispositivo en tiempo real vía Firebase
+function escucharSincronizacion() {
+    if (db) {
+        db.ref('ordenes').on('value', (snapshot) => {
+            const data = snapshot.val();
+            if (data) {
+                ordenesLocales = Object.values(data);
+                localStorage.setItem('vitalhealth_ordenes', JSON.stringify(ordenesLocales));
+                cargarOrdenes();
+                actualizarControlCaja();
+            }
+        });
     }
-    throw new Error('No encontrado');
-  } catch (error) {
-    notificar('No se pudo autocompletar. Ingrese el nombre manualmente.', 'warning');
-    nombreInput.focus();
-  } finally {
-    setLoading(btn, false, '🔍 Consultar');
-  }
 }
 
-function completarCamposPaciente(data) {
-  const nombreInput = document.getElementById('v-paciente');
-  if (nombreInput) nombreInput.value = data.nombreCompleto || '';
+function guardarEnNubeYLocal() {
+    localStorage.setItem('vitalhealth_ordenes', JSON.stringify(ordenesLocales));
+    if (db) {
+        db.ref('ordenes').set(ordenesLocales);
+    }
+}
+
+function showSection(sectionId) {
+    document.querySelectorAll('.section-content').forEach(el => el.classList.add('d-none'));
+    document.querySelectorAll('.nav-link').forEach(el => el.classList.remove('active'));
+    
+    document.getElementById(`sec-${sectionId}`).classList.remove('d-none');
+    
+    if(sectionId === 'caja') actualizarControlCaja();
 }
 
 function calcularEdad() {
-  const fnacInput = document.getElementById('v-fnac');
-  const edadInput = document.getElementById('v-edad');
-  
-  if (!fnacInput || !fnacInput.value) return;
-
-  const nac = new Date(fnacInput.value);
-  const hoy = new Date();
-  let edad = hoy.getFullYear() - nac.getFullYear();
-  const m = hoy.getMonth() - nac.getMonth();
-
-  if (m < 0 || (m === 0 && hoy.getDate() < nac.getDate())) {
-    edad--;
-  }
-
-  if (edadInput) edadInput.value = Math.max(0, edad);
+    const fnacVal = document.getElementById('pac-fnac').value;
+    if (!fnacVal) return;
+    const hoy = new Date();
+    const fnac = new Date(fnacVal);
+    let edad = hoy.getFullYear() - fnac.getFullYear();
+    const mes = hoy.getMonth() - fnac.getMonth();
+    if (mes < 0 || (mes === 0 && hoy.getDate() < fnac.getDate())) {
+        edad--;
+    }
+    document.getElementById('pac-edad').value = `${edad} AÑOS`;
 }
 
-/* ============================================================
-   GESTIÓN DE RECEPCIÓN Y VENTA
-   ============================================================ */
-
-function mostrarResultadosBusqueda(termino) {
-  const cont = document.getElementById('v-resultados');
-  if (!cont) return;
-
-  if (!termino) {
-    cont.innerHTML = '';
-    return;
-  }
-
-  const norm = termino.toLowerCase();
-  const coincidencia = productos.filter(p => 
-    p.Nombre.toLowerCase().includes(norm) || p.Codigo.toLowerCase().includes(norm)
-  );
-
-  if (!coincidencia.length) {
-    cont.innerHTML = `<div class="search-result-item"><span>No se encontraron exámenes</span></div>`;
-    return;
-  }
-
-  cont.innerHTML = coincidencia.map(p => `
-    <div class="search-result-item" onclick="seleccionarExamen('${p.Codigo}')">
-      <div>
-        <strong>${escapeHTML(p.Nombre)}</strong>
-        <br><small>Código: ${p.Codigo}</small>
-      </div>
-      <strong>S/ ${p.Precio.toFixed(2)}</strong>
-    </div>
-  `).join('');
+function buscarPaciente() {
+    const dni = document.getElementById('pac-dni').value.trim();
+    if (!dni) return alert('Ingrese un número de DNI');
+    
+    // Búsqueda en historial existente local
+    const encontrada = ordenesLocales.find(o => o.dni === dni);
+    if (encontrada) {
+        document.getElementById('pac-nombre').value = encontrada.paciente;
+        document.getElementById('pac-edad').value = encontrada.edad;
+    } else {
+        alert('Paciente no registrado previamente. Ingrese los datos manualmente.');
+    }
 }
 
-function seleccionarExamen(codigo) {
-  const prod = productos.find(p => p.Codigo === codigo);
-  if (!prod) return;
+function filtrarExamenes(texto) {
+    const contenedor = document.getElementById('sugerencias-examenes');
+    contenedor.innerHTML = '';
+    if (!texto.trim()) return;
 
-  const exist = itemsVenta.find(item => item.Codigo === codigo);
-  if (exist) {
-    exist.cantidad++;
-  } else {
-    itemsVenta.push({ ...prod, cantidad: 1 });
-  }
-
-  renderizarVenta();
-  calcularTotalCobro();
-
-  const inputBusqueda = document.getElementById('v-buscar');
-  if (inputBusqueda) inputBusqueda.value = '';
-  mostrarResultadosBusqueda('');
+    const filtrados = catalogoExamenes.filter(e => e.nombre.toLowerCase().includes(texto.toLowerCase()));
+    filtrados.forEach(ex => {
+        const item = document.createElement('a');
+        item.className = 'list-group-item list-group-item-action';
+        item.innerText = `${ex.nombre} - S/ ${ex.precio.toFixed(2)}`;
+        item.onclick = () => {
+            agregarExamen(ex);
+            contenedor.innerHTML = '';
+            document.getElementById('busqueda-examen').value = '';
+        };
+        contenedor.appendChild(item);
+    });
 }
 
-function renderizarVenta() {
-  const tabla = document.getElementById('v-lista');
-  if (!tabla) return;
-
-  if (!itemsVenta.length) {
-    tabla.innerHTML = `<tr><td colspan="6" class="text-center">No hay exámenes agregados a la orden.</td></tr>`;
-    return;
-  }
-
-  tabla.innerHTML = itemsVenta.map((item, idx) => `
-    <tr>
-      <td>${item.Codigo}</td>
-      <td>${escapeHTML(item.Nombre)}</td>
-      <td>
-        <input type="number" min="1" value="${item.cantidad}" style="width:60px" onchange="cambiarCantidad(${idx}, this.value)">
-      </td>
-      <td>S/ ${item.Precio.toFixed(2)}</td>
-      <td>S/ ${(item.Precio * item.cantidad).toFixed(2)}</td>
-      <td class="text-center">
-        <button type="button" class="btn-delete" onclick="eliminarItemVenta(${idx})">🗑️</button>
-      </td>
-    </tr>
-  `).join('');
+function agregarExamen(examen) {
+    examenesSeleccionados.push(examen);
+    renderExamenes();
 }
 
-function cambiarCantidad(idx, val) {
-  const c = Math.max(1, parseInt(val) || 1);
-  itemsVenta[idx].cantidad = c;
-  renderizarVenta();
-  calcularTotalCobro();
+function renderExamenes() {
+    const tbody = document.querySelector('#tabla-examenes-seleccionados tbody');
+    tbody.innerHTML = '';
+    
+    if (examenesSeleccionados.length === 0) {
+        tbody.innerHTML = '<tr id="empty-row"><td colspan="6" class="text-center text-muted">No hay exámenes agregados.</td></tr>';
+        document.getElementById('total-cobrar').innerText = '0.00';
+        return;
+    }
+
+    let total = 0;
+    examenesSeleccionados.forEach((ex, index) => {
+        total += ex.precio;
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${ex.codigo}</td>
+            <td>${ex.nombre}</td>
+            <td>1</td>
+            <td>S/ ${ex.precio.toFixed(2)}</td>
+            <td>S/ ${ex.precio.toFixed(2)}</td>
+            <td><button class="btn btn-sm btn-outline-danger" onclick="eliminarExamen(${index})"><i class="bi bi-trash"></i></button></td>
+        `;
+        tbody.appendChild(row);
+    });
+
+    document.getElementById('total-cobrar').innerText = total.toFixed(2);
 }
 
-function eliminarItemVenta(idx) {
-  itemsVenta.splice(idx, 1);
-  renderizarVenta();
-  calcularTotalCobro();
+function eliminarExamen(index) {
+    examenesSeleccionados.splice(index, 1);
+    renderExamenes();
 }
 
-function calcularTotalCobro() {
-  const subtotal = itemsVenta.reduce((acc, item) => acc + (item.Precio * item.cantidad), 0);
-  const descInput = document.getElementById('v-descuento');
-  const descuento = parseFloat(descInput?.value) || 0;
-  const total = Math.max(0, subtotal - descuento);
+function guardarOrdenGenerarTicket() {
+    const dni = document.getElementById('pac-dni').value.trim();
+    const paciente = document.getElementById('pac-nombre').value.trim();
+    const edad = document.getElementById('pac-edad').value.trim();
+    const metodo = document.getElementById('metodo-pago').value;
 
-  document.getElementById('v-subtotal').textContent = `S/ ${subtotal.toFixed(2)}`;
-  document.getElementById('v-total').textContent = `S/ ${total.toFixed(2)}`;
+    if (!dni || !paciente || examenesSeleccionados.length === 0) {
+        return alert('Por favor complete todos los datos requeridos y añada al menos un examen.');
+    }
+
+    const numOrden = `VH-2026-${String(ordenesLocales.length + 1).padStart(5, '0')}`;
+    const total = examenesSeleccionados.reduce((a, b) => a + b.precio, 0);
+    const ahora = new Date();
+
+    const nuevaOrden = {
+        id: numOrden,
+        fecha: ahora.toLocaleDateString('es-PE'),
+        hora: ahora.toLocaleTimeString('es-PE'),
+        timestamp: ahora.getTime(),
+        dni: dni,
+        paciente: paciente,
+        edad: edad || 'N/A',
+        examenes: [...examenesSeleccionados],
+        total: total,
+        metodoPago: metodo,
+        estado: 'EN PROCESO',
+        resultados: {}
+    };
+
+    ordenesLocales.unshift(nuevaOrden);
+    guardarEnNubeYLocal();
+
+    // Generación del formato adaptado a 58mm
+    imprimirTicket58mm(nuevaOrden);
+
+    // Resetear formulario
+    examenesSeleccionados = [];
+    renderExamenes();
+    document.getElementById('form-paciente').reset();
+    alert('Orden guardada correctamente.');
 }
 
-function cargarPlantillaEnVenta() {
-  const select = document.getElementById('selectorPlantilla');
-  const nombre = select?.value;
+function imprimirTicket58mm(orden) {
+    const area = document.getElementById('ticket-print-area');
+    let listaHTML = '';
+    orden.examenes.forEach(e => {
+        listaHTML += `
+            <tr>
+                <td colspan="2">${e.nombre}</td>
+            </tr>
+            <tr>
+                <td>1 x S/ ${e.precio.toFixed(2)}</td>
+                <td class="text-end">S/ ${e.precio.toFixed(2)}</td>
+            </tr>
+        `;
+    });
 
-  if (!nombre) return;
-
-  let prod = productos.find(p => p.Nombre.toUpperCase() === nombre.toUpperCase());
-  if (!prod) {
-    prod = { Codigo: `PL-${Date.now().toString().slice(-4)}`, Nombre: nombre, Precio: 30.00 };
-  }
-
-  seleccionarExamen(prod.Codigo);
-}
-
-/* ============================================================
-   EMISIÓN DE ÓRDENES Y TICKET
-   ============================================================ */
-
-function guardarYEmitirTicket() {
-  const dni = document.getElementById('v-dni')?.value.trim();
-  const paciente = document.getElementById('v-paciente')?.value.trim();
-
-  if (!dni || !paciente) {
-    notificar('Complete el DNI y nombre del paciente.', 'warning');
-    return;
-  }
-
-  if (!itemsVenta.length) {
-    notificar('Agregue al menos un examen a la orden.', 'warning');
-    return;
-  }
-
-  const contador = (parseInt(localStorage.getItem(STORAGE.CONTADOR) || '0') + 1);
-  localStorage.setItem(STORAGE.CONTADOR, contador.toString());
-
-  const numOrden = `VH-${new Date().getFullYear()}-${contador.toString().padStart(5, '0')}`;
-  
-  const subtotal = itemsVenta.reduce((acc, item) => acc + (item.Precio * item.cantidad), 0);
-  const descuento = parseFloat(document.getElementById('v-descuento')?.value) || 0;
-
-  const nuevaOrden = {
-    id: Date.now().toString(),
-    numeroOrden: numOrden,
-    fecha: new Date().toISOString().split('T')[0],
-    hora: new Date().toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' }),
-    paciente: {
-      dni,
-      nombre: paciente,
-      edad: document.getElementById('v-edad')?.value || '-',
-      sexo: document.getElementById('v-sexo')?.value || '-'
-    },
-    examenes: [...itemsVenta],
-    subtotal,
-    descuento,
-    total: Math.max(0, subtotal - descuento),
-    estado: 'PENDIENTE'
-  };
-
-  ordenes.unshift(nuevaOrden);
-  guardarJSON(STORAGE.ORDENES, ordenes);
-
-  notificar(`Orden ${numOrden} registrada con éxito.`, 'success');
-  imprimirTicketVentana(nuevaOrden);
-  limpiarFormularioRecepcion();
-  cargarTablaOrdenes();
-  cargarTablaOrdenesResultados();
-}
-
-function imprimirTicketVentana(orden) {
-  const win = window.open('', '_blank', 'width=400,height=600');
-  if (!win) return;
-
-  win.document.write(`
-    <html>
-    <head>
-      <title>Ticket ${orden.numeroOrden}</title>
-      <style>
-        body { font-family: monospace; padding: 10px; width: 280px; font-size: 12px; }
-        .text-center { text-align: center; }
-        .line { border-bottom: 1px dashed #000; margin: 8px 0; }
-        table { width: 100%; font-size: 11px; }
-      </style>
-    </head>
-    <body>
-      <div class="text-center">
-        <strong>CENTRO MÉDICO VITAL HEALTH</strong><br>
-        Av. Grau N° 1799 - Piura<br>
-        Telf: 984 089 927
-      </div>
-      <div class="line"></div>
-      <div>
-        <strong>ORDEN:</strong> ${orden.numeroOrden}<br>
-        <strong>FECHA:</strong> ${orden.fecha} ${orden.hora}<br>
-        <strong>DNI:</strong> ${orden.paciente.dni}<br>
-        <strong>PACIENTE:</strong> ${orden.paciente.nombre}
-      </div>
-      <div class="line"></div>
-      <table>
-        ${orden.examenes.map(e => `
-          <tr>
-            <td>${e.cantidad}x${e.Nombre}</td>
-            <td style="text-align:right">S/ ${(e.Precio * e.cantidad).toFixed(2)}</td>
-          </tr>
-        `).join('')}
-      </table>
-      <div class="line"></div>
-      <div style="text-align:right">
-        Subtotal: S/ ${orden.subtotal.toFixed(2)}<br>
-        Descuento: S/ ${orden.descuento.toFixed(2)}<br>
-        <strong>TOTAL: S/ ${orden.total.toFixed(2)}</strong>
-      </div>
-      <div class="line"></div>
-      <div class="text-center">¡Gracias por su preferencia!</div>
-      <script>window.onload = function() { window.print(); window.close(); }</script>
-    </body>
-    </html>
-  `);
-  win.document.close();
-}
-
-function limpiarFormularioRecepcion() {
-  document.getElementById('v-dni').value = '';
-  document.getElementById('v-paciente').value = '';
-  document.getElementById('v-fnac').value = '';
-  document.getElementById('v-edad').value = '';
-  document.getElementById('v-sexo').value = '';
-  document.getElementById('v-descuento').value = '0';
-  itemsVenta = [];
-  renderizarVenta();
-  calcularTotalCobro();
-}
-
-/* ============================================================
-   HISTORIAL Y RESULTADOS
-   ============================================================ */
-
-function cargarTablaOrdenes() {
-  const tbody = document.getElementById('o-lista');
-  if (!tbody) return;
-
-  const busqueda = document.getElementById('o-buscar')?.value.toLowerCase() || '';
-
-  const filtradas = ordenes.filter(o => 
-    o.numeroOrden.toLowerCase().includes(busqueda) ||
-    o.paciente.nombre.toLowerCase().includes(busqueda) ||
-    o.paciente.dni.includes(busqueda)
-  );
-
-  if (!filtradas.length) {
-    tbody.innerHTML = `<tr><td colspan="7" class="text-center">No hay órdenes encontradas.</td></tr>`;
-    return;
-  }
-
-  tbody.innerHTML = filtradas.map(o => `
-    <tr>
-      <td><strong>${o.numeroOrden}</strong></td>
-      <td>${o.fecha}</td>
-      <td>${o.paciente.dni}</td>
-      <td>${escapeHTML(o.paciente.nombre)}</td>
-      <td>S/ ${o.total.toFixed(2)}</td>
-      <td><span class="estado estado-${o.estado.toLowerCase()}">${o.estado}</span></td>
-      <td class="text-center">
-        <button type="button" class="btn btn-primary" onclick="cargarOrdenParaResultados('${o.id}')">🧪 Resultados</button>
-      </td>
-    </tr>
-  `).join('');
-}
-
-function cargarTablaOrdenesResultados() {
-  const cont = document.getElementById('r-lista');
-  if (!cont) return;
-
-  const busqueda = document.getElementById('r-buscar')?.value.toLowerCase() || '';
-
-  const filtradas = ordenes.filter(o => 
-    o.numeroOrden.toLowerCase().includes(busqueda) ||
-    o.paciente.nombre.toLowerCase().includes(busqueda) ||
-    o.paciente.dni.includes(busqueda)
-  );
-
-  cont.innerHTML = filtradas.map(o => `
-    <div class="orden-result-item" onclick="cargarOrdenParaResultados('${o.id}')">
-      <div>
-        <strong>${o.numeroOrden}</strong> - ${escapeHTML(o.paciente.nombre)}
-        <br><small>DNI: ${o.paciente.dni} | Fecha: ${o.fecha}</small>
-      </div>
-      <span class="estado estado-${o.estado.toLowerCase()}">${o.estado}</span>
-    </div>
-  `).join('');
-}
-
-function cargarOrdenParaResultados(id) {
-  const orden = ordenes.find(o => o.id === id);
-  if (!orden) return;
-
-  ordenResultadoActual = orden;
-  cambiarModulo('resultados');
-
-  const pacienteDiv = document.getElementById('r-paciente');
-  pacienteDiv.innerHTML = `
-    <h3>📋 ${escapeHTML(orden.paciente.nombre)}</h3>
-    <p><strong>DNI:</strong> ${orden.paciente.dni} | <strong>Orden:</strong> ${orden.numeroOrden} | <strong>Edad:</strong> ${orden.paciente.edad} | <strong>Sexo:</strong> ${orden.paciente.sexo}</p>
-  `;
-
-  const examenesDiv = document.getElementById('r-examenes');
-  examenesDiv.innerHTML = orden.examenes.map((ex, idx) => {
-    const plantilla = plantillasExamenes[ex.Nombre] || plantillasExamenes[Object.keys(plantillasExamenes).find(k => ex.Nombre.includes(k))];
-
-    if (plantilla) {
-      return `
-        <div class="card" style="margin-top:15px;">
-          <h4>🧪 ${escapeHTML(ex.Nombre)}</h4>
-          <table>
+    area.innerHTML = `
+        <div class="ticket-header">
+            <div class="ticket-title">CENTRO MÉDICO VITAL HEALTH</div>
+            <div>LABORATORIO CLÍNICO</div>
+            <div>Av. Grau N° 1799 - Piura</div>
+            <div>Tel: 984 089 927</div>
+        </div>
+        <div class="ticket-divider"></div>
+        <div><strong>ORDEN:</strong> ${orden.id}</div>
+        <div><strong>FECHA:</strong> ${orden.fecha} ${orden.hora}</div>
+        <div><strong>DNI:</strong> ${orden.dni}</div>
+        <div><strong>PACIENTE:</strong> ${orden.paciente}</div>
+        <div><strong>EDAD:</strong> ${orden.edad}</div>
+        <div class="ticket-divider"></div>
+        <table class="ticket-table">
             <thead>
-              <tr>
-                <th>Parámetro</th>
-                <th>Resultado</th>
-                <th>Unidad</th>
-                <th>Referencia</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${plantilla.map(p => `
                 <tr>
-                  <td>${p.parametro}</td>
-                  <td>
-                    <input type="text" class="input-param" data-exam="${idx}" data-param="${p.parametro}" value="${ex.resultadosParams?.[p.parametro] || ''}">
-                  </td>
-                  <td>${p.unidad}</td>
-                  <td>${p.referencia}</td>
+                    <th>Examen</th>
+                    <th class="text-end">Importe</th>
                 </tr>
-              `).join('')}
-            </tbody>
-          </table>
-        </div>
-      `;
-    }
-
-    return `
-      <div class="card" style="margin-top:15px;">
-        <h4>🧪 ${escapeHTML(ex.Nombre)}</h4>
-        <div class="form-group">
-          <label>Resultado General:</label>
-          <input type="text" class="input-simple" data-exam="${idx}" value="${ex.resultadoSimple || ''}">
-        </div>
-      </div>
-    `;
-  }).join('');
-}
-
-function guardarResultadosOrden() {
-  if (!ordenResultadoActual) return;
-
-  ordenResultadoActual.examenes.forEach((ex, idx) => {
-    const paramsInputs = document.querySelectorAll(`.input-param[data-exam="${idx}"]`);
-    if (paramsInputs.length) {
-      ex.resultadosParams = ex.resultadosParams || {};
-      paramsInputs.forEach(inp => {
-        ex.resultadosParams[inp.dataset.param] = inp.value;
-      });
-    }
-
-    const simpleInput = document.querySelector(`.input-simple[data-exam="${idx}"]`);
-    if (simpleInput) {
-      ex.resultadoSimple = simpleInput.value;
-    }
-  });
-
-  ordenResultadoActual.estado = 'COMPLETADO';
-  guardarJSON(STORAGE.ORDENES, ordenes);
-  notificar('Resultados guardados correctamente.', 'success');
-  cargarTablaOrdenes();
-  cargarTablaOrdenesResultados();
-}
-
-function imprimirResultadosPDF() {
-  if (!ordenResultadoActual) {
-    notificar('Seleccione una orden primero.', 'warning');
-    return;
-  }
-
-  const element = document.createElement('div');
-  element.style.padding = '30px';
-  element.style.fontFamily = 'Arial, sans-serif';
-
-  element.innerHTML = `
-    <div style="text-align:center; border-bottom:2px solid #0284c7; padding-bottom:10px;">
-      <h2 style="color:#0284c7; margin:0;">CENTRO MÉDICO VITAL HEALTH</h2>
-      <p style="margin:0;">Av. Grau N° 1799 - Piura | Tel: 984 089 927</p>
-      <h3 style="margin-top:10px;">INFORME DE RESULTADOS DE LABORATORIO</h3>
-    </div>
-    <div style="margin:15px 0; font-size:12px;">
-      <p><strong>PACIENTE:</strong> ${ordenResultadoActual.paciente.nombre} | <strong>DNI:</strong> ${ordenResultadoActual.paciente.dni}</p>
-      <p><strong>N° ORDEN:</strong> ${ordenResultadoActual.numeroOrden} | <strong>FECHA:</strong> ${ordenResultadoActual.fecha}</p>
-    </div>
-    <hr>
-    ${ordenResultadoActual.examenes.map(ex => `
-      <div style="margin-top:15px;">
-        <h4 style="background:#e0f2fe; padding:5px; margin:0;">Examen: ${ex.Nombre}</h4>${ex.resultadosParams ? `
-          <table style="width:100%; border-collapse:collapse; font-size:11px; margin-top:5px;">
-            <thead>
-              <tr style="border-bottom:1px solid #ccc;">
-                <th style="text-align:left;">Parámetro</th>
-                <th style="text-align:center;">Resultado</th>
-                <th style="text-align:center;">Unidad</th>
-                <th style="text-align:left;">Referencia</th>
-              </tr>
             </thead>
             <tbody>
-              ${Object.entries(ex.resultadosParams).map(([k, v]) => `
-                <tr style="border-bottom:1px solid #eee;">
-                  <td>${k}</td>
-                  <td style="text-align:center; font-weight:bold;">${v}</td>
-                  <td style="text-align:center;">-</td>
-                  <td>-</td>
-                </tr>
-              `).join('')}
+                ${listaHTML}
             </tbody>
-          </table>
-        ` : `<p><strong>Resultado:</strong> ${ex.resultadoSimple || 'Pendiente'}</p>`}
-      </div>
-    `).join('')}
-  `;
+        </table>
+        <div class="ticket-divider"></div>
+        <div class="text-end"><strong>TOTAL: S/ ${orden.total.toFixed(2)}</strong></div>
+        <div class="ticket-divider"></div>
+        <div class="text-center" style="margin-top: 5px;">
+            Gracias por confiar en Vital Health.<br>Tu salud es nuestra prioridad.
+        </div>
+    `;
 
-  html2pdf().from(element).save(`Resultado_${ordenResultadoActual.numeroOrden}.pdf`);
+    window.print();
 }
 
-/* ============================================================
-   PLANTILLAS Y NAVEGACIÓN
-   ============================================================ */
+function cargarOrdenes() {
+    const tbody = document.getElementById('lista-ordenes-body');
+    tbody.innerHTML = '';
 
-function cambiarModulo(modulo, btn) {
-  document.querySelectorAll('.module').forEach(m => m.classList.remove('active-module'));
-  const target = document.getElementById(`modulo-${modulo}`);
-  if (target) target.classList.add('active-module');
-
-  document.querySelectorAll('.menu-item').forEach(b => b.classList.remove('active'));
-  if (btn) btn.classList.add('active');
-
-  const titulos = {
-    recepcion: ['Recepción', 'Registro y atención de pacientes'],
-    ordenes: ['Órdenes', 'Historial de órdenes registradas'],
-    resultados: ['Resultados', 'Ingreso y validación de analíticas'],
-    plantillas: ['Plantillas', 'Configuración de parámetros por examen']
-  };
-
-  if (titulos[modulo]) {
-    document.getElementById('tituloModulo').textContent = titulos[modulo][0];
-    document.getElementById('subtituloModulo').textContent = titulos[modulo][1];
-  }
+    ordenesLocales.forEach((orden, index) => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td><strong>${orden.id}</strong></td>
+            <td>${orden.fecha}</td>
+            <td>${orden.dni}</td>
+            <td>${orden.paciente}</td>
+            <td>${orden.edad}</td>
+            <td>S/ ${orden.total.toFixed(2)}</td>
+            <td><span class="badge bg-info text-dark">${orden.estado}</span></td>
+            <td>
+                <button class="btn btn-sm btn-primary" onclick="abrirResultados('${orden.id}')"><i class="bi bi-journal-medical"></i> Resultados</button>
+                <button class="btn btn-sm btn-danger" onclick="eliminarOrden('${orden.id}')"><i class="bi bi-trash"></i> Eliminar</button>
+            </td>
+        `;
+        tbody.appendChild(tr);
+    });
 }
 
-function poblarSelectPlantillas() {
-  const selects = [document.getElementById('selectorPlantilla'), document.getElementById('selectorPlantillaEditar')];
-  const keys = Object.keys(plantillasExamenes);
-
-  selects.forEach(s => {
-    if (s) {
-      s.innerHTML = '<option value="">Seleccionar plantilla...</option>' + 
-        keys.map(k => `<option value="${k}">${k}</option>`).join('');
+function eliminarOrden(id) {
+    if (confirm(`¿Está seguro de que desea eliminar la orden ${id}? Esta acción no se puede deshacer.`)) {
+        ordenesLocales = ordenesLocales.filter(o => o.id !== id);
+        guardarEnNubeYLocal();
+        cargarOrdenes();
+        actualizarControlCaja();
     }
-  });
 }
 
-/* AUXILIARES */
-function cargarJSON(k, fallback) {
-  try {
-    const raw = localStorage.getItem(k);
-    return raw ? JSON.parse(raw) : fallback;
-  } catch { return fallback; }
+function abrirResultados(ordenId) {
+    const orden = ordenesLocales.find(o => o.id === ordenId);
+    if (!orden) return;
+
+    ordenActualVisualizando = orden;
+    showSection('resultados');
+
+    const container = document.getElementById('resultados-editor');
+    let camposHTML = '';
+
+    orden.examenes.forEach((ex, idx) => {
+        const val = (orden.resultados && orden.resultados[ex.codigo]) ? orden.resultados[ex.codigo] : '';
+        camposHTML += `
+            <div class="mb-3 p-3 border rounded bg-light">
+                <h6><strong>${ex.nombre}</strong></h6>
+                <div class="row g-2">
+                    <div class="col-md-8">
+                        <label class="form-label">Resultado</label>
+                        <input type="text" id="res-${ex.codigo}" class="form-control" value="${val}">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Unidad / Observación</label>
+                        <input type="text" id="obs-${ex.codigo}" class="form-control" placeholder="Valores normales...">
+                    </div>
+                </div>
+            </div>
+        `;
+    });
+
+    container.innerHTML = `
+        <div class="p-2 mb-3 bg-white border-bottom">
+            <h4>Paciente: ${orden.paciente} | Edad: ${orden.edad} | DNI: ${orden.dni}</h4>
+            <small class="text-muted">N° Orden: ${orden.id}</small>
+        </div>
+        ${camposHTML}
+        <div class="d-flex gap-2 mt-3">
+            <button class="btn btn-success" onclick="guardarResultados()"><i class="bi bi-floppy"></i> Guardar Resultados</button>
+            <button class="btn btn-primary" onclick="visualizarEImprimirResultados()"><i class="bi bi-printer"></i> Visualizar e Imprimir Resultados</button>
+        </div>
+    `;
 }
 
-function guardarJSON(k, val) {
-  try { localStorage.setItem(k, JSON.stringify(val)); } catch {}
+function guardarResultados() {
+    if (!ordenActualVisualizando) return;
+
+    ordenActualVisualizando.examenes.forEach(ex => {
+        const val = document.getElementById(`res-${ex.codigo}`).value;
+        if (!ordenActualVisualizando.resultados) ordenActualVisualizando.resultados = {};
+        ordenActualVisualizando.resultados[ex.codigo] = val;
+    });
+
+    ordenActualVisualizando.estado = 'COMPLETADO';
+    guardarEnNubeYLocal();
+    alert('Resultados guardados exitosamente.');
 }
 
-function escapeHTML(str) {
-  return String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+// FIX: Generación directa de ventana/visualización en HTML sin PDF en blanco
+function visualizarEImprimirResultados() {
+    if (!ordenActualVisualizando) return;
+
+    guardarResultados();
+
+    let filasResultados = '';
+    ordenActualVisualizando.examenes.forEach(ex => {
+        const val = ordenActualVisualizando.resultados[ex.codigo] || 'Pendiente';
+        filasResultados += `
+            <tr>
+                <td style="padding: 8px; border-bottom: 1px solid #ddd;"><strong>${ex.nombre}</strong></td>
+                <td style="padding: 8px; border-bottom: 1px solid #ddd;">${val}</td>
+            </tr>
+        `;
+    });
+
+    const ventanaImp = window.open('', '_blank');
+    ventanaImp.document.write(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Informe de Resultados - ${ordenActualVisualizando.id}</title>
+            <style>
+                body { font-family: Arial, sans-serif; margin: 30px; color: #333; }
+                .header { text-align: center; border-bottom: 2px solid #0072bc; padding-bottom: 10px; margin-bottom: 20px; }
+                .patient-info { background: #f4f4f4; padding: 15px; border-radius: 5px; margin-bottom: 20px; }
+                table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+                th { background: #0072bc; color: white; padding: 10px; text-align: left; }
+                .footer { margin-top: 40px; text-align: center; font-size: 12px; color: #777; }
+            </style>
+        </head>
+        <body>
+            <div class="header">
+                <h2 style="margin:0;">CENTRO MÉDICO VITAL HEALTH</h2>
+                <p style="margin:5px 0;">LABORATORIO CLÍNICO</p>
+                <small>Av. Grau N° 1799 - Piura | Tel: 984 089 927</small>
+            </div>
+            <div class="patient-info">
+                <strong>PACIENTE:</strong> ${ordenActualVisualizando.paciente}<br>
+                <strong>DNI:</strong> ${ordenActualVisualizando.dni} | <strong>EDAD:</strong> ${ordenActualVisualizando.edad}<br>
+                <strong>N° ORDEN:</strong> ${ordenActualVisualizando.id} | <strong>FECHA:</strong> ${ordenActualVisualizando.fecha}
+            </div>
+            <h3>RESULTADOS DE ANÁLISIS</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Examen</th>
+                        <th>Resultado</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${filasResultados}
+                </tbody>
+            </table>
+            <div class="footer">
+                <p>Este informe refleja los resultados procesados electrónicamente por Vital Health.</p>
+            </div>
+            <script>
+                window.onload = function() { window.print(); }
+            </script>
+        </body>
+        </html>
+    `);
+    ventanaImp.document.close();
 }
 
-function setLoading(btn, cargando, text) {
-  if (!btn) return;
-  btn.disabled = cargando;
-  btn.textContent = text;
-}
+function actualizarControlCaja() {
+    const hoyStr = new Date().toLocaleDateString('es-PE');
+    const ordenesHoy = ordenesLocales.filter(o => o.fecha === hoyStr);
 
-function notificar(msg, tipo = 'info') {
-  alert(`${tipo.toUpperCase()}: ${msg}`);
+    let total = 0;
+    let efectivo = 0;
+    let digital = 0;
+
+    const tbody = document.getElementById('caja-tabla-body');
+    if (tbody) tbody.innerHTML = '';
+
+    ordenesHoy.forEach(o => {
+        total += o.total;
+        if (o.metodoPago === 'Efectivo') {
+            efectivo += o.total;
+        } else {
+            digital += o.total;
+        }
+
+        if (tbody) {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${o.hora || 'S/H'}</td>
+                <td>${o.id}</td>
+                <td>${o.paciente}</td>
+                <td><span class="badge bg-secondary">${o.metodoPago}</span></td>
+                <td>S/ ${o.total.toFixed(2)}</td>
+            `;
+            tbody.appendChild(tr);
+        }
+    });
+
+    if (document.getElementById('caja-total-hoy')) {
+        document.getElementById('caja-total-hoy').innerText = total.toFixed(2);
+        document.getElementById('caja-efectivo').innerText = efectivo.toFixed(2);
+        document.getElementById('caja-digital').innerText = digital.toFixed(2);
+    }
 }
