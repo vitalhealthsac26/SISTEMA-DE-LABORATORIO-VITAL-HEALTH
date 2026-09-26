@@ -8,7 +8,7 @@ if (typeof firebase !== 'undefined' && !firebase.apps.length) {
 }
 const db = (typeof firebase !== 'undefined') ? firebase.database() : null;
 
-// Catálogo base de exámenes
+// Catálogo de exámenes (se llenará dinámicamente desde productos.json)
 let catalogoExamenes = [
     { codigo: 'EX001', nombre: 'HEMOGRAMA COMPLETO', precio: 25.00 },
     { codigo: 'EX002', nombre: 'PERFIL LIPÍDICO: Colesterol Total, Triglicéridos, HDL, LDL', precio: 50.00 },
@@ -21,12 +21,15 @@ let examenesSeleccionados = [];
 let ordenesLocales = JSON.parse(localStorage.getItem('vitalhealth_ordenes')) || [];
 let ordenActualVisualizando = null;
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     const dateEl = document.getElementById('current-date');
     if (dateEl) {
         dateEl.innerText = new Date().toLocaleDateString('es-PE', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
     }
-    cargarProductosJSON();
+    
+    // Cargar productos del JSON inmediatamente al iniciar
+    await cargarProductosJSON();
+    
     escucharSincronizacion();
     cargarOrdenes();
     actualizarControlCaja();
@@ -35,27 +38,26 @@ document.addEventListener('DOMContentLoaded', () => {
 // Cargar catálogo de exámenes desde productos.json
 async function cargarProductosJSON() {
     try {
-        const response = await fetch('productos.json');
+        // Agregamos timestamp para evitar problemas de caché del archivo JSON
+        const response = await fetch('productos.json?v=' + new Date().getTime());
         if (response.ok) {
             const data = await response.json();
             if (Array.isArray(data) && data.length > 0) {
-                // Mapeo flexible para adaptarse al formato del JSON
                 const productosCargados = data.map((prod, index) => ({
-                    codigo: prod.codigo || prod.id || `EX-${String(index + 1).padStart(3, '0')}`,
-                    nombre: (prod.nombre || prod.descripcion || prod.examen || '').toUpperCase(),
-                    precio: parseFloat(prod.precio || prod.costo || prod.precioUnitario || 0)
+                    codigo: String(prod.Codigo || prod.codigo || index + 1),
+                    nombre: String(prod.Nombre || prod.nombre || '').toUpperCase(),
+                    precio: parseFloat(prod.Precio || prod.precio || 0)
                 }));
                 
-                // Fusionar productos evitando duplicados por código
-                productosCargados.forEach(prod => {
-                    if (!catalogoExamenes.some(c => c.codigo === prod.codigo)) {
-                        catalogoExamenes.push(prod);
-                    }
-                });
+                // Reemplazamos/Fusionamos el catálogo con los datos del JSON
+                catalogoExamenes = productosCargados;
+                console.log(`Se cargaron con éxito ${catalogoExamenes.length} exámenes.`);
             }
+        } else {
+            console.warn('Error al leer productos.json. Código HTTP:', response.status);
         }
     } catch (error) {
-        console.warn('No se pudo cargar productos.json, utilizando catálogo predeterminado.', error);
+        console.error('No se pudo cargar productos.json:', error);
     }
 }
 
@@ -175,13 +177,24 @@ async function buscarPaciente() {
     if (btnText) btnText.innerText = 'Consultar';
 }
 
+// FILTRADO RÁPIDO DE EXÁMENES (MÁXIMO 15 RESULTADOS)
 function filtrarExamenes(texto) {
     const contenedor = document.getElementById('sugerencias-examenes');
     contenedor.innerHTML = '';
-    if (!texto.trim()) return;
-
-    const filtrados = catalogoExamenes.filter(e => e.nombre.toLowerCase().includes(texto.toLowerCase()));
+    const busqueda = texto.trim().toLowerCase();
     
+    if (!busqueda) return;
+
+    // Filtra y muestra solo los primeros 15 coincidencias
+    const filtrados = catalogoExamenes
+        .filter(e => e.nombre.toLowerCase().includes(busqueda) || e.codigo.toLowerCase().includes(busqueda))
+        .slice(0, 15);
+    
+    if (filtrados.length === 0) {
+        contenedor.innerHTML = '<div class="list-group-item text-muted">No se encontraron exámenes</div>';
+        return;
+    }
+
     filtrados.forEach(ex => {
         const item = document.createElement('a');
         item.className = 'list-group-item list-group-item-action cursor-pointer';
