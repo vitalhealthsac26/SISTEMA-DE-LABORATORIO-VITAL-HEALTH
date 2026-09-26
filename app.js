@@ -81,26 +81,30 @@ let ordenesLocales = JSON.parse(localStorage.getItem('vitalhealth_ordenes')) || 
 let ordenActualVisualizando = null;
 
 document.addEventListener('DOMContentLoaded', async () => {
-    const dateEl = document.getElementById('current-date');
-    if (dateEl) {
-        dateEl.innerText = new Date().toLocaleDateString('es-PE', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+    try {
+        const dateEl = document.getElementById('current-date');
+        if (dateEl) {
+            dateEl.innerText = new Date().toLocaleDateString('es-PE', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+        }
+        
+        await cargarProductosJSON();
+        escucharSincronizacion();
+        cargarOrdenes();
+        actualizarControlCaja();
+    } catch (e) {
+        console.error("Error inicializando la app:", e);
     }
-    
-    await cargarProductosJSON();
-    escucharSincronizacion();
-    cargarOrdenes();
-    actualizarControlCaja();
-    renderizarTablaCatalogo();
 });
 
 async function cargarProductosJSON() {
     const catalogoGuardado = localStorage.getItem('vitalhealth_catalogo');
     if (catalogoGuardado) {
-        catalogoExamenes = JSON.parse(catalogoGuardado);
-        if (catalogoExamenes.length > 0) {
-            cargarDatosEnFormularioCatalogo(catalogoExamenes[0]);
+        try {
+            catalogoExamenes = JSON.parse(catalogoGuardado);
+            return;
+        } catch (e) {
+            console.warn("Catálogo guardado corrupto, cargando por defecto.");
         }
-        return;
     }
 
     try {
@@ -122,11 +126,7 @@ async function cargarProductosJSON() {
             }
         }
     } catch (error) {
-        console.warn('Cargando catálogo básico.');
-    }
-
-    if (catalogoExamenes.length > 0) {
-        cargarDatosEnFormularioCatalogo(catalogoExamenes[0]);
+        console.warn('Usando catálogo base predeterminado.');
     }
 }
 
@@ -135,8 +135,10 @@ function guardarCatalogoLocal() {
 }
 
 function toggleSidebar() {
-    document.getElementById('sidebar').classList.toggle('active');
-    document.getElementById('sidebar-overlay').classList.toggle('active');
+    const sb = document.getElementById('sidebar');
+    const overlay = document.getElementById('sidebar-overlay');
+    if (sb) sb.classList.toggle('active');
+    if (overlay) overlay.classList.toggle('active');
 }
 
 function escucharSincronizacion() {
@@ -171,33 +173,43 @@ function showSection(sectionId) {
     if (activeNav) activeNav.classList.add('active');
 
     if (window.innerWidth < 768) {
-        document.getElementById('sidebar').classList.remove('active');
-        document.getElementById('sidebar-overlay').classList.remove('active');
+        const sb = document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebar-overlay');
+        if (sb) sb.classList.remove('active');
+        if (overlay) overlay.classList.remove('active');
     }
 
     if (sectionId === 'caja') actualizarControlCaja();
-    if (sectionId === 'catalogo') renderizarTablaCatalogo();
+    if (sectionId === 'catalogo') {
+        renderizarTablaCatalogo();
+        if (catalogoExamenes.length > 0) {
+            cargarDatosEnFormularioCatalogo(catalogoExamenes[0]);
+        }
+    }
 }
 
 function calcularEdad() {
-    const fnacVal = document.getElementById('pac-fnac').value;
-    if (!fnacVal) return;
+    const inputFnac = document.getElementById('pac-fnac');
+    const inputEdad = document.getElementById('pac-edad');
+    if (!inputFnac || !inputEdad || !inputFnac.value) return;
+
     const hoy = new Date();
-    const fnac = new Date(fnacVal);
+    const fnac = new Date(inputFnac.value);
     let edad = hoy.getFullYear() - fnac.getFullYear();
     const mes = hoy.getMonth() - fnac.getMonth();
     if (mes < 0 || (mes === 0 && hoy.getDate() < fnac.getDate())) {
         edad--;
     }
-    document.getElementById('pac-edad').value = `${edad} AÑOS`;
+    inputEdad.value = `${Math.max(0, edad)} AÑOS`;
 }
 
 async function buscarPaciente() {
     const dniInput = document.getElementById('pac-dni');
+    if (!dniInput) return;
     const dni = dniInput.value.trim();
 
     if (dni.length !== 8 || isNaN(dni)) {
-        return alert('Por favor, ingrese un DNI de 8 dígitos.');
+        return alert('Por favor, ingrese un DNI válido de 8 dígitos.');
     }
 
     const encontrada = ordenesLocales.find(o => o.dni === dni);
@@ -214,15 +226,19 @@ async function buscarPaciente() {
             const res = await response.json();
             if (res.data) {
                 document.getElementById('pac-nombre').value = `${res.data.nombres} ${res.data.apellido_paterno} ${res.data.apellido_materno}`.trim();
+                return;
             }
         }
+        alert('DNI no encontrado. Ingrese el nombre manualmente.');
     } catch (e) {
-        alert('No se pudo conectar a RENIEC. Ingrese el nombre manualmente.');
+        alert('No se pudo conectar al servicio DNI. Ingrese el nombre manualmente.');
     }
 }
 
 function filtrarExamenes(texto) {
     const contenedor = document.getElementById('sugerencias-examenes');
+    if (!contenedor) return;
+
     contenedor.innerHTML = '';
     const busqueda = texto.trim().toLowerCase();
     
@@ -240,6 +256,7 @@ function filtrarExamenes(texto) {
     filtrados.forEach(ex => {
         const item = document.createElement('a');
         item.className = 'list-group-item list-group-item-action cursor-pointer';
+        item.style.cursor = 'pointer';
         item.innerText = `${ex.nombre} - S/ ${ex.precio.toFixed(2)}`;
         item.onclick = () => {
             agregarExamen(ex);
@@ -257,11 +274,14 @@ function agregarExamen(examen) {
 
 function renderExamenes() {
     const tbody = document.querySelector('#tabla-examenes-seleccionados tbody');
+    if (!tbody) return;
+
     tbody.innerHTML = '';
     
     if (examenesSeleccionados.length === 0) {
         tbody.innerHTML = '<tr id="empty-row"><td colspan="6" class="text-center text-muted py-4">No hay exámenes agregados.</td></tr>';
-        document.getElementById('total-cobrar').innerText = '0.00';
+        const totalEl = document.getElementById('total-cobrar');
+        if (totalEl) totalEl.innerText = '0.00';
         return;
     }
 
@@ -280,7 +300,8 @@ function renderExamenes() {
         tbody.appendChild(row);
     });
 
-    document.getElementById('total-cobrar').innerText = total.toFixed(2);
+    const totalEl = document.getElementById('total-cobrar');
+    if (totalEl) totalEl.innerText = total.toFixed(2);
 }
 
 function eliminarExamen(index) {
@@ -288,7 +309,7 @@ function eliminarExamen(index) {
     renderExamenes();
 }
 
-// GESTIÓN DE CATÁLOGO CON PLANTILLAS Y PARÁMETROS DINÁMICOS
+// GESTIÓN DE CATÁLOGO
 function renderizarTablaCatalogo(filtro = '') {
     const tbody = document.getElementById('tabla-catalogo-body');
     const countEl = document.getElementById('total-cat-count');
@@ -341,6 +362,8 @@ function seleccionarExamenParaEditar(codigo) {
 }
 
 function cargarDatosEnFormularioCatalogo(ex) {
+    if (!document.getElementById('cat-id-original')) return;
+
     document.getElementById('cat-id-original').value = ex.codigo;
     document.getElementById('cat-codigo').value = ex.codigo;
     document.getElementById('cat-nombre').value = ex.nombre;
@@ -351,28 +374,33 @@ function cargarDatosEnFormularioCatalogo(ex) {
     document.getElementById('cat-ref-texto').value = ex.refTexto || '';
 
     const contenedor = document.getElementById('contenedor-parametros');
-    contenedor.innerHTML = '';
+    if (contenedor) {
+        contenedor.innerHTML = '';
+        const params = Array.isArray(ex.parametros) ? ex.parametros : [];
 
-    const params = Array.isArray(ex.parametros) ? ex.parametros : [];
-
-    if (params.length > 0) {
-        params.forEach(p => agregarFilaParametro(p));
-    } else {
-        actualizarEstadoVacioParametros();
+        if (params.length > 0) {
+            params.forEach(p => agregarFilaParametro(p));
+        } else {
+            actualizarEstadoVacioParametros();
+        }
     }
 
-    document.getElementById('catalogo-form-titulo').innerHTML = `<i class="bi bi-pencil-square me-2"></i>Editando: ${ex.nombre}`;
-    document.getElementById('btn-guardar-cat').innerHTML = '<i class="bi bi-check-circle me-1"></i>Guardar Cambios del Examen';
+    const tit = document.getElementById('catalogo-form-titulo');
+    if (tit) tit.innerHTML = `<i class="bi bi-pencil-square me-2"></i>Editando: ${ex.nombre}`;
+    
+    const btnGuardar = document.getElementById('btn-guardar-cat');
+    if (btnGuardar) btnGuardar.innerHTML = '<i class="bi bi-check-circle me-1"></i>Guardar Cambios del Examen';
 }
 
 function agregarFilaParametro(p = {}) {
     const contenedor = document.getElementById('contenedor-parametros');
+    if (!contenedor) return;
     
     const avisoVacio = contenedor.querySelector('.no-params-msg');
     if (avisoVacio) avisoVacio.remove();
 
     const div = document.createElement('div');
-    div.className = 'parametro-card';
+    div.className = 'parametro-card border p-2 mb-2 rounded bg-light';
     div.innerHTML = `
         <div class="d-flex justify-content-between align-items-center mb-2">
             <span class="fw-bold small text-primary"><i class="bi bi-card-list me-1"></i>Indicador / Parámetro</span>
@@ -409,12 +437,16 @@ function quitarFilaParametro(btn) {
 
 function vaciarTodosLosParametros() {
     const contenedor = document.getElementById('contenedor-parametros');
-    contenedor.innerHTML = '';
-    actualizarEstadoVacioParametros();
+    if (contenedor) {
+        contenedor.innerHTML = '';
+        actualizarEstadoVacioParametros();
+    }
 }
 
 function actualizarEstadoVacioParametros() {
     const contenedor = document.getElementById('contenedor-parametros');
+    if (!contenedor) return;
+
     const tarjetas = contenedor.querySelectorAll('.parametro-card');
     if (tarjetas.length === 0) {
         contenedor.innerHTML = `
@@ -426,15 +458,22 @@ function actualizarEstadoVacioParametros() {
 }
 
 function prepararNuevoExamen() {
-    document.getElementById('form-catalogo').reset();
-    document.getElementById('cat-id-original').value = '';
-    const nuevoCodigo = String(catalogoExamenes.length + 100);
-    document.getElementById('cat-codigo').value = nuevoCodigo;
+    const form = document.getElementById('form-catalogo');
+    if (form) form.reset();
+    
+    const idOrig = document.getElementById('cat-id-original');
+    if (idOrig) idOrig.value = '';
+
+    const inputCod = document.getElementById('cat-codigo');
+    if (inputCod) inputCod.value = String(catalogoExamenes.length + 100);
 
     vaciarTodosLosParametros();
 
-    document.getElementById('catalogo-form-titulo').innerHTML = '<i class="bi bi-plus-circle me-2"></i>Crear Nuevo Examen';
-    document.getElementById('btn-guardar-cat').innerHTML = '<i class="bi bi-save me-1"></i>Registrar Nuevo Examen';
+    const tit = document.getElementById('catalogo-form-titulo');
+    if (tit) tit.innerHTML = '<i class="bi bi-plus-circle me-2"></i>Crear Nuevo Examen';
+    
+    const btnGuardar = document.getElementById('btn-guardar-cat');
+    if (btnGuardar) btnGuardar.innerHTML = '<i class="bi bi-save me-1"></i>Registrar Nuevo Examen';
 }
 
 function guardarExamenCatalogo() {
@@ -549,12 +588,15 @@ function guardarOrdenGenerarTicket() {
 
     examenesSeleccionados = [];
     renderExamenes();
-    document.getElementById('form-paciente').reset();
+    const formPac = document.getElementById('form-paciente');
+    if (formPac) formPac.reset();
     alert('Orden registrada correctamente.');
 }
 
 function imprimirTicket58mm(orden) {
     const area = document.getElementById('ticket-print-area');
+    if (!area) return;
+
     let listaHTML = '';
     orden.examenes.forEach(e => {
         listaHTML += `
@@ -630,6 +672,8 @@ function abrirResultados(ordenId) {
     showSection('resultados');
 
     const container = document.getElementById('resultados-editor');
+    if (!container) return;
+
     let camposHTML = '';
 
     orden.examenes.forEach((ex) => {
@@ -711,7 +755,6 @@ function guardarResultados() {
     alert('Resultados guardados correctamente.');
 }
 
-// GENERADOR DINÁMICO DE SECCIONES IMPRESAS SEGÚN PLANTILLA
 function generarTablaEspecializada(ex, catEx, orden) {
     const params = Array.isArray(catEx.parametros) ? catEx.parametros : [];
     const tipoPlantilla = catEx.plantilla || 'estandar';
@@ -720,14 +763,13 @@ function generarTablaEspecializada(ex, catEx, orden) {
         return `<p style="text-align:center; font-size:12px; color:#64748b; font-style:italic;">Examen sin plantilla de parámetros específicos.</p>`;
     }
 
-    // PLANTILLA: HEMOGRAMA COMPLETO
     if (tipoPlantilla === 'hemograma') {
         let filasSerieRojaBlanca = '';
         let filasRecuentoDiferencial = '';
 
         params.forEach((p, idx) => {
             const resKey = `${ex.codigo}_${idx}`;
-            const resData = orden.resultados[resKey] || {};
+            const resData = (orden.resultados && orden.resultados[resKey]) ? orden.resultados[resKey] : {};
             const val = resData.resultado || '-';
 
             const esDiferencial = ['Neutrófilos Segmentados', 'Neutrófilos Abastonados', 'Linfocitos', 'Monocitos', 'Eosinófilos', 'Basófilo'].includes(p.nombre);
@@ -772,12 +814,11 @@ function generarTablaEspecializada(ex, catEx, orden) {
         `;
     }
 
-    // PLANTILLA: BIOQUÍMICA (Múltiples Rangos de Edad/Condición)
     if (tipoPlantilla === 'bioquimica') {
         let filasHTML = '';
         params.forEach((p, idx) => {
             const resKey = `${ex.codigo}_${idx}`;
-            const resData = orden.resultados[resKey] || {};
+            const resData = (orden.resultados && orden.resultados[resKey]) ? orden.resultados[resKey] : {};
 
             filasHTML += `
                 <tr>
@@ -811,10 +852,9 @@ function generarTablaEspecializada(ex, catEx, orden) {
         `;
     }
 
-    // PLANTILLA: HEMOGLOBINA GLICOSILADA (HbA1c)
     if (tipoPlantilla === 'hba1c') {
         const resKey = `${ex.codigo}_0`;
-        const resData = orden.resultados[resKey] || {};
+        const resData = (orden.resultados && orden.resultados[resKey]) ? orden.resultados[resKey] : {};
 
         return `
             <table style="width:100%; border-collapse:collapse; font-size:11px; margin-top:5px;">
@@ -842,11 +882,10 @@ function generarTablaEspecializada(ex, catEx, orden) {
         `;
     }
 
-    // PLANTILLA: ESTÁNDAR
     let filasEstandar = '';
     params.forEach((p, idx) => {
         const resKey = `${ex.codigo}_${idx}`;
-        const resData = orden.resultados[resKey] || {};
+        const resData = (orden.resultados && orden.resultados[resKey]) ? orden.resultados[resKey] : {};
 
         let valRefHTML = p.refTexto || (p.refMin || p.refMax ? `${p.refMin || '-'} - ${p.refMax || '-'}` : '-');
 
