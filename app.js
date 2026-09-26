@@ -55,6 +55,9 @@ async function cargarProductosJSON() {
     const catalogoGuardado = localStorage.getItem('vitalhealth_catalogo');
     if (catalogoGuardado) {
         catalogoExamenes = JSON.parse(catalogoGuardado);
+        if (catalogoExamenes.length > 0) {
+            cargarDatosEnFormularioCatalogo(catalogoExamenes[0]);
+        }
         return;
     }
 
@@ -79,6 +82,10 @@ async function cargarProductosJSON() {
         }
     } catch (error) {
         console.warn('Cargando catálogo básico.');
+    }
+
+    if (catalogoExamenes.length > 0) {
+        cargarDatosEnFormularioCatalogo(catalogoExamenes[0]);
     }
 }
 
@@ -262,16 +269,22 @@ function renderizarTablaCatalogo(filtro = '') {
 
     filtrados.forEach(ex => {
         const tr = document.createElement('tr');
+        tr.style.cursor = 'pointer';
+        tr.onclick = (e) => {
+            // Si hace clic en la papelera no selecciona
+            if (e.target.closest('button')) return;
+            seleccionarExamenParaEditar(ex.codigo);
+        };
         tr.innerHTML = `
             <td><span class="badge bg-light text-dark border">${ex.codigo}</span></td>
             <td><strong>${ex.nombre}</strong></td>
             <td><small class="text-muted">${ex.muestra || 'Suero'} | ${ex.metodo || 'Estándar'}</small></td>
             <td>S/ ${ex.precio.toFixed(2)}</td>
             <td class="text-end px-3">
-                <button class="btn btn-sm btn-outline-primary me-1" onclick="editarExamenCatalogo('${ex.codigo}')">
+                <button class="btn btn-sm btn-outline-primary me-1" onclick="seleccionarExamenParaEditar('${ex.codigo}')" title="Editar en formulario">
                     <i class="bi bi-pencil"></i>
                 </button>
-                <button class="btn btn-sm btn-outline-danger" onclick="eliminarExamenCatalogo('${ex.codigo}')">
+                <button class="btn btn-sm btn-outline-danger" onclick="eliminarExamenCatalogo('${ex.codigo}')" title="Eliminar">
                     <i class="bi bi-trash"></i>
                 </button>
             </td>
@@ -280,8 +293,39 @@ function renderizarTablaCatalogo(filtro = '') {
     });
 }
 
+function seleccionarExamenParaEditar(codigo) {
+    const ex = catalogoExamenes.find(e => e.codigo === codigo);
+    if (!ex) return;
+    cargarDatosEnFormularioCatalogo(ex);
+}
+
+function cargarDatosEnFormularioCatalogo(ex) {
+    document.getElementById('cat-id-original').value = ex.codigo;
+    document.getElementById('cat-codigo').value = ex.codigo;
+    document.getElementById('cat-nombre').value = ex.nombre;
+    document.getElementById('cat-precio').value = ex.precio;
+    document.getElementById('cat-muestra').value = ex.muestra || '';
+    document.getElementById('cat-unidad').value = ex.unidad || '';
+    document.getElementById('cat-ref-min').value = ex.refMin || '';
+    document.getElementById('cat-ref-max').value = ex.refMax || '';
+    document.getElementById('cat-ref-texto').value = ex.refTexto || '';
+    document.getElementById('cat-metodo').value = ex.metodo || '';
+
+    document.getElementById('catalogo-form-titulo').innerHTML = `<i class="bi bi-pencil-square me-2"></i>Editando: ${ex.nombre}`;
+    document.getElementById('btn-guardar-cat').innerHTML = '<i class="bi bi-check-circle me-1"></i>Guardar Cambios del Examen';
+}
+
+function prepararNuevoExamen() {
+    document.getElementById('form-catalogo').reset();
+    document.getElementById('cat-id-original').value = ''; // Vacío indica que es NUEVO
+    const nuevoCodigo = 'EX-' + String(catalogoExamenes.length + 100);
+    document.getElementById('cat-codigo').value = nuevoCodigo;
+    document.getElementById('catalogo-form-titulo').innerHTML = '<i class="bi bi-plus-circle me-2"></i>Crear Nuevo Examen';
+    document.getElementById('btn-guardar-cat').innerHTML = '<i class="bi bi-save me-1"></i>Registrar Nuevo Examen';
+}
+
 function guardarExamenCatalogo() {
-    const idOrig = document.getElementById('cat-id-original').value;
+    const idOrig = document.getElementById('cat-id-original').value.trim();
     const codigo = document.getElementById('cat-codigo').value.trim();
     const nombre = document.getElementById('cat-nombre').value.trim().toUpperCase();
     const precio = parseFloat(document.getElementById('cat-precio').value);
@@ -300,54 +344,38 @@ function guardarExamenCatalogo() {
     const examenObj = { codigo, nombre, precio, muestra, unidad, refMin, refMax, refTexto, metodo };
 
     if (idOrig) {
+        // ACTUALIZAR EXAMEN EXISTENTE
         const idx = catalogoExamenes.findIndex(e => e.codigo === idOrig);
-        if (idx !== -1) catalogoExamenes[idx] = examenObj;
+        if (idx !== -1) {
+            catalogoExamenes[idx] = examenObj;
+        } else {
+            catalogoExamenes.unshift(examenObj);
+        }
+        alert('Cambios guardados exitosamente.');
     } else {
+        // CREAR NUEVO EXAMEN
         if (catalogoExamenes.some(e => e.codigo === codigo)) {
-            return alert('Ya existe un examen con este código.');
+            return alert('Ya existe un examen registrado con este código.');
         }
         catalogoExamenes.unshift(examenObj);
+        alert('Nuevo examen creado exitosamente.');
     }
 
     guardarCatalogoLocal();
     renderizarTablaCatalogo();
-    cancelarEdicionCatalogo();
-    alert('Examen y plantilla guardados correctamente.');
-}
-
-function editarExamenCatalogo(codigo) {
-    const ex = catalogoExamenes.find(e => e.codigo === codigo);
-    if (!ex) return;
-
-    document.getElementById('cat-id-original').value = ex.codigo;
-    document.getElementById('cat-codigo').value = ex.codigo;
-    document.getElementById('cat-nombre').value = ex.nombre;
-    document.getElementById('cat-precio').value = ex.precio;
-    document.getElementById('cat-muestra').value = ex.muestra || '';
-    document.getElementById('cat-unidad').value = ex.unidad || '';
-    document.getElementById('cat-ref-min').value = ex.refMin || '';
-    document.getElementById('cat-ref-max').value = ex.refMax || '';
-    document.getElementById('cat-ref-texto').value = ex.refTexto || '';
-    document.getElementById('cat-metodo').value = ex.metodo || '';
-
-    document.getElementById('catalogo-form-titulo').innerHTML = '<i class="bi bi-pencil-square me-2"></i>Editar Examen / Plantilla';
-    document.getElementById('btn-guardar-cat').innerHTML = '<i class="bi bi-check-circle me-1"></i>Actualizar Examen';
-    document.getElementById('btn-cancelar-cat').classList.remove('d-none');
-}
-
-function cancelarEdicionCatalogo() {
-    document.getElementById('form-catalogo').reset();
-    document.getElementById('cat-id-original').value = '';
-    document.getElementById('catalogo-form-titulo').innerHTML = '<i class="bi bi-sliders me-2"></i>Configurar Examen y Plantilla';
-    document.getElementById('btn-guardar-cat').innerHTML = '<i class="bi bi-save me-1"></i>Guardar Examen y Plantilla';
-    document.getElementById('btn-cancelar-cat').classList.add('d-none');
+    seleccionarExamenParaEditar(codigo);
 }
 
 function eliminarExamenCatalogo(codigo) {
-    if (confirm(`¿Desea eliminar el examen ${codigo}?`)) {
+    if (confirm(`¿Desea eliminar del catálogo el examen con código ${codigo}?`)) {
         catalogoExamenes = catalogoExamenes.filter(e => e.codigo !== codigo);
         guardarCatalogoLocal();
         renderizarTablaCatalogo();
+        if (catalogoExamenes.length > 0) {
+            seleccionarExamenParaEditar(catalogoExamenes[0].codigo);
+        } else {
+            prepararNuevoExamen();
+        }
     }
 }
 
