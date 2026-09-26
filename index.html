@@ -1,280 +1,794 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Sistema de Laboratorio - Vital Health</title>
-  <link rel="stylesheet" href="styles.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Centro Médico Vital Health - Sistema de Laboratorio</title>
+
+    <link rel="stylesheet" href="styles.css">
+
+    <!-- Librería para generar PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </head>
+
 <body>
 
-  <!-- PANTALLAS DE TRABAJO EN PANTALLA -->
-  <div class="no-print">
-    <header class="main-header">
-      <h1>CENTRO MÉDICO VITAL HEALTH</h1>
-      <div class="tabs">
-        <button class="tab-btn active" onclick="cambiarModulo('modulo-venta', event)">1. Recepción y Cobro</button>
-        <button class="tab-btn" onclick="cambiarModulo('modulo-ordenes', event)">2. Órdenes del Día</button>
-        <button class="tab-btn" onclick="cambiarModulo('modulo-resultados', event)">3. Resultados</button>
-        <button class="tab-btn" onclick="cambiarModulo('modulo-plantillas', event)">4. Configurar Plantillas</button>
-      </div>
-    </header>
+<div class="app-container">
 
-    <!-- MÓDULO 1: RECEPCIÓN -->
-    <main id="modulo-venta" class="modulo active">
-      <div class="card">
-        <h2>Datos del Paciente</h2>
-        <div class="grid-4">
-          <div>
-            <label>DNI / Doc:</label>
-            <div style="display: flex; gap: 5px;">
-              <input type="text" id="v-dni" placeholder="Ej: 72750998" maxlength="8">
-              <button type="button" class="btn-action" onclick="consultarDNI()" style="padding: 0 10px;" title="Buscar DNI en RENIEC">🔍</button>
+    <!-- =====================================================
+         BARRA LATERAL
+    ====================================================== -->
+    <aside class="sidebar">
+
+        <div class="sidebar-header">
+
+            <div class="logo-container">
+                <img
+                    src="logo.png"
+                    alt="Centro Médico Vital Health"
+                    class="logo"
+                    onerror="this.style.display='none'"
+                >
             </div>
-          </div>
-          <div><label>Paciente:</label><input type="text" id="v-paciente" placeholder="Nombres y apellidos"></div>
-          <div><label>Fecha Nacimiento:</label><input type="date" id="v-fnac" onchange="calcularEdad()"></div>
-          <div><label>Edad:</label><input type="text" id="v-edad" placeholder="Ej: 27 AÑOS" readonly></div>
-        </div>
-        <div class="grid-2" style="margin-top:10px;">
-          <div>
-            <label>Sexo:</label>
-            <select id="v-sexo">
-              <option value="FEMENINO">FEMENINO</option>
-              <option value="MASCULINO">MASCULINO</option>
-            </select>
-          </div>
-          <div><label>Fecha Orden:</label><input type="date" id="v-fecha"></div>
-        </div>
-      </div>
 
-      <div class="card">
-        <h2>Agregar Exámenes</h2>
-        <div class="search-container">
-          <input type="text" id="v-buscar" placeholder="Escriba para buscar examen..." autocomplete="off">
-          <div id="v-sugerencias" class="dropdown-list"></div>
+            <h1>VITAL HEALTH</h1>
+            <p>Centro Médico</p>
+
         </div>
 
-        <div class="table-responsive">
-          <table>
-            <thead>
-              <tr><th>Examen / Prueba</th><th>Precio (S/)</th><th>Acción</th></tr>
-            </thead>
-            <tbody id="v-lista"></tbody>
-          </table>
+        <nav class="menu">
+
+            <button
+                type="button"
+                class="menu-item active"
+                onclick="cambiarModulo('recepcion', this)"
+            >
+                <span>👤</span>
+                <span>Recepción</span>
+            </button>
+
+            <button
+                type="button"
+                class="menu-item"
+                onclick="cambiarModulo('ordenes', this)"
+            >
+                <span>📋</span>
+                <span>Órdenes</span>
+            </button>
+
+            <button
+                type="button"
+                class="menu-item"
+                onclick="cambiarModulo('resultados', this)"
+            >
+                <span>🧪</span>
+                <span>Resultados</span>
+            </button>
+
+            <button
+                type="button"
+                class="menu-item"
+                onclick="cambiarModulo('plantillas', this)"
+            >
+                <span>⚙️</span>
+                <span>Plantillas</span>
+            </button>
+
+        </nav>
+
+        <div class="sidebar-footer">
+            <strong>Centro Médico Vital Health</strong>
+            <small>Av. Grau N° 1799</small>
+            <small>Veintiséis de Octubre - Piura</small>
+            <small>📱 984 089 927</small>
         </div>
 
-        <!-- SECCIÓN DE DESCUENTO Y TOTAL -->
-        <div class="total-bar">
-          <div class="grid-3" style="align-items: flex-end;">
+    </aside>
+
+
+    <!-- =====================================================
+         CONTENIDO PRINCIPAL
+    ====================================================== -->
+
+    <main class="main-content">
+
+        <!-- =================================================
+             CABECERA
+        ================================================== -->
+
+        <header class="topbar">
+
             <div>
-              <label>Tipo Descuento:</label>
-              <select id="v-tipo-descuento" onchange="calcularTotalCobro()">
-                <option value="SIN">Sin Descuento</option>
-                <option value="PORCENTAJE">Porcentaje (%)</option>
-                <option value="MONTO">Monto en Soles (S/)</option>
-              </select>
+                <h2 id="tituloModulo">
+                    Recepción
+                </h2>
+
+                <p id="subtituloModulo">
+                    Registro y atención de pacientes
+                </p>
             </div>
-            <div>
-              <label>Valor Descuento:</label>
-              <input type="number" id="v-val-descuento" value="0" min="0" step="any" oninput="calcularTotalCobro()">
+
+            <div class="topbar-info">
+                <span id="fechaActual"></span>
             </div>
-            <div>
-              <p style="margin: 0; font-size: 13px; text-align: right;">Subtotal: S/ <span id="v-subtotal">0.00</span></p>
-              <p style="margin: 3px 0; font-size: 13px; text-align: right; color: #d9534f;">Descuento: S/ <span id="v-descuento-aplicado">0.00</span></p>
-              <h3 style="margin: 0; text-align: right;">Total Final: S/ <span id="v-total">0.00</span></h3>
+
+        </header>
+
+
+        <!-- =================================================
+             MÓDULO RECEPCIÓN
+        ================================================== -->
+
+        <section
+            id="modulo-recepcion"
+            class="module active-module"
+        >
+
+            <div class="card">
+
+                <div class="card-header">
+
+                    <div>
+                        <h3>Datos del paciente</h3>
+                        <p>
+                            Ingresa el DNI para consultar los datos del paciente.
+                        </p>
+                    </div>
+
+                </div>
+
+
+                <!-- DNI -->
+
+                <div class="form-grid">
+
+                    <div class="form-group">
+
+                        <label for="dniPaciente">
+                            DNI
+                        </label>
+
+                        <div class="input-button-group">
+
+                            <input
+                                type="text"
+                                id="dniPaciente"
+                                maxlength="8"
+                                inputmode="numeric"
+                                autocomplete="off"
+                                placeholder="Ingrese DNI"
+                            >
+
+                            <button
+                                type="button"
+                                class="btn btn-primary"
+                                onclick="consultarDNI()"
+                            >
+                                🔎 Consultar
+                            </button>
+
+                        </div>
+
+                        <small id="dniMensaje" class="form-message"></small>
+
+                    </div>
+
+                </div>
+
+
+                <!-- DATOS -->
+
+                <div class="form-grid">
+
+                    <div class="form-group">
+
+                        <label for="nombrePaciente">
+                            Nombres y apellidos
+                        </label>
+
+                        <input
+                            type="text"
+                            id="nombrePaciente"
+                            placeholder="Nombres y apellidos"
+                        >
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label for="fechaNacimiento">
+                            Fecha de nacimiento
+                        </label>
+
+                        <input
+                            type="date"
+                            id="fechaNacimiento"
+                        >
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label for="edadPaciente">
+                            Edad
+                        </label>
+
+                        <input
+                            type="number"
+                            id="edadPaciente"
+                            readonly
+                            placeholder="Edad"
+                        >
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label for="sexoPaciente">
+                            Sexo
+                        </label>
+
+                        <select id="sexoPaciente">
+
+                            <option value="">
+                                Seleccionar
+                            </option>
+
+                            <option value="M">
+                                Masculino
+                            </option>
+
+                            <option value="F">
+                                Femenino
+                            </option>
+
+                        </select>
+
+                    </div>
+
+                </div>
+
             </div>
-          </div>
-          <button class="btn-print-ticket" onclick="guardarYEmitirTicket()">Guardar e Imprimir Ticket</button>
-        </div>
-      </div>
+
+
+            <!-- =================================================
+                 EXÁMENES
+            ================================================== -->
+
+            <div class="card">
+
+                <div class="card-header">
+
+                    <div>
+
+                        <h3>
+                            Exámenes solicitados
+                        </h3>
+
+                        <p>
+                            Busca y agrega los exámenes del paciente.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label for="buscadorExamen">
+                        Buscar examen
+                    </label>
+
+                    <input
+                        type="text"
+                        id="buscadorExamen"
+                        autocomplete="off"
+                        placeholder="Escribe el nombre del examen..."
+                    >
+
+                    <div
+                        id="resultadosBuscadorExamen"
+                        class="search-results"
+                    ></div>
+
+                </div>
+
+
+                <div class="table-container">
+
+                    <table>
+
+                        <thead>
+
+                            <tr>
+
+                                <th>
+                                    Código
+                                </th>
+
+                                <th>
+                                    Examen
+                                </th>
+
+                                <th>
+                                    Precio
+                                </th>
+
+                                <th>
+                                    Acción
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+                        <tbody id="tablaVenta">
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+
+                <div class="sale-summary">
+
+                    <div>
+                        <span>
+                            Subtotal
+                        </span>
+
+                        <strong id="subtotalVenta">
+                            S/ 0.00
+                        </strong>
+                    </div>
+
+
+                    <div>
+
+                        <label for="descuentoVenta">
+                            Descuento
+                        </label>
+
+                        <input
+                            type="number"
+                            id="descuentoVenta"
+                            value="0"
+                            min="0"
+                            step="0.01"
+                            oninput="calcularTotalCobro()"
+                        >
+
+                    </div>
+
+
+                    <div class="total">
+
+                        <span>
+                            Total
+                        </span>
+
+                        <strong id="totalVenta">
+                            S/ 0.00
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                <!-- PLANTILLA -->
+
+                <div class="form-group">
+
+                    <label for="selectorPlantilla">
+                        Cargar plantilla
+                    </label>
+
+                    <div class="input-button-group">
+
+                        <select id="selectorPlantilla">
+
+                            <option value="">
+                                Seleccionar plantilla
+                            </option>
+
+                        </select>
+
+                        <button
+                            type="button"
+                            class="btn btn-secondary"
+                            onclick="cargarPlantillaSeleccionada()"
+                        >
+                            Cargar
+                        </button>
+
+                    </div>
+
+                </div>
+
+
+                <div class="actions">
+
+                    <button
+                        type="button"
+                        class="btn btn-success"
+                        onclick="guardarYEmitirTicket()"
+                    >
+                        💾 Guardar orden
+                    </button>
+
+                    <button
+                        type="button"
+                        class="btn btn-secondary"
+                        onclick="limpiarFormularioRecepcion()"
+                    >
+                        🧹 Limpiar
+                    </button>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             MÓDULO ÓRDENES
+        ================================================== -->
+
+        <section
+            id="modulo-ordenes"
+            class="module"
+        >
+
+            <div class="card">
+
+                <div class="card-header">
+
+                    <div>
+
+                        <h3>
+                            Órdenes de laboratorio
+                        </h3>
+
+                        <p>
+                            Consulta las órdenes registradas.
+                        </p>
+
+                    </div>
+
+                    <button
+                        type="button"
+                        class="btn btn-secondary"
+                        onclick="cargarTablaOrdenes()"
+                    >
+                        🔄 Actualizar
+                    </button>
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <input
+                        type="text"
+                        id="buscarOrden"
+                        placeholder="Buscar por DNI, paciente u orden..."
+                        oninput="cargarTablaOrdenes()"
+                    >
+
+                </div>
+
+
+                <div class="table-container">
+
+                    <table>
+
+                        <thead>
+
+                            <tr>
+
+                                <th>
+                                    Orden
+                                </th>
+
+                                <th>
+                                    Fecha
+                                </th>
+
+                                <th>
+                                    DNI
+                                </th>
+
+                                <th>
+                                    Paciente
+                                </th>
+
+                                <th>
+                                    Total
+                                </th>
+
+                                <th>
+                                    Estado
+                                </th>
+
+                                <th>
+                                    Acción
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+                        <tbody id="tablaOrdenes">
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             MÓDULO RESULTADOS
+        ================================================== -->
+
+        <section
+            id="modulo-resultados"
+            class="module"
+        >
+
+            <div class="card">
+
+                <div class="card-header">
+
+                    <div>
+
+                        <h3>
+                            Resultados de laboratorio
+                        </h3>
+
+                        <p>
+                            Selecciona una orden para ingresar y validar resultados.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label for="buscarOrdenResultados">
+                        Buscar orden
+                    </label>
+
+                    <input
+                        type="text"
+                        id="buscarOrdenResultados"
+                        placeholder="DNI, paciente o número de orden..."
+                    >
+
+                </div>
+
+
+                <div id="listaOrdenesResultados">
+
+                </div>
+
+
+                <div
+                    id="panelResultados"
+                    class="results-panel"
+                >
+
+                    <div
+                        id="cabeceraResultado"
+                        class="result-header"
+                    >
+                    </div>
+
+
+                    <div
+                        id="contenedorExamenesResultados"
+                    >
+                    </div>
+
+
+                    <div class="actions">
+
+                        <button
+                            type="button"
+                            class="btn btn-success"
+                            onclick="guardarResultadosOrden()"
+                        >
+                            💾 Guardar resultados
+                        </button>
+
+                        <button
+                            type="button"
+                            class="btn btn-primary"
+                            onclick="imprimirResultadosPDF()"
+                        >
+                            📄 Generar PDF
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             MÓDULO PLANTILLAS
+        ================================================== -->
+
+        <section
+            id="modulo-plantillas"
+            class="module"
+        >
+
+            <div class="card">
+
+                <div class="card-header">
+
+                    <div>
+
+                        <h3>
+                            Plantillas de exámenes
+                        </h3>
+
+                        <p>
+                            Configura los parámetros de tus exámenes.
+                        </p>
+
+                    </div>
+
+                    <button
+                        type="button"
+                        class="btn btn-success"
+                        onclick="crearNuevaPlantilla()"
+                    >
+                        ➕ Nueva plantilla
+                    </button>
+
+                </div>
+
+
+                <div class="form-grid">
+
+                    <div class="form-group">
+
+                        <label for="selectorPlantillaEditar">
+                            Plantilla
+                        </label>
+
+                        <select
+                            id="selectorPlantillaEditar"
+                            onchange="cargarPlantillaParaEditar()"
+                        >
+
+                            <option value="">
+                                Seleccionar
+                            </option>
+
+                        </select>
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label for="nombrePlantilla">
+                            Nombre
+                        </label>
+
+                        <input
+                            type="text"
+                            id="nombrePlantilla"
+                            placeholder="Nombre del examen"
+                        >
+
+                    </div>
+
+                </div>
+
+
+                <div class="table-container">
+
+                    <table>
+
+                        <thead>
+
+                            <tr>
+
+                                <th>
+                                    Parámetro
+                                </th>
+
+                                <th>
+                                    Unidad
+                                </th>
+
+                                <th>
+                                    Valor de referencia
+                                </th>
+
+                                <th>
+                                    Acción
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+                        <tbody id="tablaParametrosPlantilla">
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+
+                <div class="actions">
+
+                    <button
+                        type="button"
+                        class="btn btn-secondary"
+                        onclick="agregarFilaParametro()"
+                    >
+                        ➕ Agregar parámetro
+                    </button>
+
+                    <button
+                        type="button"
+                        class="btn btn-success"
+                        onclick="guardarPlantillaActual()"
+                    >
+                        💾 Guardar plantilla
+                    </button>
+
+                </div>
+
+            </div>
+
+        </section>
+
     </main>
 
-    <!-- MÓDULO 2: ÓRDENES -->
-    <main id="modulo-ordenes" class="modulo">
-      <div class="card">
-        <h2>Órdenes Registradas</h2>
-        <div class="grid-2" style="margin-bottom:15px;">
-          <div><label>Filtrar por Fecha Exacta:</label><input type="date" id="o-filtro-fecha" onchange="cargarTablaOrdenes()"></div>
-          <div><label>Buscar Paciente o DNI:</label><input type="text" id="o-filtro-paciente" placeholder="Buscar..." onkeyup="cargarTablaOrdenes()"></div>
-        </div>
-        <div class="table-responsive">
-          <table>
-            <thead>
-              <tr>
-                <th>N° Órden</th>
-                <th>Fecha</th>
-                <th>Paciente</th>
-                <th>DNI</th>
-                <th>Exámenes</th>
-                <th>Total</th>
-                <th>Estado</th>
-                <th>Acciones</th>
-              </tr>
-            </thead>
-            <tbody id="o-lista"></tbody>
-          </table>
-        </div>
-      </div>
-    </main>
+</div>
 
-    <!-- MÓDULO 3: RESULTADOS -->
-    <main id="modulo-resultados" class="modulo">
-      <div class="card">
-        <h2>Ingreso de Resultados <span id="r-num-orden-title" style="color:#0056b3;"></span></h2>
-        <input type="hidden" id="r-orden-num">
-        <div class="grid-3">
-          <div><label>Paciente:</label><input type="text" id="r-paciente"></div>
-          <div><label>Edad:</label><input type="text" id="r-edad"></div>
-          <div><label>Sexo:</label><input type="text" id="r-sexo"></div>
-        </div>
-        <div class="grid-2" style="margin-top:10px;">
-          <div><label>Doctor Tratante (Opcional):</label><input type="text" id="r-doctor" placeholder="Dejar en blanco si no aplica"></div>
-          <div><label>Muestra / Tipo:</label><input type="text" id="r-muestra" value="SUERO / SANGRE TOTAL"></div>
-        </div>
-        
-        <h3 style="margin-top:20px; color:#0056b3;">Resultados de Exámenes</h3>
-        <div id="r-lista-examenes"></div>
-        <br>
-        <div class="btn-container-flex">
-          <button class="btn-save" onclick="guardarResultadosOrden()">💾 Guardar Resultados</button>
-          <button class="btn-print-pdf" onclick="imprimirResultadosPDF()">🖨️ Imprimir / Descargar A4 (PDF)</button>
-        </div>
-      </div>
-    </main>
 
-    <!-- MÓDULO 4: ADMINISTRADOR DE PLANTILLAS -->
-    <main id="modulo-plantillas" class="modulo">
-      <div class="card">
-        <h2>Configurar Plantillas de Exámenes</h2>
-        <div class="grid-2" style="margin-bottom:15px;">
-          <div>
-            <label>Seleccionar Examen a Configurar:</label>
-            <select id="p-select-examen" onchange="cargarPlantillaParaEditar()"></select>
-          </div>
-          <div style="display:flex; flex-direction:column; justify-content:flex-end; gap:5px;">
-            <label>Crear Nuevo Examen:</label>
-            <div style="display:flex; gap:5px;">
-              <input type="text" id="p-nuevo-examen" placeholder="Nombre nuevo examen...">
-              <button class="btn-action" style="white-space:nowrap;" onclick="crearNuevaPlantilla()">+ Crear</button>
-            </div>
-          </div>
-        </div>
+<!-- =========================================================
+     MODAL / MENSAJES
+========================================================== -->
 
-        <div class="table-responsive">
-          <table>
-            <thead>
-              <tr>
-                <th style="min-width:150px;">Parámetro / Analito</th>
-                <th style="min-width:100px;">Unidad</th>
-                <th style="min-width:180px;">Valores Referenciales</th>
-                <th style="min-width:150px;">Método</th>
-                <th style="width:50px;">Acción</th>
-              </tr>
-            </thead>
-            <tbody id="p-lista-parametros"></tbody>
-          </table>
-        </div>
-        <br>
-        <div class="btn-container-flex">
-          <button class="btn-action" onclick="agregarFilaParametro()" style="padding:12px;">+ Agregar Parámetro</button>
-          <button class="btn-save" onclick="guardarPlantillaActual()">💾 Guardar Cambios de Plantilla</button>
-        </div>
-      </div>
-    </main>
-  </div>
+<div
+    id="toast"
+    class="toast"
+>
+</div>
 
-  <!-- IMPRESIÓN 1: TICKET 58MM -->
-  <div id="print-ticket" class="print-ticket-58mm">
-    <div class="t-center">
-      <img src="logo.png" alt="Logo" class="t-logo" onerror="this.style.display='none'">
-      <div class="t-title">VITAL HEALTH</div>
-      <div class="t-sub">CENTRO MÉDICO</div>
-      <p class="t-info">RUC: 20615708829<br>Av. Grau N° 1799, Piura</p>
-      <div class="t-divider">-----------------------------------</div>
-      <div class="t-ticket-num">TICKET N° <span id="t-num">0001</span></div>
-      <div class="t-divider">-----------------------------------</div>
-    </div>
-    
-    <div class="t-datos">
-      <p><strong>FECHA:</strong> <span id="t-fecha"></span></p>
-      <p><strong>DNI:</strong> <span id="t-dni"></span></p>
-      <p><strong>PACIENTE:</strong> <span id="t-paciente"></span></p>
-      <p><strong>EDAD:</strong> <span id="t-edad"></span></p>
-    </div>
-    
-    <div class="t-divider">-----------------------------------</div>
-    
-    <table class="t-table">
-      <thead>
-        <tr>
-          <th style="text-align:left;">DESCRIPCIÓN</th>
-          <th style="text-align:right;">TOTAL</th>
-        </tr>
-      </thead>
-      <tbody id="t-items"></tbody>
-    </table>
-    
-    <div class="t-divider">-----------------------------------</div>
-    <div class="t-right t-total-box">TOTAL: S/ <span id="t-total">0.00</span></div>
-    <div class="t-divider">-----------------------------------</div>
-    
-    <div class="t-center t-footer">
-      <p><strong>¡Gracias por su preferencia!</strong></p>
-      <p>Conserve este ticket para el recojo de sus resultados.</p>
-    </div>
-  </div>
 
-  <!-- IMPRESIÓN 2: HOJA A4 RESULTADOS -->
-  <div id="print-a4" class="print-hoja-a4">
-    <div class="a4-header">
-      <div class="a4-logo-box">
-        <img src="logo.png" alt="Vital Health" class="a4-logo" onerror="this.style.display='none'">
-      </div>
-      <div class="a4-empresa">
-        <h2>CENTRO MÉDICO VITAL HEALTH</h2>
-        <p class="a4-sub">LABORATORIO DE ANÁLISIS CLÍNICOS</p>
-        <p>RUC: 20615708829</p>
-        <p>Av. Grau N° 1799, Piura</p>
-      </div>
-    </div>
-    
-    <div class="a4-line"></div>
+<!-- =========================================================
+     JAVASCRIPT PRINCIPAL
+========================================================== -->
 
-    <div class="a4-paciente-card">
-      <div class="a4-col">
-        <p><strong>PACIENTE:</strong> <span id="a4-paciente"></span></p>
-        <p><strong>SEXO:</strong> <span id="a4-sexo"></span></p>
-        <p><strong>FECHA DE EMISIÓN:</strong> <span id="a4-fecha"></span></p>
-      </div>
-      <div class="a4-col">
-        <p><strong>EDAD:</strong> <span id="a4-edad"></span></p>
-        <p><strong>DOCTOR TRATANTE:</strong> <span id="a4-doctor"></span></p>
-        <p><strong>MUESTRA:</strong> <span id="a4-muestra"></span></p>
-      </div>
-    </div>
+<script src="app.js"></script>
 
-    <!-- TABLAS DE RESULTADOS DE EXÁMENES -->
-    <div id="a4-container-examenes"></div>
-
-    <!-- FIRMA AL FINAL DE LA ÚLTIMA PÁGINA -->
-    <div class="a4-footer">
-      <div class="a4-firma-container">
-        <img src="firma.png" alt="Firma Bióloga" class="a4-firma-img" onerror="this.style.visibility='hidden'">
-        <div class="a4-firma-linea"></div>
-        <p class="a4-firma-nombre">Raysa Yadira Ursula Alberca Atarama</p>
-        <p class="a4-firma-cargo">Bióloga</p>
-        <p class="a4-firma-colegiatura">C.B.P. 17763</p>
-      </div>
-    </div>
-
-    <!-- PIE DE PÁGINA FIJO EN EL FONDO -->
-    <div class="a4-bottom-info">
-      📱 WhatsApp: 984 089 927 &nbsp;|&nbsp; 🏠 Análisis a domicilio &nbsp;|&nbsp; "Tu salud es nuestra prioridad"
-    </div>
-  </div>
-
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-  <script src="app.js"></script>
 </body>
 </html>
