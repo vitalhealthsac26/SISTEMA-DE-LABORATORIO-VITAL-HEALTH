@@ -1,7 +1,6 @@
 :root {
     --sidebar-width: 260px;
     --primary-color: #0072bc;
-    --primary-hover: #005a96;
     --dark-sidebar: #0f172a;
     --bg-light: #f8fafc;
 }
@@ -20,7 +19,6 @@ body {
     min-height: 100vh;
 }
 
-/* SIDEBAR NAVIGATION */
 .sidebar {
     width: var(--sidebar-width);
     min-height: 100vh;
@@ -34,12 +32,6 @@ body {
     z-index: 1040;
 }
 
-.sidebar-logo {
-    max-height: 50px;
-    width: auto;
-    object-fit: contain;
-}
-
 .sidebar .nav-link {
     color: #94a3b8;
     padding: 14px 22px;
@@ -47,31 +39,18 @@ body {
     font-weight: 500;
     display: flex;
     align-items: center;
-    transition: all 0.2s ease;
+    text-decoration: none;
 }
 
-.sidebar .nav-link:hover {
-    color: #ffffff;
-    background-color: rgba(255, 255, 255, 0.05);
-}
-
-.sidebar .nav-link.active {
+.sidebar .nav-link:hover, .sidebar .nav-link.active {
     color: #ffffff;
     background-color: var(--primary-color);
-    border-left: 4px solid #38bdf8;
 }
 
-.sidebar-footer {
-    font-size: 0.8rem;
-    background-color: rgba(0, 0, 0, 0.2);
-}
-
-/* ÁREA DE CONTENIDO PRINCIPAL */
 .content-area {
     flex-grow: 1;
     padding: 20px;
     max-width: calc(100vw - var(--sidebar-width));
-    box-sizing: border-box;
 }
 
 #sidebar-overlay {
@@ -85,96 +64,19 @@ body {
     z-index: 1030;
 }
 
-/* TARJETA DE PARÁMETRO DINÁMICO */
-.parametro-card {
-    background-color: #ffffff;
-    border: 1px solid #cbd5e1;
-    border-radius: 8px;
-}
-
-/* RESPONSIVO MÓVIL Y TABLET */
 @media (max-width: 767.98px) {
     .sidebar {
         position: fixed;
         left: -260px;
-        top: 0;
-        bottom: 0;
-        height: 100vh;
     }
-
     .sidebar.active {
         left: 0;
     }
-
     #sidebar-overlay.active {
         display: block;
     }
-
     .content-area {
         max-width: 100%;
         padding: 12px;
-    }
-}
-
-/* FORMATO IMPRESIÓN IMPRESORA TÉRMICA (58mm) */
-#ticket-print-area {
-    display: none;
-}
-
-@media print {
-    body * {
-        visibility: hidden;
-    }
-
-    #ticket-print-area, #ticket-print-area * {
-        visibility: visible;
-    }
-
-    #ticket-print-area {
-        display: block !important;
-        position: absolute;
-        left: 0;
-        top: 0;
-        width: 58mm !important;
-        padding: 0;
-        margin: 0;
-        font-family: 'Courier New', Courier, monospace;
-        font-size: 10px;
-        color: #000;
-    }
-
-    @page {
-        size: 58mm auto;
-        margin: 0mm;
-    }
-
-    .ticket-header {
-        text-align: center;
-        margin-bottom: 5px;
-    }
-
-    .ticket-title {
-        font-size: 11px;
-        font-weight: bold;
-    }
-
-    .ticket-divider {
-        border-top: 1px dashed #000;
-        margin: 4px 0;
-    }
-
-    .ticket-table {
-        width: 100%;
-        border-collapse: collapse;
-    }
-
-    .ticket-table th, .ticket-table td {
-        text-align: left;
-        font-size: 9px;
-        padding: 1px 0;
-    }
-
-    .text-end {
-        text-align: right !important;
     }
 }
