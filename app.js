@@ -1,9 +1,8 @@
-// CONFIGURACIÓN DE FIREBASE (Reemplaza los valores con tu proyecto Firebase si aplicable)
+// CONFIGURACIÓN DE FIREBASE
 const firebaseConfig = {
-    databaseURL: "https://vital-health-default-rtdb.firebaseio.com" // URL de BD genérica o tu propia URL
+    databaseURL: "https://vital-health-default-rtdb.firebaseio.com"
 };
 
-// Inicializar Firebase si se declara la librería
 if (typeof firebase !== 'undefined' && !firebase.apps.length) {
     firebase.initializeApp(firebaseConfig);
 }
@@ -28,6 +27,12 @@ document.addEventListener('DOMContentLoaded', () => {
     cargarOrdenes();
     actualizarControlCaja();
 });
+
+// Toggle para Menú Responsivo Móvil
+function toggleSidebar() {
+    document.getElementById('sidebar').classList.toggle('active');
+    document.getElementById('sidebar-overlay').classList.toggle('active');
+}
 
 // Sincronización multi-dispositivo en tiempo real vía Firebase
 function escucharSincronizacion() {
@@ -57,6 +62,11 @@ function showSection(sectionId) {
     
     document.getElementById(`sec-${sectionId}`).classList.remove('d-none');
     
+    if (window.innerWidth < 768) {
+        document.getElementById('sidebar').classList.remove('active');
+        document.getElementById('sidebar-overlay').classList.remove('active');
+    }
+
     if(sectionId === 'caja') actualizarControlCaja();
 }
 
@@ -73,17 +83,49 @@ function calcularEdad() {
     document.getElementById('pac-edad').value = `${edad} AÑOS`;
 }
 
-function buscarPaciente() {
-    const dni = document.getElementById('pac-dni').value.trim();
-    if (!dni) return alert('Ingrese un número de DNI');
-    
-    // Búsqueda en historial existente local
+// CONSULTA DNI CON API EXTERNA RENIEC + HISTORIAL
+async function buscarPaciente() {
+    const dniInput = document.getElementById('pac-dni');
+    const dni = dniInput.value.trim();
+
+    if (dni.length !== 8 || isNaN(dni)) {
+        return alert('Por favor, ingrese un número de DNI válido de 8 dígitos.');
+    }
+
+    // 1. Verificar si existe en el historial local/Firebase
     const encontrada = ordenesLocales.find(o => o.dni === dni);
     if (encontrada) {
         document.getElementById('pac-nombre').value = encontrada.paciente;
         document.getElementById('pac-edad').value = encontrada.edad;
-    } else {
-        alert('Paciente no registrado previamente. Ingrese los datos manualmente.');
+        return;
+    }
+
+    // 2. Consulta a API de RENIEC para autocompletar nombres
+    const btnText = document.getElementById('btn-text');
+    btnText.innerText = 'Buscando...';
+
+    try {
+        // Intento 1: API Gratuita de RENIEC
+        const response = await fetch(`https://api.apis.net.pe/v1/dni?numero=${dni}`);
+        if (response.ok) {
+            const data = await response.json();
+            const nombreCompleto = `${data.nombres} ${data.apellidoPaterno} ${data.apellidoMaterno}`.trim();
+            document.getElementById('pac-nombre').value = nombreCompleto;
+        } else {
+            // Intento 2 (Fallback)
+            const resFallback = await fetch(`https://dniruc.apisperu.com/api/v1/dni/${dni}`);
+            if (resFallback.ok) {
+                const data2 = await resFallback.json();
+                document.getElementById('pac-nombre').value = data2.nombre || `${data2.nombres} ${data2.apellidoPaterno}`;
+            } else {
+                alert('No se pudo consultar el DNI automáticamente. Puede continuar ingresando los datos manualmente.');
+            }
+        }
+    } catch (error) {
+        console.warn('Error al consultar API RENIEC:', error);
+        alert('No se obtuvo respuesta de RENIEC. Por favor, ingrese el nombre manualmente.');
+    } finally {
+        btnText.innerText = 'Consultar';
     }
 }
 
@@ -95,7 +137,7 @@ function filtrarExamenes(texto) {
     const filtrados = catalogoExamenes.filter(e => e.nombre.toLowerCase().includes(texto.toLowerCase()));
     filtrados.forEach(ex => {
         const item = document.createElement('a');
-        item.className = 'list-group-item list-group-item-action';
+        item.className = 'list-group-item list-group-item-action cursor-pointer';
         item.innerText = `${ex.nombre} - S/ ${ex.precio.toFixed(2)}`;
         item.onclick = () => {
             agregarExamen(ex);
@@ -176,10 +218,8 @@ function guardarOrdenGenerarTicket() {
     ordenesLocales.unshift(nuevaOrden);
     guardarEnNubeYLocal();
 
-    // Generación del formato adaptado a 58mm
     imprimirTicket58mm(nuevaOrden);
 
-    // Resetear formulario
     examenesSeleccionados = [];
     renderExamenes();
     document.getElementById('form-paciente').reset();
@@ -241,7 +281,7 @@ function cargarOrdenes() {
     const tbody = document.getElementById('lista-ordenes-body');
     tbody.innerHTML = '';
 
-    ordenesLocales.forEach((orden, index) => {
+    ordenesLocales.forEach((orden) => {
         const tr = document.createElement('tr');
         tr.innerHTML = `
             <td><strong>${orden.id}</strong></td>
@@ -279,17 +319,17 @@ function abrirResultados(ordenId) {
     const container = document.getElementById('resultados-editor');
     let camposHTML = '';
 
-    orden.examenes.forEach((ex, idx) => {
+    orden.examenes.forEach((ex) => {
         const val = (orden.resultados && orden.resultados[ex.codigo]) ? orden.resultados[ex.codigo] : '';
         camposHTML += `
             <div class="mb-3 p-3 border rounded bg-light">
                 <h6><strong>${ex.nombre}</strong></h6>
                 <div class="row g-2">
-                    <div class="col-md-8">
+                    <div class="col-12 col-md-8">
                         <label class="form-label">Resultado</label>
                         <input type="text" id="res-${ex.codigo}" class="form-control" value="${val}">
                     </div>
-                    <div class="col-md-4">
+                    <div class="col-12 col-md-4">
                         <label class="form-label">Unidad / Observación</label>
                         <input type="text" id="obs-${ex.codigo}" class="form-control" placeholder="Valores normales...">
                     </div>
@@ -304,7 +344,7 @@ function abrirResultados(ordenId) {
             <small class="text-muted">N° Orden: ${orden.id}</small>
         </div>
         ${camposHTML}
-        <div class="d-flex gap-2 mt-3">
+        <div class="d-flex flex-wrap gap-2 mt-3">
             <button class="btn btn-success" onclick="guardarResultados()"><i class="bi bi-floppy"></i> Guardar Resultados</button>
             <button class="btn btn-primary" onclick="visualizarEImprimirResultados()"><i class="bi bi-printer"></i> Visualizar e Imprimir Resultados</button>
         </div>
@@ -325,7 +365,6 @@ function guardarResultados() {
     alert('Resultados guardados exitosamente.');
 }
 
-// FIX: Generación directa de ventana/visualización en HTML sin PDF en blanco
 function visualizarEImprimirResultados() {
     if (!ordenActualVisualizando) return;
 
