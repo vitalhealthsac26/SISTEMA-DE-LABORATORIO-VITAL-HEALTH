@@ -43,7 +43,7 @@
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="#" onclick="showSection('catalogo')">
-                        <i class="bi bi-journal-bookmark-fill me-2"></i> Catálogo / Precios
+                        <i class="bi bi-journal-bookmark-fill me-2"></i> Catálogo / Plantillas
                     </a>
                 </li>
                 <li class="nav-item">
@@ -55,8 +55,7 @@
 
             <div class="sidebar-footer p-3 text-white-50 text-center border-top border-secondary border-opacity-25">
                 <div class="fw-semibold">Centro Médico Vital Health</div>
-                <div class="small">Av. Grau N° 1799</div>
-                <div class="small">Veintiséis de Octubre - Piura</div>
+                <div class="small">Av. Grau N° 1799 - Veintiséis de Octubre</div>
                 <div class="small mt-1"><i class="bi bi-whatsapp me-1"></i>984 089 927</div>
             </div>
         </aside>
@@ -87,23 +86,26 @@
                                     <h5 class="card-title fw-bold text-primary mb-0">
                                         <i class="bi bi-person-vcard me-2"></i>Datos del Paciente
                                     </h5>
-                                    <small class="text-muted">Ingresa el DNI para consultar automáticamente en RENIEC o historial local.</small>
                                 </div>
                                 <div class="card-body">
                                     <form id="form-paciente" onsubmit="event.preventDefault();">
                                         <div class="row g-3">
-                                            <div class="col-12 col-md-4">
+                                            <div class="col-12 col-md-3">
                                                 <label class="form-label fw-semibold">DNI / Documento</label>
                                                 <div class="input-group">
-                                                    <input type="text" id="pac-dni" class="form-control" placeholder="Ingrese 8 dígitos" maxlength="8">
+                                                    <input type="text" id="pac-dni" class="form-control" placeholder="8 dígitos" maxlength="8">
                                                     <button class="btn btn-primary" type="button" onclick="buscarPaciente()">
-                                                        <i class="bi bi-search me-1"></i><span id="btn-text">Consultar</span>
+                                                        <i class="bi bi-search"></i>
                                                     </button>
                                                 </div>
                                             </div>
-                                            <div class="col-12 col-md-8">
+                                            <div class="col-12 col-md-6">
                                                 <label class="form-label fw-semibold">Nombres y Apellidos</label>
-                                                <input type="text" id="pac-nombre" class="form-control" placeholder="Apellidos y Nombres completos">
+                                                <input type="text" id="pac-nombre" class="form-control" placeholder="Nombre completo">
+                                            </div>
+                                            <div class="col-12 col-md-3">
+                                                <label class="form-label fw-semibold">Médico Solicitante</label>
+                                                <input type="text" id="pac-doctor" class="form-control" placeholder="Dr. / Particular">
                                             </div>
                                             <div class="col-12 col-md-4">
                                                 <label class="form-label fw-semibold">Fecha de Nacimiento</label>
@@ -116,7 +118,6 @@
                                             <div class="col-12 col-md-4">
                                                 <label class="form-label fw-semibold">Sexo</label>
                                                 <select id="pac-sexo" class="form-select">
-                                                    <option value="">Seleccionar</option>
                                                     <option value="MASCULINO">MASCULINO</option>
                                                     <option value="FEMENINO">FEMENINO</option>
                                                 </select>
@@ -137,8 +138,8 @@
                                 <div class="card-body">
                                     <div class="row g-3 mb-3">
                                         <div class="col-12 col-md-8 position-relative">
-                                            <label class="form-label fw-semibold">Buscar examen individual</label>
-                                            <input type="text" id="busqueda-examen" class="form-control" placeholder="Escriba el nombre o código del examen..." oninput="filtrarExamenes(this.value)">
+                                            <label class="form-label fw-semibold">Buscar Examen</label>
+                                            <input type="text" id="busqueda-examen" class="form-control" placeholder="Escriba el nombre o código..." oninput="filtrarExamenes(this.value)">
                                             <div id="sugerencias-examenes" class="list-group position-absolute w-100 shadow z-3" style="max-height: 250px; overflow-y: auto;"></div>
                                         </div>
                                         <div class="col-12 col-md-4">
@@ -198,14 +199,11 @@
                                             <th>Fecha</th>
                                             <th>DNI</th>
                                             <th>Paciente</th>
-                                            <th>Edad</th>
-                                            <th>Total</th>
                                             <th>Estado</th>
                                             <th class="text-end px-3">Acciones</th>
                                         </tr>
                                     </thead>
-                                    <tbody id="lista-ordenes-body">
-                                    </tbody>
+                                    <tbody id="lista-ordenes-body"></tbody>
                                 </table>
                             </div>
                         </div>
@@ -224,35 +222,73 @@
                     </div>
                 </section>
 
-                <!-- SECCIÓN 4: CATÁLOGO DE EXÁMENES Y PRECIOS -->
+                <!-- SECCIÓN 4: CATÁLOGO Y CONFIGURACIÓN DE PLANTILLAS -->
                 <section id="sec-catalogo" class="section-content d-none">
                     <div class="row g-4">
-                        <!-- Formulario Crear/Editar Examen -->
-                        <div class="col-12 col-lg-4">
+                        <!-- Formulario de Configuración de Plantillas -->
+                        <div class="col-12 col-lg-5">
                             <div class="card shadow-sm border-0">
                                 <div class="card-header bg-white py-3 border-bottom">
                                     <h5 class="card-title fw-bold text-primary mb-0" id="catalogo-form-titulo">
-                                        <i class="bi bi-plus-circle me-2"></i>Agregar Nuevo Examen
+                                        <i class="bi bi-sliders me-2"></i>Configurar Examen y Plantilla
                                     </h5>
                                 </div>
                                 <div class="card-body">
                                     <form id="form-catalogo" onsubmit="event.preventDefault(); guardarExamenCatalogo();">
                                         <input type="hidden" id="cat-id-original" value="">
-                                        <div class="mb-3">
-                                            <label class="form-label fw-semibold">Código</label>
-                                            <input type="text" id="cat-codigo" class="form-control" placeholder="Ej. EX-1069" required>
+                                        <div class="row g-2 mb-2">
+                                            <div class="col-4">
+                                                <label class="form-label fw-semibold small">Código</label>
+                                                <input type="text" id="cat-codigo" class="form-control form-control-sm" placeholder="EX-01" required>
+                                            </div>
+                                            <div class="col-8">
+                                                <label class="form-label fw-semibold small">Precio (S/)</label>
+                                                <input type="number" step="0.01" id="cat-precio" class="form-control form-control-sm" placeholder="0.00" required>
+                                            </div>
                                         </div>
-                                        <div class="mb-3">
-                                            <label class="form-label fw-semibold">Nombre del Examen</label>
-                                            <input type="text" id="cat-nombre" class="form-control" placeholder="Ej. HEMOGLOBINA GLICOSILADA" required>
+                                        <div class="mb-2">
+                                            <label class="form-label fw-semibold small">Nombre del Examen</label>
+                                            <input type="text" id="cat-nombre" class="form-control form-control-sm" placeholder="Ej. ÁCIDO ÚRICO" required>
                                         </div>
-                                        <div class="mb-3">
-                                            <label class="form-label fw-semibold">Precio (S/)</label>
-                                            <input type="number" step="0.01" id="cat-precio" class="form-control" placeholder="0.00" required>
+                                        
+                                        <hr class="my-3">
+                                        <h6 class="fw-bold text-secondary mb-2"><i class="bi bi-file-text me-1"></i>Campos de la Plantilla de Resultado</h6>
+
+                                        <div class="row g-2 mb-2">
+                                            <div class="col-6">
+                                                <label class="form-label fw-semibold small">Tipo de Muestra</label>
+                                                <input type="text" id="cat-muestra" class="form-control form-control-sm" placeholder="Ej. Suero / Sangre">
+                                            </div>
+                                            <div class="col-6">
+                                                <label class="form-label fw-semibold small">Unidad de Medida</label>
+                                                <input type="text" id="cat-unidad" class="form-control form-control-sm" placeholder="Ej. mg/dL, %">
+                                            </div>
                                         </div>
+
+                                        <div class="row g-2 mb-2">
+                                            <div class="col-6">
+                                                <label class="form-label fw-semibold small">Val. Ref. Mínimo</label>
+                                                <input type="text" id="cat-ref-min" class="form-control form-control-sm" placeholder="2.50">
+                                            </div>
+                                            <div class="col-6">
+                                                <label class="form-label fw-semibold small">Val. Ref. Máximo</label>
+                                                <input type="text" id="cat-ref-max" class="form-control form-control-sm" placeholder="7.00">
+                                            </div>
+                                        </div>
+
+                                        <div class="mb-2">
+                                            <label class="form-label fw-semibold small">Valores de Referencia en Texto (Opcional)</label>
+                                            <textarea id="cat-ref-texto" class="form-control form-control-sm" rows="2" placeholder="Normal: < 200&#10;Elevado: > 240"></textarea>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label class="form-label fw-semibold small">Método del Análisis</label>
+                                            <input type="text" id="cat-metodo" class="form-control form-control-sm" placeholder="Ej. Colorimétrico enzimático">
+                                        </div>
+
                                         <div class="d-grid gap-2">
                                             <button type="submit" class="btn btn-primary fw-semibold" id="btn-guardar-cat">
-                                                <i class="bi bi-save me-1"></i>Guardar Examen
+                                                <i class="bi bi-save me-1"></i>Guardar Examen y Plantilla
                                             </button>
                                             <button type="button" class="btn btn-outline-secondary d-none" id="btn-cancelar-cat" onclick="cancelarEdicionCatalogo()">
                                                 Cancelar Edición
@@ -263,31 +299,30 @@
                             </div>
                         </div>
 
-                        <!-- Tabla del Catálogo Completo -->
-                        <div class="col-12 col-lg-8">
+                        <!-- Lista del Catálogo -->
+                        <div class="col-12 col-lg-7">
                             <div class="card shadow-sm border-0">
                                 <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center flex-wrap gap-2 border-bottom">
                                     <h5 class="card-title fw-bold text-primary mb-0">
                                         <i class="bi bi-journal-text me-2"></i>Catálogo de Exámenes (<span id="total-cat-count">0</span>)
                                     </h5>
-                                    <div style="max-width: 250px;" class="w-100">
-                                        <input type="text" id="buscar-en-tabla-cat" class="form-control form-control-sm" placeholder="Buscar en catálogo..." oninput="renderizarTablaCatalogo(this.value)">
+                                    <div style="max-width: 200px;" class="w-100">
+                                        <input type="text" class="form-control form-control-sm" placeholder="Buscar..." oninput="renderizarTablaCatalogo(this.value)">
                                     </div>
                                 </div>
                                 <div class="card-body p-0">
-                                    <div class="table-responsive" style="max-height: 500px; overflow-y: auto;">
+                                    <div class="table-responsive" style="max-height: 520px; overflow-y: auto;">
                                         <table class="table table-hover align-middle mb-0">
                                             <thead class="table-light sticky-top">
                                                 <tr>
                                                     <th>Código</th>
-                                                    <th>Nombre del Examen</th>
+                                                    <th>Examen</th>
+                                                    <th>Muestra / Método</th>
                                                     <th>Precio</th>
-                                                    <th class="text-end px-3">Acciones</th>
+                                                    <th class="text-end px-3">Acción</th>
                                                 </tr>
                                             </thead>
-                                            <tbody id="tabla-catalogo-body">
-                                                <!-- Se llena dinámicamente -->
-                                            </tbody>
+                                            <tbody id="tabla-catalogo-body"></tbody>
                                         </table>
                                     </div>
                                 </div>
@@ -327,7 +362,7 @@
 
                     <div class="card shadow-sm border-0">
                         <div class="card-header bg-white py-3 border-bottom">
-                            <h5 class="card-title fw-bold text-primary mb-0"><i class="bi bi-list-check me-2"></i>Detalle de Transacciones del Día</h5>
+                            <h5 class="card-title fw-bold text-primary mb-0"><i class="bi bi-list-check me-2"></i>Transacciones de Hoy</h5>
                         </div>
                         <div class="card-body p-0">
                             <div class="table-responsive">
@@ -341,8 +376,7 @@
                                             <th>Monto</th>
                                         </tr>
                                     </thead>
-                                    <tbody id="caja-tabla-body">
-                                    </tbody>
+                                    <tbody id="caja-tabla-body"></tbody>
                                 </table>
                             </div>
                         </div>
@@ -353,7 +387,7 @@
         </main>
     </div>
 
-    <!-- Área oculta para impresión del Ticket 58mm -->
+    <!-- Ticket de venta (impresión térmica 58mm) -->
     <div id="ticket-print-area" class="d-none d-print-block"></div>
 
     <!-- Bootstrap 5 JS -->
