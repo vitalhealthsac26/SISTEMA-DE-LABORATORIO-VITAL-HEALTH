@@ -1,25 +1,27 @@
-// CONFIGURACIÓN DE FIREBASE CON RESPALDO LOCAL DE FALLBACK
-const firebaseConfig = {
-    databaseURL: "https://vital-health-default-rtdb.firebaseio.com"
-};
-
-if (typeof firebase !== 'undefined' && !firebase.apps.length) {
-    try {
-        firebase.initializeApp(firebaseConfig);
-    } catch (e) {
-        console.warn("Servicio de Firebase no disponible en modo directo. Operando en modo local.", e);
+// CONTROL DE FIREBASE CON PROTECCIÓN ANTE ERRORES DE RED O INICIALIZACIÓN
+let db = null;
+try {
+    if (typeof firebase !== 'undefined') {
+        const firebaseConfig = {
+            databaseURL: "https://vital-health-default-rtdb.firebaseio.com"
+        };
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        db = firebase.database();
     }
+} catch (e) {
+    console.warn("Firebase no inicializado. Operando en modo local seguro.", e);
 }
-const db = (typeof firebase !== 'undefined' && firebase.apps.length) ? firebase.database() : null;
 
-// CATÁLOGO BASE PREDETERMINADO (RESPALDO SISTEMA CON PLANTILLAS AVANZADAS)
+// BASE DE DATOS LOCAL PREDETERMINADA
 let catalogoExamenes = [
     {
         codigo: '101',
         nombre: 'HEMOGRAMA COMPLETO',
         precio: 35.00,
         muestra: 'Sangre Total (EDTA)',
-        metodo: 'Citometría de flujo / Impedancia eléctrica (Método Coulter)',
+        metodo: 'Citometría de flujo / Impedancia eléctrica',
         plantilla: 'hemograma',
         refTexto: '',
         parametros: [
@@ -31,15 +33,8 @@ let catalogoExamenes = [
             { nombre: 'Hemoglobina Corpuscular media - HCM', unidad: 'pg', refMin: '25.00', refMax: '33.00' },
             { nombre: 'Concentración de Hemoglobina Corpuscular media - CHCM', unidad: 'g/dL', refMin: '30.00', refMax: '36.00' },
             { nombre: 'Recuento Plaquetario', unidad: 'Cél/uL', refMin: '150000.00', refMax: '475000.00' },
-            { nombre: 'RDW-SD', unidad: 'fL', refMin: '37.00', refMax: '54.00' },
-            { nombre: 'RDW-CV', unidad: '%', refMin: '11.50', refMax: '15.60' },
-            { nombre: 'Vol. plaquetario medio - VPM', unidad: 'fL', refMin: '7.60', refMax: '10.80' },
             { nombre: 'Neutrófilos Segmentados', unidad: '%', refMin: '31', refMax: '51' },
-            { nombre: 'Neutrófilos Abastonados', unidad: '%', refMin: '0.00', refMax: '5' },
-            { nombre: 'Linfocitos', unidad: '%', refMin: '4.00', refMax: '28.00' },
-            { nombre: 'Monocitos', unidad: '%', refMin: '0.00', refMax: '10.00' },
-            { nombre: 'Eosinófilos', unidad: '%', refMin: '0.00', refMax: '2.5' },
-            { nombre: 'Basófilo', unidad: '%', refMin: '0.00', refMax: '2.00' }
+            { nombre: 'Linfocitos', unidad: '%', refMin: '4.00', refMax: '28.00' }
         ]
     },
     {
@@ -47,11 +42,11 @@ let catalogoExamenes = [
         nombre: 'GLUCOSA EN AYUNAS',
         precio: 15.00,
         muestra: 'Suero',
-        metodo: 'Colorimétrico enzimático o Espectrofotometría EC9200',
+        metodo: 'Colorimétrico enzimático',
         plantilla: 'bioquimica',
         refTexto: '',
         parametros: [
-            { nombre: 'Glucosa', unidad: 'mg/dL', refMin: '74', refMax: '106', refTexto: 'Adultos: 74 - 106 | Niños: 60 - 100 | Neonatos: 50 - 80' }
+            { nombre: 'Glucosa', unidad: 'mg/dL', refMin: '74', refMax: '106', refTexto: 'Adultos: 74 - 106 | Niños: 60 - 100' }
         ]
     },
     {
@@ -63,44 +58,7 @@ let catalogoExamenes = [
         plantilla: 'hba1c',
         refTexto: '',
         parametros: [
-            { nombre: 'Hemoglobina Glicosilada (HbA1c)', unidad: '%', refMin: '', refMax: '5.6', refTexto: 'Normal: Menos del 5.7% | Prediabetes: 5.7- 6.4% | Diabetes: 6.5% a más' }
-        ]
-    },
-    {
-        codigo: '104',
-        nombre: 'PERFIL HEPÁTICO',
-        precio: 90.00,
-        muestra: 'Suero',
-        metodo: 'Colorimétrico enzimático o Espectrofotometría EC9200',
-        plantilla: 'perfil_hepatico',
-        refTexto: '',
-        parametros: [
-            { nombre: 'Bilirrubina total', unidad: 'mg/dL', refMin: '0.00', refMax: '0.10', refTexto: '< 0.1' },
-            { nombre: 'Bilirrubina directa', unidad: 'mg/dL', refMin: '0.00', refMax: '0.20', refTexto: '< 0.2' },
-            { nombre: 'Bilirrubina indirecta', unidad: 'mg/dL', refMin: '0.00', refMax: '0.80', refTexto: '< 0.8' },
-            { nombre: 'Proteinas Totales', unidad: 'g/dL', refMin: '6.10', refMax: '7.90', refTexto: '6.10 - 7.90' },
-            { nombre: 'Albumina', unidad: 'g/dL', refMin: '3.50', refMax: '4.80', refTexto: '3.50 - 4.80' },
-            { nombre: 'Globulinas', unidad: 'g/dL', refMin: '2.00', refMax: '3.50', refTexto: '2.00 - 3.50' },
-            { nombre: 'TGO', unidad: 'U/L', refMin: '0.00', refMax: '38.00', refTexto: 'M: <= 38.00 | F: <= 32.00' },
-            { nombre: 'TGP', unidad: 'U/L', refMin: '0.00', refMax: '41.00', refTexto: 'M: <= 41.00 | F: <= 31.00' },
-            { nombre: 'Fosfatasa alcalina', unidad: 'U/L', refMin: '40.0', refMax: '300.0', refTexto: 'Adultos: 40.0 - 300.0 | Niños: < 645.0' },
-            { nombre: 'Gamma Glutamil Transpeptidasa (GGT)', unidad: 'U/L', refMin: '5.00', refMax: '40.00', refTexto: '5.00 - 40.00' }
-        ]
-    },
-    {
-        codigo: '105',
-        nombre: 'PERFIL LIPÍDICO',
-        precio: 85.00,
-        muestra: 'Suero',
-        metodo: 'Colorimétrico enzimático o Espectrofotometría EC 9200',
-        plantilla: 'perfil_lipidico',
-        refTexto: '',
-        parametros: [
-            { nombre: 'Colesterol total', unidad: 'mg/dL', refTexto: 'Normal < 200 | Moderadamente alto 200 - 239 | Elevado > 240' },
-            { nombre: 'HDL - Colesterol', unidad: 'mg/dL', refMin: '40.00', refMax: '60.00', refTexto: '40.00 - 60.00' },
-            { nombre: 'LDL - Colesterol', unidad: 'mg/dL', refTexto: 'Riesgo bajo < 129 | Riesgo moderado 130 - 189 | Riesgo alto >= 190' },
-            { nombre: 'VLDL - Colesterol', unidad: 'mg/dL', refMin: '2.00', refMax: '30.00', refTexto: '2.00 - 30.00' },
-            { nombre: 'Triglicéridos', unidad: 'mg/dL', refTexto: 'Normal < 150 | Moderado elevado 150 - 199 | Elevado 200 - 499 | Muy elevado > 500' }
+            { nombre: 'Hemoglobina Glicosilada (HbA1c)', unidad: '%', refMin: '', refMax: '5.6', refTexto: 'Normal: Menos del 5.7% | Prediabetes: 5.7- 6.4%' }
         ]
     }
 ];
@@ -109,19 +67,29 @@ let examenesSeleccionados = [];
 let ordenesLocales = JSON.parse(localStorage.getItem('vitalhealth_ordenes')) || [];
 let ordenActualVisualizando = null;
 
+// INICIALIZACIÓN GLOBAL SEGURO DEL DOM
 document.addEventListener('DOMContentLoaded', async () => {
     try {
         const dateEl = document.getElementById('current-date');
         if (dateEl) {
             dateEl.innerText = new Date().toLocaleDateString('es-PE', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
         }
-        
+
         await cargarProductosJSON();
         escucharSincronizacion();
         cargarOrdenes();
         actualizarControlCaja();
+        
+        // Cerrar lista flotante al hacer clic afuera
+        document.addEventListener('click', (e) => {
+            const sug = document.getElementById('sugerencias-examenes');
+            const busq = document.getElementById('busqueda-examen');
+            if (sug && busq && !sug.contains(e.target) && e.target !== busq) {
+                sug.innerHTML = '';
+            }
+        });
     } catch (e) {
-        console.error("Error inicializando la aplicación LIS:", e);
+        console.error("Error al inicializar interfaz:", e);
     }
 });
 
@@ -132,7 +100,7 @@ async function cargarProductosJSON() {
             catalogoExamenes = JSON.parse(catalogoGuardado);
             return;
         } catch (e) {
-            console.warn("La información en caché local requiere reconstrucción.");
+            console.warn("Error en la caché local.");
         }
     }
 
@@ -155,7 +123,7 @@ async function cargarProductosJSON() {
             }
         }
     } catch (error) {
-        console.warn('Se utilizará la base predeterminada.');
+        console.warn('Cargando catálogo por defecto.');
     }
 }
 
@@ -183,7 +151,7 @@ function escucharSincronizacion() {
                 }
             });
         } catch (err) {
-            console.warn("Trabajando en modo offline de sincronización.");
+            console.warn("Trabajando en modo fuera de línea.");
         }
     }
 }
@@ -194,7 +162,7 @@ function guardarEnNubeYLocal() {
         try {
             db.ref('ordenes').set(ordenesLocales);
         } catch (e) {
-            console.warn("Sincronización diferida por falta de conexión.");
+            console.warn("Sincronización diferida.");
         }
     }
 }
@@ -206,8 +174,13 @@ function showSection(sectionId) {
     const sec = document.getElementById(`sec-${sectionId}`);
     if (sec) sec.classList.remove('d-none');
     
-    const activeNav = document.querySelector(`.sidebar .nav-link[onclick*="'${sectionId}'"]`);
-    if (activeNav) activeNav.classList.add('active');
+    // Activar botón navegación
+    const navLinks = document.querySelectorAll('.sidebar .nav-link');
+    navLinks.forEach(link => {
+        if (link.getAttribute('onclick') && link.getAttribute('onclick').includes(sectionId)) {
+            link.classList.add('active');
+        }
+    });
 
     if (window.innerWidth < 768) {
         const sb = document.getElementById('sidebar');
@@ -270,9 +243,9 @@ async function buscarPaciente() {
                 return;
             }
         }
-        alert('DNI no encontrado en la base de consulta externa. Por favor, escriba el nombre.');
+        alert('DNI no encontrado. Por favor, escriba los datos del paciente manualmente.');
     } catch (e) {
-        alert('Servicio externo de DNI no disponible temporalmente. Complete manualmente.');
+        alert('Servicio de búsqueda externa no disponible. Complete manualmente.');
     }
 }
 
@@ -290,16 +263,17 @@ function filtrarExamenes(texto) {
         .slice(0, 15);
     
     if (filtrados.length === 0) {
-        contenedor.innerHTML = '<div class="list-group-item text-muted">No se encontraron exámenes coincidentes</div>';
+        contenedor.innerHTML = '<div class="list-group-item text-muted">No se encontraron exámenes</div>';
         return;
     }
 
     filtrados.forEach(ex => {
         const item = document.createElement('a');
-        item.className = 'list-group-item list-group-item-action border-0 shadow-sm mb-1 rounded cursor-pointer';
-        item.style.cursor = 'pointer';
+        item.href = "#";
+        item.className = 'list-group-item list-group-item-action border-0 shadow-sm mb-1 rounded';
         item.innerText = `${ex.codigo} - ${ex.nombre} | S/ ${ex.precio.toFixed(2)}`;
-        item.onclick = () => {
+        item.onclick = (e) => {
+            e.preventDefault();
             agregarExamen(ex);
             contenedor.innerHTML = '';
             const elBusqueda = document.getElementById('busqueda-examen');
@@ -321,7 +295,7 @@ function renderExamenes() {
     tbody.innerHTML = '';
     
     if (examenesSeleccionados.length === 0) {
-        tbody.innerHTML = '<tr id="empty-row"><td colspan="6" class="text-center text-muted py-4">No hay exámenes agregados a la orden.</td></tr>';
+        tbody.innerHTML = '<tr id="empty-row"><td colspan="6" class="text-center text-muted py-4">No hay exámenes agregados.</td></tr>';
         const totalEl = document.getElementById('total-cobrar');
         if (totalEl) totalEl.innerText = '0.00';
         return;
@@ -355,7 +329,7 @@ function eliminarExamen(index) {
     renderExamenes();
 }
 
-// CONTROL DE CATÁLOGO Y EDICIÓN DE PARÁMETROS
+// CATÁLOGO Y PARÁMETROS
 function renderizarTablaCatalogo(filtro = '') {
     const tbody = document.getElementById('tabla-catalogo-body');
     const countEl = document.getElementById('total-cat-count');
@@ -372,7 +346,7 @@ function renderizarTablaCatalogo(filtro = '') {
     if (countEl) countEl.innerText = filtrados.length;
 
     if (filtrados.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted py-3">No existen registros coincidentes.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted py-3">Sin resultados.</td></tr>';
         return;
     }
 
@@ -389,10 +363,10 @@ function renderizarTablaCatalogo(filtro = '') {
             <td><small class="text-muted">${ex.muestra || 'Suero'} | <span class="badge bg-info text-dark">${ex.plantilla || 'estandar'}</span></small></td>
             <td>S/ ${ex.precio.toFixed(2)}</td>
             <td class="text-end px-3">
-                <button class="btn btn-sm btn-outline-primary me-1" onclick="seleccionarExamenParaEditar('${ex.codigo}')" title="Editar Configuración">
+                <button class="btn btn-sm btn-outline-primary me-1" onclick="seleccionarExamenParaEditar('${ex.codigo}')" title="Editar">
                     <i class="bi bi-pencil"></i>
                 </button>
-                <button class="btn btn-sm btn-outline-danger" onclick="eliminarExamenCatalogo('${ex.codigo}')" title="Eliminar Examen">
+                <button class="btn btn-sm btn-outline-danger" onclick="eliminarExamenCatalogo('${ex.codigo}')" title="Eliminar">
                     <i class="bi bi-trash"></i>
                 </button>
             </td>
@@ -468,7 +442,7 @@ function agregarFilaParametro(p = {}) {
                 <input type="text" class="form-control form-control-sm param-ref-max" placeholder="Max. Numérico" value="${p.refMax || ''}">
             </div>
             <div class="col-12">
-                <input type="text" class="form-control form-control-sm param-ref-texto" placeholder="Referencia Texto / Descripción (Ej: Normal: < 200)" value="${p.refTexto || ''}">
+                <input type="text" class="form-control form-control-sm param-ref-texto" placeholder="Descripción Referencial" value="${p.refTexto || ''}">
             </div>
         </div>
     `;
@@ -768,7 +742,7 @@ function abrirResultados(ordenId) {
                 `;
             });
         } else {
-            filasParamsHTML = `<p class="text-muted small mb-0">Sin parámetros configurados. Agregue parámetros desde el panel "Catálogo / Plantillas".</p>`;
+            filasParamsHTML = `<p class="text-muted small mb-0">Sin parámetros configurados. Configúrelos en "Catálogo / Plantillas".</p>`;
         }
 
         camposHTML += `
@@ -827,12 +801,10 @@ function guardarResultados() {
     alert('Resultados almacenados con éxito.');
 }
 
-// MOTOR DE GENERACIÓN DE INFORMES DINÁMICOS Y MULTIFORMATO
 function generarTablaEspecializada(ex, catEx, orden) {
     const params = Array.isArray(catEx.parametros) ? catEx.parametros : [];
     const tipoPlantilla = catEx.plantilla || 'estandar';
 
-    // 1. PLANTILLA TEXTO LIBRE / INFORME DESCRIPTIVO
     if (tipoPlantilla === 'texto_libre') {
         const resKey = `${ex.codigo}_texto`;
         const resData = (orden.resultados && orden.resultados[resKey]) ? orden.resultados[resKey] : {};
@@ -842,7 +814,6 @@ function generarTablaEspecializada(ex, catEx, orden) {
             <div style="background-color:#f8fafc; border: 1px solid #cbd5e1; border-radius: 6px; padding: 12px; font-size:12px; line-height: 1.6; white-space: pre-wrap; font-family: 'Segoe UI', Tahoma, sans-serif;">
                 ${contenido}
             </div>
-            ${catEx.metodo ? `<div style="font-size:10px; font-style:italic; text-align:right; margin-top:4px; color:#475569;">Método: ${catEx.metodo}</div>` : ''}
         `;
     }
 
@@ -850,179 +821,10 @@ function generarTablaEspecializada(ex, catEx, orden) {
         return `<p style="text-align:center; font-size:12px; color:#64748b; font-style:italic;">Examen sin parámetros descriptivos.</p>`;
     }
 
-    // 2. PLANTILLA HEMOGRAMA COMPLETO
-    if (tipoPlantilla === 'hemograma') {
-        let filasSerieRojaBlanca = '';
-        let filasRecuentoDiferencial = '';
-
-        params.forEach((p, idx) => {
-            const resKey = `${ex.codigo}_${idx}`;
-            const resData = (orden.resultados && orden.resultados[resKey]) ? orden.resultados[resKey] : {};
-            const val = resData.resultado || '-';
-
-            const esDiferencial = ['Neutrófilos Segmentados', 'Neutrófilos Abastonados', 'Linfocitos', 'Monocitos', 'Eosinófilos', 'Basófilo'].includes(p.nombre);
-
-            const filaHTML = `
-                <tr>
-                    <td style="padding: 5px 8px; border-bottom: 1px solid #e2e8f0; text-align:left; font-weight: 500;">${p.nombre}</td>
-                    <td style="padding: 5px 8px; border-bottom: 1px solid #e2e8f0; font-weight: bold; text-align:center;">${val}</td>
-                    <td style="padding: 5px 8px; border-bottom: 1px solid #e2e8f0; text-align:center;">${p.unidad || ''}</td>
-                    <td style="padding: 5px 8px; border-bottom: 1px solid #e2e8f0; text-align:center;">${p.refMin || '-'}</td>
-                    <td style="padding: 5px 8px; border-bottom: 1px solid #e2e8f0; text-align:center;">${p.refMax || '-'}</td>
-                </tr>
-            `;
-
-            if (esDiferencial) {
-                filasRecuentoDiferencial += filaHTML;
-            } else {
-                filasSerieRojaBlanca += filaHTML;
-            }
-        });
-
-        return `
-            <table style="width:100%; border-collapse:collapse; font-size:11px; margin-top:5px;">
-                <thead>
-                    <tr style="background-color: #3b82f6; color: #ffffff; font-weight:bold;">
-                        <th style="padding: 6px 8px; text-align:left;">PARÁMETRO</th>
-                        <th style="padding: 6px 8px; text-align:center;">RESULTADO</th>
-                        <th style="padding: 6px 8px; text-align:center;">UNIDAD</th>
-                        <th style="padding: 6px 8px; text-align:center;">MÍNIMO</th>
-                        <th style="padding: 6px 8px; text-align:center;">MÁXIMO</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${filasSerieRojaBlanca}
-                    <tr style="background-color: #e2e8f0; font-weight:bold;">
-                        <td colspan="5" style="padding: 6px 8px; text-align:left; color:#1e3a8a;">Recuento Diferencial Porcentual %</td>
-                    </tr>
-                    ${filasRecuentoDiferencial}
-                </tbody>
-            </table>
-            <div style="font-size:10px; font-style:italic; text-align:right; margin-top:4px; color:#475569;">Método: ${catEx.metodo || 'Citometría de flujo / Impedancia eléctrica'}</div>
-        `;
-    }
-
-    // 3. PLANTILLA BIOQUÍMICA / TABLAS COMPUESTAS CON RANGOS MULTIPLES (Glucosa, Ácido Úrico)
-    if (tipoPlantilla === 'bioquimica') {
-        let filasHTML = '';
-        params.forEach((p, idx) => {
-            const resKey = `${ex.codigo}_${idx}`;
-            const resData = (orden.resultados && orden.resultados[resKey]) ? orden.resultados[resKey] : {};
-            const val = resData.resultado || '-';
-
-            filasHTML += `
-                <tr>
-                    <td style="padding: 8px; border: 1px solid #cbd5e1; font-weight: bold; text-align:center; vertical-align:middle;">${p.nombre}</td>
-                    <td style="padding: 8px; border: 1px solid #cbd5e1; font-weight: bold; font-size:13px; text-align:center; vertical-align:middle;">${val}</td>
-                    <td style="padding: 8px; border: 1px solid #cbd5e1; text-align:center; vertical-align:middle;">${p.unidad || '-'}</td>
-                    <td style="padding: 6px; border: 1px solid #cbd5e1; text-align:center; vertical-align:middle;">
-                        ${p.refTexto ? `<div style="white-space:pre-line; font-size:10px;">${p.refTexto}</div>` : `
-                            <table style="width:100%; border-collapse:collapse; font-size:10px;">
-                                <tr><th style="border-bottom:1px solid #ddd;">Mínimo</th><th style="border-bottom:1px solid #ddd;">Máximo</th></tr>
-                                <tr><td>${p.refMin \vert{}\vert{} '-'}</td><td>${p.refMax || '-'}</td></tr>
-                            </table>
-                        `}
-                    </td>
-                    <td style="padding: 8px; border: 1px solid #cbd5e1; font-style: italic; font-size: 10px; text-align:center; vertical-align:middle;">${catEx.metodo || 'Colorimétrico'}</td>
-                </tr>
-            `;
-        });
-
-        return `
-            <table style="width:100%; border-collapse:collapse; font-size:11px; margin-top:5px;">
-                <thead>
-                    <tr style="background-color: #bae6fd; color: #0369a1; font-weight:bold;">
-                        <th style="padding: 6px; border: 1px solid #7dd3fc; width:22%;">Bioquímica</th>
-                        <th style="padding: 6px; border: 1px solid #7dd3fc; width:18%;">Resultado</th>
-                        <th style="padding: 6px; border: 1px solid #7dd3fc; width:15%;">Unidad</th>
-                        <th style="padding: 6px; border: 1px solid #7dd3fc; width:25%;">Valor Referencial</th>
-                        <th style="padding: 6px; border: 1px solid #7dd3fc; width:20%;">Método</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr style="background-color:#ffffff;"><td colspan="5" style="padding:4px 8px; text-align:left; font-weight:bold; font-size:10px; border: 1px solid #cbd5e1;">Muestra : ${catEx.muestra || 'Suero'}</td></tr>
-                    ${filasHTML}
-                </tbody>
-            </table>
-        `;
-    }
-
-    // 4. PLANTILLA PERFIL HEPÁTICO Y LIPÍDICO COMPLETO
-    if (tipoPlantilla === 'perfil_hepatico' || tipoPlantilla === 'perfil_lipidico') {
-        let filasHTML = '';
-        params.forEach((p, idx) => {
-            const resKey = `${ex.codigo}_${idx}`;
-            const resData = (orden.resultados && orden.resultados[resKey]) ? orden.resultados[resKey] : {};
-            const val = resData.resultado || '-';
-
-            filasHTML += `
-                <tr style="background-color: ${idx % 2 === 0 ? '#f8fafc' : '#ffffff'};">
-                    <td style="padding: 6px 8px; border: 1px solid #cbd5e1; text-align:left; font-weight:600;">${p.nombre}</td>
-                    <td style="padding: 6px 8px; border: 1px solid #cbd5e1; text-align:center; font-weight:bold; font-size:12px;">${val}</td>
-                    <td style="padding: 6px 8px; border: 1px solid #cbd5e1; text-align:center;">${p.unidad || '-'}</td>
-                    <td style="padding: 6px 8px; border: 1px solid #cbd5e1; text-align:center; font-size:10px;">${p.refTexto || (p.refMin || p.refMax ? `${p.refMin \vert{}\vert{} '-'} -${p.refMax || '-'}` : '-')}</td>
-                    <td style="padding: 6px 8px; border: 1px solid #cbd5e1; text-align:center; font-style:italic; font-size:10px;">${catEx.metodo || 'Espectrofotometría'}</td>
-                </tr>
-            `;
-        });
-
-        return `
-            <table style="width:100%; border-collapse:collapse; font-size:11px; margin-top:5px;">
-                <thead>
-                    <tr style="background-color: #e0f2fe; color: #0369a1; font-weight:bold;">
-                        <th style="padding: 6px 8px; border: 1px solid #bae6fd; text-align:left;">Bioquímica</th>
-                        <th style="padding: 6px 8px; border: 1px solid #bae6fd; text-align:center;">Resultado</th>
-                        <th style="padding: 6px 8px; border: 1px solid #bae6fd; text-align:center;">Unidad</th>
-                        <th style="padding: 6px 8px; border: 1px solid #bae6fd; text-align:center;">Valor Referencial</th>
-                        <th style="padding: 6px 8px; border: 1px solid #bae6fd; text-align:center;">Método</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${filasHTML}
-                </tbody>
-            </table>
-        `;
-    }
-
-    // 5. PLANTILLA HEMOGLOBINA GLICOSILADA (HbA1c)
-    if (tipoPlantilla === 'hba1c') {
-        const p = params[0] || { nombre: ex.nombre, unidad: '%' };
-        const resKey = `${ex.codigo}_0`;
-        const resData = (orden.resultados && orden.resultados[resKey]) ? orden.resultados[resKey] : {};
-
-        return `
-            <table style="width:100%; border-collapse:collapse; font-size:11px; margin-top:5px;">
-                <thead>
-                    <tr style="background-color: #bae6fd; color: #0369a1; font-weight:bold;">
-                        <th style="padding: 6px; border: 1px solid #7dd3fc;">MUESTRA</th>
-                        <th style="padding: 6px; border: 1px solid #7dd3fc;">RESULTADO</th>
-                        <th style="padding: 6px; border: 1px solid #7dd3fc;">UNIDAD</th>
-                        <th style="padding: 6px; border: 1px solid #7dd3fc;">VALOR REFERENCIAL</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr style="background-color:#ffffff;"><td colspan="4" style="padding:4px 8px; text-align:left; font-weight:bold; font-size:10px; border: 1px solid #cbd5e1;">${catEx.muestra || 'SANGRE TOTAL'}</td></tr>
-                    <tr>
-                        <td style="padding: 10px; border: 1px solid #cbd5e1; font-weight: bold; text-align:center;">${p.nombre}</td>
-                        <td style="padding: 10px; border: 1px solid #cbd5e1; font-weight: bold; font-size:14px; text-align:center;">${resData.resultado || '-'}</td>
-                        <td style="padding: 10px; border: 1px solid #cbd5e1; text-align:center;">${p.unidad || '%'}</td>
-                        <td style="padding: 10px; border: 1px solid #cbd5e1; text-align:center; font-size:10px;">
-                            <strong>Normal:</strong> Menos del 5.7%<br>
-                            <strong>Prediabetes:</strong> 5.7 - 6.4%<br>
-                            <strong>Diabetes:</strong> 6.5% a más
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        `;
-    }
-
-    // 6. PLANTILLA ESTÁNDAR POR DEFECTO
     let filasEstandar = '';
     params.forEach((p, idx) => {
         const resKey = `${ex.codigo}_${idx}`;
         const resData = (orden.resultados && orden.resultados[resKey]) ? orden.resultados[resKey] : {};
-
         let valRefHTML = p.refTexto || (p.refMin || p.refMax ? `${p.refMin || '-'} - ${p.refMax || '-'}` : '-');
 
         filasEstandar += `
@@ -1067,7 +869,7 @@ function visualizarEImprimirResultados() {
 
         bloquesExamenesHTML += `
             <div style="margin-top:18px; page-break-inside: avoid;">
-                <h3 style="text-align:center; font-size:15px; font-weight:bold; margin-bottom:6px; font-family:'Segoe UI', sans-serif; color: #000000; text-transform: uppercase; letter-spacing: 0.5px;">
+                <h3 style="text-align:center; font-size:15px; font-weight:bold; margin-bottom:6px; font-family:'Segoe UI', sans-serif; color: #000000; text-transform: uppercase;">
                     EXAMEN DE ${ex.nombre}
                 </h3>
                 ${contenidoExamen}
@@ -1080,103 +882,27 @@ function visualizarEImprimirResultados() {
         <!DOCTYPE html>
         <html>
         <head>
-            <title>Informe de Laboratorio - ${ordenActualVisualizando.paciente}</title>
+            <title>Informe - ${ordenActualVisualizando.paciente}</title>
             <style>
                 @page { size: A4; margin: 12mm; }
                 body { font-family: 'Segoe UI', Arial, sans-serif; color: #1e293b; margin: 0; padding: 0; }
                 .header { display: flex; align-items: center; justify-content: space-between; border-bottom: 2px solid #0072bc; padding-bottom: 8px; }
-                .logo-section { display: flex; align-items: center; gap: 15px; }
-                .logo-img { height: 65px; }
-                .header-title h2 { margin: 0; color: #0072bc; font-size: 18px; font-weight: bold; }
-                .header-title p { margin: 2px 0; font-size: 11px; color: #475569; }
-                .header-info { font-size: 11px; color: #475569; text-align: right; line-height: 1.4; }
-                
-                .patient-box {
-                    border: 1.5px solid #3b82f6;
-                    border-radius: 8px;
-                    padding: 10px 16px;
-                    margin-top: 12px;
-                    display: grid;
-                    grid-template-columns: 1fr 1fr;
-                    row-gap: 5px;
-                    font-size: 11px;
-                    font-weight: 600;
-                    color: #0f172a;
-                    background-color: #fafafa;
-                }
-
-                .footer-firma {
-                    margin-top: 50px;
-                    text-align: right;
-                    padding-right: 30px;
-                }
-                .firma-linea {
-                    display: inline-block;
-                    text-align: center;
-                    border-top: 1px solid #000;
-                    padding-top: 4px;
-                    width: 220px;
-                    font-size: 11px;
-                }
-
-                .footer-page {
-                    position: fixed;
-                    bottom: 0;
-                    left: 0;
-                    right: 0;
-                    border-top: 2px solid #0072bc;
-                    padding-top: 6px;
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: center;
-                    font-size: 10px;
-                    font-weight: bold;
-                    color: #0072bc;
-                }
+                .patient-box { border: 1.5px solid #3b82f6; border-radius: 8px; padding: 10px 16px; margin-top: 12px; display: grid; grid-template-columns: 1fr 1fr; row-gap: 5px; font-size: 11px; font-weight: 600; background-color: #fafafa; }
             </style>
         </head>
         <body>
             <div class="header">
-                <div class="logo-section">
-                    <img src="logo.png" class="logo-img" onerror="this.style.display='none'">
-                    <div class="header-title">
-                        <h2>Centro Médico VITAL HEALTH</h2>
-                        <p>Laboratorio clínico, comprometido con tu salud.</p>
-                    </div>
-                </div>
-                <div class="header-info">
-                    📍 Av. Grau N° 1799 - Veintiséis de Octubre<br>
-                    📷 Vitalhealthlaboratorio | 👍 Vital Health's Lab
-                </div>
+                <h2>Centro Médico VITAL HEALTH</h2>
+                <div>Tel: 984 089 927</div>
             </div>
-
             <div class="patient-box">
                 <div>PACIENTE: ${ordenActualVisualizando.paciente.toUpperCase()}</div>
                 <div>EDAD: ${ordenActualVisualizando.edad}</div>
                 <div>DNI: ${ordenActualVisualizando.dni}</div>
-                <div>SEXO: ${ordenActualVisualizando.sexo || 'MASCULINO'}</div>
-                <div>DOCTOR: ${ordenActualVisualizando.doctor || 'PARTICULAR'}</div>
                 <div>FECHA: ${ordenActualVisualizando.fecha}</div>
             </div>
-
             ${bloquesExamenesHTML}
-
-            <div class="footer-firma">
-                <div class="firma-linea">
-                    <strong>Raysa Yadira Ursula Alberca Atarama</strong><br>
-                    Bióloga - C.B.P. 17763
-                </div>
-            </div>
-
-            <div class="footer-page">
-                <div>📞 984 089 927</div>
-                <div>🏠 SERVICIO A DOMICILIO</div>
-                <div>"ANÁLISIS DE CALIDAD PARA EL CUIDADO DE TU SALUD"</div>
-            </div>
-
-            <script>
-                window.onload = function() { window.print(); }
-            </script>
+            <script>window.onload = function() { window.print(); }</script>
         </body>
         </html>
     `);
