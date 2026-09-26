@@ -3,7 +3,7 @@
     --primary-color: #0072bc;
     --primary-hover: #005a96;
     --dark-sidebar: #0f172a;
-    --bg-light: #f1f5f9;
+    --bg-light: #f8fafc;
 }
 
 body {
@@ -20,7 +20,7 @@ body {
     min-height: 100vh;
 }
 
-/* SIDEBAR DESIGN */
+/* SIDEBAR LAYOUT */
 .sidebar {
     width: var(--sidebar-width);
     min-height: 100vh;
@@ -66,7 +66,7 @@ body {
     background-color: rgba(0, 0, 0, 0.2);
 }
 
-/* CONTENT AREA */
+/* ÁREA DE CONTENIDO PRINCIPAL */
 .content-area {
     flex-grow: 1;
     padding: 20px;
@@ -85,16 +85,14 @@ body {
     z-index: 1030;
 }
 
-/* ESTILOS DE BLOQUE DE PARÁMETROS DINÁMICOS */
+/* CARD DE PARÁMETRO DINÁMICO */
 .parametro-card {
-    background-color: #f8fafc;
-    border: 1px solid #e2e8f0;
-    border-radius: 6px;
-    padding: 10px;
-    margin-bottom: 8px;
+    background-color: #ffffff;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
 }
 
-/* RESPONSIVE DESIGN */
+/* RESPONSIVO PARA DISPOSITIVOS MÓVILES Y TABLETS */
 @media (max-width: 767.98px) {
     .sidebar {
         position: fixed;
@@ -118,7 +116,7 @@ body {
     }
 }
 
-/* ESTILOS DE IMPRESIÓN PARA TICKET DE VENTA (58mm) */
+/* FORMATO IMPRESIÓN IMPRESORA TÉRMICA (58mm) */
 #ticket-print-area {
     display: none;
 }
