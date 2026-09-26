@@ -230,27 +230,41 @@
                             <div class="card shadow-sm border-0">
                                 <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
                                     <h5 class="card-title fw-bold text-primary mb-0" id="catalogo-form-titulo">
-                                        <i class="bi bi-sliders me-2"></i>Editar Examen Seleccionado
+                                        <i class="bi bi-pencil-square me-2"></i>Configurar Examen
                                     </h5>
                                     <button class="btn btn-sm btn-outline-success" type="button" onclick="prepararNuevoExamen()">
                                         <i class="bi bi-plus-lg"></i> Nuevo Examen
                                     </button>
                                 </div>
                                 <div class="card-body">
+                                    <!-- BUSCADOR CON DESPLEGABLE DENTRO DEL FORMULARIO -->
+                                    <div class="mb-3 position-relative">
+                                        <label class="form-label fw-bold text-dark small mb-1">
+                                            <i class="bi bi-search me-1 text-primary"></i>Buscar para Editar Examen:
+                                        </label>
+                                        <input type="text" id="cat-search-input" class="form-control form-control-sm border-primary" 
+                                               placeholder="Escriba código o nombre del examen..." 
+                                               oninput="filtrarExamenesEditar(this.value)">
+                                        <div id="cat-dropdown-sugerencias" class="list-group position-absolute w-100 shadow-lg z-3 mt-1" 
+                                             style="max-height: 220px; overflow-y: auto; display: none;"></div>
+                                    </div>
+
                                     <form id="form-catalogo" onsubmit="event.preventDefault(); guardarExamenCatalogo();">
                                         <input type="hidden" id="cat-id-original" value="">
+                                        
                                         <div class="row g-2 mb-2">
                                             <div class="col-4">
-                                                <label class="form-label fw-semibold small">Código</label>
+                                                <label class="form-label fw-semibold small mb-1">Código</label>
                                                 <input type="text" id="cat-codigo" class="form-control form-control-sm" placeholder="EX-01" required>
                                             </div>
                                             <div class="col-8">
-                                                <label class="form-label fw-semibold small">Precio (S/)</label>
+                                                <label class="form-label fw-semibold small mb-1">Precio (S/)</label>
                                                 <input type="number" step="0.01" id="cat-precio" class="form-control form-control-sm" placeholder="0.00" required>
                                             </div>
                                         </div>
+
                                         <div class="mb-2">
-                                            <label class="form-label fw-semibold small">Nombre del Examen</label>
+                                            <label class="form-label fw-semibold small mb-1">Nombre del Examen</label>
                                             <input type="text" id="cat-nombre" class="form-control form-control-sm" placeholder="Ej. ÁCIDO ÚRICO" required>
                                         </div>
                                         
@@ -259,33 +273,33 @@
 
                                         <div class="row g-2 mb-2">
                                             <div class="col-6">
-                                                <label class="form-label fw-semibold small">Tipo de Muestra</label>
+                                                <label class="form-label fw-semibold small mb-1">Tipo de Muestra</label>
                                                 <input type="text" id="cat-muestra" class="form-control form-control-sm" placeholder="Ej. Suero / Sangre">
                                             </div>
                                             <div class="col-6">
-                                                <label class="form-label fw-semibold small">Unidad de Medida</label>
+                                                <label class="form-label fw-semibold small mb-1">Unidad de Medida</label>
                                                 <input type="text" id="cat-unidad" class="form-control form-control-sm" placeholder="Ej. mg/dL, %">
                                             </div>
                                         </div>
 
                                         <div class="row g-2 mb-2">
                                             <div class="col-6">
-                                                <label class="form-label fw-semibold small">Val. Ref. Mínimo</label>
+                                                <label class="form-label fw-semibold small mb-1">Val. Ref. Mínimo</label>
                                                 <input type="text" id="cat-ref-min" class="form-control form-control-sm" placeholder="2.50">
                                             </div>
                                             <div class="col-6">
-                                                <label class="form-label fw-semibold small">Val. Ref. Máximo</label>
+                                                <label class="form-label fw-semibold small mb-1">Val. Ref. Máximo</label>
                                                 <input type="text" id="cat-ref-max" class="form-control form-control-sm" placeholder="7.00">
                                             </div>
                                         </div>
 
                                         <div class="mb-2">
-                                            <label class="form-label fw-semibold small">Valores de Referencia en Texto (Opcional)</label>
+                                            <label class="form-label fw-semibold small mb-1">Valores de Referencia en Texto (Opcional)</label>
                                             <textarea id="cat-ref-texto" class="form-control form-control-sm" rows="2" placeholder="Normal: < 200&#10;Elevado: > 240"></textarea>
                                         </div>
 
                                         <div class="mb-3">
-                                            <label class="form-label fw-semibold small">Método del Análisis</label>
+                                            <label class="form-label fw-semibold small mb-1">Método del Análisis</label>
                                             <input type="text" id="cat-metodo" class="form-control form-control-sm" placeholder="Ej. Colorimétrico enzimático">
                                         </div>
 
@@ -307,7 +321,7 @@
                                         <i class="bi bi-journal-text me-2"></i>Catálogo de Exámenes (<span id="total-cat-count">0</span>)
                                     </h5>
                                     <div style="max-width: 200px;" class="w-100">
-                                        <input type="text" class="form-control form-control-sm" placeholder="Buscar..." oninput="renderizarTablaCatalogo(this.value)">
+                                        <input type="text" class="form-control form-control-sm" placeholder="Buscar en lista..." oninput="renderizarTablaCatalogo(this.value)">
                                     </div>
                                 </div>
                                 <div class="card-body p-0">
