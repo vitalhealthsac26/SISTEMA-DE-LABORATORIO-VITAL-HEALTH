@@ -226,7 +226,7 @@
                 <section id="sec-catalogo" class="section-content d-none">
                     <div class="row g-4">
                         <!-- Formulario de Edición / Creación -->
-                        <div class="col-12 col-lg-5">
+                        <div class="col-12 col-lg-6">
                             <div class="card shadow-sm border-0">
                                 <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
                                     <h5 class="card-title fw-bold text-primary mb-0" id="catalogo-form-titulo">
@@ -237,18 +237,6 @@
                                     </button>
                                 </div>
                                 <div class="card-body">
-                                    <!-- BUSCADOR CON DESPLEGABLE DENTRO DEL FORMULARIO -->
-                                    <div class="mb-3 position-relative">
-                                        <label class="form-label fw-bold text-dark small mb-1">
-                                            <i class="bi bi-search me-1 text-primary"></i>Buscar para Editar Examen:
-                                        </label>
-                                        <input type="text" id="cat-search-input" class="form-control form-control-sm border-primary" 
-                                               placeholder="Escriba código o nombre del examen..." 
-                                               oninput="filtrarExamenesEditar(this.value)">
-                                        <div id="cat-dropdown-sugerencias" class="list-group position-absolute w-100 shadow-lg z-3 mt-1" 
-                                             style="max-height: 220px; overflow-y: auto; display: none;"></div>
-                                    </div>
-
                                     <form id="form-catalogo" onsubmit="event.preventDefault(); guardarExamenCatalogo();">
                                         <input type="hidden" id="cat-id-original" value="">
                                         
@@ -265,42 +253,34 @@
 
                                         <div class="mb-2">
                                             <label class="form-label fw-semibold small mb-1">Nombre del Examen</label>
-                                            <input type="text" id="cat-nombre" class="form-control form-control-sm" placeholder="Ej. ÁCIDO ÚRICO" required>
+                                            <input type="text" id="cat-nombre" class="form-control form-control-sm" placeholder="Ej. HELICOBACTER PYLORI" required>
                                         </div>
-                                        
-                                        <hr class="my-3">
-                                        <h6 class="fw-bold text-secondary mb-2"><i class="bi bi-file-text me-1"></i>Campos de la Plantilla de Resultado</h6>
 
-                                        <div class="row g-2 mb-2">
+                                        <div class="row g-2 mb-3">
                                             <div class="col-6">
                                                 <label class="form-label fw-semibold small mb-1">Tipo de Muestra</label>
                                                 <input type="text" id="cat-muestra" class="form-control form-control-sm" placeholder="Ej. Suero / Sangre">
                                             </div>
                                             <div class="col-6">
-                                                <label class="form-label fw-semibold small mb-1">Unidad de Medida</label>
-                                                <input type="text" id="cat-unidad" class="form-control form-control-sm" placeholder="Ej. mg/dL, %">
+                                                <label class="form-label fw-semibold small mb-1">Método de Análisis</label>
+                                                <input type="text" id="cat-metodo" class="form-control form-control-sm" placeholder="Ej. Inmunocromatografía / Colorimétrico">
                                             </div>
+                                        </div>
+                                        
+                                        <hr class="my-3">
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <h6 class="fw-bold text-secondary mb-0"><i class="bi bi-list-task me-1"></i>Parámetros / Indicadores del Examen</h6>
+                                            <button type="button" class="btn btn-sm btn-outline-primary" onclick="agregarFilaParametro()">
+                                                <i class="bi bi-plus-lg me-1"></i>Agregar Parámetro
+                                            </button>
                                         </div>
 
-                                        <div class="row g-2 mb-2">
-                                            <div class="col-6">
-                                                <label class="form-label fw-semibold small mb-1">Val. Ref. Mínimo</label>
-                                                <input type="text" id="cat-ref-min" class="form-control form-control-sm" placeholder="2.50">
-                                            </div>
-                                            <div class="col-6">
-                                                <label class="form-label fw-semibold small mb-1">Val. Ref. Máximo</label>
-                                                <input type="text" id="cat-ref-max" class="form-control form-control-sm" placeholder="7.00">
-                                            </div>
-                                        </div>
-
-                                        <div class="mb-2">
-                                            <label class="form-label fw-semibold small mb-1">Valores de Referencia en Texto (Opcional)</label>
-                                            <textarea id="cat-ref-texto" class="form-control form-control-sm" rows="2" placeholder="Normal: < 200&#10;Elevado: > 240"></textarea>
-                                        </div>
+                                        <!-- Contenedor Dinámico para Múltiples Indicadores -->
+                                        <div id="contenedor-parametros" class="mb-3"></div>
 
                                         <div class="mb-3">
-                                            <label class="form-label fw-semibold small mb-1">Método del Análisis</label>
-                                            <input type="text" id="cat-metodo" class="form-control form-control-sm" placeholder="Ej. Colorimétrico enzimático">
+                                            <label class="form-label fw-semibold small mb-1">Texto de Observación o Método Predeterminado</label>
+                                            <textarea id="cat-ref-texto" class="form-control form-control-sm" rows="2" placeholder="Información complementaria, interpretación o comentarios predeterminados..."></textarea>
                                         </div>
 
                                         <div class="d-grid gap-2">
@@ -314,18 +294,18 @@
                         </div>
 
                         <!-- Lista del Catálogo -->
-                        <div class="col-12 col-lg-7">
+                        <div class="col-12 col-lg-6">
                             <div class="card shadow-sm border-0">
                                 <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center flex-wrap gap-2 border-bottom">
                                     <h5 class="card-title fw-bold text-primary mb-0">
                                         <i class="bi bi-journal-text me-2"></i>Catálogo de Exámenes (<span id="total-cat-count">0</span>)
                                     </h5>
                                     <div style="max-width: 200px;" class="w-100">
-                                        <input type="text" class="form-control form-control-sm" placeholder="Buscar en lista..." oninput="renderizarTablaCatalogo(this.value)">
+                                        <input type="text" class="form-control form-control-sm" placeholder="Buscar examen..." oninput="renderizarTablaCatalogo(this.value)">
                                     </div>
                                 </div>
                                 <div class="card-body p-0">
-                                    <div class="table-responsive" style="max-height: 520px; overflow-y: auto;">
+                                    <div class="table-responsive" style="max-height: 550px; overflow-y: auto;">
                                         <table class="table table-hover align-middle mb-0">
                                             <thead class="table-light sticky-top">
                                                 <tr>
