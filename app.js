@@ -27,16 +27,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         dateEl.innerText = new Date().toLocaleDateString('es-PE', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
     }
     
-    // Cargar catálogo desde JSON o localStorage
     await cargarProductosJSON();
-    
     escucharSincronizacion();
     cargarOrdenes();
     actualizarControlCaja();
     renderizarTablaCatalogo();
 });
 
-// Cargar catálogo de exámenes desde productos.json o localStorage
 async function cargarProductosJSON() {
     const catalogoGuardado = localStorage.getItem('vitalhealth_catalogo');
     if (catalogoGuardado) {
@@ -66,13 +63,11 @@ function guardarCatalogoLocal() {
     localStorage.setItem('vitalhealth_catalogo', JSON.stringify(catalogoExamenes));
 }
 
-// Toggle para menú móvil
 function toggleSidebar() {
     document.getElementById('sidebar').classList.toggle('active');
     document.getElementById('sidebar-overlay').classList.toggle('active');
 }
 
-// Sincronización multi-dispositivo en tiempo real vía Firebase
 function escucharSincronizacion() {
     if (db) {
         db.ref('ordenes').on('value', (snapshot) => {
@@ -101,6 +96,10 @@ function showSection(sectionId) {
     const sec = document.getElementById(`sec-${sectionId}`);
     if (sec) sec.classList.remove('d-none');
     
+    // Activar el enlace del menú dinámicamente
+    const activeNav = document.querySelector(`.nav-link[onclick*="'${sectionId}'"]`);
+    if (activeNav) activeNav.classList.add('active');
+
     if (window.innerWidth < 768) {
         document.getElementById('sidebar').classList.remove('active');
         document.getElementById('sidebar-overlay').classList.remove('active');
@@ -123,7 +122,6 @@ function calcularEdad() {
     document.getElementById('pac-edad').value = `${edad} AÑOS`;
 }
 
-// CONSULTA AUTOMÁTICA DNI (RENIEC / API + HISTORIAL LOCAL)
 async function buscarPaciente() {
     const dniInput = document.getElementById('pac-dni');
     const dni = dniInput.value.trim();
@@ -179,7 +177,6 @@ async function buscarPaciente() {
     if (btnText) btnText.innerText = 'Consultar';
 }
 
-// FILTRADO RÁPIDO DE EXÁMENES EN RECEPCIÓN (MÁXIMO 15 RESULTADOS)
 function filtrarExamenes(texto) {
     const contenedor = document.getElementById('sugerencias-examenes');
     contenedor.innerHTML = '';
@@ -219,7 +216,7 @@ function renderExamenes() {
     tbody.innerHTML = '';
     
     if (examenesSeleccionados.length === 0) {
-        tbody.innerHTML = '<tr id="empty-row"><td colspan="6" class="text-center text-muted">No hay exámenes agregados.</td></tr>';
+        tbody.innerHTML = '<tr id="empty-row"><td colspan="6" class="text-center text-muted py-4">No hay exámenes agregados.</td></tr>';
         document.getElementById('total-cobrar').innerText = '0.00';
         return;
     }
@@ -229,12 +226,12 @@ function renderExamenes() {
         total += ex.precio;
         const row = document.createElement('tr');
         row.innerHTML = `
-            <td>${ex.codigo}</td>
-            <td>${ex.nombre}</td>
+            <td><span class="badge bg-light text-dark border">${ex.codigo}</span></td>
+            <td><strong>${ex.nombre}</strong></td>
             <td>1</td>
             <td>S/ ${ex.precio.toFixed(2)}</td>
             <td>S/ ${ex.precio.toFixed(2)}</td>
-            <td><button class="btn btn-sm btn-outline-danger" onclick="eliminarExamen(${index})"><i class="bi bi-trash"></i></button></td>
+            <td class="text-center"><button class="btn btn-sm btn-outline-danger" onclick="eliminarExamen(${index})"><i class="bi bi-trash"></i></button></td>
         `;
         tbody.appendChild(row);
     });
@@ -247,7 +244,6 @@ function eliminarExamen(index) {
     renderExamenes();
 }
 
-// FUNCIONES PARA LA GESTIÓN DEL CATÁLOGO
 function renderizarTablaCatalogo(filtro = '') {
     const tbody = document.getElementById('tabla-catalogo-body');
     const countEl = document.getElementById('total-cat-count');
@@ -268,14 +264,13 @@ function renderizarTablaCatalogo(filtro = '') {
         return;
     }
 
-    // Renderizamos máximo 100 elementos por rendimiento visual
     filtrados.slice(0, 100).forEach(ex => {
         const tr = document.createElement('tr');
         tr.innerHTML = `
             <td><span class="badge bg-light text-dark border">${ex.codigo}</span></td>
             <td><strong>${ex.nombre}</strong></td>
             <td>S/ ${ex.precio.toFixed(2)}</td>
-            <td class="text-end">
+            <td class="text-end px-3">
                 <button class="btn btn-sm btn-outline-primary me-1" onclick="editarExamenCatalogo('${ex.codigo}')">
                     <i class="bi bi-pencil"></i>
                 </button>
@@ -299,13 +294,11 @@ function guardarExamenCatalogo() {
     }
 
     if (idOrig) {
-        // Modo Edición
         const idx = catalogoExamenes.findIndex(e => e.codigo === idOrig);
         if (idx !== -1) {
             catalogoExamenes[idx] = { codigo, nombre, precio };
         }
     } else {
-        // Modo Creación
         if (catalogoExamenes.some(e => e.codigo === codigo)) {
             return alert('Ya existe un examen con este mismo código.');
         }
@@ -348,7 +341,6 @@ function eliminarExamenCatalogo(codigo) {
     }
 }
 
-// GENERACIÓN DE TICKET Y ÓRDENES
 function guardarOrdenGenerarTicket() {
     const dni = document.getElementById('pac-dni').value.trim();
     const paciente = document.getElementById('pac-nombre').value.trim();
@@ -454,10 +446,10 @@ function cargarOrdenes() {
             <td>${orden.paciente}</td>
             <td>${orden.edad}</td>
             <td>S/ ${orden.total.toFixed(2)}</td>
-            <td><span class="badge bg-info text-dark">${orden.estado}</span></td>
-            <td>
-                <button class="btn btn-sm btn-primary" onclick="abrirResultados('${orden.id}')"><i class="bi bi-journal-medical"></i> Resultados</button>
-                <button class="btn btn-sm btn-danger" onclick="eliminarOrden('${orden.id}')"><i class="bi bi-trash"></i> Eliminar</button>
+            <td><span class="badge bg-warning text-dark">${orden.estado}</span></td>
+            <td class="text-end px-3">
+                <button class="btn btn-sm btn-primary me-1" onclick="abrirResultados('${orden.id}')"><i class="bi bi-journal-medical"></i> Resultados</button>
+                <button class="btn btn-sm btn-outline-danger" onclick="eliminarOrden('${orden.id}')"><i class="bi bi-trash"></i></button>
             </td>
         `;
         tbody.appendChild(tr);
@@ -487,14 +479,14 @@ function abrirResultados(ordenId) {
         const val = (orden.resultados && orden.resultados[ex.codigo]) ? orden.resultados[ex.codigo] : '';
         camposHTML += `
             <div class="mb-3 p-3 border rounded bg-light">
-                <h6><strong>${ex.nombre}</strong></h6>
+                <h6 class="fw-bold text-primary">${ex.nombre}</h6>
                 <div class="row g-2">
                     <div class="col-12 col-md-8">
-                        <label class="form-label">Resultado</label>
+                        <label class="form-label small fw-semibold">Resultado</label>
                         <input type="text" id="res-${ex.codigo}" class="form-control" value="${val}">
                     </div>
                     <div class="col-12 col-md-4">
-                        <label class="form-label">Unidad / Observación</label>
+                        <label class="form-label small fw-semibold">Unidad / Observaciones</label>
                         <input type="text" id="obs-${ex.codigo}" class="form-control" placeholder="Valores normales...">
                     </div>
                 </div>
@@ -503,14 +495,14 @@ function abrirResultados(ordenId) {
     });
 
     container.innerHTML = `
-        <div class="p-2 mb-3 bg-white border-bottom">
-            <h4>Paciente: ${orden.paciente} | Edad: ${orden.edad} | DNI: ${orden.dni}</h4>
-            <small class="text-muted">N° Orden: ${orden.id}</small>
+        <div class="p-3 mb-3 bg-light border rounded">
+            <h5 class="fw-bold mb-1">Paciente: ${orden.paciente}</h5>
+            <div class="text-muted small"><strong>DNI:</strong> ${orden.dni} | <strong>Edad:</strong> ${orden.edad} | <strong>N° Orden:</strong> ${orden.id}</div>
         </div>
         ${camposHTML}
-        <div class="d-flex flex-wrap gap-2 mt-3">
-            <button class="btn btn-success" onclick="guardarResultados()"><i class="bi bi-floppy"></i> Guardar Resultados</button>
-            <button class="btn btn-primary" onclick="visualizarEImprimirResultados()"><i class="bi bi-printer"></i> Visualizar e Imprimir Resultados</button>
+        <div class="d-flex flex-wrap gap-2 mt-4">
+            <button class="btn btn-success fw-semibold" onclick="guardarResultados()"><i class="bi bi-floppy me-1"></i> Guardar Resultados</button>
+            <button class="btn btn-primary fw-semibold" onclick="visualizarEImprimirResultados()"><i class="bi bi-printer me-1"></i> Visualizar e Imprimir Resultados</button>
         </div>
     `;
 }
@@ -541,8 +533,8 @@ function visualizarEImprimirResultados() {
         const val = ordenActualVisualizando.resultados[ex.codigo] || 'Pendiente';
         filasResultados += `
             <tr>
-                <td style="padding: 8px; border-bottom: 1px solid #ddd;"><strong>${ex.nombre}</strong></td>
-                <td style="padding: 8px; border-bottom: 1px solid #ddd;">${val}</td>
+                <td style="padding: 10px; border-bottom: 1px solid #e2e8f0;"><strong>${ex.nombre}</strong></td>
+                <td style="padding: 10px; border-bottom: 1px solid #e2e8f0;">${val}</td>
             </tr>
         `;
     });
@@ -554,18 +546,18 @@ function visualizarEImprimirResultados() {
         <head>
             <title>Informe de Resultados - ${ordenActualVisualizando.id}</title>
             <style>
-                body { font-family: Arial, sans-serif; margin: 30px; color: #333; }
-                .header { text-align: center; border-bottom: 2px solid #0072bc; padding-bottom: 10px; margin-bottom: 20px; }
-                .patient-info { background: #f4f4f4; padding: 15px; border-radius: 5px; margin-bottom: 20px; }
+                body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 30px; color: #334155; }
+                .header { text-align: center; border-bottom: 2px solid #0072bc; padding-bottom: 12px; margin-bottom: 20px; }
+                .patient-info { background: #f8fafc; padding: 15px; border-radius: 6px; margin-bottom: 20px; border: 1px solid #e2e8f0; }
                 table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-                th { background: #0072bc; color: white; padding: 10px; text-align: left; }
-                .footer { margin-top: 40px; text-align: center; font-size: 12px; color: #777; }
+                th { background: #0072bc; color: white; padding: 10px; text-align: left; font-size: 14px; }
+                .footer { margin-top: 40px; text-align: center; font-size: 12px; color: #64748b; }
             </style>
         </head>
         <body>
             <div class="header">
-                <h2 style="margin:0;">CENTRO MÉDICO VITAL HEALTH</h2>
-                <p style="margin:5px 0;">LABORATORIO CLÍNICO</p>
+                <h2 style="margin:0; color:#0072bc;">CENTRO MÉDICO VITAL HEALTH</h2>
+                <p style="margin:4px 0; font-weight:bold;">LABORATORIO CLÍNICO</p>
                 <small>Av. Grau N° 1799 - Piura | Tel: 984 089 927</small>
             </div>
             <div class="patient-info">
@@ -586,7 +578,7 @@ function visualizarEImprimirResultados() {
                 </tbody>
             </table>
             <div class="footer">
-                <p>Este informe refleja los resultados procesados electrónicamente por Vital Health.</p>
+                <p>Este informe refleja los resultados procesados electrónicamente por el laboratorio de Vital Health.</p>
             </div>
             <script>
                 window.onload = function() { window.print(); }
@@ -620,7 +612,7 @@ function actualizarControlCaja() {
             const tr = document.createElement('tr');
             tr.innerHTML = `
                 <td>${o.hora || 'S/H'}</td>
-                <td>${o.id}</td>
+                <td><strong>${o.id}</strong></td>
                 <td>${o.paciente}</td>
                 <td><span class="badge bg-secondary">${o.metodoPago}</span></td>
                 <td>S/ ${o.total.toFixed(2)}</td>
