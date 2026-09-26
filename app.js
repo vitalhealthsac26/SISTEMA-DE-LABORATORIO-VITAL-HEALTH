@@ -1,4 +1,4 @@
-// CONFIGURACIÓN DE FIREBASE
+// CONFIGURACIÓN DE FIREBASE CON RESPALDO LOCAL DE FALLBACK
 const firebaseConfig = {
     databaseURL: "https://vital-health-default-rtdb.firebaseio.com"
 };
@@ -7,12 +7,12 @@ if (typeof firebase !== 'undefined' && !firebase.apps.length) {
     try {
         firebase.initializeApp(firebaseConfig);
     } catch (e) {
-        console.warn("Error inicializando Firebase:", e);
+        console.warn("Servicio de Firebase no disponible en modo directo. Operando en modo local.", e);
     }
 }
 const db = (typeof firebase !== 'undefined' && firebase.apps.length) ? firebase.database() : null;
 
-// Catálogo base predeterminado de respaldo
+// CATÁLOGO BASE PREDETERMINADO (RESPALDO SISTEMA)
 let catalogoExamenes = [
     {
         codigo: '568',
@@ -23,7 +23,7 @@ let catalogoExamenes = [
         plantilla: 'estandar',
         refTexto: '',
         parametros: [
-            { nombre: 'HELICOBACTER PYLORI', unidad: '', refMin: '', refMax: '', refTexto: 'NO REACTIVO / REACTIVO' }
+            { nombre: 'HELICOBACTER PYLORI', unidad: '', refMin: '', refMax: '', refTexto: 'NO REACTIVO' }
         ]
     },
     {
@@ -63,7 +63,7 @@ let catalogoExamenes = [
         plantilla: 'bioquimica',
         refTexto: '',
         parametros: [
-            { nombre: 'Glucosa', unidad: 'mg/dL', refTexto: 'Adultos: 74 - 106 | Niños: 60 - 100 | Neonatos: 50 - 80' }
+            { nombre: 'Glucosa', unidad: 'mg/dL', refMin: '74', refMax: '106', refTexto: 'Adultos: 74 - 106 | Niños: 60 - 100' }
         ]
     },
     {
@@ -75,7 +75,7 @@ let catalogoExamenes = [
         plantilla: 'hba1c',
         refTexto: '',
         parametros: [
-            { nombre: 'Hemoglobina Glicosilada (HbA1c)', unidad: '%', refTexto: 'Normal: < 5.7% | Prediabetes: 5.7 - 6.4% | Diabetes: >= 6.5%' }
+            { nombre: 'Hemoglobina Glicosilada (HbA1c)', unidad: '%', refMin: '', refMax: '5.6', refTexto: 'Normal: < 5.7% | Prediabetes: 5.7 - 6.4% | Diabetes: >= 6.5%' }
         ]
     }
 ];
@@ -96,7 +96,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         cargarOrdenes();
         actualizarControlCaja();
     } catch (e) {
-        console.error("Inicialización segura:", e);
+        console.error("Error inicializando la aplicación LIS:", e);
     }
 });
 
@@ -107,7 +107,7 @@ async function cargarProductosJSON() {
             catalogoExamenes = JSON.parse(catalogoGuardado);
             return;
         } catch (e) {
-            console.warn("Catálogo en caché no válido, reponiendo predeterminado.");
+            console.warn("La información en caché local requiere reconstrucción.");
         }
     }
 
@@ -130,7 +130,7 @@ async function cargarProductosJSON() {
             }
         }
     } catch (error) {
-        console.warn('Se utilizará el catálogo por defecto local.');
+        console.warn('Se utilizará la base predeterminada.');
     }
 }
 
@@ -158,7 +158,7 @@ function escucharSincronizacion() {
                 }
             });
         } catch (err) {
-            console.warn("Sin conexión con Firebase, trabajando en modo local.");
+            console.warn("Trabajando en modo offline de sincronización.");
         }
     }
 }
@@ -169,7 +169,7 @@ function guardarEnNubeYLocal() {
         try {
             db.ref('ordenes').set(ordenesLocales);
         } catch (e) {
-            console.warn("No se pudo guardar en la nube.");
+            console.warn("Sincronización diferida por falta de conexión.");
         }
     }
 }
@@ -220,8 +220,8 @@ async function buscarPaciente() {
     if (!dniInput) return;
     const dni = dniInput.value.trim();
 
-    if (dni.length !== 8 || isNaN(dni)) {
-        return alert('Por favor, ingrese un DNI válido de 8 dígitos.');
+    if (dni.length < 8) {
+        return alert('Ingrese un número de documento válido de al menos 8 dígitos.');
     }
 
     const encontrada = ordenesLocales.find(o => o.dni === dni);
@@ -245,9 +245,9 @@ async function buscarPaciente() {
                 return;
             }
         }
-        alert('DNI no encontrado. Ingrese los datos manualmente.');
+        alert('DNI no encontrado en la base de consulta externa. Por favor, escriba el nombre.');
     } catch (e) {
-        alert('No se pudo conectar al servicio externo de DNI. Ingrese el nombre manualmente.');
+        alert('Servicio externo de DNI no disponible temporalmente. Complete manualmente.');
     }
 }
 
@@ -265,15 +265,15 @@ function filtrarExamenes(texto) {
         .slice(0, 15);
     
     if (filtrados.length === 0) {
-        contenedor.innerHTML = '<div class="list-group-item text-muted">No se encontraron coincidencias</div>';
+        contenedor.innerHTML = '<div class="list-group-item text-muted">No se encontraron exámenes coincidentes</div>';
         return;
     }
 
     filtrados.forEach(ex => {
         const item = document.createElement('a');
-        item.className = 'list-group-item list-group-item-action cursor-pointer';
+        item.className = 'list-group-item list-group-item-action border-0 shadow-sm mb-1 rounded cursor-pointer';
         item.style.cursor = 'pointer';
-        item.innerText = `${ex.nombre} - S/ ${ex.precio.toFixed(2)}`;
+        item.innerText = `${ex.codigo} - ${ex.nombre} | S/ ${ex.precio.toFixed(2)}`;
         item.onclick = () => {
             agregarExamen(ex);
             contenedor.innerHTML = '';
@@ -296,7 +296,7 @@ function renderExamenes() {
     tbody.innerHTML = '';
     
     if (examenesSeleccionados.length === 0) {
-        tbody.innerHTML = '<tr id="empty-row"><td colspan="6" class="text-center text-muted py-4">No hay exámenes agregados.</td></tr>';
+        tbody.innerHTML = '<tr id="empty-row"><td colspan="6" class="text-center text-muted py-4">No hay exámenes agregados a la orden.</td></tr>';
         const totalEl = document.getElementById('total-cobrar');
         if (totalEl) totalEl.innerText = '0.00';
         return;
@@ -330,7 +330,7 @@ function eliminarExamen(index) {
     renderExamenes();
 }
 
-// GESTIÓN DE CATÁLOGO
+// CONTROL DE CATÁLOGO Y EDICIÓN DE PARAMETROS
 function renderizarTablaCatalogo(filtro = '') {
     const tbody = document.getElementById('tabla-catalogo-body');
     const countEl = document.getElementById('total-cat-count');
@@ -347,7 +347,7 @@ function renderizarTablaCatalogo(filtro = '') {
     if (countEl) countEl.innerText = filtrados.length;
 
     if (filtrados.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted py-3">No hay exámenes registrados.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted py-3">No existen registros coincidentes.</td></tr>';
         return;
     }
 
@@ -364,7 +364,7 @@ function renderizarTablaCatalogo(filtro = '') {
             <td><small class="text-muted">${ex.muestra || 'Suero'} | <span class="badge bg-info text-dark">${ex.plantilla || 'estandar'}</span></small></td>
             <td>S/ ${ex.precio.toFixed(2)}</td>
             <td class="text-end px-3">
-                <button class="btn btn-sm btn-outline-primary me-1" onclick="seleccionarExamenParaEditar('${ex.codigo}')" title="Editar Examen">
+                <button class="btn btn-sm btn-outline-primary me-1" onclick="seleccionarExamenParaEditar('${ex.codigo}')" title="Editar Configuración">
                     <i class="bi bi-pencil"></i>
                 </button>
                 <button class="btn btn-sm btn-outline-danger" onclick="eliminarExamenCatalogo('${ex.codigo}')" title="Eliminar Examen">
@@ -407,7 +407,7 @@ function cargarDatosEnFormularioCatalogo(ex) {
     }
 
     const tit = document.getElementById('catalogo-form-titulo');
-    if (tit) tit.innerHTML = `<i class="bi bi-pencil-square me-2"></i>Editando: ${ex.nombre}`;
+    if (tit) tit.innerHTML = `<i class="bi bi-pencil-square me-2"></i>Editando: ${ex.codigo} - ${ex.nombre}`;
     
     const btnGuardar = document.getElementById('btn-guardar-cat');
     if (btnGuardar) btnGuardar.innerHTML = '<i class="bi bi-check-circle me-1"></i>Guardar Cambios del Examen';
@@ -421,12 +421,12 @@ function agregarFilaParametro(p = {}) {
     if (avisoVacio) avisoVacio.remove();
 
     const div = document.createElement('div');
-    div.className = 'parametro-card border p-2 mb-2 rounded bg-light';
+    div.className = 'parametro-card border p-2 mb-2 rounded bg-light shadow-sm';
     div.innerHTML = `
         <div class="d-flex justify-content-between align-items-center mb-2">
-            <span class="fw-bold small text-primary"><i class="bi bi-card-list me-1"></i>Parámetro</span>
+            <span class="fw-bold small text-primary"><i class="bi bi-card-list me-1"></i>Parámetro Técnico</span>
             <button type="button" class="btn btn-sm btn-link text-danger p-0 text-decoration-none" onclick="quitarFilaParametro(this)">
-                <i class="bi bi-x-circle-fill"></i> Quitar
+                <i class="bi bi-x-circle-fill"></i> Eliminar
             </button>
         </div>
         <div class="row g-2">
@@ -437,13 +437,13 @@ function agregarFilaParametro(p = {}) {
                 <input type="text" class="form-control form-control-sm param-unidad" placeholder="Unidad (Ej: g/dL)" value="${p.unidad || ''}">
             </div>
             <div class="col-6">
-                <input type="text" class="form-control form-control-sm param-ref-min" placeholder="Ref. Mínimo" value="${p.refMin || ''}">
+                <input type="text" class="form-control form-control-sm param-ref-min" placeholder="Min. Numérico" value="${p.refMin || ''}">
             </div>
             <div class="col-6">
-                <input type="text" class="form-control form-control-sm param-ref-max" placeholder="Ref. Máximo" value="${p.refMax || ''}">
+                <input type="text" class="form-control form-control-sm param-ref-max" placeholder="Max. Numérico" value="${p.refMax || ''}">
             </div>
             <div class="col-12">
-                <input type="text" class="form-control form-control-sm param-ref-texto" placeholder="Texto Ref. (Ej: Adultos: 74 - 106)" value="${p.refTexto || ''}">
+                <input type="text" class="form-control form-control-sm param-ref-texto" placeholder="Referencia Texto / Descripción (Ej: Adultos: 74 - 106)" value="${p.refTexto || ''}">
             </div>
         </div>
     `;
@@ -486,7 +486,7 @@ function prepararNuevoExamen() {
     if (idOrig) idOrig.value = '';
 
     const inputCod = document.getElementById('cat-codigo');
-    if (inputCod) inputCod.value = String(catalogoExamenes.length + 100);
+    if (inputCod) inputCod.value = String(catalogoExamenes.length + 1);
 
     vaciarTodosLosParametros();
 
@@ -494,7 +494,7 @@ function prepararNuevoExamen() {
     if (tit) tit.innerHTML = '<i class="bi bi-plus-circle me-2"></i>Crear Nuevo Examen';
     
     const btnGuardar = document.getElementById('btn-guardar-cat');
-    if (btnGuardar) btnGuardar.innerHTML = '<i class="bi bi-save me-1"></i>Registrar Nuevo Examen';
+    if (btnGuardar) btnGuardar.innerHTML = '<i class="bi bi-save me-1"></i>Registrar Examen';
 }
 
 function guardarExamenCatalogo() {
@@ -516,7 +516,7 @@ function guardarExamenCatalogo() {
     const refTexto = document.getElementById('cat-ref-texto')?.value.trim() || '';
 
     if (!codigo || !nombre || isNaN(precio)) {
-        return alert('Complete el Código, Nombre y Precio del examen.');
+        return alert('Debe proporcionar el Código, Nombre y Precio del examen.');
     }
 
     const filasParam = document.querySelectorAll('#contenedor-parametros .parametro-card');
@@ -549,13 +549,13 @@ function guardarExamenCatalogo() {
         } else {
             catalogoExamenes.unshift(examenObj);
         }
-        alert('Examen actualizado con éxito.');
+        alert('Examen y parámetros actualizados correctamente.');
     } else {
         if (catalogoExamenes.some(e => e.codigo === codigo)) {
             return alert('Ya existe un examen registrado con este código.');
         }
         catalogoExamenes.unshift(examenObj);
-        alert('Nuevo examen registrado.');
+        alert('Nuevo examen agregado al catálogo.');
     }
 
     guardarCatalogoLocal();
@@ -564,7 +564,7 @@ function guardarExamenCatalogo() {
 }
 
 function eliminarExamenCatalogo(codigo) {
-    if (confirm(`¿Desea eliminar del catálogo el examen ${codigo}?`)) {
+    if (confirm(`¿Confirma la eliminación del examen ${codigo}?`)) {
         catalogoExamenes = catalogoExamenes.filter(e => e.codigo !== String(codigo));
         guardarCatalogoLocal();
         renderizarTablaCatalogo();
@@ -585,7 +585,7 @@ function guardarOrdenGenerarTicket() {
     const metodo = document.getElementById('metodo-pago')?.value || 'Efectivo';
 
     if (!dni || !paciente || examenesSeleccionados.length === 0) {
-        return alert('Complete el DNI, Nombre del paciente y agregue al menos un examen.');
+        return alert('Faltan datos obligatorios: DNI, Nombre del paciente y al menos un examen.');
     }
 
     const numOrden = `VH-2026-${String(ordenesLocales.length + 1).padStart(5, '0')}`;
@@ -618,7 +618,6 @@ function guardarOrdenGenerarTicket() {
     renderExamenes();
     const formPac = document.getElementById('form-paciente');
     if (formPac) formPac.reset();
-    alert('Orden procesada e impresa.');
 }
 
 function imprimirTicket58mm(orden) {
@@ -666,11 +665,16 @@ function cargarOrdenes() {
     if (!tbody) return;
     tbody.innerHTML = '';
 
+    if (ordenesLocales.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-4">No hay órdenes registradas aún.</td></tr>';
+        return;
+    }
+
     ordenesLocales.forEach((orden) => {
         const tr = document.createElement('tr');
         tr.innerHTML = `
             <td><strong>${orden.id}</strong></td>
-            <td>${orden.fecha}</td>
+            <td>${orden.fecha} ${orden.hora || ''}</td>
             <td>${orden.dni}</td>
             <td>${orden.paciente}</td>
             <td><span class="badge ${orden.estado === 'COMPLETADO' ? 'bg-success' : 'bg-warning text-dark'}">${orden.estado}</span></td>
@@ -684,7 +688,7 @@ function cargarOrdenes() {
 }
 
 function eliminarOrden(id) {
-    if (confirm(`¿Eliminar la orden ${id}?`)) {
+    if (confirm(`¿Desea eliminar la orden ${id}?`)) {
         ordenesLocales = ordenesLocales.filter(o => o.id !== id);
         guardarEnNubeYLocal();
         cargarOrdenes();
@@ -730,7 +734,7 @@ function abrirResultados(ordenId) {
                 `;
             });
         } else {
-            filasParamsHTML = `<p class="text-muted small mb-0">Examen sin parámetros editables.</p>`;
+            filasParamsHTML = `<p class="text-muted small mb-0">Sin parámetros configurados. Puede agregar parámetros ingresando a la sección "Catálogo / Plantillas".</p>`;
         }
 
         camposHTML += `
@@ -756,7 +760,7 @@ function abrirResultados(ordenId) {
         ${camposHTML}
         <div class="d-flex flex-wrap gap-2 mt-4">
             <button class="btn btn-success fw-semibold" onclick="guardarResultados()"><i class="bi bi-floppy me-1"></i> Guardar Resultados</button>
-            <button class="btn btn-primary fw-semibold" onclick="visualizarEImprimirResultados()"><i class="bi bi-printer me-1"></i> Visualizar e Imprimir Resultados</button>
+            <button class="btn btn-primary fw-semibold" onclick="visualizarEImprimirResultados()"><i class="bi bi-printer me-1"></i> Visualizar e Imprimir Reporte A4</button>
         </div>
     `;
 }
@@ -780,7 +784,7 @@ function guardarResultados() {
     ordenActualVisualizando.estado = 'COMPLETADO';
     guardarEnNubeYLocal();
     cargarOrdenes();
-    alert('Resultados guardados correctamente.');
+    alert('Resultados almacenados con éxito.');
 }
 
 function generarTablaEspecializada(ex, catEx, orden) {
@@ -788,7 +792,7 @@ function generarTablaEspecializada(ex, catEx, orden) {
     const tipoPlantilla = catEx.plantilla || 'estandar';
 
     if (params.length === 0) {
-        return `<p style="text-align:center; font-size:12px; color:#64748b; font-style:italic;">Examen sin parámetros definidos.</p>`;
+        return `<p style="text-align:center; font-size:12px; color:#64748b; font-style:italic;">Examen sin parámetros descriptivos.</p>`;
     }
 
     if (tipoPlantilla === 'hemograma') {
@@ -823,7 +827,7 @@ function generarTablaEspecializada(ex, catEx, orden) {
             <table style="width:100%; border-collapse:collapse; font-size:11px; margin-top:5px;">
                 <thead>
                     <tr style="background-color: #cbd5e1; color: #0f172a; font-weight:bold;">
-                        <th style="padding: 6px; text-align:left;">SERIE / PARÁMETRO</th>
+                        <th style="padding: 6px; text-align:left;">PARÁMETRO</th>
                         <th style="padding: 6px; text-align:right;">RESULTADO</th>
                         <th style="padding: 6px; text-align:center;">UNIDAD</th>
                         <th style="padding: 6px; text-align:center;">MÍNIMO</th>
@@ -839,73 +843,6 @@ function generarTablaEspecializada(ex, catEx, orden) {
                 </tbody>
             </table>
             <div style="font-size:10px; font-style:italic; text-align:right; margin-top:4px; color:#475569;">Método: ${catEx.metodo || 'Citometría de flujo / Impedancia'}</div>
-        `;
-    }
-
-    if (tipoPlantilla === 'bioquimica') {
-        let filasHTML = '';
-        params.forEach((p, idx) => {
-            const resKey = `${ex.codigo}_${idx}`;
-            const resData = (orden.resultados && orden.resultados[resKey]) ? orden.resultados[resKey] : {};
-            const refVal = p.refTexto ? p.refTexto : `${p.refMin || '-'} - ${p.refMax || '-'}`;
-
-            filasHTML += `
-                <tr>
-                    <td style="padding: 8px; border: 1px solid #cbd5e1; font-weight:bold; text-align:left;">${p.nombre}</td>
-                    <td style="padding: 8px; border: 1px solid #cbd5e1; font-weight:bold; text-align:center; font-size:13px;">${resData.resultado || '-'}</td>
-                    <td style="padding: 8px; border: 1px solid #cbd5e1; text-align:center;">${p.unidad || ''}</td>
-                    <td style="padding: 8px; border: 1px solid #cbd5e1; text-align:left; font-size:10px;">${refVal}</td>
-                    <td style="padding: 8px; border: 1px solid #cbd5e1; text-align:center; font-style:italic; font-size:10px;">${catEx.metodo || 'Colorimétrico'}</td>
-                </tr>
-            `;
-        });
-
-        return `
-            <div style="font-size:11px; font-weight:bold; margin-bottom:4px;">Muestra: ${catEx.muestra || 'Suero'}</div>
-            <table style="width:100%; border-collapse:collapse; font-size:11px;">
-                <thead>
-                    <tr style="background-color: #bae6fd; color: #0369a1;">
-                        <th style="padding: 6px; border: 1px solid #7dd3fc; text-align:left;">Bioquímica</th>
-                        <th style="padding: 6px; border: 1px solid #7dd3fc; text-align:center;">Resultado</th>
-                        <th style="padding: 6px; border: 1px solid #7dd3fc; text-align:center;">Unidad</th>
-                        <th style="padding: 6px; border: 1px solid #7dd3fc; text-align:left;">Valor Referencial</th>
-                        <th style="padding: 6px; border: 1px solid #7dd3fc; text-align:center;">Método</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${filasHTML}
-                </tbody>
-            </table>
-        `;
-    }
-
-    if (tipoPlantilla === 'hba1c') {
-        const resKey = `${ex.codigo}_0`;
-        const resData = (orden.resultados && orden.resultados[resKey]) ? orden.resultados[resKey] : {};
-
-        return `
-            <table style="width:100%; border-collapse:collapse; font-size:11px; margin-top:5px;">
-                <thead>
-                    <tr style="background-color: #bae6fd; color: #0369a1; text-align:center;">
-                        <th style="padding: 6px; border: 1px solid #7dd3fc;">MUESTRA</th>
-                        <th style="padding: 6px; border: 1px solid #7dd3fc;">RESULTADO</th>
-                        <th style="padding: 6px; border: 1px solid #7dd3fc;">UNIDAD</th>
-                        <th style="padding: 6px; border: 1px solid #7dd3fc;">VALOR REFERENCIAL</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td style="padding: 10px; border: 1px solid #cbd5e1; font-weight:bold; text-align:center;">${catEx.muestra || 'SANGRE'}</td>
-                        <td style="padding: 10px; border: 1px solid #cbd5e1; font-weight:bold; text-align:center; font-size:14px;">${resData.resultado || '-'}</td>
-                        <td style="padding: 10px; border: 1px solid #cbd5e1; text-align:center;">%</td>
-                        <td style="padding: 10px; border: 1px solid #cbd5e1; text-align:left; font-size:11px; line-height:1.4;">
-                            Normal: Menos del 5.7%<br>
-                            Prediabetes: 5.7% - 6.4%<br>
-                            Diabetes: 6.5% a más
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
         `;
     }
 
@@ -958,7 +895,7 @@ function visualizarEImprimirResultados() {
 
         bloquesExamenesHTML += `
             <div style="margin-top:20px; page-break-inside: avoid;">
-                <h3 style="text-align:center; font-size:16px; font-weight:bold; margin-bottom:8px; font-family:'Segoe UI', sans-serif; color: #0072bc; text-transform: uppercase;">
+                <h3 style="text-align:center; font-size:15px; font-weight:bold; margin-bottom:8px; font-family:'Segoe UI', sans-serif; color: #0072bc; text-transform: uppercase;">
                     ${ex.nombre}
                 </h3>
                 ${contenidoExamen}
@@ -971,20 +908,20 @@ function visualizarEImprimirResultados() {
         <!DOCTYPE html>
         <html>
         <head>
-            <title>Resultado - ${ordenActualVisualizando.paciente}</title>
+            <title>Informe de Laboratorio - ${ordenActualVisualizando.paciente}</title>
             <style>
                 @page { size: A4; margin: 15mm; }
                 body { font-family: 'Segoe UI', Arial, sans-serif; color: #1e293b; margin: 0; padding: 0; }
                 .header { display: flex; align-items: center; justify-content: space-between; border-bottom: 2px solid #0072bc; padding-bottom: 10px; }
                 .logo-section { display: flex; align-items: center; gap: 15px; }
-                .logo-img { height: 75px; }
-                .header-title h2 { margin: 0; color: #0072bc; font-size: 20px; font-weight: bold; }
-                .header-title p { margin: 2px 0; font-size: 12px; color: #475569; }
+                .logo-img { height: 70px; }
+                .header-title h2 { margin: 0; color: #0072bc; font-size: 19px; font-weight: bold; }
+                .header-title p { margin: 2px 0; font-size: 11px; color: #475569; }
                 .header-info { font-size: 11px; color: #475569; text-align: right; }
                 
                 .patient-box {
                     border: 1.5px solid #3b82f6;
-                    border-radius: 12px;
+                    border-radius: 10px;
                     padding: 12px 18px;
                     margin-top: 15px;
                     display: grid;
@@ -996,7 +933,7 @@ function visualizarEImprimirResultados() {
                 }
 
                 .footer-firma {
-                    margin-top: 50px;
+                    margin-top: 60px;
                     text-align: right;
                     padding-right: 40px;
                 }
@@ -1019,7 +956,7 @@ function visualizarEImprimirResultados() {
                     display: flex;
                     justify-content: space-between;
                     align-items: center;
-                    font-size: 11px;
+                    font-size: 10px;
                     font-weight: bold;
                     color: #0072bc;
                 }
