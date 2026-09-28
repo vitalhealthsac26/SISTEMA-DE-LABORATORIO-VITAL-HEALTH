@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
-
-// 1. DICCIONARIO DE VALORES Y PARÁMETROS REFERENCIALES COMPUESTOS
+// ==========================================
+// DICCIONARIOS Y BASE DE DATOS INICIAL
+// ==========================================
 const BASE_VALORES_REFERENCIALES = {
   "HEMOGRAMA": [
     { id: 'leucocitos', nombre: 'Leucocitos', unidad: 'Cél/uL', refMin: 4500, refMax: 11000, referencia: '4,500 - 11,000 /uL' },
@@ -26,8 +26,7 @@ const BASE_VALORES_REFERENCIALES = {
   ]
 };
 
-// 2. CATÁLOGO COMPLETO DE EXÁMENES INCORPORADO DE TU APP.JS 1
-const examenesCatalogo = [
+let examenesCatalogo = [
   { codigo: "5", nombre: "11 - DESOXICORTISOL (COMPUESTOS)", unidad: "ng/dL", refMin: 10, refMax: 138, referencia: "< 138 ng/dL" },
   { codigo: "6", nombre: "17 - HIDROXICORTICOIDES (ORINA 24H)", unidad: "mg/24h", refMin: 3.0, refMax: 12.0, referencia: "3.0 - 12.0 mg/24h" },
   { codigo: "7", nombre: "17 KETOESTEROIDES (ORINA 24 HRS.)", unidad: "mg/24h", refMin: 6.0, refMax: 20.0, referencia: "6.0 - 20.0 mg/24h" },
@@ -712,13 +711,365 @@ const examenesCatalogo = [
   { codigo: "729", nombre: "LEGIONELLA PNEUMOPHILA IGM", unidad: "", refMin: "", refMax: "", referencia: "NEGATIVO" }
 ];
 
-// Helper para normalizar los sub-parámetros de un examen
+// ESTADO GLOBAL DE LA APLICACIÓN
+let examenesSeleccionados = [];
+let ordenesGlobales = [];
+let ordenSeleccionadaResultados = null;
+let resultadosTemporales = {};
+
+// ==========================================
+// INICIALIZACIÓN
+// ==========================================
+document.addEventListener('DOMContentLoaded', () => {
+  // Establecer fecha actual en la cabecera
+  const elFecha = document.getElementById('current-date');
+  if (elFecha) {
+    const hoy = new Date();
+    elFecha.textContent = hoy.toLocaleDateString('es-PE', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+  }
+
+  // Cargar órdenes guardadas en LocalStorage
+  const ordenesGuardadas = localStorage.getItem('vitalhealth_ordenes');
+  if (ordenesGuardadas) {
+    try {
+      ordenesGlobales = JSON.parse(ordenesGuardadas);
+    } catch (e) {
+      console.error("Error al cargar ordenes guardadas", e);
+    }
+  }
+
+  // Cargar catálogo guardado en LocalStorage si existe
+  const catGuardado = localStorage.getItem('vitalhealth_catalogo');
+  if (catGuardado) {
+    try {
+      examenesCatalogo = JSON.parse(catGuardado);
+    } catch (e) {
+      console.error("Error al cargar catálogo guardado", e);
+    }
+  }
+
+  renderizarTablaCatalogo('');
+  actualizarCaja();
+});
+
+// ==========================================
+// NAVEGACIÓN Y SIDEBAR
+// ==========================================
+function toggleSidebar() {
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('sidebar-overlay');
+  if (sidebar) sidebar.classList.toggle('active');
+  if (overlay) overlay.classList.toggle('active');
+}
+
+function showSection(sectionId) {
+  const secciones = document.querySelectorAll('.section-content');
+  secciones.forEach(sec => sec.classList.add('d-none'));
+
+  const secObjetivo = document.getElementById(`sec-${sectionId}`);
+  if (secObjetivo) {
+    secObjetivo.classList.remove('d-none');
+  }
+
+  // Actualizar clase activa en menú lateral
+  const navLinks = document.querySelectorAll('.sidebar .nav-link');
+  navLinks.forEach(link => link.classList.remove('active'));
+  
+  const linkActivo = Array.from(navLinks).find(l => l.getAttribute('onclick')?.includes(`'${sectionId}'`));
+  if (linkActivo) linkActivo.classList.add('active');
+
+  // Ejecutar acciones de carga por sección
+  if (sectionId === 'ordenes') {
+    cargarOrdenes();
+  } else if (sectionId === 'caja') {
+    actualizarCaja();
+  } else if (sectionId === 'catalogo') {
+    renderizarTablaCatalogo('');
+  }
+
+  // Cerrar sidebar en dispositivos móviles
+  if (window.innerWidth < 992) {
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('sidebar-overlay');
+    if (sidebar) sidebar.classList.remove('active');
+    if (overlay) overlay.classList.remove('active');
+  }
+}
+
+// ==========================================
+// RECEPCIÓN / ADMISIÓN
+// ==========================================
+function buscarPaciente() {
+  const dni = document.getElementById('pac-dni').value.trim();
+  if (!dni) {
+    alert("Por favor ingrese un número de DNI / Documento.");
+    return;
+  }
+
+  // Buscar en historial local
+  const ordenPrev = ordenesGlobales.find(o => o.paciente && o.paciente.dni === dni);
+  if (ordenPrev) {
+    document.getElementById('pac-nombre').value = ordenPrev.paciente.nombre || '';
+    document.getElementById('pac-doctor').value = ordenPrev.paciente.doctor || 'Particular';
+    document.getElementById('pac-edad').value = ordenPrev.paciente.edad || '';
+    if (ordenPrev.paciente.sexo) {
+      document.getElementById('pac-sexo').value = ordenPrev.paciente.sexo;
+    }
+  } else {
+    alert("Paciente no encontrado en el registro previo local. Complete los datos manualmente.");
+  }
+}
+
+function calcularEdad() {
+  const fnac = document.getElementById('pac-fnac').value;
+  if (!fnac) return;
+
+  const hoy = new Date();
+  const nac = new Date(fnac);
+  let edad = hoy.getFullYear() - nac.getFullYear();
+  const m = hoy.getMonth() - nac.getMonth();
+  
+  if (m < 0 || (m === 0 && hoy.getDate() < nac.getDate())) {
+    edad--;
+  }
+
+  document.getElementById('pac-edad').value = `${edad > 0 ? edad : 0} AÑOS`;
+}
+
+function filtrarExamenes(query) {
+  const contenedor = document.getElementById('sugerencias-examenes');
+  if (!contenedor) return;
+
+  if (!query || query.trim().length === 0) {
+    contenedor.innerHTML = '';
+    return;
+  }
+
+  const q = query.toLowerCase();
+  const resultados = examenesCatalogo.filter(e => 
+    e.nombre.toLowerCase().includes(q) || e.codigo.toLowerCase().includes(q)
+  );
+
+  if (resultados.length === 0) {
+    contenedor.innerHTML = '<div class="list-group-item disabled">No se encontraron exámenes</div>';
+    return;
+  }
+
+  let html = '';
+  resultados.slice(0, 8).forEach(e => {
+    html += `
+      <button type="button" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center" onclick="seleccionarExamen('${e.codigo}')">
+        <div>
+          <strong>[${e.codigo}]</strong> ${e.nombre}
+        </div>
+        <span class="badge bg-primary rounded-pill">S/ ${parseFloat(e.precio || 25).toFixed(2)}</span>
+      </button>
+    `;
+  });
+
+  contenedor.innerHTML = html;
+}
+
+function seleccionarExamen(codigo) {
+  const item = examenesCatalogo.find(e => e.codigo === codigo);
+  if (!item) return;
+
+  if (!examenesSeleccionados.some(e => e.codigo === item.codigo)) {
+    examenesSeleccionados.push({
+      ...item,
+      precio: parseFloat(item.precio || 25.0)
+    });
+    actualizarTablaSeleccionados();
+  }
+
+  document.getElementById('busqueda-examen').value = '';
+  document.getElementById('sugerencias-examenes').innerHTML = '';
+}
+
+function eliminarExamenSeleccionado(codigo) {
+  examenesSeleccionados = examenesSeleccionados.filter(e => e.codigo !== codigo);
+  actualizarTablaSeleccionados();
+}
+
+function actualizarTablaSeleccionados() {
+  const tbody = document.querySelector('#tabla-examenes-seleccionados tbody');
+  const totalEl = document.getElementById('total-cobrar');
+  if (!tbody) return;
+
+  if (examenesSeleccionados.length === 0) {
+    tbody.innerHTML = `
+      <tr id="empty-row">
+        <td colspan="6" class="text-center text-muted py-4">No hay exámenes agregados.</td>
+      </tr>
+    `;
+    if (totalEl) totalEl.textContent = '0.00';
+    return;
+  }
+
+  let html = '';
+  let total = 0;
+
+  examenesSeleccionados.forEach(item => {
+    const precio = item.precio || 25.0;
+    total += precio;
+    html += `
+      <tr>
+        <td><strong>${item.codigo}</strong></td>
+        <td>${item.nombre}</td>
+        <td>1</td>
+        <td>S/ ${precio.toFixed(2)}</td>
+        <td>S/ ${precio.toFixed(2)}</td>
+        <td class="text-center">
+          <button class="btn btn-sm btn-outline-danger" onclick="eliminarExamenSeleccionado('${item.codigo}')">
+            <i class="bi bi-trash"></i>
+          </button>
+        </td>
+      </tr>
+    `;
+  });
+
+  tbody.innerHTML = html;
+  if (totalEl) totalEl.textContent = total.toFixed(2);
+}
+
+function guardarOrdenGenerarTicket() {
+  const dni = document.getElementById('pac-dni').value.trim();
+  const nombre = document.getElementById('pac-nombre').value.trim();
+  const doctor = document.getElementById('pac-doctor').value.trim() || 'Particular';
+  const edad = document.getElementById('pac-edad').value.trim() || 'N/R';
+  const sexo = document.getElementById('pac-sexo').value;
+  const metodoPago = document.getElementById('metodo-pago').value;
+
+  if (!dni || !nombre || examenesSeleccionados.length === 0) {
+    alert("Por favor complete los datos obligatorios del paciente (DNI, Nombre) y agregue al menos un examen.");
+    return;
+  }
+
+  const total = examenesSeleccionados.reduce((acc, curr) => acc + (curr.precio || 25.0), 0);
+  const ahora = new Date();
+  
+  const nuevaOrden = {
+    id: `VH-2026-${String(ordenesGlobales.length + 1).padStart(5, '0')}`,
+    fecha: ahora.toLocaleDateString('es-PE'),
+    hora: ahora.toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' }),
+    paciente: { dni, nombre, doctor, edad, sexo },
+    examenes: [...examenesSeleccionados],
+    total,
+    metodoPago,
+    estado: 'PENDIENTE',
+    resultados: {}
+  };
+
+  ordenesGlobales.unshift(nuevaOrden);
+  localStorage.setItem('vitalhealth_ordenes', JSON.stringify(ordenesGlobales));
+
+  imprimirTicket58mm(nuevaOrden);
+
+  // Limpiar formulario de recepción
+  document.getElementById('form-paciente').reset();
+  examenesSeleccionados = [];
+  actualizarTablaSeleccionados();
+  alert(`Orden ${nuevaOrden.id} registrada con éxito.`);
+}
+
+function imprimirTicket58mm(orden) {
+  const areaPrint = document.getElementById('ticket-print-area');
+  if (!areaPrint) return;
+
+  let filasExamenes = orden.examenes.map(e => `
+    <tr>
+      <td colspan="2" style="padding-top:4px;">${e.nombre}</td>
+    </tr>
+    <tr>
+      <td>1 x S/ ${(e.precio || 25.0).toFixed(2)}</td>
+      <td style="text-align:right;">S/ ${(e.precio || 25.0).toFixed(2)}</td>
+    </tr>
+  `).join('');
+
+  areaPrint.innerHTML = `
+    <div style="font-family: monospace; width: 220px; font-size: 11px; padding: 5px;">
+      <div style="text-align: center; font-weight: bold;">
+        CENTRO MÉDICO VITAL HEALTH<br/>
+        LABORATORIO CLÍNICO<br/>
+        <small>Av. Grau N° 1799 - Veintiséis de Octubre</small><br/>
+        <small>Tel: 984 089 927</small>
+      </div>
+      <div style="border-top: 1px dashed #000; margin: 5px 0;"></div>
+      <div><strong>ORDEN:</strong> ${orden.id}</div>
+      <div><strong>FECHA:</strong> ${orden.fecha} ${orden.hora}</div>
+      <div><strong>DNI:</strong> ${orden.paciente.dni}</div>
+      <div><strong>PACIENTE:</strong> ${orden.paciente.nombre}</div>
+      <div><strong>MEDICO:</strong> ${orden.paciente.doctor}</div>
+      <div><strong>FORMA PAGO:</strong> ${orden.metodoPago}</div>
+      <div style="border-top: 1px dashed #000; margin: 5px 0;"></div>
+      <table style="width:100%; border-collapse:collapse;">
+        <tbody>${filasExamenes}</tbody>
+      </table>
+      <div style="border-top: 1px dashed #000; margin: 5px 0;"></div>
+      <div style="text-align:right; font-size: 13px;"><strong>TOTAL: S/ ${orden.total.toFixed(2)}</strong></div>
+      <div style="border-top: 1px dashed #000; margin: 5px 0;"></div>
+      <div style="text-align:center; margin-top:8px;">
+        *** ¡Gracias por su confianza! ***
+      </div>
+    </div>
+  `;
+
+  window.print();
+}
+
+// ==========================================
+// SECCIÓN ÓRDENES DE TRABAJO
+// ==========================================
+function cargarOrdenes() {
+  const tbody = document.getElementById('lista-ordenes-body');
+  if (!tbody) return;
+
+  if (ordenesGlobales.length === 0) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="6" class="text-center text-muted py-4">No se han registrado órdenes aún.</td>
+      </tr>
+    `;
+    return;
+  }
+
+  let html = '';
+  ordenesGlobales.forEach(o => {
+    const badgeColor = o.estado === 'COMPLETADO' ? 'bg-success' : 'bg-warning text-dark';
+    html += `
+      <tr>
+        <td><strong>${o.id}</strong></td>
+        <td>${o.fecha} <small class="text-muted">${o.hora}</small></td>
+        <td>${o.paciente.dni}</td>
+        <td>${o.paciente.nombre}</td>
+        <td><span class="badge ${badgeColor}">${o.estado}</span></td>
+        <td class="text-end px-3">
+          <button class="btn btn-sm btn-primary" onclick="abrirResultadosParaOrden('${o.id}')">
+            <i class="bi bi-pencil-square me-1"></i> Resultados
+          </button>
+        </td>
+      </tr>
+    `;
+  });
+
+  tbody.innerHTML = html;
+}
+
+// ==========================================
+// REGISTRO Y GESTIÓN DE RESULTADOS
+// ==========================================
 function obtenerIndicadoresExamen(examen) {
   if (!examen) return [];
   const nombreNorm = (examen.nombre || '').toUpperCase().trim();
   if (BASE_VALORES_REFERENCIALES[nombreNorm]) {
     return BASE_VALORES_REFERENCIALES[nombreNorm];
   }
+
+  // Si tiene indicadores definidos en plantilla
+  if (examen.indicadores && Array.isArray(examen.indicadores) && examen.indicadores.length > 0) {
+    return examen.indicadores;
+  }
+
   return [{
     id: `ind_${examen.codigo}`,
     nombre: examen.nombre,
@@ -729,605 +1080,414 @@ function obtenerIndicadoresExamen(examen) {
   }];
 }
 
-export default function App() {
-  const [seccionActiva, setSeccionActiva] = useState('ordenes');
-  const [busqueda, setBusqueda] = useState('');
-  
-  // Estado para el registro de Pacientes y Órdenes
-  const [paciente, setPaciente] = useState({ dni: '', nombre: '', edad: '', sexo: 'MASCULINO', doctor: 'Particular' });
-  const [metodoPago, setMetodoPago] = useState('Efectivo');
-  const [examenesSeleccionados, setExamenesSeleccionados] = useState([]);
-  const [ordenes, setOrdenes] = useState([]);
-  
-  // Estado para la gestión e impresión de resultados
-  const [ordenActual, setOrdenActual] = useState(null);
-  const [resultadosInput, setResultadosInput] = useState({});
+function abrirResultadosParaOrden(ordenId) {
+  const orden = ordenesGlobales.find(o => o.id === ordenId);
+  if (!orden) return;
 
-  // Cargar datos locales al iniciar la aplicación
-  useEffect(() => {
-    const ordenesGuardadas = localStorage.getItem('vitalhealth_ordenes');
-    if (ordenesGuardadas) {
-      try {
-        setOrdenes(JSON.parse(ordenesGuardadas));
-      } catch (e) {
-        console.error("Error al cargar ordenes locales", e);
-      }
-    }
-  }, []);
+  ordenSeleccionadaResultados = orden;
+  resultadosTemporales = { ...(orden.resultados || {}) };
 
-  const guardarOrdenesEnStorage = (nuevasOrdenes) => {
-    setOrdenes(nuevasOrdenes);
-    localStorage.setItem('vitalhealth_ordenes', JSON.stringify(nuevasOrdenes));
-  };
+  showSection('resultados');
+  renderizarEditorResultados();
+}
 
-  // Filtrado dinámico de exámenes
-  const examenesFiltrados = examenesCatalogo.filter((e) =>
-    e.nombre.toLowerCase().includes(busqueda.toLowerCase()) ||
-    e.codigo.includes(busqueda)
-  );
+function renderizarEditorResultados() {
+  const editor = document.getElementById('resultados-editor');
+  if (!editor || !ordenSeleccionadaResultados) return;
 
-  const agregarExamenAOrden = (item) => {
-    if (!examenesSeleccionados.some(e => e.codigo === item.codigo)) {
-      setExamenesSeleccionados([...examenesSeleccionados, { ...item, precio: parseFloat(item.precio || 25.0) }]);
-    }
-  };
+  const ord = ordenSeleccionadaResultados;
+  let bloquesHTML = '';
 
-  const eliminarExamenDeOrden = (codigo) => {
-    setExamenesSeleccionados(examenesSeleccionados.filter(e => e.codigo !== codigo));
-  };
+  ord.examenes.forEach(ex => {
+    const indicadores = obtenerIndicadoresExamen(ex);
+    let camposHTML = '';
 
-  const totalCobrar = examenesSeleccionados.reduce((acc, curr) => acc + (curr.precio || 25.0), 0);
-
-  // Registro de nueva Orden
-  const registrarOrden = () => {
-    if (!paciente.dni || !paciente.nombre || examenesSeleccionados.length === 0) {
-      alert("Por favor complete los datos obligatorios: DNI, Nombre y al menos un examen.");
-      return;
-    }
-
-    const ahora = new Date();
-    const nuevaOrden = {
-      id: `VH-2026-${String(ordenes.length + 1).padStart(5, '0')}`,
-      fecha: ahora.toLocaleDateString('es-PE'),
-      hora: ahora.toLocaleTimeString('es-PE'),
-      paciente: { ...paciente },
-      examenes: [...examenesSeleccionados],
-      total: totalCobrar,
-      metodoPago: metodoPago,
-      estado: 'PENDIENTE',
-      resultados: {}
-    };
-
-    const actualizadas = [nuevaOrden, ...ordenes];
-    guardarOrdenesEnStorage(actualizadas);
-    imprimirTicket58mm(nuevaOrden);
-
-    // Resetear formulario
-    setPaciente({ dni: '', nombre: '', edad: '', sexo: 'MASCULINO', doctor: 'Particular' });
-    setExamenesSeleccionados([]);
-  };
-
-  // Evaluación de rangos clínicos (Normal / Alto / Bajo)
-  const evaluarRangoClinico = (valStr, minVal, maxVal) => {
-    const val = parseFloat(valStr);
-    const min = parseFloat(minVal);
-    const max = parseFloat(maxVal);
-    if (isNaN(val)) return 'normal';
-    if (!isNaN(min) && val < min) return 'bajo';
-    if (!isNaN(max) && val > max) return 'alto';
-    return 'normal';
-  };
-
-  // Cargar pantalla de resultados para una orden
-  const abrirCargaResultados = (orden) => {
-    setOrdenActual(orden);
-    setResultadosInput(orden.resultados || {});
-    setSeccionActiva('resultados');
-  };
-
-  const guardarResultados = () => {
-    if (!ordenActual) return;
-    const ordenesActualizadas = ordenes.map(o => {
-      if (o.id === ordenActual.id) {
-        return {
-          ...o,
-          resultados: { ...resultadosInput },
-          estado: 'COMPLETADO'
-        };
-      }
-      return o;
+    indicadores.forEach(ind => {
+      const valActual = resultadosTemporales[ind.id] || '';
+      camposHTML += `
+        <div class="row align-items-center mb-2 g-2">
+          <div class="col-12 col-md-4">
+            <label class="form-label mb-0 fw-semibold small">${ind.nombre}</label>
+          </div>
+          <div class="col-12 col-md-4">
+            <input type="text" class="form-control form-control-sm" 
+                   value="${valActual}" 
+                   placeholder="Ingresar resultado"
+                   onchange="actualizarValorResultado('${ind.id}', this.value)">
+          </div>
+          <div class="col-12 col-md-4">
+            <small class="text-muted">${ind.unidad || ''} ${ind.referencia ? `(${ind.referencia})` : ''}</small>
+          </div>
+        </div>
+      `;
     });
 
-    guardarOrdenesEnStorage(ordenesActualizadas);
-    alert('Resultados almacenados exitosamente.');
-  };
-
-  // Impresión de Ticket de 58mm
-  const imprimirTicket58mm = (orden) => {
-    const ventanaImp = window.open('', '_blank');
-    if (!ventanaImp) return;
-
-    let itemsHTML = orden.examenes.map(e => `
-      <tr>
-        <td colspan="2">${e.nombre}</td>
-      </tr>
-      <tr>
-        <td>1 x S/ ${(e.precio || 25.0).toFixed(2)}</td>
-        <td style="text-align:right;">S/ ${(e.precio || 25.0).toFixed(2)}</td>
-      </tr>
-    `).join('');
-
-    ventanaImp.document.write(`
-      <html>
-      <head>
-        <style>
-          body { font-family: monospace; width: 200px; font-size: 11px; margin: 0; padding: 5px; }
-          .header { text-align: center; font-weight: bold; margin-bottom: 5px; }
-          .divider { border-top: 1px dashed #000; margin: 5px 0; }
-          table { width: 100%; border-collapse: collapse; }
-        </style>
-      </head>
-      <body>
-        <div class="header">
-          CENTRO MÉDICO VITAL HEALTH<br/>
-          LABORATORIO CLÍNICO<br/>
-          Tel: 984 089 927
+    bloquesHTML += `
+      <div class="card mb-3 border border-light-subtle shadow-sm">
+        <div class="card-header bg-light fw-bold text-primary">
+          <i class="bi bi-file-text me-2"></i>${ex.nombre}
         </div>
-        <div class="divider"></div>
-        <div>ORDEN: ${orden.id}</div>
-        <div>FECHA: ${orden.fecha} ${orden.hora}</div>
-        <div>DNI: ${orden.paciente.dni}</div>
-        <div>PACIENTE: ${orden.paciente.nombre}</div>
-        <div class="divider"></div>
-        <table><tbody>${itemsHTML}</tbody></table>
-        <div class="divider"></div>
-        <div style="text-align:right;"><strong>TOTAL: S/ ${orden.total.toFixed(2)}</strong></div>
-        <script>window.onload = function() { window.print(); window.close(); }</script>
-      </body>
-      </html>
-    `);
-    ventanaImp.document.close();
-  };
+        <div class="card-body">
+          ${camposHTML}
+        </div>
+      </div>
+    `;
+  });
 
-  // Impresión de Reporte Clínico en Formato A4
-  const imprimirReporteA4 = () => {
-    if (!ordenActual) return;
-    guardarResultados();
+  editor.innerHTML = `
+    <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom flex-wrap gap-2">
+      <div>
+        <h5 class="fw-bold mb-0 text-dark">Paciente: ${ord.paciente.nombre}</h5>
+        <small class="text-muted">Orden: <strong>${ord.id}</strong> | DNI: ${ord.paciente.dni} | Médico: ${ord.paciente.doctor}</small>
+      </div>
+      <div class="d-flex gap-2">
+        <button class="btn btn-success" onclick="guardarResultadosOrden()">
+          <i class="bi bi-save me-1"></i>Guardar Resultados
+        </button>
+        <button class="btn btn-primary" onclick="imprimirReporteA4()">
+          <i class="bi bi-printer me-1"></i>Visualizar e Imprimir Reporte A4
+        </button>
+      </div>
+    </div>
+    ${bloquesHTML}
+  `;
+}
 
-    const ventanaImp = window.open('', '_blank');
-    if (!ventanaImp) return;
+function actualizarValorResultado(indicadorId, valor) {
+  resultadosTemporales[indicadorId] = valor;
+}
 
-    let bloques = ordenActual.examenes.map(ex => {
-      const indicadores = obtenerIndicadoresExamen(ex);
-      let filas = indicadores.map(ind => {
-        const valRes = resultadosInput[ind.id] || '-';
-        const estado = evaluarRangoClinico(valRes, ind.refMin, ind.refMax);
-        
-        let celdaRes = valRes;
-        if (estado === 'alto' || estado === 'bajo') {
-          celdaRes = `<span style="color:red; font-weight:bold;">${valRes} * (${estado.toUpperCase()})</span>`;
-        }
+function guardarResultadosOrden() {
+  if (!ordenSeleccionadaResultados) return;
 
-        return `
-          <tr>
-            <td style="padding:6px; border:1px solid #ccc;">${ind.nombre}</td>
-            <td style="padding:6px; border:1px solid #ccc; text-align:center; font-weight:bold;">${celdaRes}</td>
-            <td style="padding:6px; border:1px solid #ccc; text-align:center;">${ind.unidad || '-'}</td>
-            <td style="padding:6px; border:1px solid #ccc; text-align:center;">${ind.referencia || `${ind.refMin} - ${ind.refMax}`}</td>
-          </tr>
-        `;
-      }).join('');
+  const index = ordenesGlobales.findIndex(o => o.id === ordenSeleccionadaResultados.id);
+  if (index !== -1) {
+    ordenesGlobales[index].resultados = { ...resultadosTemporales };
+    ordenesGlobales[index].estado = 'COMPLETADO';
+    ordenSeleccionadaResultados = ordenesGlobales[index];
+
+    localStorage.setItem('vitalhealth_ordenes', JSON.stringify(ordenesGlobales));
+    alert('Resultados guardados exitosamente.');
+  }
+}
+
+function evaluarRangoClinico(valStr, minVal, maxVal) {
+  const val = parseFloat(valStr);
+  const min = parseFloat(minVal);
+  const max = parseFloat(maxVal);
+
+  if (isNaN(val)) return 'normal';
+  if (!isNaN(min) && val < min) return 'bajo';
+  if (!isNaN(max) && val > max) return 'alto';
+  return 'normal';
+}
+
+function imprimirReporteA4() {
+  if (!ordenSeleccionadaResultados) return;
+  guardarResultadosOrden();
+
+  const ord = ordenSeleccionadaResultados;
+  const ventanaImp = window.open('', '_blank');
+  if (!ventanaImp) return;
+
+  let bloquesHTML = ord.examenes.map(ex => {
+    const indicadores = obtenerIndicadoresExamen(ex);
+    let filas = indicadores.map(ind => {
+      const valRes = ord.resultados[ind.id] || '-';
+      const estado = evaluarRangoClinico(valRes, ind.refMin, ind.refMax);
+
+      let celdaRes = valRes;
+      if (estado === 'alto' || estado === 'bajo') {
+        celdaRes = `<span style="color:red; font-weight:bold;">${valRes} * (${estado.toUpperCase()})</span>`;
+      }
 
       return `
-        <div style="margin-top:15px;">
-          <h3 style="color:#0072bc; border-bottom:1px solid #0072bc; margin-bottom:5px;">${ex.nombre}</h3>
-          <table style="width:100%; border-collapse:collapse; font-size:12px;">
-            <thead>
-              <tr style="background:#f0f4f8;">
-                <th style="padding:6px; border:1px solid #ccc; text-align:left;">PARAMETRO</th>
-                <th style="padding:6px; border:1px solid #ccc;">RESULTADO</th>
-                <th style="padding:6px; border:1px solid #ccc;">UNIDAD</th>
-                <th style="padding:6px; border:1px solid #ccc;">VALOR REFERENCIAL</th>
-              </tr>
-            </thead>
-            <tbody>${filas}</tbody>
-          </table>
-        </div>
+        <tr>
+          <td style="padding:6px; border:1px solid #ccc;">${ind.nombre}</td>
+          <td style="padding:6px; border:1px solid #ccc; text-align:center; font-weight:bold;">${celdaRes}</td>
+          <td style="padding:6px; border:1px solid #ccc; text-align:center;">${ind.unidad || '-'}</td>
+          <td style="padding:6px; border:1px solid #ccc; text-align:center;">${ind.referencia || `${ind.refMin \vert{}\vert{} ''} -${ind.refMax || ''}`}</td>
+        </tr>
       `;
     }).join('');
 
-    ventanaImp.document.write(`
-      <html>
-      <head>
-        <title>Informe Clínico - ${ordenActual.paciente.nombre}</title>
-        <style>
-          @page { size: A4; margin: 15mm; }
-          body { font-family: Arial, sans-serif; font-size: 11px; color: #333; }
-          .header { border-bottom: 2px solid #0072bc; padding-bottom: 8px; display: flex; justify-content: space-between; }
-          .patient-box { border: 1px solid #b7c7d9; border-radius: 5px; padding: 10px; margin-top: 15px; display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
-        </style>
-      </head>
-      <body>
-        <div class="header">
-          <div>
-            <h1 style="color:#0072bc; margin:0; font-size:20px;">Centro Médico Vital Health</h1>
-            <div>LABORATORIO CLÍNICO</div>
-          </div>
-          <div style="text-align:right;">
-            <div>Av. Grau N° 1799 - Piura</div>
-            <div>Tel: 984 089 927</div>
-          </div>
-        </div>
-
-        <div class="patient-box">
-          <div><strong>PACIENTE:</strong> ${ordenActual.paciente.nombre.toUpperCase()}</div>
-          <div><strong>DNI:</strong> ${ordenActual.paciente.dni}</div>
-          <div><strong>EDAD:</strong> ${ordenActual.paciente.edad}</div>
-          <div><strong>MEDICO:</strong> ${ordenActual.paciente.doctor}</div>
-          <div><strong>ORDEN:</strong> ${ordenActual.id}</div>
-          <div><strong>FECHA:</strong> ${ordenActual.fecha}</div>
-        </div>
-
-        ${bloques}
-
-        <div style="margin-top:40px; text-align:center;">
-          <div style="border-top:1px solid #333; width:200px; margin:0 auto 5px auto;"></div>
-          <strong>Bióloga Responsable</strong><br/>
-          <span>Laboratorio Clínico - Vital Health</span>
-        </div>
-
-        <script>window.onload = function() { window.print(); }</script>
-      </body>
-      </html>
-    `);
-    ventanaImp.document.close();
-  };
-
-  // Cálculo para Control de Caja
-  const calcularCaja = () => {
-    const hoy = new Date().toLocaleDateString('es-PE');
-    const ordenesHoy = ordenes.filter(o => o.fecha === hoy);
-    const totalEfectivo = ordenesHoy.filter(o => o.metodoPago === 'Efectivo').reduce((a, b) => a + b.total, 0);
-    const totalDigital = ordenesHoy.filter(o => o.metodoPago !== 'Efectivo').reduce((a, b) => a + b.total, 0);
-    return { ordenesHoy, totalEfectivo, totalDigital, totalGeneral: totalEfectivo + totalDigital };
-  };
-
-  const datosCaja = calcularCaja();
-
-  return (
-    <div style={{ fontFamily: 'Arial, sans-serif', minHeight: '100vh', backgroundColor: '#f4f6f9' }}>
-      {/* Navbar Superior */}
-      <nav style={{ backgroundColor: '#0072bc', color: 'white', padding: '15px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <h2 style={{ margin: 0, fontSize: '20px' }}>Centro Médico Vital Health - LIS</h2>
-        <div>
-          <button onClick={() => setSeccionActiva('ordenes')} style={btnNavStyle(seccionActiva === 'ordenes')}>Recepción / Órdenes</button>
-          <button onClick={() => setSeccionActiva('resultados')} style={btnNavStyle(seccionActiva === 'resultados')}>Carga de Resultados</button>
-          <button onClick={() => setSeccionActiva('caja')} style={btnNavStyle(seccionActiva === 'caja')}>Control de Caja</button>
-          <button onClick={() => setSeccionActiva('catalogo')} style={btnNavStyle(seccionActiva === 'catalogo')}>Catálogo de Exámenes</button>
-        </div>
-      </nav>
-
-      <div style={{ padding: '20px', maxWidth: '1200px', margin: '0 auto' }}>
-        {/* SECCIÓN 1: RECEPCIÓN Y EMISIÓN DE ÓRDENES */}
-        {seccionActiva === 'ordenes' && (
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
-            {/* Formulario Paciente */}
-            <div style={{ backgroundColor: 'white', padding: '20px', borderRadius: '8px', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>
-              <h3 style={{ marginTop: 0, color: '#0072bc' }}>Datos del Paciente</h3>
-              <div style={{ display: 'grid', gap: '10px' }}>
-                <input
-                  type="text"
-                  placeholder="DNI / Documento"
-                  value={paciente.dni}
-                  onChange={(e) => setPaciente({ ...paciente, dni: e.target.value })}
-                  style={inputStyle}
-                />
-                <input
-                  type="text"
-                  placeholder="Nombre y Apellidos Completos"
-                  value={paciente.nombre}
-                  onChange={(e) => setPaciente({ ...paciente, nombre: e.target.value })}
-                  style={inputStyle}
-                />
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-                  <input
-                    type="text"
-                    placeholder="Edad (Ej: 25 AÑOS)"
-                    value={paciente.edad}
-                    onChange={(e) => setPaciente({ ...paciente, edad: e.target.value })}
-                    style={inputStyle}
-                  />
-                  <select
-                    value={paciente.sexo}
-                    onChange={(e) => setPaciente({ ...paciente, sexo: e.target.value })}
-                    style={inputStyle}
-                  >
-                    <option value="MASCULINO">MASCULINO</option>
-                    <option value="FEMENINO">FEMENINO</option>
-                  </select>
-                </div>
-                <input
-                  type="text"
-                  placeholder="Médico Solicitante"
-                  value={paciente.doctor}
-                  onChange={(e) => setPaciente({ ...paciente, doctor: e.target.value })}
-                  style={inputStyle}
-                />
-                <select
-                  value={metodoPago}
-                  onChange={(e) => setMetodoPago(e.target.value)}
-                  style={inputStyle}
-                >
-                  <option value="Efectivo">Efectivo</option>
-                  <option value="Yape/Plin">Yape / Plin</option>
-                  <option value="Tarjeta">Tarjeta de Crédito / Débito</option>
-                </select>
-              </div>
-
-              <h4 style={{ color: '#0072bc', marginBottom: '10px' }}>Exámenes Seleccionados</h4>
-              <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '15px' }}>
-                <thead>
-                  <tr style={{ backgroundColor: '#f0f4f8', textTransform: 'uppercase', fontSize: '11px' }}>
-                    <th style={{ padding: '8px', textAlign: 'left' }}>Código</th>
-                    <th style={{ padding: '8px', textAlign: 'left' }}>Examen</th>
-                    <th style={{ padding: '8px', textAlign: 'right' }}>Precio</th>
-                    <th style={{ padding: '8px', textAlign: 'center' }}>Acción</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {examenesSeleccionados.map((item) => (
-                    <tr key={item.codigo} style={{ borderBottom: '1px solid #eee' }}>
-                      <td style={{ padding: '8px' }}>{item.codigo}</td>
-                      <td style={{ padding: '8px' }}>{item.nombre}</td>
-                      <td style={{ padding: '8px', textAlign: 'right' }}>S/ {(item.precio || 25.0).toFixed(2)}</td>
-                      <td style={{ padding: '8px', textAlign: 'center' }}>
-                        <button onClick={() => eliminarExamenDeOrden(item.codigo)} style={{ color: 'red', border: 'none', background: 'none', cursor: 'pointer' }}>X</button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontWeight: 'bold', fontSize: '18px' }}>
-                <span>Total a Cobrar:</span>
-                <span style={{ color: '#28a745' }}>S/ {totalCobrar.toFixed(2)}</span>
-              </div>
-
-              <button
-                onClick={registrarOrden}
-                style={{ width: '100%', padding: '12px', backgroundColor: '#28a745', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', marginTop: '15px', fontWeight: 'bold' }}
-              >
-                Generar Orden e Imprimir Ticket (58mm)
-              </button>
-            </div>
-
-            {/* Búsqueda en Catálogo de Exámenes */}
-            <div style={{ backgroundColor: 'white', padding: '20px', borderRadius: '8px', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>
-              <h3 style={{ marginTop: 0, color: '#0072bc' }}>Buscar e Incorporar Exámenes</h3>
-              <input
-                type="text"
-                placeholder="Buscar por código o nombre del examen..."
-                value={busqueda}
-                onChange={(e) => setBusqueda(e.target.value)}
-                style={{ ...inputStyle, marginBottom: '15px' }}
-              />
-
-              <div style={{ maxHeight: '450px', overflowY: 'auto', border: '1px solid #ddd', borderRadius: '4px' }}>
-                {examenesFiltrados.map((item) => (
-                  <div
-                    key={item.codigo}
-                    onClick={() => agregarExamenAOrden(item)}
-                    style={{
-                      padding: '10px',
-                      borderBottom: '1px solid #eee',
-                      cursor: 'pointer',
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                      backgroundColor: 'white'
-                    }}
-                  >
-                    <div>
-                      <strong>[{item.codigo}]</strong> {item.nombre}
-                      <br/>
-                      <small style={{ color: '#666' }}>Ref: {item.referencia || 'Ver parámetros'} {item.unidad ? `(${item.unidad})` : ''}</small>
-                    </div>
-                    <button style={{ padding: '5px 10px', backgroundColor: '#0072bc', color: 'white', border: 'none', borderRadius: '3px', cursor: 'pointer' }}>
-                      +
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* SECCIÓN 2: CARGA DE RESULTADOS */}
-        {seccionActiva === 'resultados' && (
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '20px' }}>
-            {/* Lista de Órdenes */}
-            <div style={{ backgroundColor: 'white', padding: '20px', borderRadius: '8px', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>
-              <h3 style={{ marginTop: 0, color: '#0072bc' }}>Órdenes Registradas</h3>
-              <div style={{ maxHeight: '500px', overflowY: 'auto' }}>
-                {ordenes.map((o) => (
-                  <div
-                    key={o.id}
-                    onClick={() => abrirCargaResultados(o)}
-                    style={{
-                      padding: '12px',
-                      border: '1px solid #ddd',
-                      borderRadius: '5px',
-                      marginBottom: '10px',
-                      cursor: 'pointer',
-                      backgroundColor: ordenActual?.id === o.id ? '#e0f7fa' : 'white'
-                    }}
-                  >
-                    <strong>{o.id}</strong> - {o.paciente.nombre}
-                    <br/>
-                    <small style={{ color: '#666' }}>{o.fecha} | DNI: {o.paciente.dni}</small>
-                    <br/>
-                    <span style={{ fontSize: '11px', fontWeight: 'bold', color: o.estado === 'COMPLETADO' ? '#28a745' : '#ffc107' }}>
-                      ● {o.estado}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Editor de Resultados */}
-            <div style={{ backgroundColor: 'white', padding: '20px', borderRadius: '8px', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>
-              {ordenActual ? (
-                <div>
-                  <h3 style={{ marginTop: 0, color: '#0072bc' }}>Resultados: {ordenActual.paciente.nombre}</h3>
-                  <p><strong>DNI:</strong> {ordenActual.paciente.dni} | <strong>Orden:</strong> {ordenActual.id}</p>
-                  <hr/>
-
-                  {ordenActual.examenes.map((ex) => {
-                    const indicadores = obtenerIndicadoresExamen(ex);
-                    return (
-                      <div key={ex.codigo} style={{ marginBottom: '20px', padding: '15px', border: '1px solid #eee', borderRadius: '5px' }}>
-                        <h4 style={{ margin: '0 0 10px 0', color: '#333' }}>{ex.nombre}</h4>
-                        {indicadores.map((ind) => (
-                          <div key={ind.id} style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gap: '10px', alignItems: 'center', marginBottom: '8px' }}>
-                            <label style={{ fontSize: '13px' }}>{ind.nombre}:</label>
-                            <input
-                              type="text"
-                              placeholder="Resultado"
-                              value={resultadosInput[ind.id] || ''}
-                              onChange={(e) => setResultadosInput({ ...resultadosInput, [ind.id]: e.target.value })}
-                              style={inputStyle}
-                            />
-                            <span style={{ fontSize: '11px', color: '#666' }}>
-                              {ind.unidad} ({ind.referencia || `${ind.refMin} - ${ind.refMax}`})
-                            </span>
-                          </div>
-                        ))}
-                      </div>
-                    );
-                  })}
-
-                  <div style={{ display: 'flex', gap: '10px', marginTop: '20px' }}>
-                    <button
-                      onClick={guardarResultados}
-                      style={{ flex: 1, padding: '10px', backgroundColor: '#0072bc', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
-                    >
-                      Guardar Resultados
-                    </button>
-                    <button
-                      onClick={imprimirReporteA4}
-                      style={{ flex: 1, padding: '10px', backgroundColor: '#17a2b8', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
-                    >
-                      Visualizar e Imprimir Reporte A4
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                <p style={{ color: '#666' }}>Seleccione una orden del panel izquierdo para cargar los resultados.</p>
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* SECCIÓN 3: CONTROL DE CAJA */}
-        {seccionActiva === 'caja' && (
-          <div style={{ backgroundColor: 'white', padding: '20px', borderRadius: '8px', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>
-            <h3 style={{ marginTop: 0, color: '#0072bc' }}>Control de Caja del Día</h3>
-            
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '15px', marginBottom: '20px' }}>
-              <div style={{ padding: '15px', backgroundColor: '#e9f5ff', borderRadius: '5px', textAlign: 'center' }}>
-                <small>Efectivo</small>
-                <h2 style={{ margin: '5px 0', color: '#0072bc' }}>S/ {datosCaja.totalEfectivo.toFixed(2)}</h2>
-              </div>
-              <div style={{ padding: '15px', backgroundColor: '#e8f8f0', borderRadius: '5px', textAlign: 'center' }}>
-                <small>Digital (Yape/Plin/Tarjeta)</small>
-                <h2 style={{ margin: '5px 0', color: '#28a745' }}>S/ {datosCaja.totalDigital.toFixed(2)}</h2>
-              </div>
-              <div style={{ padding: '15px', backgroundColor: '#fdf6e2', borderRadius: '5px', textAlign: 'center' }}>
-                <small>Total Cobrado Hoy</small>
-                <h2 style={{ margin: '5px 0', color: '#ffc107' }}>S/ {datosCaja.totalGeneral.toFixed(2)}</h2>
-              </div>
-            </div>
-
-            <h4>Detalle de Transacciones Hoy</h4>
-            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-              <thead>
-                <tr style={{ backgroundColor: '#f0f4f8', textTransform: 'uppercase', fontSize: '11px' }}>
-                  <th style={{ padding: '8px', textAlign: 'left' }}>Hora</th>
-                  <th style={{ padding: '8px', textAlign: 'left' }}>Orden</th>
-                  <th style={{ padding: '8px', textAlign: 'left' }}>Paciente</th>
-                  <th style={{ padding: '8px', textAlign: 'left' }}>Método</th>
-                  <th style={{ padding: '8px', textAlign: 'right' }}>Total</th>
-                </tr>
-              </thead>
-              <tbody>
-                {datosCaja.ordenesHoy.map((o) => (
-                  <tr key={o.id} style={{ borderBottom: '1px solid #eee' }}>
-                    <td style={{ padding: '8px' }}>{o.hora}</td>
-                    <td style={{ padding: '8px' }}>{o.id}</td>
-                    <td style={{ padding: '8px' }}>{o.paciente.nombre}</td>
-                    <td style={{ padding: '8px' }}>{o.metodoPago}</td>
-                    <td style={{ padding: '8px', textAlign: 'right' }}>S/ {o.total.toFixed(2)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-
-        {/* SECCIÓN 4: CATÁLOGO COMPLETO DE EXÁMENES */}
-        {seccionActiva === 'catalogo' && (
-          <div style={{ backgroundColor: 'white', padding: '20px', borderRadius: '8px', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>
-            <h3 style={{ marginTop: 0, color: '#0072bc' }}>Catálogo General de Exámenes ({examenesCatalogo.length})</h3>
-            <input
-              type="text"
-              placeholder="Buscar examen por nombre o código..."
-              value={busqueda}
-              onChange={(e) => setBusqueda(e.target.value)}
-              style={{ ...inputStyle, marginBottom: '15px' }}
-            />
-            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-              <thead>
-                <tr style={{ backgroundColor: '#f0f4f8', textTransform: 'uppercase', fontSize: '11px' }}>
-                  <th style={{ padding: '8px', textAlign: 'left' }}>Código</th>
-                  <th style={{ padding: '8px', textAlign: 'left' }}>Nombre del Examen</th>
-                  <th style={{ padding: '8px', textAlign: 'left' }}>Unidad</th>
-                  <th style={{ padding: '8px', textAlign: 'left' }}>Valor de Referencia</th>
-                </tr>
-              </thead>
-              <tbody>
-                {examenesFiltrados.map((item) => (
-                  <tr key={item.codigo} style={{ borderBottom: '1px solid #eee' }}>
-                    <td style={{ padding: '8px' }}><strong>{item.codigo}</strong></td>
-                    <td style={{ padding: '8px' }}>{item.nombre}</td>
-                    <td style={{ padding: '8px' }}>{item.unidad || 'N/A'}</td>
-                    <td style={{ padding: '8px' }}>{item.referencia}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
+    return `
+      <div style="margin-top:15px;">
+        <h4 style="color:#0072bc; border-bottom:1px solid #0072bc; margin-bottom:5px; font-size:14px; text-transform:uppercase;">${ex.nombre}</h4>
+        <table style="width:100%; border-collapse:collapse; font-size:11px;">
+          <thead>
+            <tr style="background:#f0f4f8;">
+              <th style="padding:6px; border:1px solid #ccc; text-align:left;">PARÁMETRO</th>
+              <th style="padding:6px; border:1px solid #ccc; text-align:center;">RESULTADO</th>
+              <th style="padding:6px; border:1px solid #ccc; text-align:center;">UNIDAD</th>
+              <th style="padding:6px; border:1px solid #ccc; text-align:center;">VALOR REFERENCIAL</th>
+            </tr>
+          </thead>
+          <tbody>${filas}</tbody>
+        </table>
       </div>
-    </div>
-  );
+    `;
+  }).join('');
+
+  ventanaImp.document.write(`
+    <!DOCTYPE html>
+    <html lang="es">
+    <head>
+      <meta charset="UTF-8">
+      <title>Informe Clínico - ${ord.paciente.nombre}</title>
+      <style>
+        @page { size: A4; margin: 15mm; }
+        body { font-family: Arial, sans-serif; font-size: 11px; color: #333; line-height: 1.4; }
+        .header { border-bottom: 2px solid #0072bc; padding-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
+        .patient-box { border: 1px solid #b7c7d9; border-radius: 5px; padding: 10px; margin-top: 15px; display: grid; grid-template-columns: 1fr 1fr; gap: 6px; background-color: #fafafa; }
+        .footer-sign { margin-top: 50px; text-align: center; }
+      </style>
+    </head>
+    <body>
+      <div class="header">
+        <div>
+          <h2 style="color:#0072bc; margin:0; font-size:18px;">CENTRO MÉDICO VITAL HEALTH</h2>
+          <div style="font-weight:bold; color:#555;">LABORATORIO CLÍNICO</div>
+        </div>
+        <div style="text-align:right; font-size:10px;">
+          <div>Av. Grau N° 1799 - Veintiséis de Octubre</div>
+          <div>Tel / WhatsApp: 984 089 927</div>
+        </div>
+      </div>
+
+      <div class="patient-box">
+        <div><strong>PACIENTE:</strong> ${ord.paciente.nombre.toUpperCase()}</div>
+        <div><strong>DNI / DOC:</strong> ${ord.paciente.dni}</div>
+        <div><strong>EDAD:</strong> ${ord.paciente.edad} | <strong>SEXO:</strong> ${ord.paciente.sexo}</div>
+        <div><strong>MÉDICO:</strong> ${ord.paciente.doctor}</div>
+        <div><strong>N° ORDEN:</strong> ${ord.id}</div>
+        <div><strong>FECHA / HORA:</strong> ${ord.fecha} ${ord.hora}</div>
+      </div>
+
+      ${bloquesHTML}
+
+      <div class="footer-sign">
+        <div style="border-top:1px solid #333; width:220px; margin:0 auto 5px auto;"></div>
+        <strong>Bióloga Responsable / Tecnólogo Médico</strong><br/>
+        <span>Laboratorio Clínico - Vital Health</span>
+      </div>
+
+      <script>
+        window.onload = function() { window.print(); }
+      </script>
+    </body>
+    </html>
+  `);
+  ventanaImp.document.close();
 }
 
-// Estilos Reutilizables
-const inputStyle = {
-  width: '100%',
-  padding: '8px 10px',
-  borderRadius: '4px',
-  border: '1px solid #ccc',
-  boxSizing: 'border-box'
-};
+// ==========================================
+// CATÁLOGO Y PLANTILLAS
+// ==========================================
+function renderizarTablaCatalogo(filtro) {
+  const tbody = document.getElementById('tabla-catalogo-body');
+  const countEl = document.getElementById('total-cat-count');
+  if (!tbody) return;
 
-const btnNavStyle = (activo) => ({
-  backgroundColor: activo ? '#0056b3' : 'transparent',
-  color: 'white',
-  border: 'none',
-  padding: '8px 15px',
-  borderRadius: '4px',
-  cursor: 'pointer',
-  marginLeft: '5px',
-  fontWeight: activo ? 'bold' : 'normal'
-});
+  const f = (filtro || '').toLowerCase();
+  const lista = examenesCatalogo.filter(e => 
+    e.nombre.toLowerCase().includes(f) || e.codigo.toLowerCase().includes(f)
+  );
+
+  if (countEl) countEl.textContent = examenesCatalogo.length;
+
+  if (lista.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="5" class="text-center text-muted py-3">No hay exámenes registrados.</td></tr>`;
+    return;
+  }
+
+  let html = '';
+  lista.forEach(item => {
+    const numInd = obtenerIndicadoresExamen(item).length;
+    html += `
+      <tr>
+        <td><strong>${item.codigo}</strong></td>
+        <td>${item.nombre}</td>
+        <td><span class="badge bg-secondary">${numInd} ind.</span></td>
+        <td>S/ ${parseFloat(item.precio || 25).toFixed(2)}</td>
+        <td class="text-end">
+          <button class="btn btn-sm btn-outline-primary" onclick="cargarExamenEnFormulario('${item.codigo}')">
+            <i class="bi bi-pencil"></i>
+          </button>
+        </td>
+      </tr>
+    `;
+  });
+
+  tbody.innerHTML = html;
+}
+
+function prepararNuevoExamen() {
+  document.getElementById('form-catalogo').reset();
+  document.getElementById('cat-id-original').value = '';
+  document.getElementById('catalogo-form-titulo').innerHTML = `<i class="bi bi-layout-text-window-reverse me-2"></i>Nuevo Examen`;
+  document.getElementById('contenedor-indicadores').innerHTML = '';
+}
+
+function cargarExamenEnFormulario(codigo) {
+  const item = examenesCatalogo.find(e => e.codigo === codigo);
+  if (!item) return;
+
+  document.getElementById('cat-id-original').value = item.codigo;
+  document.getElementById('cat-codigo').value = item.codigo;
+  document.getElementById('cat-nombre').value = item.nombre;
+  document.getElementById('cat-precio').value = item.precio || 25.0;
+  document.getElementById('cat-muestra').value = item.muestra || '';
+  document.getElementById('cat-metodo').value = item.metodo || '';
+  document.getElementById('cat-ref-texto').value = item.referencia || '';
+
+  document.getElementById('catalogo-form-titulo').innerHTML = `<i class="bi bi-pencil-square me-2"></i>Editar Examen: ${item.nombre}`;
+
+  // Cargar indicadores
+  const cont = document.getElementById('contenedor-indicadores');
+  cont.innerHTML = '';
+  const indicadores = obtenerIndicadoresExamen(item);
+
+  indicadores.forEach(ind => {
+    agregarIndicadorDOM(ind.nombre, ind.unidad, ind.refMin, ind.refMax, ind.referencia);
+  });
+}
+
+function agregarIndicadorResultado() {
+  agregarIndicadorDOM('', '', '', '', '');
+}
+
+function agregarIndicadorDOM(nombre = '', unidad = '', min = '', max = '', refText = '') {
+  const cont = document.getElementById('contenedor-indicadores');
+  if (!cont) return;
+
+  const div = document.createElement('div');
+  div.className = 'card p-2 mb-2 indicador-card bg-light';
+  div.innerHTML = `
+    <div class="row g-2 align-items-center">
+      <div class="col-12 col-md-4">
+        <input type="text" class="form-control form-control-sm ind-nombre" placeholder="Nombre Indicador" value="${nombre}" required>
+      </div>
+      <div class="col-4 col-md-2">
+        <input type="text" class="form-control form-control-sm ind-unidad" placeholder="Unidad" value="${unidad}">
+      </div>
+      <div class="col-4 col-md-2">
+        <input type="number" step="any" class="form-control form-control-sm ind-min" placeholder="Min" value="${min}">
+      </div>
+      <div class="col-4 col-md-2">
+        <input type="number" step="any" class="form-control form-control-sm ind-max" placeholder="Max" value="${max}">
+      </div>
+      <div class="col-12 col-md-2 text-end">
+        <button type="button" class="btn btn-sm btn-outline-danger" onclick="this.closest('.card').remove()"><i class="bi bi-trash"></i> Quitar</button>
+      </div>
+    </div>
+  `;
+  cont.appendChild(div);
+}
+
+function vaciarTodosLosIndicadores() {
+  const cont = document.getElementById('contenedor-indicadores');
+  if (cont) cont.innerHTML = '';
+}
+
+function guardarExamenCatalogo() {
+  const codigoOrig = document.getElementById('cat-id-original').value;
+  const codigo = document.getElementById('cat-codigo').value.trim();
+  const nombre = document.getElementById('cat-nombre').value.trim();
+  const precio = parseFloat(document.getElementById('cat-precio').value) || 0;
+  const muestra = document.getElementById('cat-muestra').value.trim();
+  const metodo = document.getElementById('cat-metodo').value.trim();
+  const refTexto = document.getElementById('cat-ref-texto').value.trim();
+
+  if (!codigo || !nombre) {
+    alert("Código y Nombre son obligatorios.");
+    return;
+  }
+
+  // Recopilar indicadores
+  const indCards = document.querySelectorAll('#contenedor-indicadores .indicador-card');
+  const indicadores = [];
+
+  indCards.forEach((card, idx) => {
+    const nom = card.querySelector('.ind-nombre').value.trim();
+    if (nom) {
+      indicadores.push({
+        id: `ind_${codigo}_${idx + 1}`,
+        nombre: nom,
+        unidad: card.querySelector('.ind-unidad').value.trim(),
+        refMin: card.querySelector('.ind-min').value,
+        refMax: card.querySelector('.ind-max').value,
+        referencia: refTexto
+      });
+    }
+  });
+
+  const nuevoExamen = {
+    codigo,
+    nombre,
+    precio,
+    muestra,
+    metodo,
+    unidad: indicadores[0]?.unidad || '',
+    refMin: indicadores[0]?.refMin || '',
+    refMax: indicadores[0]?.refMax || '',
+    referencia: refTexto || (indicadores[0] ? `${indicadores[0].refMin} - ${indicadores[0].refMax}` : ''),
+    indicadores
+  };
+
+  const idx = examenesCatalogo.findIndex(e => e.codigo === (codigoOrig || codigo));
+  if (idx !== -1) {
+    examenesCatalogo[idx] = nuevoExamen;
+  } else {
+    examenesCatalogo.push(nuevoExamen);
+  }
+
+  localStorage.setItem('vitalhealth_catalogo', JSON.stringify(examenesCatalogo));
+  renderizarTablaCatalogo('');
+  prepararNuevoExamen();
+  alert("Examen guardado en el catálogo.");
+}
+
+// ==========================================
+// ARQUEO Y CONTROL DE CAJA
+// ==========================================
+function actualizarCaja() {
+  const hoyStr = new Date().toLocaleDateString('es-PE');
+  const ordenesHoy = ordenesGlobales.filter(o => o.fecha === hoyStr);
+
+  let totalGeneral = 0;
+  let totalEfectivo = 0;
+  let totalDigital = 0;
+
+  const tbody = document.getElementById('caja-tabla-body');
+  let html = '';
+
+  ordenesHoy.forEach(o => {
+    const monto = parseFloat(o.total || 0);
+    totalGeneral += monto;
+
+    if (o.metodoPago === 'Efectivo') {
+      totalEfectivo += monto;
+    } else {
+      totalDigital += monto;
+    }
+
+    html += `
+      <tr>
+        <td>${o.hora}</td>
+        <td><strong>${o.id}</strong></td>
+        <td>${o.paciente.nombre}</td>
+        <td><span class="badge bg-light text-dark border">${o.metodoPago}</span></td>
+        <td class="fw-bold">S/ ${monto.toFixed(2)}</td>
+      </tr>
+    `;
+  });
+
+  document.getElementById('caja-total-hoy').textContent = totalGeneral.toFixed(2);
+  document.getElementById('caja-efectivo').textContent = totalEfectivo.toFixed(2);
+  document.getElementById('caja-digital').textContent = totalDigital.toFixed(2);
+
+  if (tbody) {
+    tbody.innerHTML = html || `<tr><td colspan="5" class="text-center text-muted py-3">No hay movimientos registrados el día de hoy.</td></tr>`;
+  }
+}
