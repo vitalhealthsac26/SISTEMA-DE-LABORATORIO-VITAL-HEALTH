@@ -1279,8 +1279,9 @@ function imprimirReporteA4() {
 
       <div class="footer-sign">
         <div style="border-top:1px solid #333; width:220px; margin:0 auto 5px auto;"></div>
-        <strong>Bióloga Responsable / Tecnólogo Médico</strong><br/>
-        <span>Laboratorio Clínico - Vital Health</span>
+        <strong>Raysa Yadira Ursula Alberca Atarama/strong><br/>
+        <strong>Bióloga/strong><br/>
+        <strong>C.B.P.17763/strong><br/>
       </div>
 
       <script>
