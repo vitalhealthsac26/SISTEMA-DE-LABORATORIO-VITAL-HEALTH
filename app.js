@@ -1304,8 +1304,8 @@ function renderizarTablaCatalogo(filtro) {
         <td><span class="badge bg-secondary">${numInd} ind.</span></td>
         <td>S/ ${parseFloat(item.precio || 25).toFixed(2)}</td>
         <td class="text-end">
-          <button class="btn btn-sm btn-outline-primary" onclick="cargarExamenEnFormulario('${item.codigo}')">
-            <i class="bi bi-pencil"></i>
+          <button class="btn btn-sm btn-outline-primary" onclick="cargarExamenEnFormulario('${item.codigo}')" title="Configurar o modificar plantilla">
+            <i class="bi bi-pencil-square"></i> Editar
           </button>
         </td>
       </tr>
