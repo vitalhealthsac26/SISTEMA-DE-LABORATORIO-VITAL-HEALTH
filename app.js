@@ -1028,7 +1028,7 @@ function imprimirTicket58mm(orden) {
 }
 
 // ==========================================
-// SECCIÓN ÓRDENES DE TRABAJO
+// SECCIÓN ÓRDENES DE TRABAJO (Con opción de borrar orden)
 // ==========================================
 function cargarOrdenes() {
   const tbody = document.getElementById('lista-ordenes-body');
@@ -1054,8 +1054,11 @@ function cargarOrdenes() {
         <td>${o.paciente.nombre}</td>
         <td><span class="badge ${badgeColor}">${o.estado}</span></td>
         <td class="text-end px-3">
-          <button class="btn btn-sm btn-primary" onclick="abrirResultadosParaOrden('${o.id}')">
+          <button class="btn btn-sm btn-primary me-1" onclick="abrirResultadosParaOrden('${o.id}')">
             <i class="bi bi-pencil-square me-1"></i> Resultados
+          </button>
+          <button class="btn btn-sm btn-outline-danger" onclick="eliminarOrden('${o.id}')" title="Eliminar Orden">
+            <i class="bi bi-trash"></i>
           </button>
         </td>
       </tr>
@@ -1063,6 +1066,15 @@ function cargarOrdenes() {
   });
 
   tbody.innerHTML = html;
+}
+
+function eliminarOrden(ordenId) {
+  if (confirm(`¿Está seguro de eliminar la orden ${ordenId}? Esta acción no se puede deshacer.`)) {
+    ordenesGlobales = ordenesGlobales.filter(o => o.id !== ordenId);
+    localStorage.setItem('vitalhealth_ordenes', JSON.stringify(ordenesGlobales));
+    cargarOrdenes();
+    actualizarCaja();
+  }
 }
 
 // ==========================================
@@ -1133,8 +1145,11 @@ function renderizarEditorResultados() {
 
     bloquesHTML += `
       <div class="card mb-3 border border-light-subtle shadow-sm">
-        <div class="card-header bg-light fw-bold text-primary">
-          <i class="bi bi-file-text me-2"></i>${ex.nombre}
+        <div class="card-header bg-light fw-bold text-primary d-flex justify-content-between align-items-center">
+          <span><i class="bi bi-file-text me-2"></i>${ex.nombre}</span>
+          <button class="btn btn-sm btn-outline-danger py-0 px-2" onclick="eliminarExamenDeOrden('${ex.codigo}')" title="Eliminar este examen de la orden">
+            <i class="bi bi-trash"></i> Eliminar Examen
+          </button>
         </div>
         <div class="card-body">
           ${camposHTML}
@@ -1162,6 +1177,20 @@ function renderizarEditorResultados() {
   `;
 }
 
+function eliminarExamenDeOrden(codigoExamen) {
+  if (!ordenSeleccionadaResultados) return;
+  if (confirm("¿Desea eliminar este examen de la orden actual?")) {
+    ordenSeleccionadaResultados.examenes = ordenSeleccionadaResultados.examenes.filter(e => e.codigo !== codigoExamen);
+    
+    const index = ordenesGlobales.findIndex(o => o.id === ordenSeleccionadaResultados.id);
+    if (index !== -1) {
+      ordenesGlobales[index] = ordenSeleccionadaResultados;
+      localStorage.setItem('vitalhealth_ordenes', JSON.stringify(ordenesGlobales));
+    }
+    renderizarEditorResultados();
+  }
+}
+
 function actualizarValorResultado(indicadorId, valor) {
   resultadosTemporales[indicadorId] = valor;
 }
@@ -1180,15 +1209,15 @@ function guardarResultadosOrden() {
   }
 }
 
-function evaluarRangoClinico(valStr, minVal, maxVal) {
-let numericVal = parseFloat(val);
-    let numericMin = parseFloat(min);
-    let numericMax = parseFloat(max);
+function evaluarRangoClinico(val, min, max) {
+  let numericVal = parseFloat(val);
+  let numericMin = parseFloat(min);
+  let numericMax = parseFloat(max);
 
-    if (isNaN(numericVal)) return val; 
-    if (!isNaN(numericMin) && numericVal < numericMin) return val + ' *';
-    if (!isNaN(numericMax) && numericVal > numericMax) return val + ' *';
-    return val;
+  if (isNaN(numericVal)) return val; 
+  if (!isNaN(numericMin) && numericVal < numericMin) return val + ' *';
+  if (!isNaN(numericMax) && numericVal > numericMax) return val + ' *';
+  return val;
 }
 
 function imprimirReporteA4() {
@@ -1203,11 +1232,12 @@ function imprimirReporteA4() {
     const indicadores = obtenerIndicadoresExamen(ex);
     let filas = indicadores.map(ind => {
       const valRes = ord.resultados[ind.id] || '-';
-      const estado = evaluarRangoClinico(valRes, ind.refMin, ind.refMax);
+      const valorConAsterisco = evaluarRangoClinico(valRes, ind.refMin, ind.refMax);
 
-      let celdaRes = valRes;
-      if (estado === 'alto' || estado === 'bajo') {
-        celdaRes = `<span style="color:red; font-weight:bold;">${valRes} * (${estado.toUpperCase()})</span>`;
+      let celdaRes = valorConAsterisco;
+      // Resaltar en rojo si contiene asterisco indicando que está fuera de rango
+      if (celdaRes.includes('*')) {
+        celdaRes = `<span style="color:red; font-weight:bold;">${celdaRes}</span>`;
       }
 
       const rangoTexto = ind.referencia ? ind.referencia : ((ind.refMin || ind.refMax) ? `${ind.refMin || ''} - ${ind.refMax || ''}` : '-');
@@ -1278,11 +1308,11 @@ function imprimirReporteA4() {
       ${bloquesHTML}
 
       <div class="footer-sign">
-    <div style="border-top:1px solid #333; width:220px; margin:0 auto 5px auto;"></div>
-    <strong>Raysa Yadira Ursula Alberca Atarama</strong><br/>
-    <strong>Bióloga</strong><br/>
-    <strong>C.B.P.17763</strong><br/>
-</div>
+        <div style="border-top:1px solid #333; width:220px; margin:0 auto 5px auto;"></div>
+        <strong>Raysa Yadira Ursula Alberca Atarama</strong><br/>
+        <strong>Bióloga</strong><br/>
+        <strong>C.B.P.17763</strong>
+      </div>
 
       <script>
         window.onload = function() { window.print(); }
@@ -1337,7 +1367,7 @@ function renderizarTablaCatalogo(filtro) {
 function prepararNuevoExamen() {
   document.getElementById('form-catalogo').reset();
   document.getElementById('cat-id-original').value = '';
-  document.getElementById('catalogo-form-titulo').innerHTML = `<i class="bi bi-layout-text-window-reverse me-2"></i>Nuevo Examen`;
+  document.getElementById('catalogo-form-titulo').innerHTML = `<i class="bi bi-layout-text-window-reverse me-2"></i>Plantilla individual del examen`;
   document.getElementById('contenedor-indicadores').innerHTML = '';
 }
 
@@ -1411,7 +1441,7 @@ function guardarExamenCatalogo() {
   const refTexto = document.getElementById('cat-ref-texto').value.trim();
 
   if (!codigo || !nombre) {
-        alert("Código y Nombre son obligatorios.");
+    alert("Código y Nombre son obligatorios.");
     return;
   }
 
@@ -1501,7 +1531,7 @@ function actualizarCaja() {
   if (elEfec) elEfec.textContent = totalEfectivo.toFixed(2);
   if (elDig) elDig.textContent = totalDigital.toFixed(2);
 
-  if (tbody) {
+  if, (tbody) {
     tbody.innerHTML = html || `<tr><td colspan="5" class="text-center text-muted py-3">No hay movimientos registrados el día de hoy.</td></tr>`;
   }
 }
