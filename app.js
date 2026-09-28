@@ -27,7 +27,7 @@ const BASE_VALORES_REFERENCIALES = {
 };
 
 let examenesCatalogo = [
-   { codigo: "5", nombre: "11 - DESOXICORTISOL (COMPUESTOS)", unidad: "ng/dL", refMin: 10, refMax: 138, referencia: "< 138 ng/dL" },
+  { codigo: "5", nombre: "11 - DESOXICORTISOL (COMPUESTOS)", unidad: "ng/dL", refMin: 10, refMax: 138, referencia: "< 138 ng/dL" },
   { codigo: "6", nombre: "17 - HIDROXICORTICOIDES (ORINA 24H)", unidad: "mg/24h", refMin: 3.0, refMax: 12.0, referencia: "3.0 - 12.0 mg/24h" },
   { codigo: "7", nombre: "17 KETOESTEROIDES (ORINA 24 HRS.)", unidad: "mg/24h", refMin: 6.0, refMax: 20.0, referencia: "6.0 - 20.0 mg/24h" },
   { codigo: "8", nombre: "17 OH PROGESTERONA BASAL, 30 Y 60 POST ESTIMULACIÓN CON ACTH", unidad: "ng/mL", refMin: 0.2, refMax: 3.0, referencia: "Según fase / estimulación" },
