@@ -1181,13 +1181,13 @@ function guardarResultadosOrden() {
 }
 
 function evaluarRangoClinico(valStr, minVal, maxVal) {
-  const val = parseFloat(valStr);
-  const min = parseFloat(minVal);
-  const max = parseFloat(maxVal);
+let numericVal = parseFloat(val);
+    let numericMin = parseFloat(min);
+    let numericMax = parseFloat(max);
 
- if (isNaN(val)) return val; // o el valor por defecto si no es número
-    if (!isNaN(min) && val < min) return val + ' *';
-    if (!isNaN(max) && val > max) return val + ' *';
+    if (isNaN(numericVal)) return val; 
+    if (!isNaN(numericMin) && numericVal < numericMin) return val + ' *';
+    if (!isNaN(numericMax) && numericVal > numericMax) return val + ' *';
     return val;
 }
 
