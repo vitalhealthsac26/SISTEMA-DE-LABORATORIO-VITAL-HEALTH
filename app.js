@@ -1237,7 +1237,7 @@ function imprimirReporteA4() {
       let celdaRes = valorConAsterisco;
       // Resaltar en rojo si contiene asterisco indicando que está fuera de rango
       if (celdaRes.includes('*')) {
-        celdaRes = `<span style="color:red; font-weight:bold;">${celdaRes}</span>`;
+        celdaRes = `<span style="color:black; font-weight:bold;">${celdaRes}</span>`;
       }
 
       const rangoTexto = ind.referencia ? ind.referencia : ((ind.refMin || ind.refMax) ? `${ind.refMin || ''} - ${ind.refMax || ''}` : '-');
