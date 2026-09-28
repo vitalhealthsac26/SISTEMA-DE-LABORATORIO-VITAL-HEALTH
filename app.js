@@ -965,8 +965,8 @@ function guardarOrdenGenerarTicket() {
 }
 
 function imprimirTicket58mm(orden) {
-  const areaPrint = document.getElementById('ticket-print-area');
-  if (!areaPrint) return;
+  const ventanaImp = window.open('', '_blank', 'width=300,height=600');
+  if (!ventanaImp) return;
 
   let filasExamenes = orden.examenes.map(e => `
     <tr>
@@ -978,35 +978,53 @@ function imprimirTicket58mm(orden) {
     </tr>
   `).join('');
 
-  areaPrint.innerHTML = `
-    <div style="font-family: monospace; width: 220px; font-size: 11px; padding: 5px;">
-      <div style="text-align: center; font-weight: bold;">
+  ventanaImp.document.write(`
+    <!DOCTYPE html>
+    <html lang="es">
+    <head>
+      <meta charset="UTF-8">
+      <title>Ticket ${orden.id}</title>
+      <style>
+        @page { size: 58mm auto; margin: 2mm; }
+        body { font-family: monospace; width: 200px; font-size: 11px; padding: 5px; color: #000; margin: 0; }
+        .center { text-align: center; font-weight: bold; }
+        .line { border-top: 1px dashed #000; margin: 5px 0; }
+      </style>
+    </head>
+    <body>
+      <div class="center">
         CENTRO MÉDICO VITAL HEALTH<br/>
         LABORATORIO CLÍNICO<br/>
-        <small>Av. Grau N° 1799 - Veintiséis de Octubre</small><br/>
-        <small>Tel: 984 089 927</small>
+        <small style="font-weight:normal;">Av. Grau N° 1799 - Veintiséis de Octubre</small><br/>
+        <small style="font-weight:normal;">Tel: 984 089 927</small>
       </div>
-      <div style="border-top: 1px dashed #000; margin: 5px 0;"></div>
+      <div class="line"></div>
       <div><strong>ORDEN:</strong> ${orden.id}</div>
       <div><strong>FECHA:</strong> ${orden.fecha} ${orden.hora}</div>
       <div><strong>DNI:</strong> ${orden.paciente.dni}</div>
       <div><strong>PACIENTE:</strong> ${orden.paciente.nombre}</div>
-      <div><strong>MEDICO:</strong> ${orden.paciente.doctor}</div>
-      <div><strong>FORMA PAGO:</strong> ${orden.metodoPago}</div>
-      <div style="border-top: 1px dashed #000; margin: 5px 0;"></div>
+      <div><strong>MÉDICO:</strong> ${orden.paciente.doctor}</div>
+      <div><strong>PAGO:</strong> ${orden.metodoPago}</div>
+      <div class="line"></div>
       <table style="width:100%; border-collapse:collapse;">
         <tbody>${filasExamenes}</tbody>
       </table>
-      <div style="border-top: 1px dashed #000; margin: 5px 0;"></div>
-      <div style="text-align:right; font-size: 13px;"><strong>TOTAL: S/ ${orden.total.toFixed(2)}</strong></div>
-      <div style="border-top: 1px dashed #000; margin: 5px 0;"></div>
-      <div style="text-align:center; margin-top:8px;">
+      <div class="line"></div>
+      <div style="text-align:right; font-size: 12px;"><strong>TOTAL: S/ ${orden.total.toFixed(2)}</strong></div>
+      <div class="line"></div>
+      <div class="center" style="margin-top:8px; font-weight:normal;">
         *** ¡Gracias por su confianza! ***
       </div>
-    </div>
-  `;
-
-  window.print();
+      <script>
+        window.onload = function() {
+          window.print();
+          window.close();
+        }
+      </script>
+    </body>
+    </html>
+  `);
+  ventanaImp.document.close();
 }
 
 // ==========================================
@@ -1392,7 +1410,7 @@ function guardarExamenCatalogo() {
   const refTexto = document.getElementById('cat-ref-texto').value.trim();
 
   if (!codigo || !nombre) {
-    alert("Código y Nombre son obligatorios.");
+        alert("Código y Nombre son obligatorios.");
     return;
   }
 
