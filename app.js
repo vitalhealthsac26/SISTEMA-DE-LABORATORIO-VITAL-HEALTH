@@ -27,58 +27,7 @@ const BASE_VALORES_REFERENCIALES = {
 };
 
 let examenesCatalogo = [
-  // Exámenes agregados desde el documento Balcells (Capítulos 1 y 2)
-  { codigo: "1001", nombre: "HEMATÍES (RECUENTO)", unidad: "10^12/L", refMin: 3.8, refMax: 6.5, referencia: "Varón: 5.5 ± 1 | Mujer: 4.8 ± 1 x10^12/L" },
-  { codigo: "1002", nombre: "AMPLITUD DE DISTRIBUCIÓN ERITROCITARIA (ADE / RDW)", unidad: "%", refMin: 11.0, refMax: 15.0, referencia: "13 ± 2 %" },
-  { codigo: "1003", nombre: "RETICULOCITOS (RECUENTO ABSOLUTO)", unidad: "/µL", refMin: 35000, refMax: 75000, referencia: "35,000 - 75,000 /µL" },
-  { codigo: "1004", nombre: "MASA ERITROCITARIA (VOLUMEN GLOBULAR)", unidad: "mL/kg", refMin: 20.0, refMax: 35.0, referencia: "Varón: 30 ± 5 | Mujer: 25 ± 5 mL/kg" },
-  { codigo: "1005", nombre: "VIDA MEDIA ERITROCITARIA (CON 51Cr)", unidad: "días", refMin: 25, refMax: 30, referencia: "25 - 30 días" },
-  { codigo: "1006", nombre: "PRUEBA DE COOMBS DIRECTA", unidad: "", refMin: "", refMax: "", referencia: "NEGATIVO" },
-  { codigo: "1007", nombre: "PRUEBA DE COOMBS INDIRECTA", unidad: "", refMin: "", refMax: "", referencia: "NEGATIVO" },
-  { codigo: "1008", nombre: "NEUTRÓFILOS ABSOLUTOS", unidad: "/µL", refMin: 3000, refMax: 5000, referencia: "3,000 - 5,000 /µL (55-65%)" },
-  { codigo: "1009", nombre: "LINFOCITOS ABSOLUTOS", unidad: "/µL", refMin: 1500, refMax: 4000, referencia: "1,500 - 4,000 /µL (25-35%)" },
-  { codigo: "1010", nombre: "MONOCITOS ABSOLUTOS", unidad: "/µL", refMin: 100, refMax: 500, referencia: "100 - 500 /µL (4-8%)" },
-  { codigo: "1011", nombre: "EOSINÓFILOS ABSOLUTOS", unidad: "/µL", refMin: 20, refMax: 350, referencia: "20 - 350 /µL (0.5-4%)" },
-  { codigo: "1012", nombre: "BASÓFILOS ABSOLUTOS", unidad: "/µL", refMin: 10, refMax: 100, referencia: "10 - 100 /µL (0.5-1%)" },
-  { codigo: "1013", nombre: "FOSFATASA ALCALINA LEUCOCITARIA (FAL)", unidad: "puntos", refMin: 20, refMax: 100, referencia: "20 - 100 puntos" },
-  { codigo: "1014", nombre: "RECUENTO DE PLAQUETAS", unidad: "/µL", refMin: 150000, refMax: 350000, referencia: "150,000 - 350,000 /µL" },
-  { codigo: "1015", nombre: "TIEMPO DE HEMORRAGIA (MÉTODO DE DUKE)", unidad: "minutos", refMin: 1, refMax: 5, referencia: "Hasta 5 minutos" },
-  { codigo: "1016", nombre: "TIEMPO DE HEMORRAGIA (MÉTODO DE IVY)", unidad: "minutos", refMin: 1, refMax: 10, referencia: "< 9 - 10 minutos" },
-  { codigo: "1017", nombre: "TIEMPO DE OBTURACIÓN PFA (COLÁGENO-EPINEFRINA)", unidad: "segundos", refMin: 0, refMax: 160, referencia: "< 160 segundos" },
-  { codigo: "1018", nombre: "TIEMPO DE OBTURACIÓN PFA (COLÁGENO-ADP)", unidad: "segundos", refMin: 0, refMax: 125, referencia: "< 125 segundos" },
-  { codigo: "1019", nombre: "AGREGACIÓN PLAQUETARIA", unidad: "%", refMin: 65, refMax: 85, referencia: "~ 75 %" },
-  { codigo: "1020", nombre: "TIEMPO DE COAGULACIÓN", unidad: "minutos", refMin: 5, refMax: 11, referencia: "5 - 11 minutos" },
-  { codigo: "1021", nombre: "RETRACCIÓN DEL COÁGULO", unidad: "%", refMin: 45, refMax: 65, referencia: "~ 55 % del volumen inicial" },
-  { codigo: "1022", nombre: "TIEMPO DE TROMBOPLASTINA PARCIAL ACTIVADA (TTPA / CEFLINA-CAOLÍN)", unidad: "segundos", refMin: 25, refMax: 38, referencia: "25 - 38 segundos" },
-  { codigo: "1023", nombre: "TIEMPO DE TROMBINA", unidad: "segundos", refMin: 15, refMax: 20, referencia: "15 - 20 segundos" },
-  { codigo: "1024", nombre: "TIEMPO DE REPTILASA", unidad: "segundos", refMin: 15, refMax: 22, referencia: "15 - 22 segundos" },
-  { codigo: "1025", nombre: "ACTIVIDAD ANTI-FACTOR Xa (MONITORIZACIÓN HBPM)", unidad: "U/mL", refMin: 0.8, refMax: 1.2, referencia: "0.8 - 1.2 U/mL" },
-  { codigo: "1026", nombre: "TEST DE EUGLOBULINAS (VON KAULLA)", unidad: "horas", refMin: 2, refMax: 24, referencia: "> 2 horas" },
-  { codigo: "1027", nombre: "PRODUCTOS DE DEGRADACIÓN DEL FIBRINÓGENO (PDF)", unidad: "µg/mL", refMin: 0, refMax: 10, referencia: "< 10 µg/mL" },
-  { codigo: "1028", nombre: "HOMOCISTEÍNA PLASMÁTICA", unidad: "µmol/L", refMin: 5, refMax: 15, referencia: "< 15 µmol/L" },
-  { codigo: "1029", nombre: "PREALBÚMINA (TRANSTIRETINA) SÉRICA", unidad: "mg/dL", refMin: 19, refMax: 40, referencia: "19 - 40 mg/dL" },
-  { codigo: "1030", nombre: "COCIENTE ALBÚMINA / GLOBULINA", unidad: "Ratio", refMin: 1.5, refMax: 2.7, referencia: "1.5 - 2.7" },
-  { codigo: "1031", nombre: "ALFA-1 GLOBULINA", unidad: "g/dL", refMin: 0.2, refMax: 0.4, referencia: "0.2 - 0.4 g/dL (3 - 5 %)" },
-  { codigo: "1032", nombre: "ALFA-2 GLOBULINA", unidad: "g/dL", refMin: 0.4, refMax: 0.7, referencia: "0.4 - 0.7 g/dL (5 - 9 %)" },
-  { codigo: "1033", nombre: "BETA GLOBULINA", unidad: "g/dL", refMin: 0.7, refMax: 0.9, referencia: "0.7 - 0.9 g/dL (9 - 14 %)" },
-  { codigo: "1034", nombre: "GAMMA GLOBULINA", unidad: "g/dL", refMin: 0.7, refMax: 1.4, referencia: "0.7 - 1.4 g/dL (12 - 20 %)" },
-  { codigo: "1035", nombre: "INMUNOGLOBULINA D (IgD)", unidad: "mg/dL", refMin: 0.3, refMax: 40.0, referencia: "0.3 - 40.0 mg/dL" },
-  { codigo: "1036", nombre: "INMUNOGLOBULINA E (IgE)", unidad: "mg/dL", refMin: 0.01, refMax: 0.43, referencia: "0.01 - 0.43 mg/dL (< 100 IU/mL)" },
-  { codigo: "1037", nombre: "NITRÓGENO UREICO EN SANGRE (BUN)", unidad: "mg/dL", refMin: 8, refMax: 25, referencia: "8 - 25 mg/dL" },
-  { codigo: "1038", nombre: "OSMOLALIDAD PLASMÁTICA", unidad: "mOsm/kg", refMin: 280, refMax: 300, referencia: "280 - 300 mOsm/kg" },
-  { codigo: "1039", nombre: "SODIO PLASMÁTICO", unidad: "mmol/L", refMin: 135, refMax: 145, referencia: "135 - 145 mmol/L" },
-  { codigo: "1040", nombre: "POTASIO PLASMÁTICO", unidad: "mmol/L", refMin: 3.5, refMax: 5.0, referencia: "3.5 - 5.0 mmol/L" },
-  { codigo: "1041", nombre: "MAGNESIO PLASMÁTICO", unidad: "mg/dL", refMin: 1.9, refMax: 2.5, referencia: "1.9 - 2.5 mg/dL" },
-  { codigo: "1042", nombre: "CALCIO IÓNICO", unidad: "mg/dL", refMin: 4.5, refMax: 5.3, referencia: "4.5 - 5.3 mg/dL (~ 50% del Calcio total)" },
-  { codigo: "1043", nombre: "TROPONINA T (CARDIOESPECÍFICA)", unidad: "ng/L", refMin: 0, refMax: 10, referencia: "< 10 ng/L" },
-  { codigo: "1044", nombre: "TROPONINA I (CARDIOESPECÍFICA)", unidad: "ng/L", refMin: 0, refMax: 40, referencia: "< 40 ng/L" },
-  { codigo: "1045", nombre: "MIOGLOBINA SÉRICA", unidad: "ng/mL", refMin: 0, refMax: 90, referencia: "< 90 ng/mL" },
-  { codigo: "1046", nombre: "PROTEÍNA C REACTIVA (PCR US / ALTA SENSIBILIDAD)", unidad: "mg/dL", refMin: 0.0, refMax: 0.5, referencia: "< 0.5 mg/dL (< 5 mg/L)" },
-  { codigo: "1047", nombre: "PROCALCITONINA (PCT)", unidad: "ng/mL", refMin: 0.0, refMax: 0.5, referencia: "< 0.5 ng/mL" },
-  { codigo: "1048", nombre: "VELOCIDAD DE SEDIMENTACIÓN GLOBULAR (VSG)", unidad: "mm/h", refMin: 3, refMax: 10, referencia: "3 - 10 mm en la 1ra hora" },
-
-  // Catálogo base preexistente
-  { codigo: "5", nombre: "11 - DESOXICORTISOL (COMPUESTOS)", unidad: "ng/dL", refMin: 10, refMax: 138, referencia: "< 138 ng/dL" },
+   { codigo: "5", nombre: "11 - DESOXICORTISOL (COMPUESTOS)", unidad: "ng/dL", refMin: 10, refMax: 138, referencia: "< 138 ng/dL" },
   { codigo: "6", nombre: "17 - HIDROXICORTICOIDES (ORINA 24H)", unidad: "mg/24h", refMin: 3.0, refMax: 12.0, referencia: "3.0 - 12.0 mg/24h" },
   { codigo: "7", nombre: "17 KETOESTEROIDES (ORINA 24 HRS.)", unidad: "mg/24h", refMin: 6.0, refMax: 20.0, referencia: "6.0 - 20.0 mg/24h" },
   { codigo: "8", nombre: "17 OH PROGESTERONA BASAL, 30 Y 60 POST ESTIMULACIÓN CON ACTH", unidad: "ng/mL", refMin: 0.2, refMax: 3.0, referencia: "Según fase / estimulación" },
@@ -1487,7 +1436,7 @@ function guardarExamenCatalogo() {
   localStorage.setItem('vitalhealth_catalogo', JSON.stringify(examenesCatalogo));
   renderizarTablaCatalogo('');
   prepararNuevoExamen();
-  alert("Examen guardado en el catálogo.");
+  alert("Examen guardado exitosamente en el catálogo.");
 }
 
 // ==========================================
