@@ -1,6 +1,32 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
-// Estructura normalizada de exámenes con sus campos de referencia/unidades integrados a partir de la literatura médica y tu catálogo comercial.
+// 1. DICCIONARIO DE VALORES Y PARÁMETROS REFERENCIALES COMPUESTOS
+const BASE_VALORES_REFERENCIALES = {
+  "HEMOGRAMA": [
+    { id: 'leucocitos', nombre: 'Leucocitos', unidad: 'Cél/uL', refMin: 4500, refMax: 11000, referencia: '4,500 - 11,000 /uL' },
+    { id: 'hematies', nombre: 'Hematíes (Glóbulos Rojos)', unidad: 'M/uL', refMin: 4.2, refMax: 5.8, referencia: 'V: 4.5-5.8 | M: 4.2-5.2 M/uL' },
+    { id: 'hemoglobina', nombre: 'Hemoglobina', unidad: 'g/dL', refMin: 12.0, refMax: 16.5, referencia: 'V: 13.5-16.5 | M: 12.0-15.0 g/dL' },
+    { id: 'hematocrito', nombre: 'Hematocrito', unidad: '%', refMin: 37, refMax: 50, referencia: 'V: 40-50% | M: 37-47%' },
+    { id: 'vcm', nombre: 'VCM', unidad: 'fL', refMin: 80, refMax: 98, referencia: '80.0 - 98.0 fL' },
+    { id: 'hcm', nombre: 'HCM', unidad: 'pg', refMin: 27, refMax: 33, referencia: '27.0 - 33.0 pg' },
+    { id: 'chcm', nombre: 'CHCM', unidad: 'g/dL', refMin: 32, refMax: 36, referencia: '32.0 - 36.0 g/dL' },
+    { id: 'plaquetas', nombre: 'Plaquetas', unidad: 'Cél/uL', refMin: 150000, refMax: 450000, referencia: '150,000 - 450,000 /uL' }
+  ],
+  "PERFIL LIPIDICO": [
+    { id: 'col_tot', nombre: 'Colesterol Total', unidad: 'mg/dL', refMin: 0, refMax: 200, referencia: '< 200 mg/dL' },
+    { id: 'trig', nombre: 'Triglicéridos', unidad: 'mg/dL', refMin: 0, refMax: 150, referencia: '< 150 mg/dL' },
+    { id: 'hdl', nombre: 'Colesterol HDL', unidad: 'mg/dL', refMin: 40, refMax: 100, referencia: '> 40 mg/dL' },
+    { id: 'ldl', nombre: 'Colesterol LDL', unidad: 'mg/dL', refMin: 0, refMax: 100, referencia: '< 100 mg/dL' }
+  ],
+  "PERFIL HEPATICO": [
+    { id: 'bt', nombre: 'Bilirrubina Total', unidad: 'mg/dL', refMin: 0.2, refMax: 1.2, referencia: '0.2 - 1.2 mg/dL' },
+    { id: 'bd', nombre: 'Bilirrubina Directa', unidad: 'mg/dL', refMin: 0.0, refMax: 0.3, referencia: '0.0 - 0.3 mg/dL' },
+    { id: 'tgo', nombre: 'TGO (AST)', unidad: 'U/L', refMin: 0, refMax: 38, referencia: 'Hasta 38 U/L' },
+    { id: 'tgp', nombre: 'TGP (ALT)', unidad: 'U/L', refMin: 0, refMax: 41, referencia: 'Hasta 41 U/L' }
+  ]
+};
+
+// 2. CATÁLOGO COMPLETO DE EXÁMENES INCORPORADO DE TU APP.JS 1
 const examenesCatalogo = [
   { codigo: "5", nombre: "11 - DESOXICORTISOL (COMPUESTOS)", unidad: "ng/dL", refMin: 10, refMax: 138, referencia: "< 138 ng/dL" },
   { codigo: "6", nombre: "17 - HIDROXICORTICOIDES (ORINA 24H)", unidad: "mg/24h", refMin: 3.0, refMax: 12.0, referencia: "3.0 - 12.0 mg/24h" },
@@ -625,7 +651,7 @@ const examenesCatalogo = [
   { codigo: "667", nombre: "HORMONA DE CRECIMIENTO HUMANO BASAL (HGH)", unidad: "ng/mL", refMin: 0.05, refMax: 3.0, referencia: "< 3.0 ng/mL" },
   { codigo: "668", nombre: "HORMONA DEL CRECIMIENTO (POST CLONID) 120'", unidad: "ng/mL", refMin: 5, refMax: 20, referencia: "Respuesta normal: > 7-10 ng/mL" },
   { codigo: "669", nombre: "HORMONA DEL CRECIMIENTO (POST CLONID) 30'", unidad: "ng/mL", refMin: 5, refMax: 20, referencia: "Respuesta normal: > 7-10 ng/mL" },
-  { codigo: "670", nombre: "HORMONA DEL CRECIMIENTO (POST CLONID) 60'", unidad: "ng/mL", refMin: 5, refMax: 20, referencia: "Respuesta normal: > 7-10 ng/mL" },
+  { codigo: "70", nombre: "HORMONA DEL CRECIMIENTO (POST CLONID) 60'", unidad: "ng/mL", refMin: 5, refMax: 20, referencia: "Respuesta normal: > 7-10 ng/mL" },
   { codigo: "671", nombre: "HORMONA DEL CRECIMIENTO (POST CLONID) 90'", unidad: "ng/mL", refMin: 5, refMax: 20, referencia: "Respuesta normal: > 7-10 ng/mL" },
   { codigo: "672", nombre: "HORMONA DEL CRECIMIENTO (POST EJER) 30'", unidad: "ng/mL", refMin: 5, refMax: 20, referencia: "Respuesta normal: > 7-10 ng/mL" },
   { codigo: "673", nombre: "HORMONA DEL CRECIMIENTO POST ESTIMULO", unidad: "ng/mL", refMin: 7, refMax: 20, referencia: "Pico > 7 ng/mL" },
@@ -686,85 +712,622 @@ const examenesCatalogo = [
   { codigo: "729", nombre: "LEGIONELLA PNEUMOPHILA IGM", unidad: "", refMin: "", refMax: "", referencia: "NEGATIVO" }
 ];
 
-export default function App() {
-  const [busqueda, setBusqueda] = useState('');
-  const [examenSeleccionado, setExamenSeleccionado] = useState(null);
-  const [resultadoInput, setResultadoInput] = useState('');
+// Helper para normalizar los sub-parámetros de un examen
+function obtenerIndicadoresExamen(examen) {
+  if (!examen) return [];
+  const nombreNorm = (examen.nombre || '').toUpperCase().trim();
+  if (BASE_VALORES_REFERENCIALES[nombreNorm]) {
+    return BASE_VALORES_REFERENCIALES[nombreNorm];
+  }
+  return [{
+    id: `ind_${examen.codigo}`,
+    nombre: examen.nombre,
+    unidad: examen.unidad || '',
+    refMin: examen.refMin,
+    refMax: examen.refMax,
+    referencia: examen.referencia || ''
+  }];
+}
 
+export default function App() {
+  const [seccionActiva, setSeccionActiva] = useState('ordenes');
+  const [busqueda, setBusqueda] = useState('');
+  
+  // Estado para el registro de Pacientes y Órdenes
+  const [paciente, setPaciente] = useState({ dni: '', nombre: '', edad: '', sexo: 'MASCULINO', doctor: 'Particular' });
+  const [metodoPago, setMetodoPago] = useState('Efectivo');
+  const [examenesSeleccionados, setExamenesSeleccionados] = useState([]);
+  const [ordenes, setOrdenes] = useState([]);
+  
+  // Estado para la gestión e impresión de resultados
+  const [ordenActual, setOrdenActual] = useState(null);
+  const [resultadosInput, setResultadosInput] = useState({});
+
+  // Cargar datos locales al iniciar la aplicación
+  useEffect(() => {
+    const ordenesGuardadas = localStorage.getItem('vitalhealth_ordenes');
+    if (ordenesGuardadas) {
+      try {
+        setOrdenes(JSON.parse(ordenesGuardadas));
+      } catch (e) {
+        console.error("Error al cargar ordenes locales", e);
+      }
+    }
+  }, []);
+
+  const guardarOrdenesEnStorage = (nuevasOrdenes) => {
+    setOrdenes(nuevasOrdenes);
+    localStorage.setItem('vitalhealth_ordenes', JSON.stringify(nuevasOrdenes));
+  };
+
+  // Filtrado dinámico de exámenes
   const examenesFiltrados = examenesCatalogo.filter((e) =>
     e.nombre.toLowerCase().includes(busqueda.toLowerCase()) ||
     e.codigo.includes(busqueda)
   );
 
-  return (
-    <div style={{ padding: '20px', fontFamily: 'Arial, sans-serif', maxWidth: '900px', margin: '0 auto' }}>
-      <h1>Sistema de Gestión de Resultados de Laboratorio Clínico</h1>
-      
-      <div style={{ marginBottom: '20px' }}>
-        <input
-          type="text"
-          placeholder="Buscar examen por nombre o código..."
-          value={busqueda}
-          onChange={(e) => setBusqueda(e.target.value)}
-          style={{ width: '100%', padding: '10px', fontSize: '16px' }}
-        />
-      </div>
+  const agregarExamenAOrden = (item) => {
+    if (!examenesSeleccionados.some(e => e.codigo === item.codigo)) {
+      setExamenesSeleccionados([...examenesSeleccionados, { ...item, precio: parseFloat(item.precio || 25.0) }]);
+    }
+  };
 
-      <div style={{ display: 'flex', gap: '20px' }}>
-        <div style={{ flex: 1, maxHeight: '400px', overflowY: 'auto', border: '1px solid #ccc', padding: '10px' }}>
-          <h3>Catálogo de Exámenes ({examenesFiltrados.length})</h3>
-          <ul style={{ listStyleType: 'none', padding: 0 }}>
-            {examenesFiltrados.map((item) => (
-              <li
-                key={item.codigo}
-                onClick={() => {
-                  setExamenSeleccionado(item);
-                  setResultadoInput('');
-                }}
-                style={{
-                  padding: '8px',
-                  cursor: 'pointer',
-                  borderBottom: '1px solid #eee',
-                  backgroundColor: examenSeleccionado?.codigo === item.codigo ? '#e0f7fa' : 'transparent'
-                }}
-              >
-                <strong>[{item.codigo}]</strong> {item.nombre}
-              </li>
-            ))}
-          </ul>
+  const eliminarExamenDeOrden = (codigo) => {
+    setExamenesSeleccionados(examenesSeleccionados.filter(e => e.codigo !== codigo));
+  };
+
+  const totalCobrar = examenesSeleccionados.reduce((acc, curr) => acc + (curr.precio || 25.0), 0);
+
+  // Registro de nueva Orden
+  const registrarOrden = () => {
+    if (!paciente.dni || !paciente.nombre || examenesSeleccionados.length === 0) {
+      alert("Por favor complete los datos obligatorios: DNI, Nombre y al menos un examen.");
+      return;
+    }
+
+    const ahora = new Date();
+    const nuevaOrden = {
+      id: `VH-2026-${String(ordenes.length + 1).padStart(5, '0')}`,
+      fecha: ahora.toLocaleDateString('es-PE'),
+      hora: ahora.toLocaleTimeString('es-PE'),
+      paciente: { ...paciente },
+      examenes: [...examenesSeleccionados],
+      total: totalCobrar,
+      metodoPago: metodoPago,
+      estado: 'PENDIENTE',
+      resultados: {}
+    };
+
+    const actualizadas = [nuevaOrden, ...ordenes];
+    guardarOrdenesEnStorage(actualizadas);
+    imprimirTicket58mm(nuevaOrden);
+
+    // Resetear formulario
+    setPaciente({ dni: '', nombre: '', edad: '', sexo: 'MASCULINO', doctor: 'Particular' });
+    setExamenesSeleccionados([]);
+  };
+
+  // Evaluación de rangos clínicos (Normal / Alto / Bajo)
+  const evaluarRangoClinico = (valStr, minVal, maxVal) => {
+    const val = parseFloat(valStr);
+    const min = parseFloat(minVal);
+    const max = parseFloat(maxVal);
+    if (isNaN(val)) return 'normal';
+    if (!isNaN(min) && val < min) return 'bajo';
+    if (!isNaN(max) && val > max) return 'alto';
+    return 'normal';
+  };
+
+  // Cargar pantalla de resultados para una orden
+  const abrirCargaResultados = (orden) => {
+    setOrdenActual(orden);
+    setResultadosInput(orden.resultados || {});
+    setSeccionActiva('resultados');
+  };
+
+  const guardarResultados = () => {
+    if (!ordenActual) return;
+    const ordenesActualizadas = ordenes.map(o => {
+      if (o.id === ordenActual.id) {
+        return {
+          ...o,
+          resultados: { ...resultadosInput },
+          estado: 'COMPLETADO'
+        };
+      }
+      return o;
+    });
+
+    guardarOrdenesEnStorage(ordenesActualizadas);
+    alert('Resultados almacenados exitosamente.');
+  };
+
+  // Impresión de Ticket de 58mm
+  const imprimirTicket58mm = (orden) => {
+    const ventanaImp = window.open('', '_blank');
+    if (!ventanaImp) return;
+
+    let itemsHTML = orden.examenes.map(e => `
+      <tr>
+        <td colspan="2">${e.nombre}</td>
+      </tr>
+      <tr>
+        <td>1 x S/ ${(e.precio || 25.0).toFixed(2)}</td>
+        <td style="text-align:right;">S/ ${(e.precio || 25.0).toFixed(2)}</td>
+      </tr>
+    `).join('');
+
+    ventanaImp.document.write(`
+      <html>
+      <head>
+        <style>
+          body { font-family: monospace; width: 200px; font-size: 11px; margin: 0; padding: 5px; }
+          .header { text-align: center; font-weight: bold; margin-bottom: 5px; }
+          .divider { border-top: 1px dashed #000; margin: 5px 0; }
+          table { width: 100%; border-collapse: collapse; }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          CENTRO MÉDICO VITAL HEALTH<br/>
+          LABORATORIO CLÍNICO<br/>
+          Tel: 984 089 927
+        </div>
+        <div class="divider"></div>
+        <div>ORDEN: ${orden.id}</div>
+        <div>FECHA: ${orden.fecha} ${orden.hora}</div>
+        <div>DNI: ${orden.paciente.dni}</div>
+        <div>PACIENTE: ${orden.paciente.nombre}</div>
+        <div class="divider"></div>
+        <table><tbody>${itemsHTML}</tbody></table>
+        <div class="divider"></div>
+        <div style="text-align:right;"><strong>TOTAL: S/ ${orden.total.toFixed(2)}</strong></div>
+        <script>window.onload = function() { window.print(); window.close(); }</script>
+      </body>
+      </html>
+    `);
+    ventanaImp.document.close();
+  };
+
+  // Impresión de Reporte Clínico en Formato A4
+  const imprimirReporteA4 = () => {
+    if (!ordenActual) return;
+    guardarResultados();
+
+    const ventanaImp = window.open('', '_blank');
+    if (!ventanaImp) return;
+
+    let bloques = ordenActual.examenes.map(ex => {
+      const indicadores = obtenerIndicadoresExamen(ex);
+      let filas = indicadores.map(ind => {
+        const valRes = resultadosInput[ind.id] || '-';
+        const estado = evaluarRangoClinico(valRes, ind.refMin, ind.refMax);
+        
+        let celdaRes = valRes;
+        if (estado === 'alto' || estado === 'bajo') {
+          celdaRes = `<span style="color:red; font-weight:bold;">${valRes} * (${estado.toUpperCase()})</span>`;
+        }
+
+        return `
+          <tr>
+            <td style="padding:6px; border:1px solid #ccc;">${ind.nombre}</td>
+            <td style="padding:6px; border:1px solid #ccc; text-align:center; font-weight:bold;">${celdaRes}</td>
+            <td style="padding:6px; border:1px solid #ccc; text-align:center;">${ind.unidad || '-'}</td>
+            <td style="padding:6px; border:1px solid #ccc; text-align:center;">${ind.referencia || `${ind.refMin} - ${ind.refMax}`}</td>
+          </tr>
+        `;
+      }).join('');
+
+      return `
+        <div style="margin-top:15px;">
+          <h3 style="color:#0072bc; border-bottom:1px solid #0072bc; margin-bottom:5px;">${ex.nombre}</h3>
+          <table style="width:100%; border-collapse:collapse; font-size:12px;">
+            <thead>
+              <tr style="background:#f0f4f8;">
+                <th style="padding:6px; border:1px solid #ccc; text-align:left;">PARAMETRO</th>
+                <th style="padding:6px; border:1px solid #ccc;">RESULTADO</th>
+                <th style="padding:6px; border:1px solid #ccc;">UNIDAD</th>
+                <th style="padding:6px; border:1px solid #ccc;">VALOR REFERENCIAL</th>
+              </tr>
+            </thead>
+            <tbody>${filas}</tbody>
+          </table>
+        </div>
+      `;
+    }).join('');
+
+    ventanaImp.document.write(`
+      <html>
+      <head>
+        <title>Informe Clínico - ${ordenActual.paciente.nombre}</title>
+        <style>
+          @page { size: A4; margin: 15mm; }
+          body { font-family: Arial, sans-serif; font-size: 11px; color: #333; }
+          .header { border-bottom: 2px solid #0072bc; padding-bottom: 8px; display: flex; justify-content: space-between; }
+          .patient-box { border: 1px solid #b7c7d9; border-radius: 5px; padding: 10px; margin-top: 15px; display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <div>
+            <h1 style="color:#0072bc; margin:0; font-size:20px;">Centro Médico Vital Health</h1>
+            <div>LABORATORIO CLÍNICO</div>
+          </div>
+          <div style="text-align:right;">
+            <div>Av. Grau N° 1799 - Piura</div>
+            <div>Tel: 984 089 927</div>
+          </div>
         </div>
 
-        <div style={{ flex: 1, border: '1px solid #ccc', padding: '15px' }}>
-          <h3>Ingreso de Resultados</h3>
-          {examenSeleccionado ? (
-            <div>
-              <p><strong>Examen:</strong> {examenSeleccionado.nombre}</p>
-              <p><strong>Código:</strong> {examenSeleccionado.codigo}</p>
-              <p><strong>Unidad:</strong> {examenSeleccionado.unidad || 'N/A'}</p>
-              <p><strong>Referencia:</strong> {examenSeleccionado.referencia}</p>
+        <div class="patient-box">
+          <div><strong>PACIENTE:</strong> ${ordenActual.paciente.nombre.toUpperCase()}</div>
+          <div><strong>DNI:</strong> ${ordenActual.paciente.dni}</div>
+          <div><strong>EDAD:</strong> ${ordenActual.paciente.edad}</div>
+          <div><strong>MEDICO:</strong> ${ordenActual.paciente.doctor}</div>
+          <div><strong>ORDEN:</strong> ${ordenActual.id}</div>
+          <div><strong>FECHA:</strong> ${ordenActual.fecha}</div>
+        </div>
 
-              <div style={{ marginTop: '15px' }}>
-                <label style={{ display: 'block', marginBottom: '5px' }}>Resultado:</label>
+        ${bloques}
+
+        <div style="margin-top:40px; text-align:center;">
+          <div style="border-top:1px solid #333; width:200px; margin:0 auto 5px auto;"></div>
+          <strong>Bióloga Responsable</strong><br/>
+          <span>Laboratorio Clínico - Vital Health</span>
+        </div>
+
+        <script>window.onload = function() { window.print(); }</script>
+      </body>
+      </html>
+    `);
+    ventanaImp.document.close();
+  };
+
+  // Cálculo para Control de Caja
+  const calcularCaja = () => {
+    const hoy = new Date().toLocaleDateString('es-PE');
+    const ordenesHoy = ordenes.filter(o => o.fecha === hoy);
+    const totalEfectivo = ordenesHoy.filter(o => o.metodoPago === 'Efectivo').reduce((a, b) => a + b.total, 0);
+    const totalDigital = ordenesHoy.filter(o => o.metodoPago !== 'Efectivo').reduce((a, b) => a + b.total, 0);
+    return { ordenesHoy, totalEfectivo, totalDigital, totalGeneral: totalEfectivo + totalDigital };
+  };
+
+  const datosCaja = calcularCaja();
+
+  return (
+    <div style={{ fontFamily: 'Arial, sans-serif', minHeight: '100vh', backgroundColor: '#f4f6f9' }}>
+      {/* Navbar Superior */}
+      <nav style={{ backgroundColor: '#0072bc', color: 'white', padding: '15px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <h2 style={{ margin: 0, fontSize: '20px' }}>Centro Médico Vital Health - LIS</h2>
+        <div>
+          <button onClick={() => setSeccionActiva('ordenes')} style={btnNavStyle(seccionActiva === 'ordenes')}>Recepción / Órdenes</button>
+          <button onClick={() => setSeccionActiva('resultados')} style={btnNavStyle(seccionActiva === 'resultados')}>Carga de Resultados</button>
+          <button onClick={() => setSeccionActiva('caja')} style={btnNavStyle(seccionActiva === 'caja')}>Control de Caja</button>
+          <button onClick={() => setSeccionActiva('catalogo')} style={btnNavStyle(seccionActiva === 'catalogo')}>Catálogo de Exámenes</button>
+        </div>
+      </nav>
+
+      <div style={{ padding: '20px', maxWidth: '1200px', margin: '0 auto' }}>
+        {/* SECCIÓN 1: RECEPCIÓN Y EMISIÓN DE ÓRDENES */}
+        {seccionActiva === 'ordenes' && (
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+            {/* Formulario Paciente */}
+            <div style={{ backgroundColor: 'white', padding: '20px', borderRadius: '8px', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>
+              <h3 style={{ marginTop: 0, color: '#0072bc' }}>Datos del Paciente</h3>
+              <div style={{ display: 'grid', gap: '10px' }}>
                 <input
                   type="text"
-                  placeholder="Ingrese el valor o informe"
-                  value={resultadoInput}
-                  onChange={(e) => setResultadoInput(e.target.value)}
-                  style={{ width: '100%', padding: '8px', marginBottom: '10px' }}
+                  placeholder="DNI / Documento"
+                  value={paciente.dni}
+                  onChange={(e) => setPaciente({ ...paciente, dni: e.target.value })}
+                  style={inputStyle}
                 />
-                <button
-                  onClick={() => alert(`Resultado guardado para ${examenSeleccionado.nombre}: ${resultadoInput} ${examenSeleccionado.unidad}`)}
-                  style={{ padding: '10px 15px', backgroundColor: '#007bff', color: 'white', border: 'none', cursor: 'pointer' }}
+                <input
+                  type="text"
+                  placeholder="Nombre y Apellidos Completos"
+                  value={paciente.nombre}
+                  onChange={(e) => setPaciente({ ...paciente, nombre: e.target.value })}
+                  style={inputStyle}
+                />
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                  <input
+                    type="text"
+                    placeholder="Edad (Ej: 25 AÑOS)"
+                    value={paciente.edad}
+                    onChange={(e) => setPaciente({ ...paciente, edad: e.target.value })}
+                    style={inputStyle}
+                  />
+                  <select
+                    value={paciente.sexo}
+                    onChange={(e) => setPaciente({ ...paciente, sexo: e.target.value })}
+                    style={inputStyle}
+                  >
+                    <option value="MASCULINO">MASCULINO</option>
+                    <option value="FEMENINO">FEMENINO</option>
+                  </select>
+                </div>
+                <input
+                  type="text"
+                  placeholder="Médico Solicitante"
+                  value={paciente.doctor}
+                  onChange={(e) => setPaciente({ ...paciente, doctor: e.target.value })}
+                  style={inputStyle}
+                />
+                <select
+                  value={metodoPago}
+                  onChange={(e) => setMetodoPago(e.target.value)}
+                  style={inputStyle}
                 >
-                  Guardar Resultado
-                </button>
+                  <option value="Efectivo">Efectivo</option>
+                  <option value="Yape/Plin">Yape / Plin</option>
+                  <option value="Tarjeta">Tarjeta de Crédito / Débito</option>
+                </select>
+              </div>
+
+              <h4 style={{ color: '#0072bc', marginBottom: '10px' }}>Exámenes Seleccionados</h4>
+              <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '15px' }}>
+                <thead>
+                  <tr style={{ backgroundColor: '#f0f4f8', textTransform: 'uppercase', fontSize: '11px' }}>
+                    <th style={{ padding: '8px', textAlign: 'left' }}>Código</th>
+                    <th style={{ padding: '8px', textAlign: 'left' }}>Examen</th>
+                    <th style={{ padding: '8px', textAlign: 'right' }}>Precio</th>
+                    <th style={{ padding: '8px', textAlign: 'center' }}>Acción</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {examenesSeleccionados.map((item) => (
+                    <tr key={item.codigo} style={{ borderBottom: '1px solid #eee' }}>
+                      <td style={{ padding: '8px' }}>{item.codigo}</td>
+                      <td style={{ padding: '8px' }}>{item.nombre}</td>
+                      <td style={{ padding: '8px', textAlign: 'right' }}>S/ {(item.precio || 25.0).toFixed(2)}</td>
+                      <td style={{ padding: '8px', textAlign: 'center' }}>
+                        <button onClick={() => eliminarExamenDeOrden(item.codigo)} style={{ color: 'red', border: 'none', background: 'none', cursor: 'pointer' }}>X</button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontWeight: 'bold', fontSize: '18px' }}>
+                <span>Total a Cobrar:</span>
+                <span style={{ color: '#28a745' }}>S/ {totalCobrar.toFixed(2)}</span>
+              </div>
+
+              <button
+                onClick={registrarOrden}
+                style={{ width: '100%', padding: '12px', backgroundColor: '#28a745', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', marginTop: '15px', fontWeight: 'bold' }}
+              >
+                Generar Orden e Imprimir Ticket (58mm)
+              </button>
+            </div>
+
+            {/* Búsqueda en Catálogo de Exámenes */}
+            <div style={{ backgroundColor: 'white', padding: '20px', borderRadius: '8px', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>
+              <h3 style={{ marginTop: 0, color: '#0072bc' }}>Buscar e Incorporar Exámenes</h3>
+              <input
+                type="text"
+                placeholder="Buscar por código o nombre del examen..."
+                value={busqueda}
+                onChange={(e) => setBusqueda(e.target.value)}
+                style={{ ...inputStyle, marginBottom: '15px' }}
+              />
+
+              <div style={{ maxHeight: '450px', overflowY: 'auto', border: '1px solid #ddd', borderRadius: '4px' }}>
+                {examenesFiltrados.map((item) => (
+                  <div
+                    key={item.codigo}
+                    onClick={() => agregarExamenAOrden(item)}
+                    style={{
+                      padding: '10px',
+                      borderBottom: '1px solid #eee',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      backgroundColor: 'white'
+                    }}
+                  >
+                    <div>
+                      <strong>[{item.codigo}]</strong> {item.nombre}
+                      <br/>
+                      <small style={{ color: '#666' }}>Ref: {item.referencia || 'Ver parámetros'} {item.unidad ? `(${item.unidad})` : ''}</small>
+                    </div>
+                    <button style={{ padding: '5px 10px', backgroundColor: '#0072bc', color: 'white', border: 'none', borderRadius: '3px', cursor: 'pointer' }}>
+                      +
+                    </button>
+                  </div>
+                ))}
               </div>
             </div>
-          ) : (
-            <p>Seleccione un examen de la lista para registrar el resultado del paciente.</p>
-          )}
-        </div>
+          </div>
+        )}
+
+        {/* SECCIÓN 2: CARGA DE RESULTADOS */}
+        {seccionActiva === 'resultados' && (
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '20px' }}>
+            {/* Lista de Órdenes */}
+            <div style={{ backgroundColor: 'white', padding: '20px', borderRadius: '8px', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>
+              <h3 style={{ marginTop: 0, color: '#0072bc' }}>Órdenes Registradas</h3>
+              <div style={{ maxHeight: '500px', overflowY: 'auto' }}>
+                {ordenes.map((o) => (
+                  <div
+                    key={o.id}
+                    onClick={() => abrirCargaResultados(o)}
+                    style={{
+                      padding: '12px',
+                      border: '1px solid #ddd',
+                      borderRadius: '5px',
+                      marginBottom: '10px',
+                      cursor: 'pointer',
+                      backgroundColor: ordenActual?.id === o.id ? '#e0f7fa' : 'white'
+                    }}
+                  >
+                    <strong>{o.id}</strong> - {o.paciente.nombre}
+                    <br/>
+                    <small style={{ color: '#666' }}>{o.fecha} | DNI: {o.paciente.dni}</small>
+                    <br/>
+                    <span style={{ fontSize: '11px', fontWeight: 'bold', color: o.estado === 'COMPLETADO' ? '#28a745' : '#ffc107' }}>
+                      ● {o.estado}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Editor de Resultados */}
+            <div style={{ backgroundColor: 'white', padding: '20px', borderRadius: '8px', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>
+              {ordenActual ? (
+                <div>
+                  <h3 style={{ marginTop: 0, color: '#0072bc' }}>Resultados: {ordenActual.paciente.nombre}</h3>
+                  <p><strong>DNI:</strong> {ordenActual.paciente.dni} | <strong>Orden:</strong> {ordenActual.id}</p>
+                  <hr/>
+
+                  {ordenActual.examenes.map((ex) => {
+                    const indicadores = obtenerIndicadoresExamen(ex);
+                    return (
+                      <div key={ex.codigo} style={{ marginBottom: '20px', padding: '15px', border: '1px solid #eee', borderRadius: '5px' }}>
+                        <h4 style={{ margin: '0 0 10px 0', color: '#333' }}>{ex.nombre}</h4>
+                        {indicadores.map((ind) => (
+                          <div key={ind.id} style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gap: '10px', alignItems: 'center', marginBottom: '8px' }}>
+                            <label style={{ fontSize: '13px' }}>{ind.nombre}:</label>
+                            <input
+                              type="text"
+                              placeholder="Resultado"
+                              value={resultadosInput[ind.id] || ''}
+                              onChange={(e) => setResultadosInput({ ...resultadosInput, [ind.id]: e.target.value })}
+                              style={inputStyle}
+                            />
+                            <span style={{ fontSize: '11px', color: '#666' }}>
+                              {ind.unidad} ({ind.referencia || `${ind.refMin} - ${ind.refMax}`})
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    );
+                  })}
+
+                  <div style={{ display: 'flex', gap: '10px', marginTop: '20px' }}>
+                    <button
+                      onClick={guardarResultados}
+                      style={{ flex: 1, padding: '10px', backgroundColor: '#0072bc', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
+                    >
+                      Guardar Resultados
+                    </button>
+                    <button
+                      onClick={imprimirReporteA4}
+                      style={{ flex: 1, padding: '10px', backgroundColor: '#17a2b8', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
+                    >
+                      Visualizar e Imprimir Reporte A4
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <p style={{ color: '#666' }}>Seleccione una orden del panel izquierdo para cargar los resultados.</p>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* SECCIÓN 3: CONTROL DE CAJA */}
+        {seccionActiva === 'caja' && (
+          <div style={{ backgroundColor: 'white', padding: '20px', borderRadius: '8px', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>
+            <h3 style={{ marginTop: 0, color: '#0072bc' }}>Control de Caja del Día</h3>
+            
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '15px', marginBottom: '20px' }}>
+              <div style={{ padding: '15px', backgroundColor: '#e9f5ff', borderRadius: '5px', textAlign: 'center' }}>
+                <small>Efectivo</small>
+                <h2 style={{ margin: '5px 0', color: '#0072bc' }}>S/ {datosCaja.totalEfectivo.toFixed(2)}</h2>
+              </div>
+              <div style={{ padding: '15px', backgroundColor: '#e8f8f0', borderRadius: '5px', textAlign: 'center' }}>
+                <small>Digital (Yape/Plin/Tarjeta)</small>
+                <h2 style={{ margin: '5px 0', color: '#28a745' }}>S/ {datosCaja.totalDigital.toFixed(2)}</h2>
+              </div>
+              <div style={{ padding: '15px', backgroundColor: '#fdf6e2', borderRadius: '5px', textAlign: 'center' }}>
+                <small>Total Cobrado Hoy</small>
+                <h2 style={{ margin: '5px 0', color: '#ffc107' }}>S/ {datosCaja.totalGeneral.toFixed(2)}</h2>
+              </div>
+            </div>
+
+            <h4>Detalle de Transacciones Hoy</h4>
+            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+              <thead>
+                <tr style={{ backgroundColor: '#f0f4f8', textTransform: 'uppercase', fontSize: '11px' }}>
+                  <th style={{ padding: '8px', textAlign: 'left' }}>Hora</th>
+                  <th style={{ padding: '8px', textAlign: 'left' }}>Orden</th>
+                  <th style={{ padding: '8px', textAlign: 'left' }}>Paciente</th>
+                  <th style={{ padding: '8px', textAlign: 'left' }}>Método</th>
+                  <th style={{ padding: '8px', textAlign: 'right' }}>Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                {datosCaja.ordenesHoy.map((o) => (
+                  <tr key={o.id} style={{ borderBottom: '1px solid #eee' }}>
+                    <td style={{ padding: '8px' }}>{o.hora}</td>
+                    <td style={{ padding: '8px' }}>{o.id}</td>
+                    <td style={{ padding: '8px' }}>{o.paciente.nombre}</td>
+                    <td style={{ padding: '8px' }}>{o.metodoPago}</td>
+                    <td style={{ padding: '8px', textAlign: 'right' }}>S/ {o.total.toFixed(2)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+
+        {/* SECCIÓN 4: CATÁLOGO COMPLETO DE EXÁMENES */}
+        {seccionActiva === 'catalogo' && (
+          <div style={{ backgroundColor: 'white', padding: '20px', borderRadius: '8px', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>
+            <h3 style={{ marginTop: 0, color: '#0072bc' }}>Catálogo General de Exámenes ({examenesCatalogo.length})</h3>
+            <input
+              type="text"
+              placeholder="Buscar examen por nombre o código..."
+              value={busqueda}
+              onChange={(e) => setBusqueda(e.target.value)}
+              style={{ ...inputStyle, marginBottom: '15px' }}
+            />
+            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+              <thead>
+                <tr style={{ backgroundColor: '#f0f4f8', textTransform: 'uppercase', fontSize: '11px' }}>
+                  <th style={{ padding: '8px', textAlign: 'left' }}>Código</th>
+                  <th style={{ padding: '8px', textAlign: 'left' }}>Nombre del Examen</th>
+                  <th style={{ padding: '8px', textAlign: 'left' }}>Unidad</th>
+                  <th style={{ padding: '8px', textAlign: 'left' }}>Valor de Referencia</th>
+                </tr>
+              </thead>
+              <tbody>
+                {examenesFiltrados.map((item) => (
+                  <tr key={item.codigo} style={{ borderBottom: '1px solid #eee' }}>
+                    <td style={{ padding: '8px' }}><strong>{item.codigo}</strong></td>
+                    <td style={{ padding: '8px' }}>{item.nombre}</td>
+                    <td style={{ padding: '8px' }}>{item.unidad || 'N/A'}</td>
+                    <td style={{ padding: '8px' }}>{item.referencia}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
     </div>
   );
 }
+
+// Estilos Reutilizables
+const inputStyle = {
+  width: '100%',
+  padding: '8px 10px',
+  borderRadius: '4px',
+  border: '1px solid #ccc',
+  boxSizing: 'border-box'
+};
+
+const btnNavStyle = (activo) => ({
+  backgroundColor: activo ? '#0056b3' : 'transparent',
+  color: 'white',
+  border: 'none',
+  padding: '8px 15px',
+  borderRadius: '4px',
+  cursor: 'pointer',
+  marginLeft: '5px',
+  fontWeight: activo ? 'bold' : 'normal'
+});
