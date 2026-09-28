@@ -1185,10 +1185,10 @@ function evaluarRangoClinico(valStr, minVal, maxVal) {
   const min = parseFloat(minVal);
   const max = parseFloat(maxVal);
 
-  if (isNaN(val)) return 'normal';
-  if (!isNaN(min) && val < min) return '*';
-  if (!isNaN(max) && val > max) return '*';
-  return 'normal';
+ if (isNaN(val)) return val; // o el valor por defecto si no es número
+    if (!isNaN(min) && val < min) return val + ' *';
+    if (!isNaN(max) && val > max) return val + ' *';
+    return val;
 }
 
 function imprimirReporteA4() {
