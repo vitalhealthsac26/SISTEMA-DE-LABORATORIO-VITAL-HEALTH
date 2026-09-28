@@ -1647,4 +1647,40 @@ function actualizarResumenCaja() {
         `;
         tbody.appendChild(tr);
     });
+} 
+// ==========================================
+// INICIALIZACIÓN Y MANEJADORES DE EVENTOS
+// ==========================================
+document.addEventListener('DOMContentLoaded', () => {
+  console.log("Sistema inicializado correctamente. Conectando botones...");
+
+  // Ejemplo de vinculación para un botón general o de búsqueda si existe en el DOM
+  const btnBuscar = document.getElementById('btn-buscar');
+  if (btnBuscar) {
+    btnBuscar.addEventListener('click', (e) => {
+      e.preventDefault();
+      const inputFiltro = document.getElementById('input-filtro');
+      const termino = inputFiltro ? inputFiltro.value.trim() : '';
+      ejecutarBusqueda(termino);
+    });
+  }
+
+  // Delegación de eventos global para asegurar que cualquier botón interactúe correctamente
+  document.addEventListener('click', (event) => {
+    const target = event.target;
+    
+    // Si se hace click en un botón con clase interactiva o similar
+    if (target.matches('button') || target.closest('button')) {
+      const boton = target.matches('button') ? target : target.closest('button');
+      console.log('Botón presionado:', boton.id || boton.className);
+    }
+  });
+});
+
+function ejecutarBusqueda(termino) {
+  const resultados = examenesCatalogo.filter(ex => 
+    ex.nombre.toLowerCase().includes(termino.toLowerCase()) || 
+    ex.codigo.includes(termino)
+  );
+  console.log(`Resultados encontrados para "${termino}":`, resultados);
 }
