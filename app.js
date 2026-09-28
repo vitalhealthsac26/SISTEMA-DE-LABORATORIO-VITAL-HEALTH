@@ -380,7 +380,7 @@ let examenesCatalogo = [
   { codigo: "367", nombre: "CULTIVO DE HONGOS", unidad: "", refMin: "", refMax: "", referencia: "SIN DESARROLLO MICÓTICO" },
   { codigo: "368", nombre: "CULTIVO DE LCR", unidad: "", refMin: "", refMax: "", referencia: "ESTÉRIL" },
   { codigo: "369", nombre: "CULTIVO DE LIQUIDO ASCITICO", unidad: "", refMin: "", refMax: "", referencia: "ESTÉRIL" },
-  { codigo: "370", nombre: "CULTIVO DE SECRECIÓN CON MIC", unidad: "", refMin: "", refMax: "", referencia: "SIN DESARROLLO BACTERIANO PATÓGENO" },
+  { codigo: "370", nombre: "CULTIVO DE SECRECIÓN CON MIC", unidad: "", refMin: "", refMax: "", referencia: "SIN DESARROLLO BACTERIANO PATóGENO" },
   { codigo: "371", nombre: "CULTIVO DE SECRECION CONJUNTIVAL", unidad: "", refMin: "", refMax: "", referencia: "SIN DESARROLLO PATÓGENO" },
   { codigo: "372", nombre: "CULTIVO DE SECRECION FARINGEA", unidad: "", refMin: "", refMax: "", referencia: "FLORA HABITUAL DE FARINGE" },
   { codigo: "373", nombre: "CULTIVO DE SECRECION OTICA", unidad: "", refMin: "", refMax: "", referencia: "SIN DESARROLLO PATÓGENO" },
@@ -1531,7 +1531,7 @@ function actualizarCaja() {
   if (elEfec) elEfec.textContent = totalEfectivo.toFixed(2);
   if (elDig) elDig.textContent = totalDigital.toFixed(2);
 
-  if, (tbody) {
+  if (tbody) {
     tbody.innerHTML = html || `<tr><td colspan="5" class="text-center text-muted py-3">No hay movimientos registrados el día de hoy.</td></tr>`;
   }
 }
