@@ -1278,11 +1278,11 @@ function imprimirReporteA4() {
       ${bloquesHTML}
 
       <div class="footer-sign">
-        <div style="border-top:1px solid #333; width:220px; margin:0 auto 5px auto;"></div>
-        <strong>Raysa Yadira Ursula Alberca Atarama/strong><br/>
-        <strong>Bióloga/strong><br/>
-        <strong>C.B.P.17763/strong><br/>
-      </div>
+    <div style="border-top:1px solid #333; width:220px; margin:0 auto 5px auto;"></div>
+    <strong>Raysa Yadira Ursula Alberca Atarama</strong><br/>
+    <strong>Bióloga</strong><br/>
+    <strong>C.B.P.17763</strong><br/>
+</div>
 
       <script>
         window.onload = function() { window.print(); }
