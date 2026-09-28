@@ -14,60 +14,288 @@ try {
     console.warn("Firebase no inicializado. Operando en modo local seguro.", e);
 }
 
-// BASE DE DATOS LOCAL PREDETERMINADA
-let catalogoExamenes = [
-    {
-        codigo: '101',
-        nombre: 'HEMOGRAMA COMPLETO',
-        precio: 35.00,
-        muestra: 'Sangre Total (EDTA)',
-        metodo: 'Citometría de flujo / Impedancia eléctrica',
-        plantilla: 'hemograma',
-        refTexto: '',
-        parametros: [
-            { nombre: 'Leucocitos', unidad: 'Cél/uL', refMin: '4500.00', refMax: '13500.00' },
-            { nombre: 'Glóbulos Rojos (hematíes)', unidad: 'Cél/uL', refMin: '4000000.00', refMax: '5200000.00' },
-            { nombre: 'Hemoglobina', unidad: 'g/dL', refMin: '11.50', refMax: '15.50' },
-            { nombre: 'Hematocrito', unidad: '%', refMin: '35.00', refMax: '45.00' },
-            { nombre: 'Volumen Corpuscular medio - VCM', unidad: 'fL', refMin: '77.00', refMax: '95.00' },
-            { nombre: 'Hemoglobina Corpuscular media - HCM', unidad: 'pg', refMin: '25.00', refMax: '33.00' },
-            { nombre: 'Concentración de Hemoglobina Corpuscular media - CHCM', unidad: 'g/dL', refMin: '30.00', refMax: '36.00' },
-            { nombre: 'Recuento Plaquetario', unidad: 'Cél/uL', refMin: '150000.00', refMax: '475000.00' },
-            { nombre: 'Neutrófilos Segmentados', unidad: '%', refMin: '31', refMax: '51' },
-            { nombre: 'Linfocitos', unidad: '%', refMin: '4.00', refMax: '28.00' }
-        ]
-    },
-    {
-        codigo: '102',
-        nombre: 'GLUCOSA EN AYUNAS',
-        precio: 15.00,
-        muestra: 'Suero',
-        metodo: 'Colorimétrico enzimático',
-        plantilla: 'bioquimica',
-        refTexto: '',
-        parametros: [
-            { nombre: 'Glucosa', unidad: 'mg/dL', refMin: '74', refMax: '106', refTexto: 'Adultos: 74 - 106 | Niños: 60 - 100' }
-        ]
-    },
-    {
-        codigo: '103',
-        nombre: 'HEMOGLOBINA GLICOSILADA (HbA1c)',
-        precio: 60.00,
-        muestra: 'Sangre Total (EDTA)',
-        metodo: 'HPLC / Inmunoturbidimetría',
-        plantilla: 'hba1c',
-        refTexto: '',
-        parametros: [
-            { nombre: 'Hemoglobina Glicosilada (HbA1c)', unidad: '%', refMin: '', refMax: '5.6', refTexto: 'Normal: Menos del 5.7% | Prediabetes: 5.7- 6.4%' }
-        ]
-    }
-];
+// DICCIONARIO DE VALORES Y PARÁMETROS REFERENCIALES NORMATIVOS (BALCELLS / LA CLÍNICA Y EL LABORATORIO)
+const BASE_VALORES_REFERENCIALES = {
+    // HEMATOLOGÍA
+    "HEMOGRAMA": [
+        { nombre: 'Leucocitos', unidad: 'Cél/uL', refMin: '4500', refMax: '11000', referencia: '4,500 - 11,000 /uL' },
+        { nombre: 'Hematíes (Glóbulos Rojos)', unidad: 'M/uL', refMin: '4.2', refMax: '5.8', referencia: 'V: 4.5-5.8 | M: 4.2-5.2 M/uL' },
+        { nombre: 'Hemoglobina', unidad: 'g/dL', refMin: '12.0', refMax: '16.5', referencia: 'V: 13.5-16.5 | M: 12.0-15.0 g/dL' },
+        { nombre: 'Hematocrito', unidad: '%', refMin: '37', refMax: '50', referencia: 'V: 40-50% | M: 37-47%' },
+        { nombre: 'VCM (Volumen Corpuscular Medio)', unidad: 'fL', refMin: '80', refMax: '98', referencia: '80.0 - 98.0 fL' },
+        { nombre: 'HCM (Hemoglobina Corp. Media)', unidad: 'pg', refMin: '27', refMax: '33', referencia: '27.0 - 33.0 pg' },
+        { nombre: 'CHCM (Conc. Hb Corp. Media)', unidad: 'g/dL', refMin: '32', refMax: '36', referencia: '32.0 - 36.0 g/dL' },
+        { nombre: 'Plaquetas', unidad: 'Cél/uL', refMin: '150000', refMax: '450000', referencia: '150,000 - 450,000 /uL' },
+        { nombre: 'Neutrófilos Segmentados', unidad: '%', refMin: '50', refMax: '70', referencia: '50 - 70 %' },
+        { nombre: 'Linfocitos', unidad: '%', refMin: '20', refMax: '40', referencia: '20 - 40 %' },
+        { nombre: 'Monocitos', unidad: '%', refMin: '2', refMax: '8', referencia: '2 - 8 %' },
+        { nombre: 'Eosinófilos', unidad: '%', refMin: '1', refMax: '4', referencia: '1 - 4 %' },
+        { nombre: 'Basófilos', unidad: '%', refMin: '0', refMax: '1', referencia: '0 - 1 %' },
+        { nombre: 'Abastonados', unidad: '%', refMin: '0', refMax: '4', referencia: '0 - 4 %' }
+    ],
+    "HEMOGRAMA COMPLETO AUTOMATIZADO": [
+        { nombre: 'Leucocitos Totales', unidad: '10^3/uL', refMin: '4.5', refMax: '11.0', referencia: '4.5 - 11.0 x10^3/uL' },
+        { nombre: 'Eritrocitos', unidad: '10^6/uL', refMin: '4.2', refMax: '5.6', referencia: '4.20 - 5.60 x10^6/uL' },
+        { nombre: 'Hemoglobina', unidad: 'g/dL', refMin: '12.0', refMax: '16.5', referencia: 'V: 13.5 - 16.5 | M: 12.0 - 15.0 g/dL' },
+        { nombre: 'Hematocrito', unidad: '%', refMin: '37', refMax: '50', referencia: 'V: 40 - 50% | M: 37 - 47%' },
+        { nombre: 'VCM', unidad: 'fL', refMin: '80', refMax: '98', referencia: '80.0 - 98.0 fL' },
+        { nombre: 'HCM', unidad: 'pg', refMin: '27', refMax: '33', referencia: '27.0 - 33.0 pg' },
+        { nombre: 'CHCM', unidad: 'g/dL', refMin: '32', refMax: '36', referencia: '32.0 - 36.0 g/dL' },
+        { nombre: 'Recuento de Plaquetas', unidad: '10^3/uL', refMin: '150', refMax: '450', referencia: '150 - 450 x10^3/uL' },
+        { nombre: 'Neutrófilos %', unidad: '%', refMin: '50', refMax: '70', referencia: '50 - 70 %' },
+        { nombre: 'Linfocitos %', unidad: '%', refMin: '20', refMax: '40', referencia: '20 - 40 %' }
+    ],
+    "HEMOGLOBINA": [
+        { nombre: 'Hemoglobina', unidad: 'g/dL', refMin: '12.0', refMax: '16.5', referencia: 'Mujeres: 12.0-15.0 | Varones: 13.5-16.5 g/dL' }
+    ],
+    "HEMATOCRITO": [
+        { nombre: 'Hematocrito', unidad: '%', refMin: '37', refMax: '50', referencia: 'Mujeres: 37-47% | Varones: 40-50%' }
+    ],
+    "HEMOGLOBINA + HEMATOCRITO": [
+        { nombre: 'Hemoglobina', unidad: 'g/dL', refMin: '12.0', refMax: '16.5', referencia: 'V: 13.5-16.5 | M: 12.0-15.0 g/dL' },
+        { nombre: 'Hematocrito', unidad: '%', refMin: '37', refMax: '50', referencia: 'V: 40-50% | M: 37-47%' }
+    ],
+    "VELOCIDAD DE SEDIMENTACION (VSG)": [
+        { nombre: 'VSG 1ra Hora', unidad: 'mm/h', refMin: '0', refMax: '20', referencia: 'Varones: 0 - 15 | Mujeres: 0 - 20 mm/h' }
+    ],
+    "RECUENTO DE PLAQUETAS": [
+        { nombre: 'Recuento de Plaquetas', unidad: '/uL', refMin: '150000', refMax: '450000', referencia: '150,000 - 450,000 /uL' }
+    ],
 
+    // BIOQUÍMICA / METABOLISMO
+    "GLUCOSA BASAL": [
+        { nombre: 'Glucosa en Ayunas', unidad: 'mg/dL', refMin: '70', refMax: '100', referencia: 'Normal: 70 - 100 mg/dL | Prediabetes: 100 - 125 mg/dL' }
+    ],
+    "UREA": [
+        { nombre: 'Urea Sérica', unidad: 'mg/dL', refMin: '15', refMax: '45', referencia: '15 - 45 mg/dL' }
+    ],
+    "CREATININA SERICA": [
+        { nombre: 'Creatinina Sérica', unidad: 'mg/dL', refMin: '0.6', refMax: '1.2', referencia: 'Varones: 0.7 - 1.2 | Mujeres: 0.6 - 1.1 mg/dL' }
+    ],
+    "ACIDO URICO": [
+        { nombre: 'Ácido Úrico', unidad: 'mg/dL', refMin: '2.5', refMax: '7.0', referencia: 'Varones: 3.4 - 7.0 | Mujeres: 2.5 - 6.0 mg/dL' }
+    ],
+    "PERFIL LIPIDICO": [
+        { nombre: 'Colesterol Total', unidad: 'mg/dL', refMin: '0', refMax: '200', referencia: '< 200 mg/dL (Deseable)' },
+        { nombre: 'Triglicéridos', unidad: 'mg/dL', refMin: '0', refMax: '150', referencia: '< 150 mg/dL (Normal)' },
+        { nombre: 'Colesterol HDL', unidad: 'mg/dL', refMin: '40', refMax: '100', referencia: '> 40 mg/dL (Protector)' },
+        { nombre: 'Colesterol LDL', unidad: 'mg/dL', refMin: '0', refMax: '100', referencia: '< 100 mg/dL (Óptimo)' },
+        { nombre: 'Colesterol VLDL', unidad: 'mg/dL', refMin: '2', refMax: '30', referencia: '2 - 30 mg/dL' }
+    ],
+    "COLESTEROL TOTAL": [
+        { nombre: 'Colesterol Total', unidad: 'mg/dL', refMin: '0', refMax: '200', referencia: 'Deseable: < 200 mg/dL' }
+    ],
+    "TRIGLICERIDOS": [
+        { nombre: 'Triglicéridos', unidad: 'mg/dL', refMin: '0', refMax: '150', referencia: 'Normal: < 150 mg/dL' }
+    ],
+    "BILIRRUBINAS TOTALES Y FRACCIONADAS (79, 79A Y 79B)": [
+        { nombre: 'Bilirrubina Total', unidad: 'mg/dL', refMin: '0.2', refMax: '1.2', referencia: '0.2 - 1.2 mg/dL' },
+        { nombre: 'Bilirrubina Directa', unidad: 'mg/dL', refMin: '0.0', refMax: '0.3', referencia: '0.0 - 0.3 mg/dL' },
+        { nombre: 'Bilirrubina Indirecta', unidad: 'mg/dL', refMin: '0.2', refMax: '0.9', referencia: '0.2 - 0.9 mg/dL' }
+    ],
+    "PERFIL HEPATICO": [
+        { nombre: 'Bilirrubina Total', unidad: 'mg/dL', refMin: '0.2', refMax: '1.2', referencia: '0.2 - 1.2 mg/dL' },
+        { nombre: 'Bilirrubina Directa', unidad: 'mg/dL', refMin: '0.0', refMax: '0.3', referencia: '0.0 - 0.3 mg/dL' },
+        { nombre: 'Bilirrubina Indirecta', unidad: 'mg/dL', refMin: '0.1', refMax: '0.9', referencia: '0.1 - 0.9 mg/dL' },
+        { nombre: 'TGO (AST)', unidad: 'U/L', refMin: '0', refMax: '38', referencia: 'Hasta 38 U/L' },
+        { nombre: 'TGP (ALT)', unidad: 'U/L', refMin: '0', refMax: '41', referencia: 'Hasta 41 U/L' },
+        { nombre: 'Fosfatasa Alcalina', unidad: 'U/L', refMin: '40', refMax: '129', referencia: '40 - 129 U/L' },
+        { nombre: 'GGTP (Gamma Glutamil)', unidad: 'U/L', refMin: '8', refMax: '61', referencia: '8 - 61 U/L' },
+        { nombre: 'Proteínas Totales', unidad: 'g/dL', refMin: '6.4', refMax: '8.3', referencia: '6.4 - 8.3 g/dL' },
+        { nombre: 'Albúmina', unidad: 'g/dL', refMin: '3.5', refMax: '5.2', referencia: '3.5 - 5.2 g/dL' },
+        { nombre: 'Globulina', unidad: 'g/dL', refMin: '2.0', refMax: '3.5', referencia: '2.0 - 3.5 g/dL' }
+    ],
+    "TGO (ASAT)": [
+        { nombre: 'TGO / AST', unidad: 'U/L', refMin: '0', refMax: '38', referencia: 'Varones: < 38 | Mujeres: < 32 U/L' }
+    ],
+    "TGP (ALAT)": [
+        { nombre: 'TGP / ALT', unidad: 'U/L', refMin: '0', refMax: '41', referencia: 'Varones: < 41 | Mujeres: < 33 U/L' }
+    ],
+    "FOSFATASA ALCALINA": [
+        { nombre: 'Fosfatasa Alcalina', unidad: 'U/L', refMin: '40', refMax: '129', referencia: 'Adultos: 40 - 129 U/L' }
+    ],
+    "GAMMA GLUTAMIL TRANSPEPTIDASA": [
+        { nombre: 'GGT', unidad: 'U/L', refMin: '8', refMax: '61', referencia: 'Varones: 11 - 61 | Mujeres: 8 - 36 U/L' }
+    ],
+    "PROTEINAS TOTALES Y FRACCIONADAS": [
+        { nombre: 'Proteínas Totales', unidad: 'g/dL', refMin: '6.4', refMax: '8.3', referencia: '6.4 - 8.3 g/dL' },
+        { nombre: 'Albúmina Sérica', unidad: 'g/dL', refMin: '3.5', refMax: '5.0', referencia: '3.5 - 5.0 g/dL' },
+        { nombre: 'Globulinas', unidad: 'g/dL', refMin: '2.0', refMax: '3.5', referencia: '2.0 - 3.5 g/dL' },
+        { nombre: 'Relación A/G', unidad: 'Ratio', refMin: '1.1', refMax: '2.2', referencia: '1.1 - 2.2' }
+    ],
+    "ALBUMINA SÉRICA": [
+        { nombre: 'Albúmina Sérica', unidad: 'g/dL', refMin: '3.5', refMax: '5.2', referencia: '3.5 - 5.2 g/dL' }
+    ],
+    "AMILASA SERICA": [
+        { nombre: 'Amilasa Sérica', unidad: 'U/L', refMin: '28', refMax: '100', referencia: '28 - 100 U/L' }
+    ],
+    "LIPASA SERICA": [
+        { nombre: 'Lipasa Sérica', unidad: 'U/L', refMin: '13', refMax: '60', referencia: '13 - 60 U/L' }
+    ],
+    "HEMOGLOBINA GLICOSILADA HbA1c": [
+        { nombre: 'HbA1c', unidad: '%', refMin: '4.0', refMax: '5.6', referencia: 'Normal: < 5.7% | Prediabetes: 5.7 - 6.4% | Diabetes: >= 6.5%' }
+    ],
+    "HEMOGLOBINA GLICOSILADA": [
+        { nombre: 'HbA1c', unidad: '%', refMin: '4.0', refMax: '5.6', referencia: 'Normal: < 5.7% | Prediabetes: 5.7 - 6.4%' }
+    ],
+
+    // ELECTROLITOS Y MINERALES
+    "ELECTROLITOS (NA,K,CL)": [
+        { nombre: 'Sodio (Na)', unidad: 'mEq/L', refMin: '135', refMax: '145', referencia: '135 - 145 mEq/L' },
+        { nombre: 'Potasio (K)', unidad: 'mEq/L', refMin: '3.5', refMax: '5.1', referencia: '3.5 - 5.1 mEq/L' },
+        { nombre: 'Cloro (Cl)', unidad: 'mEq/L', refMin: '98', refMax: '107', referencia: '98 - 107 mEq/L' }
+    ],
+    "CALCIO SERICO": [
+        { nombre: 'Calcio Total', unidad: 'mg/dL', refMin: '8.5', refMax: '10.5', referencia: '8.5 - 10.5 mg/dL' }
+    ],
+    "CALCIO IONICO": [
+        { nombre: 'Calcio Iónico', unidad: 'mmol/L', refMin: '1.15', refMax: '1.33', referencia: '1.15 - 1.33 mmol/L' }
+    ],
+    "MAGNESIO SERICO (HN)": [
+        { nombre: 'Magnesio Sérico', unidad: 'mg/dL', refMin: '1.7', refMax: '2.5', referencia: '1.7 - 2.5 mg/dL' }
+    ],
+    "FOSFORO SERICO": [
+        { nombre: 'Fósforo Sérico', unidad: 'mg/dL', refMin: '2.5', refMax: '4.5', referencia: '2.5 - 4.5 mg/dL' }
+    ],
+
+    // PERFIL TIROIDEO
+    "PERFIL TIROIDEO: T3, T4, TSH": [
+        { nombre: 'TSH Ultrasensible', unidad: 'uIU/mL', refMin: '0.4', refMax: '4.2', referencia: '0.40 - 4.20 uIU/mL' },
+        { nombre: 'T4 Total', unidad: 'ug/dL', refMin: '4.5', refMax: '12.0', referencia: '4.5 - 12.0 ug/dL' },
+        { nombre: 'T3 Total', unidad: 'ng/dL', refMin: '80', refMax: '200', referencia: '80 - 200 ng/dL' }
+    ],
+    "PERFIL TIROIDEO LIBRE: TRIODOTlRONlNA(T3), TIROXINA(T4), TSH ULTRASENSIBLE, T3 LIBRE Y T4 LIBRE": [
+        { nombre: 'TSH Ultrasensible', unidad: 'uIU/mL', refMin: '0.4', refMax: '4.2', referencia: '0.40 - 4.20 uIU/mL' },
+        { nombre: 'T4 Libre', unidad: 'ng/dL', refMin: '0.89', refMax: '1.76', referencia: '0.89 - 1.76 ng/dL' },
+        { nombre: 'T3 Libre', unidad: 'pg/mL', refMin: '2.0', refMax: '4.4', referencia: '2.0 - 4.4 pg/mL' }
+    ],
+    "TSH ULTRASENSIBLE": [
+        { nombre: 'TSH', unidad: 'uIU/mL', refMin: '0.4', refMax: '4.2', referencia: '0.40 - 4.20 uIU/mL' }
+    ],
+    "T4 LIBRE": [
+        { nombre: 'T4 Libre', unidad: 'ng/dL', refMin: '0.89', refMax: '1.76', referencia: '0.89 - 1.76 ng/dL' }
+    ],
+    "T3 LIBRE": [
+        { nombre: 'T3 Libre', unidad: 'pg/mL', refMin: '2.0', refMax: '4.4', referencia: '2.0 - 4.4 pg/mL' }
+    ],
+
+    // COAGULACIÓN
+    "TIEMPO DE PROTROMBINA": [
+        { nombre: 'Tiempo de Protrombina (TP)', unidad: 'segundos', refMin: '11.0', refMax: '13.5', referencia: '11.0 - 13.5 s' },
+        { nombre: 'INR', unidad: 'Ratio', refMin: '0.8', refMax: '1.2', referencia: '0.8 - 1.2 (Sin anticoagulación)' }
+    ],
+    "TIEMPO DE PROTOMBINA + INR": [
+        { nombre: 'Tiempo de Protrombina', unidad: 'seg', refMin: '11.0', refMax: '13.5', referencia: '11.0 - 13.5 seg' },
+        { nombre: 'INR', unidad: 'Ratio', refMin: '0.8', refMax: '1.2', referencia: '0.8 - 1.2' }
+    ],
+    "TIEMPO PARCIAL DE TROMBOPLASTINA": [
+        { nombre: 'TTPa', unidad: 'segundos', refMin: '25.0', refMax: '38.0', referencia: '25.0 - 38.0 seg' }
+    ],
+    "FIBRINOGENO": [
+        { nombre: 'Fibrinógeno', unidad: 'mg/dL', refMin: '200', refMax: '400', referencia: '200 - 400 mg/dL' }
+    ],
+    "PERFIL DE COAGULACIÓN: COAGULACIÓN Y SANGRÍA, TIEMPO DE TROMBINA, TIEMPO DE TROMBOPLASTINA PARCIAL, TIEMPO DE PROTOMBINA, FIBRINOGENO, GRUPO Y FACTOR, RECUENTO DE PLAQUETAS": [
+        { nombre: 'Tiempo de Coagulación', unidad: 'minutos', refMin: '5', refMax: '10', referencia: '5 - 10 min' },
+        { nombre: 'Tiempo de Sangría', unidad: 'minutos', refMin: '1', refMax: '4', referencia: '1 - 4 min' },
+        { nombre: 'Tiempo de Protrombina (TP)', unidad: 'seg', refMin: '11.0', refMax: '13.5', referencia: '11.0 - 13.5 s' },
+        { nombre: 'INR', unidad: 'Ratio', refMin: '0.8', refMax: '1.2', referencia: '0.8 - 1.2' },
+        { nombre: 'TTPa', unidad: 'seg', refMin: '25', refMax: '38', referencia: '25 - 38 s' },
+        { nombre: 'Fibrinógeno', unidad: 'mg/dL', refMin: '200', refMax: '400', referencia: '200 - 400 mg/dL' },
+        { nombre: 'Recuento de Plaquetas', unidad: '/uL', refMin: '150000', refMax: '450000', referencia: '150,000 - 450,000 /uL' }
+    ],
+
+    // EXAMEN DE ORINA
+    "EXAMEN COMPLETO DE ORINA": [
+        { nombre: 'Aspecto', unidad: '', tipo: 'texto', referencia: 'Límpido / Transparente' },
+        { nombre: 'Color', unidad: '', tipo: 'texto', referencia: 'Amarillo Pajizo' },
+        { nombre: 'Densidad', unidad: '', refMin: '1.005', refMax: '1.030', referencia: '1.005 - 1.030' },
+        { nombre: 'pH', unidad: '', refMin: '5.0', refMax: '8.0', referencia: '5.0 - 8.0' },
+        { nombre: 'Proteínas', unidad: 'mg/dL', tipo: 'texto', referencia: 'Negativo' },
+        { nombre: 'Glucosa', unidad: 'mg/dL', tipo: 'texto', referencia: 'Negativo' },
+        { nombre: 'Cuerpos Cetónicos', unidad: '', tipo: 'texto', referencia: 'Negativo' },
+        { nombre: 'Bilirrubina', unidad: '', tipo: 'texto', referencia: 'Negativo' },
+        { nombre: 'Urobilinógeno', unidad: 'mg/dL', tipo: 'texto', referencia: 'Normal (< 1 mg/dL)' },
+        { nombre: 'Nitritos', unidad: '', tipo: 'texto', referencia: 'Negativo' },
+        { nombre: 'Leucocitos (Sedimento)', unidad: '/campo', refMin: '0', refMax: '5', referencia: '0 - 5 por campo' },
+        { nombre: 'Hematíes (Sedimento)', unidad: '/campo', refMin: '0', refMax: '3', referencia: '0 - 3 por campo' },
+        { nombre: 'Células Epiteliales', unidad: '', tipo: 'texto', referencia: 'Escasas' },
+        { nombre: 'Bacterias', unidad: '', tipo: 'texto', referencia: 'Escasas o Ausentes' }
+    ],
+    "EXAMEN DE ORINA COMPLETO": [
+        { nombre: 'Aspecto', unidad: '', tipo: 'texto', referencia: 'Límpido' },
+        { nombre: 'Color', unidad: '', tipo: 'texto', referencia: 'Amarillo' },
+        { nombre: 'Densidad', unidad: '', refMin: '1.005', refMax: '1.030', referencia: '1.005 - 1.030' },
+        { nombre: 'pH', unidad: '', refMin: '5.0', refMax: '7.5', referencia: '5.0 - 7.5' },
+        { nombre: 'Leucocitos', unidad: '/campo', refMin: '0', refMax: '5', referencia: '0 - 5 x campo' },
+        { nombre: 'Hematíes', unidad: '/campo', refMin: '0', refMax: '2', referencia: '0 - 2 x campo' }
+    ],
+
+    // MARCADORES TUMORALES
+    "PSA TOTAL (ANTIGENO PROSTATICO ESPECIFICO)": [
+        { nombre: 'PSA Total', unidad: 'ng/mL', refMin: '0', refMax: '4.0', referencia: '0.0 - 4.0 ng/mL' }
+    ],
+    "PSA LIBRE (ANTIGENO PROSTATICO LIBRE)": [
+        { nombre: 'PSA Libre', unidad: 'ng/mL', refMin: '0', refMax: '0.93', referencia: '< 0.93 ng/mL' },
+        { nombre: 'Relación PSA Libre / Total', unidad: '%', refMin: '18', refMax: '100', referencia: '> 18% (Riesgo bajo benigno)' }
+    ],
+    "CA 125 (OVARIO)": [
+        { nombre: 'CA 125', unidad: 'U/mL', refMin: '0', refMax: '35', referencia: '0 - 35 U/mL' }
+    ],
+    "CA 15-3 (MAMA)": [
+        { nombre: 'CA 15-3', unidad: 'U/mL', refMin: '0', refMax: '25', referencia: '< 25 U/mL' }
+    ],
+    "CA19-9 (PANCREAS)": [
+        { nombre: 'CA 19-9', unidad: 'U/mL', refMin: '0', refMax: '37', referencia: '< 37 U/mL' }
+    ],
+    "ANTIGENO CARCINOEMBRIOGENICO - CEA": [
+        { nombre: 'CEA', unidad: 'ng/mL', refMin: '0', refMax: '5.0', referencia: 'No fumadores: < 3.0 | Fumadores: < 5.0 ng/mL' }
+    ],
+    "ALFA FETO PROTEINA (AFP)": [
+        { nombre: 'AFP', unidad: 'IU/mL', refMin: '0', refMax: '7.0', referencia: '< 7.0 IU/mL' }
+    ],
+
+    // HORMONAS FEMENINAS
+    "FSH HORMONA FOLICULOESTIMULANTE": [
+        { nombre: 'FSH', unidad: 'mIU/mL', refMin: '', refMax: '', referencia: 'F. Folicular: 3.5-12.5 | F. Ovulatoria: 4.7-21.5 | F. Lútea: 1.7-7.7 | Menopausia: 25.8-134.8 mIU/mL' }
+    ],
+    "LH HORMONA LUTEINIZANTE": [
+        { nombre: 'LH', unidad: 'mIU/mL', refMin: '', refMax: '', referencia: 'F. Folicular: 2.4-12.6 | F. Ovulatoria: 14.0-95.6 | F. Lútea: 1.0-11.4 mIU/mL' }
+    ],
+    "PROLACTINA": [
+        { nombre: 'Prolactina', unidad: 'ng/mL', refMin: '4.8', refMax: '23.3', referencia: 'Mujeres no embarazadas: 4.8 - 23.3 | Varones: 4.0 - 15.2 ng/mL' }
+    ],
+    "ESTRADIOL": [
+        { nombre: 'Estradiol (E2)', unidad: 'pg/mL', refMin: '', refMax: '', referencia: 'F. Folicular: 12.5-166 | F. Ovulatoria: 85.8-498 | F. Lútea: 43.8-211 pg/mL' }
+    ],
+    "PROGESTERONA": [
+        { nombre: 'Progesterona', unidad: 'ng/mL', refMin: '', refMax: '', referencia: 'F. Folicular: 0.05-0.89 | F. Lútea: 1.83-23.9 ng/mL' }
+    ],
+    "SUB-UNIDAD HCG BETA CUANTITATIVO": [
+        { nombre: 'Beta-HCG Cuantitativo', unidad: 'mIU/mL', refMin: '0', refMax: '5', referencia: 'Hombres y mujeres no gestantes: < 5 mIU/mL' }
+    ],
+
+    // SEROLOGÍA / INMUNOLOGÍA
+    "PROTEINA C REACTIVA (PCR)": [
+        { nombre: 'PCR Cuantitativo', unidad: 'mg/L', refMin: '0', refMax: '6.0', referencia: '< 6.0 mg/L' }
+    ],
+    "PROTEINA C REACTIVA ULTRASENSIBLE (HN) PCR US": [
+        { nombre: 'PCR Us', unidad: 'mg/L', refMin: '0', refMax: '3.0', referencia: 'Bajo riesgo: < 1.0 | Alto riesgo: > 3.0 mg/L' }
+    ],
+    "FACTOR REUMATOIDEO CUANTITATIVO": [
+        { nombre: 'Factor Reumatoideo', unidad: 'IU/mL', refMin: '0', refMax: '14.0', referencia: '< 14.0 IU/mL' }
+    ],
+    "ANTI ESTREPTOLISINA - ASO (CUANTITATIVO)": [
+        { nombre: 'ASTO / ASO', unidad: 'IU/mL', refMin: '0', refMax: '200', referencia: '< 200 IU/mL' }
+    ]
+};
+
+// BASE DE DATOS LOCAL
+let catalogoExamenes = [];
 let examenesSeleccionados = [];
 let ordenesLocales = JSON.parse(localStorage.getItem('vitalhealth_ordenes')) || [];
 let ordenActualVisualizando = null;
 
-// INICIALIZACIÓN GLOBAL SEGURO DEL DOM
+// INICIALIZACIÓN GLOBAL SEGURA DEL DOM
 document.addEventListener('DOMContentLoaded', async () => {
     try {
         const dateEl = document.getElementById('current-date');
@@ -124,9 +352,17 @@ function normalizarIndicadores(lista, prefix = 'ind') {
 
 function obtenerIndicadoresExamen(examen) {
     if (!examen) return [];
-    if (Array.isArray(examen.indicadores)) return normalizarIndicadores(examen.indicadores, examen.codigo || 'ind');
-    // Compatibilidad con catálogos/órdenes anteriores.
-    if (Array.isArray(examen.parametros)) return normalizarIndicadores(examen.parametros, examen.codigo || 'ind');
+    if (Array.isArray(examen.indicadores) && examen.indicadores.length > 0) {
+        return normalizarIndicadores(examen.indicadores, examen.codigo || 'ind');
+    }
+    // Si no tiene indicadores guardados, busca automáticamente en el diccionario normativo clínico
+    const nombreNorm = (examen.nombre || '').toUpperCase().trim();
+    if (BASE_VALORES_REFERENCIALES[nombreNorm]) {
+        return normalizarIndicadores(BASE_VALORES_REFERENCIALES[nombreNorm], examen.codigo || 'ind');
+    }
+    if (Array.isArray(examen.parametros) && examen.parametros.length > 0) {
+        return normalizarIndicadores(examen.parametros, examen.codigo || 'ind');
+    }
     return [];
 }
 
@@ -134,7 +370,10 @@ async function cargarProductosJSON() {
     const catalogoGuardado = localStorage.getItem('vitalhealth_catalogo');
     if (catalogoGuardado) {
         try {
-            catalogoExamenes = JSON.parse(catalogoGuardado).map(ex => ({ ...ex, indicadores: normalizarIndicadores(ex.indicadores || ex.parametros || [], ex.codigo || 'ind') }));
+            catalogoExamenes = JSON.parse(catalogoGuardado).map(ex => ({
+                ...ex,
+                indicadores: obtenerIndicadoresExamen(ex)
+            }));
             return;
         } catch (e) {
             console.warn("Error en la caché local.");
@@ -146,16 +385,21 @@ async function cargarProductosJSON() {
         if (response.ok) {
             const data = await response.json();
             if (Array.isArray(data) && data.length > 0) {
-                catalogoExamenes = data.map((prod, index) => ({
-                    codigo: String(prod.Codigo || prod.codigo || index + 1),
-                    nombre: String(prod.Nombre || prod.nombre || '').toUpperCase(),
-                    precio: parseFloat(prod.Precio || prod.precio || 0),
-                    muestra: prod.muestra || 'Suero',
-                    metodo: prod.metodo || 'Estándar',
-                    plantilla: prod.plantilla || 'estandar',
-                    refTexto: prod.refTexto || '',
-                    indicadores: normalizarIndicadores(prod.indicadores || prod.parametros || [], String(prod.Codigo || prod.codigo || index + 1))
-                }));
+                catalogoExamenes = data.map((prod, index) => {
+                    const exTmp = {
+                        codigo: String(prod.Codigo || prod.codigo || index + 1),
+                        nombre: String(prod.Nombre || prod.nombre || '').toUpperCase(),
+                        precio: parseFloat(prod.Precio || prod.precio || 0),
+                        muestra: prod.muestra || 'Suero',
+                        metodo: prod.metodo || 'Estándar',
+                        plantilla: prod.plantilla || 'estandar',
+                        refTexto: prod.refTexto || ''
+                    };
+                    return {
+                        ...exTmp,
+                        indicadores: obtenerIndicadoresExamen(exTmp)
+                    };
+                });
                 guardarCatalogoLocal();
             }
         }
@@ -211,7 +455,6 @@ function showSection(sectionId) {
     const sec = document.getElementById(`sec-${sectionId}`);
     if (sec) sec.classList.remove('d-none');
     
-    // Activar botón navegación
     const navLinks = document.querySelectorAll('.sidebar .nav-link');
     navLinks.forEach(link => {
         if (link.getAttribute('onclick') && link.getAttribute('onclick').includes(sectionId)) {
@@ -388,6 +631,7 @@ function renderizarTablaCatalogo(filtro = '') {
     }
 
     filtrados.forEach(ex => {
+        const indCant = obtenerIndicadoresExamen(ex).length;
         const tr = document.createElement('tr');
         tr.style.cursor = 'pointer';
         tr.onclick = (e) => {
@@ -397,7 +641,7 @@ function renderizarTablaCatalogo(filtro = '') {
         tr.innerHTML = `
             <td><span class="badge bg-light text-dark border">${ex.codigo}</span></td>
             <td><strong>${ex.nombre}</strong></td>
-            <td><small class="text-muted">${ex.muestra || 'Suero'} | <span class="badge bg-info text-dark">${obtenerIndicadoresExamen(ex).length} indicador(es)</span></small></td>
+            <td><small class="text-muted">${ex.muestra || 'Suero'} | <span class="badge bg-info text-dark">${indCant} indicador(es)</span></small></td>
             <td>S/ ${ex.precio.toFixed(2)}</td>
             <td class="text-end px-3">
                 <button class="btn btn-sm btn-outline-primary me-1" onclick="seleccionarExamenParaEditar('${ex.codigo}')" title="Editar">
@@ -453,7 +697,7 @@ function agregarIndicadorResultado(ind = {}) {
     const indicador = {
         id: ind.id || generarIdIndicador(),
         nombre: ind.nombre || '', tipo: ind.tipo || 'texto', unidad: ind.unidad || '',
-        referencia: ind.referencia || '', min: ind.min || '', max: ind.max || '',
+        referencia: ind.referencia || '', min: ind.min || ind.refMin || '', max: ind.max || ind.refMax || '',
         contenido: ind.contenido || '', obligatorio: ind.obligatorio !== false
     };
 
@@ -462,42 +706,42 @@ function agregarIndicadorResultado(ind = {}) {
     div.dataset.indicadorId = indicador.id;
     div.innerHTML = `
         <div class="d-flex justify-content-between align-items-center mb-3">
-            <div><span class="badge bg-primary-subtle text-primary">INDICADOR</span><span class="small text-muted ms-2">ID independiente</span></div>
+            <div><span class="badge bg-primary-subtle text-primary">PARÁMETRO CLÍNICO</span><span class="small text-muted ms-2">Configuración Rango</span></div>
             <button type="button" class="btn btn-sm btn-outline-danger" onclick="quitarIndicadorResultado(this)"><i class="bi bi-trash"></i> Eliminar</button>
         </div>
         <div class="row g-2">
             <div class="col-md-6">
-                <label class="form-label small fw-semibold">Nombre del indicador</label>
+                <label class="form-label small fw-semibold">Nombre del indicador / Parámetro</label>
                 <input type="text" class="form-control form-control-sm ind-nombre" value="${escapeHtmlVH(indicador.nombre)}" placeholder="Ej. Hemoglobina">
             </div>
             <div class="col-md-3">
                 <label class="form-label small fw-semibold">Tipo de resultado</label>
                 <select class="form-select form-select-sm ind-tipo">
                     <option value="texto" ${indicador.tipo==='texto'?'selected':''}>Texto</option>
-                    <option value="numerico" ${indicador.tipo==='numerico'?'selected':''}>Numérico</option>
+                    <option value="numerico" ${indicador.tipo==='numerico'||!indicador.tipo?'selected':''}>Numérico</option>
                     <option value="multilinea" ${indicador.tipo==='multilinea'?'selected':''}>Texto largo</option>
                     <option value="seleccion" ${indicador.tipo==='seleccion'?'selected':''}>Selección</option>
                 </select>
             </div>
             <div class="col-md-3">
-                <label class="form-label small fw-semibold">Unidad</label>
+                <label class="form-label small fw-semibold">Unidad de Medida</label>
                 <input type="text" class="form-control form-control-sm ind-unidad" value="${escapeHtmlVH(indicador.unidad)}" placeholder="g/dL, mg/dL, etc.">
             </div>
             <div class="col-md-4">
-                <label class="form-label small fw-semibold">Valor referencial</label>
-                <input type="text" class="form-control form-control-sm ind-referencia" value="${escapeHtmlVH(indicador.referencia)}" placeholder="Ej. 12 - 16">
+                <label class="form-label small fw-semibold">Valor Referencial (Texto)</label>
+                <input type="text" class="form-control form-control-sm ind-referencia" value="${escapeHtmlVH(indicador.referencia)}" placeholder="Ej. 12.0 - 16.0">
             </div>
             <div class="col-md-4">
-                <label class="form-label small fw-semibold">Mínimo (opcional)</label>
-                <input type="text" class="form-control form-control-sm ind-min" value="${escapeHtmlVH(indicador.min)}" placeholder="Solo si corresponde">
+                <label class="form-label small fw-semibold">Mínimo Normal</label>
+                <input type="text" class="form-control form-control-sm ind-min" value="${escapeHtmlVH(indicador.min)}" placeholder="Ej. 12.0">
             </div>
             <div class="col-md-4">
-                <label class="form-label small fw-semibold">Máximo (opcional)</label>
-                <input type="text" class="form-control form-control-sm ind-max" value="${escapeHtmlVH(indicador.max)}" placeholder="Solo si corresponde">
+                <label class="form-label small fw-semibold">Máximo Normal</label>
+                <input type="text" class="form-control form-control-sm ind-max" value="${escapeHtmlVH(indicador.max)}" placeholder="Ej. 16.0">
             </div>
             <div class="col-12">
-                <label class="form-label small fw-semibold">Contenido / instrucciones / opciones</label>
-                <textarea class="form-control form-control-sm ind-contenido" rows="2" placeholder="Texto que quieras mostrar para este indicador o instrucciones internas...">${escapeHtmlVH(indicador.contenido)}</textarea>
+                <label class="form-label small fw-semibold">Observaciones / Descripción del Parámetro</label>
+                <textarea class="form-control form-control-sm ind-contenido" rows="2" placeholder="Notas referenciales adicionales...">${escapeHtmlVH(indicador.contenido)}</textarea>
             </div>
         </div>`;
     contenedor.appendChild(div);
@@ -519,7 +763,7 @@ function actualizarEstadoVacioIndicadores() {
     const contenedor = document.getElementById('contenedor-indicadores');
     if (!contenedor) return;
     if (contenedor.querySelectorAll('.indicador-card').length === 0) {
-        contenedor.innerHTML = `<div class="no-indicadores-msg text-center text-muted p-4 border rounded-3 bg-light small"><i class="bi bi-layout-text-window-reverse fs-4 d-block mb-2"></i>Este examen todavía no tiene indicadores. Puedes crear una plantilla completamente diferente para cada examen.</div>`;
+        contenedor.innerHTML = `<div class="no-indicadores-msg text-center text-muted p-4 border rounded-3 bg-light small"><i class="bi bi-layout-text-window-reverse fs-4 d-block mb-2"></i>Este examen todavía no tiene indicadores. Puedes agregar parámetros individuales.</div>`;
     }
 }
 
@@ -578,11 +822,11 @@ function guardarExamenCatalogo() {
         }
 
         catalogoExamenes[idx] = examenObj;
-        alert('Examen y su plantilla individual actualizados correctamente.');
+        alert('Examen y sus parámetros actualizados correctamente.');
     } else {
         if (catalogoExamenes.some(e => e.codigo === codigo)) return alert('Ya existe un examen registrado con este código.');
         catalogoExamenes.unshift(examenObj);
-        alert('Nuevo examen y plantilla individual agregados al catálogo.');
+        alert('Nuevo examen agregado al catálogo.');
     }
     guardarCatalogoLocal();
     renderizarTablaCatalogo();
@@ -722,6 +966,36 @@ function eliminarOrden(id) {
     }
 }
 
+// EVALUACIÓN CLÍNICA AUTOMÁTICA
+function evaluarRangoClinico(valStr, minStr, maxStr) {
+    const val = parseFloat(valStr);
+    const min = parseFloat(minStr);
+    const max = parseFloat(maxStr);
+
+    if (isNaN(val)) return 'normal';
+    if (!isNaN(min) && val < min) return 'bajo';
+    if (!isNaN(max) && val > max) return 'alto';
+    return 'normal';
+}
+
+function evaluarYResaltarCampo(inputEl, minStr, maxStr) {
+    const estado = evaluarRangoClinico(inputEl.value, minStr, maxStr);
+    inputEl.classList.remove('resultado-alto', 'resultado-bajo', 'resultado-normal');
+    
+    const badgeEl = inputEl.parentNode.querySelector('.badge-estado-clinico');
+    if (badgeEl) badgeEl.remove();
+
+    if (estado === 'alto') {
+        inputEl.classList.add('resultado-alto');
+        inputEl.insertAdjacentHTML('afterend', '<span class="badge bg-danger ms-1 badge-estado-clinico">ALTO</span>');
+    } else if (estado === 'bajo') {
+        inputEl.classList.add('resultado-bajo');
+        inputEl.insertAdjacentHTML('afterend', '<span class="badge bg-warning text-dark ms-1 badge-estado-clinico">BAJO</span>');
+    } else if (inputEl.value.trim() !== '') {
+        inputEl.classList.add('resultado-normal');
+    }
+}
+
 function abrirResultados(ordenId) {
     const orden = ordenesLocales.find(o => o.id === ordenId);
     if (!orden) return;
@@ -731,7 +1005,7 @@ function abrirResultados(ordenId) {
     if (!container) return;
     let camposHTML = '';
 
-    orden.examenes.forEach((ex, examenIndex) => {
+    orden.examenes.forEach((ex) => {
         const catEx = catalogoExamenes.find(c => c.codigo === ex.codigo) || ex;
         const indicadores = obtenerIndicadoresExamen(catEx);
         let filas = '';
@@ -745,23 +1019,38 @@ function abrirResultados(ordenId) {
                 const oldKey = `${ex.codigo}_${idx}`;
                 const data = orden.resultados?.[key] || orden.resultados?.[oldKey] || {};
                 let control = '';
+                const minVal = ind.min || ind.refMin || '';
+                const maxVal = ind.max || ind.refMax || '';
+
                 if (ind.tipo === 'multilinea') {
                     control = `<textarea class="form-control form-control-sm resultado-individual" rows="3" data-examen="${escapeHtmlVH(ex.codigo)}" data-indicador="${escapeHtmlVH(key)}" placeholder="Resultado...">${escapeHtmlVH(data.resultado || '')}</textarea>`;
                 } else if (ind.tipo === 'seleccion') {
-                    const opciones = (ind.contenido || '').split(/[,;\n]/).map(x=>x.trim()).filter(Boolean);
+                    const opciones = (ind.contenido || 'POSITIVO, NEGATIVO, REACTIVO, NO REACTIVO').split(/[,;\n]/).map(x=>x.trim()).filter(Boolean);
                     control = `<select class="form-select form-select-sm resultado-individual" data-examen="${escapeHtmlVH(ex.codigo)}" data-indicador="${escapeHtmlVH(key)}"><option value="">Seleccione...</option>${opciones.map(o=>`<option ${String(data.resultado||'')===o?'selected':''} value="${escapeHtmlVH(o)}">${escapeHtmlVH(o)}</option>`).join('')}</select>`;
                 } else {
-                    control = `<input type="${ind.tipo==='numerico'?'number':'text'}" step="any" class="form-control form-control-sm resultado-individual fw-bold" data-examen="${escapeHtmlVH(ex.codigo)}" data-indicador="${escapeHtmlVH(key)}" value="${escapeHtmlVH(data.resultado || '')}" placeholder="Resultado...">`;
+                    control = `<div class="d-flex align-items-center"><input type="text" step="any" class="form-control form-control-sm resultado-individual fw-bold" data-examen="${escapeHtmlVH(ex.codigo)}" data-indicador="${escapeHtmlVH(key)}" data-min="${escapeHtmlVH(minVal)}" data-max="${escapeHtmlVH(maxVal)}" value="${escapeHtmlVH(data.resultado || '')}" placeholder="Resultado..." oninput="evaluarYResaltarCampo(this, '${escapeHtmlVH(minVal)}', '${escapeHtmlVH(maxVal)}')"></div>`;
                 }
-                filas += `<div class="resultado-indicador-row border-bottom pb-3 mb-3"><div class="row g-2 align-items-start"><div class="col-md-4"><label class="form-label fw-bold small mb-1">${escapeHtmlVH(ind.nombre)}</label>${ind.contenido ? `<div class="small text-muted">${escapeHtmlVH(ind.contenido)}</div>` : ''}</div><div class="col-md-4">${control}</div><div class="col-md-4 small text-muted pt-1">${ind.unidad ? `<div><strong>Unidad:</strong> ${escapeHtmlVH(ind.unidad)}</div>` : ''}${ind.referencia ? `<div><strong>Referencia:</strong> ${escapeHtmlVH(ind.referencia)}</div>` : ''}</div></div></div>`;
+                const refTextoMostrar = ind.referencia || ((minVal || maxVal) ? `${minVal} - ${maxVal}` : 'Sin referencia');
+                filas += `<div class="resultado-indicador-row border-bottom pb-3 mb-3"><div class="row g-2 align-items-start"><div class="col-md-4"><label class="form-label fw-bold small mb-1">${escapeHtmlVH(ind.nombre)}</label>${ind.contenido ? `<div class="small text-muted">${escapeHtmlVH(ind.contenido)}</div>` : ''}</div><div class="col-md-4">${control}</div><div class="col-md-4 small text-muted pt-1">${ind.unidad ? `<div><strong>Unidad:</strong> ${escapeHtmlVH(ind.unidad)}</div>` : ''}<div><strong>Valor de Referencia:</strong> <span class="badge bg-light text-dark border">${escapeHtmlVH(refTextoMostrar)}</span></div></div></div></div>`;
             });
         } else {
-            filas = `<div class="alert alert-light border small mb-0">Este examen no tiene indicadores configurados. Ve a <strong>Catálogo / Plantillas</strong> y créalos de forma individual.</div>`;
+            filas = `<div class="alert alert-light border small mb-0">Este examen no tiene indicadores configurados. Ve a <strong>Catálogo / Plantillas</strong> e créalos.</div>`;
         }
         camposHTML += `<div class="card mb-3 shadow-sm border"><div class="card-header bg-light d-flex justify-content-between align-items-center"><h6 class="fw-bold text-primary mb-0">${escapeHtmlVH(ex.nombre)}</h6><span class="badge bg-secondary">${indicadores.length} indicador(es)</span></div><div class="card-body">${filas}</div></div>`;
     });
 
     container.innerHTML = `<div class="p-3 mb-3 bg-light border rounded"><h5 class="fw-bold mb-1">Paciente: ${escapeHtmlVH(orden.paciente)}</h5><div class="text-muted small"><strong>DNI:</strong> ${escapeHtmlVH(orden.dni)} | <strong>Edad:</strong> ${escapeHtmlVH(orden.edad)} | <strong>Doctor:</strong> ${escapeHtmlVH(orden.doctor || 'Particular')}</div></div>${camposHTML}<div class="d-flex flex-wrap gap-2 mt-4"><button class="btn btn-success fw-semibold" onclick="guardarResultados()"><i class="bi bi-floppy me-1"></i>Guardar Resultados</button><button class="btn btn-primary fw-semibold" onclick="visualizarEImprimirResultados()"><i class="bi bi-printer me-1"></i>Visualizar e Imprimir Reporte A4</button></div>`;
+
+    // Evaluar estado visual inicial de los valores cargados
+    setTimeout(() => {
+        document.querySelectorAll('#resultados-editor input.resultado-individual').forEach(input => {
+            const min = input.dataset.min;
+            const max = input.dataset.max;
+            if (input.value && (min || max)) {
+                evaluarYResaltarCampo(input, min, max);
+            }
+        });
+    }, 100);
 }
 
 function guardarResultados() {
@@ -774,7 +1063,21 @@ function guardarResultados() {
         if (!examen || !indicador) return;
         const catEx = catalogoExamenes.find(c => c.codigo === examen) || {};
         const ind = obtenerIndicadoresExamen(catEx).find(x => x.id === indicador) || {};
-        ordenActualVisualizando.resultados[indicador] = { resultado: el.value || '', indicadorId: indicador, indicador: ind.nombre || '', unidad: ind.unidad || '', referencia: ind.referencia || '' };
+        
+        const minVal = el.dataset.min || ind.min || ind.refMin || '';
+        const maxVal = el.dataset.max || ind.max || ind.refMax || '';
+        const estadoClinico = evaluarRangoClinico(el.value, minVal, maxVal);
+
+        ordenActualVisualizando.resultados[indicador] = {
+            resultado: el.value || '',
+            indicadorId: indicador,
+            indicador: ind.nombre || '',
+            unidad: ind.unidad || '',
+            referencia: ind.referencia || ((minVal || maxVal) ? `${minVal} - ${maxVal}` : ''),
+            min: minVal,
+            max: maxVal,
+            estadoClinico: estadoClinico
+        };
     });
 
     document.querySelectorAll('#resultados-editor .resultado-directo').forEach(el => {
@@ -800,8 +1103,18 @@ function generarTablaEspecializada(ex, catEx, orden) {
     indicadores.forEach((ind, idx) => {
         const key = ind.id || `${ex.codigo}_${idx}`;
         const data = orden.resultados?.[key] || orden.resultados?.[`${ex.codigo}_${idx}`] || {};
-        const ref = ind.referencia || ((ind.min || ind.max) ? `${ind.min || '-'} - ${ind.max || '-'}` : '-');
-        filas += `<tr><td>${escapeHtmlVH(ind.nombre)}</td><td class="resultado">${escapeHtmlVH(data.resultado || '-')}</td><td>${escapeHtmlVH(ind.unidad || '-')}</td><td>${escapeHtmlVH(ref)}</td></tr>`;
+        const ref = ind.referencia || data.referencia || ((ind.min || ind.max) ? `${ind.min || '-'} - ${ind.max || '-'}` : '-');
+        
+        const minVal = ind.min || ind.refMin || data.min || '';
+        const maxVal = ind.max || ind.refMax || data.max || '';
+        const estado = evaluarRangoClinico(data.resultado, minVal, maxVal);
+
+        let celdaRes = escapeHtmlVH(data.resultado || '-');
+        if (estado === 'alto' || estado === 'bajo') {
+            celdaRes = `<span style="color:#dc3545;font-weight:bold;">${celdaRes} * (${estado.toUpperCase()})</span>`;
+        }
+
+        filas += `<tr><td>${escapeHtmlVH(ind.nombre)}</td><td class="resultado">${celdaRes}</td><td>${escapeHtmlVH(ind.unidad || '-')}</td><td>${escapeHtmlVH(ref)}</td></tr>`;
     });
     return `<table class="tabla-resultados"><thead><tr><th>INDICADOR / PRUEBA</th><th>RESULTADO</th><th>UNIDAD</th><th>VALOR REFERENCIAL</th></tr></thead><tbody>${filas}</tbody></table>`;
 }
@@ -883,7 +1196,7 @@ function visualizarEImprimirResultados() {
         <small>Laboratorio Clínico - Centro Médico Vital Health</small>
     </div>
 
-    <div class="nota">Este informe corresponde a los resultados registrados en el sistema del laboratorio.</div>
+    <div class="nota">* Valores fuera de los rangos referenciales normales. Este informe corresponde a los resultados registrados en el sistema del laboratorio.</div>
 
     <div class="footer">Centro Médico Vital Health · Av. Grau N° 1799 · Veintiséis de Octubre, Piura · 984 089 927</div>
 
@@ -892,6 +1205,7 @@ function visualizarEImprimirResultados() {
 </html>`);
     ventanaImp.document.close();
 }
+
 function actualizarControlCaja() {
     const hoyStr = new Date().toLocaleDateString('es-PE');
     const ordenesHoy = ordenesLocales.filter(o => o.fecha === hoyStr);
