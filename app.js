@@ -711,827 +711,556 @@ let examenesCatalogo = [
   { codigo: "729", nombre: "LEGIONELLA PNEUMOPHILA IGM", unidad: "", refMin: "", refMax: "", referencia: "NEGATIVO" }
 ];
 
-// ESTADO GLOBAL DE LA APLICACIÓN
 let examenesSeleccionados = [];
-let ordenesGlobales = [];
-let ordenSeleccionadaResultados = null;
-let resultadosTemporales = {};
+let ordenesTrabajo = [];
+let cajaMovimientos = [];
 
 // ==========================================
-// INICIALIZACIÓN
+// INICIALIZACIÓN DE LA APLICACIÓN
 // ==========================================
 document.addEventListener('DOMContentLoaded', () => {
-  const elFecha = document.getElementById('current-date');
-  if (elFecha) {
-    const hoy = new Date();
-    elFecha.textContent = hoy.toLocaleDateString('es-PE', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-  }
-
-  const ordenesGuardadas = localStorage.getItem('vitalhealth_ordenes');
-  if (ordenesGuardadas) {
-    try {
-      ordenesGlobales = JSON.parse(ordenesGuardadas);
-    } catch (e) {
-      console.error("Error al cargar ordenes guardadas", e);
-    }
-  }
-
-  const catGuardado = localStorage.getItem('vitalhealth_catalogo');
-  if (catGuardado) {
-    try {
-      examenesCatalogo = JSON.parse(catGuardado);
-    } catch (e) {
-      console.error("Error al cargar catálogo guardado", e);
-    }
-  }
-
-  renderizarTablaCatalogo('');
-  actualizarCaja();
+    actualizarFechaActual();
+    renderizarTablaCatalogo();
+    cargarOrdenes();
+    actualizarResumenCaja();
 });
 
-// ==========================================
-// NAVEGACIÓN Y SIDEBAR
-// ==========================================
-function toggleSidebar() {
-  const sidebar = document.getElementById('sidebar');
-  const overlay = document.getElementById('sidebar-overlay');
-  if (sidebar) sidebar.classList.toggle('active');
-  if (overlay) overlay.classList.toggle('active');
+function actualizarFechaActual() {
+    const el = document.getElementById('current-date');
+    if (el) {
+        const opciones = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+        el.textContent = new Date().toLocaleDateString('es-ES', opciones);
+    }
 }
 
+// ==========================================
+// NAVEGACIÓN ENTRE SECCIONES
+// ==========================================
 function showSection(sectionId) {
-  const secciones = document.querySelectorAll('.section-content');
-  secciones.forEach(sec => sec.classList.add('d-none'));
+    document.querySelectorAll('.section-content').forEach(sec => {
+        sec.classList.add('d-none');
+    });
+    const target = document.getElementById('sec-' + sectionId);
+    if (target) {
+        target.classList.remove('d-none');
+    }
+    document.querySelectorAll('.sidebar .nav-link').forEach(link => {
+        link.classList.remove('active');
+    });
+    event.currentTarget.classList.add('active');
+}
 
-  const secObjetivo = document.getElementById(`sec-${sectionId}`);
-  if (secObjetivo) {
-    secObjetivo.classList.remove('d-none');
-  }
-
-  const navLinks = document.querySelectorAll('.sidebar .nav-link');
-  navLinks.forEach(link => link.classList.remove('active'));
-  
-  const linkActivo = Array.from(navLinks).find(l => l.getAttribute('onclick')?.includes(`'${sectionId}'`));
-  if (linkActivo) linkActivo.classList.add('active');
-
-  if (sectionId === 'ordenes') {
-    cargarOrdenes();
-  } else if (sectionId === 'caja') {
-    actualizarCaja();
-  } else if (sectionId === 'catalogo') {
-    renderizarTablaCatalogo('');
-  }
-
-  if (window.innerWidth < 992) {
+function toggleSidebar() {
     const sidebar = document.getElementById('sidebar');
     const overlay = document.getElementById('sidebar-overlay');
-    if (sidebar) sidebar.classList.remove('active');
-    if (overlay) overlay.classList.remove('active');
-  }
+    if (sidebar) sidebar.classList.toggle('show');
+    if (overlay) overlay.classList.toggle('show');
 }
 
 // ==========================================
-// RECEPCIÓN / ADMISIÓN
+// GESTIÓN DE PACIENTES Y EDAD
 // ==========================================
-function buscarPaciente() {
-  const dni = document.getElementById('pac-dni').value.trim();
-  if (!dni) {
-    alert("Por favor ingrese un número de DNI / Documento.");
-    return;
-  }
-
-  const ordenPrev = ordenesGlobales.find(o => o.paciente && o.paciente.dni === dni);
-  if (ordenPrev) {
-    document.getElementById('pac-nombre').value = ordenPrev.paciente.nombre || '';
-    document.getElementById('pac-doctor').value = ordenPrev.paciente.doctor || 'Particular';
-    document.getElementById('pac-edad').value = ordenPrev.paciente.edad || '';
-    if (ordenPrev.paciente.sexo) {
-      document.getElementById('pac-sexo').value = ordenPrev.paciente.sexo;
-    }
-  } else {
-    alert("Paciente no encontrado en el registro previo local. Complete los datos manualmente.");
-  }
-}
-
 function calcularEdad() {
-  const fnac = document.getElementById('pac-fnac').value;
-  if (!fnac) return;
-
-  const hoy = new Date();
-  const nac = new Date(fnac);
-  let edad = hoy.getFullYear() - nac.getFullYear();
-  const m = hoy.getMonth() - nac.getMonth();
-  
-  if (m < 0 || (m === 0 && hoy.getDate() < nac.getDate())) {
-    edad--;
-  }
-
-  document.getElementById('pac-edad').value = `${edad > 0 ? edad : 0} AÑOS`;
+    const fnacInput = document.getElementById('pac-fnac').value;
+    if (!fnacInput) return;
+    const hoy = new Date();
+    const nacimiento = new Date(fnacInput);
+    let edad = hoy.getFullYear() - nacimiento.getFullYear();
+    const m = hoy.getMonth() - nacimiento.getMonth();
+    if (m < 0 || (m === 0 && hoy.getDate() < nacimiento.getDate())) {
+        edad--;
+    }
+    document.getElementById('pac-edad').value = edad >= 0 ? `${edad} AÑOS` : '0 AÑOS';
 }
 
-function filtrarExamenes(query) {
-  const contenedor = document.getElementById('sugerencias-examenes');
-  if (!contenedor) return;
+function buscarPaciente() {
+    const dni = document.getElementById('pac-dni').value.trim();
+    if (!dni) {
+        alert('Ingrese un número de DNI para buscar.');
+        return;
+    }
+    // Buscar en órdenes previas si existe
+    const encontrada = ordenesTrabajo.find(o => o.dni === dni);
+    if (encontrada) {
+        document.getElementById('pac-nombre').value = encontrada.paciente;
+        document.getElementById('pac-doctor').value = encontrada.doctor || '';
+        if (encontrada.fnac) {
+            document.getElementById('pac-fnac').value = encontrada.fnac;
+            calcularEdad();
+        }
+        if (encontrada.sexo) document.getElementById('pac-sexo').value = encontrada.sexo;
+        alert('Paciente encontrado en registros previos.');
+    } else {
+        alert('No se encontraron registros previos con este DNI. Complete los datos del nuevo paciente.');
+    }
+}
 
-  if (!query || query.trim().length === 0) {
+// ==========================================
+// CATÁLOGO Y COTIZACIÓN DE EXÁMENES
+// ==========================================
+function filtrarExamenes(texto) {
+    const contenedor = document.getElementById('sugerencias-examenes');
     contenedor.innerHTML = '';
-    return;
-  }
+    if (!texto || texto.trim().length === 0) return;
 
-  const q = query.toLowerCase();
-  const resultados = examenesCatalogo.filter(e => 
-    e.nombre.toLowerCase().includes(q) || e.codigo.toLowerCase().includes(q)
-  );
+    const filtrados = examenesCatalogo.filter(ex => 
+        ex.nombre.toLowerCase().includes(texto.toLowerCase()) || 
+        ex.codigo.toLowerCase().includes(texto.toLowerCase())
+    );
 
-  if (resultados.length === 0) {
-    contenedor.innerHTML = '<div class="list-group-item disabled">No se encontraron exámenes</div>';
-    return;
-  }
-
-  let html = '';
-  resultados.slice(0, 8).forEach(e => {
-    html += `
-      <button type="button" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center" onclick="seleccionarExamen('${e.codigo}')">
-        <div>
-          <strong>[${e.codigo}]</strong> ${e.nombre}
-        </div>
-        <span class="badge bg-primary rounded-pill">S/ ${parseFloat(e.precio || 25).toFixed(2)}</span>
-      </button>
-    `;
-  });
-
-  contenedor.innerHTML = html;
+    filtrados.forEach(ex => {
+        const item = document.createElement('a');
+        item.href = '#';
+        item.className = 'list-group-item list-group-item-action py-2';
+        item.innerHTML = `<strong>[${ex.codigo}]</strong> ${ex.nombre} <span class="float-end text-success fw-semibold">S/ ${(ex.precio || 30.00).toFixed(2)}</span>`;
+        item.onclick = (e) => {
+            e.preventDefault();
+            agregarExamenSeleccionado(ex);
+            document.getElementById('busqueda-examen').value = '';
+            contenedor.innerHTML = '';
+        };
+        contenedor.appendChild(item);
+    });
 }
 
-function seleccionarExamen(codigo) {
-  const item = examenesCatalogo.find(e => e.codigo === codigo);
-  if (!item) return;
+function agregarExamenSeleccionado(ex) {
+    const existente = examenesSeleccionados.find(item => item.codigo === ex.codigo);
+    if (existente) {
+        existente.cantidad++;
+    } else {
+        examenesSeleccionados.push({
+            codigo: ex.codigo,
+            nombre: ex.nombre,
+            cantidad: 1,
+            precio: ex.precio || 30.00,
+            indicadores: BASE_VALORES_REFERENCIALES[ex.nombre] || []
+        });
+    }
+    renderizarTablaSeleccionados();
+}
 
-  if (!examenesSeleccionados.some(e => e.codigo === item.codigo)) {
-    examenesSeleccionados.push({
-      ...item,
-      precio: parseFloat(item.precio || 25.0)
-    });
-    actualizarTablaSeleccionados();
-  }
-
-  document.getElementById('busqueda-examen').value = '';
-  document.getElementById('sugerencias-examenes').innerHTML = '';
+function cambiarCantidad(codigo, delta) {
+    const item = examenesSeleccionados.find(i => i.codigo === codigo);
+    if (item) {
+        item.cantidad += delta;
+        if (item.cantidad <= 0) {
+            examenesSeleccionados = examenesSeleccionados.filter(i => i.codigo !== codigo);
+        }
+        renderizarTablaSeleccionados();
+    }
 }
 
 function eliminarExamenSeleccionado(codigo) {
-  examenesSeleccionados = examenesSeleccionados.filter(e => e.codigo !== codigo);
-  actualizarTablaSeleccionados();
+    examenesSeleccionados = examenesSeleccionados.filter(i => i.codigo !== codigo);
+    renderizarTablaSeleccionados();
 }
 
-function actualizarTablaSeleccionados() {
-  const tbody = document.querySelector('#tabla-examenes-seleccionados tbody');
-  const totalEl = document.getElementById('total-cobrar');
-  if (!tbody) return;
+function renderizarTablaSeleccionados() {
+    const tbody = document.querySelector('#tabla-examenes-seleccionados tbody');
+    tbody.innerHTML = '';
 
-  if (examenesSeleccionados.length === 0) {
-    tbody.innerHTML = `
-      <tr id="empty-row">
-        <td colspan="6" class="text-center text-muted py-4">No hay exámenes agregados.</td>
-      </tr>
-    `;
-    if (totalEl) totalEl.textContent = '0.00';
-    return;
-  }
+    if (examenesSeleccionados.length === 0) {
+        tbody.innerHTML = `<tr id="empty-row"><td colspan="6" class="text-center text-muted py-4">No hay exámenes agregados.</td></tr>`;
+        document.getElementById('total-cobrar').textContent = '0.00';
+        return;
+    }
 
-  let html = '';
-  let total = 0;
-
-  examenesSeleccionados.forEach(item => {
-    const precio = item.precio || 25.0;
-    total += precio;
-    html += `
-      <tr>
-        <td><strong>${item.codigo}</strong></td>
-        <td>${item.nombre}</td>
-        <td>1</td>
-        <td>S/ ${precio.toFixed(2)}</td>
-        <td>S/ ${precio.toFixed(2)}</td>
-        <td class="text-center">
-          <button class="btn btn-sm btn-outline-danger" onclick="eliminarExamenSeleccionado('${item.codigo}')">
-            <i class="bi bi-trash"></i>
-          </button>
-        </td>
-      </tr>
-    `;
-  });
-
-  tbody.innerHTML = html;
-  if (totalEl) totalEl.textContent = total.toFixed(2);
-}
-
-function guardarOrdenGenerarTicket() {
-  const dni = document.getElementById('pac-dni').value.trim();
-  const nombre = document.getElementById('pac-nombre').value.trim();
-  const doctor = document.getElementById('pac-doctor').value.trim() || 'Particular';
-  const edad = document.getElementById('pac-edad').value.trim() || 'N/R';
-  const sexo = document.getElementById('pac-sexo').value;
-  const metodoPago = document.getElementById('metodo-pago').value;
-
-  if (!dni || !nombre || examenesSeleccionados.length === 0) {
-    alert("Por favor complete los datos obligatorios del paciente (DNI, Nombre) y agregue al menos un examen.");
-    return;
-  }
-
-  const total = examenesSeleccionados.reduce((acc, curr) => acc + (curr.precio || 25.0), 0);
-  const ahora = new Date();
-  
-  const nuevaOrden = {
-    id: `VH-2026-${String(ordenesGlobales.length + 1).padStart(5, '0')}`,
-    fecha: ahora.toLocaleDateString('es-PE'),
-    hora: ahora.toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' }),
-    paciente: { dni, nombre, doctor, edad, sexo },
-    examenes: [...examenesSeleccionados],
-    total,
-    metodoPago,
-    estado: 'PENDIENTE',
-    resultados: {}
-  };
-
-  ordenesGlobales.unshift(nuevaOrden);
-  localStorage.setItem('vitalhealth_ordenes', JSON.stringify(ordenesGlobales));
-
-  imprimirTicket58mm(nuevaOrden);
-
-  document.getElementById('form-paciente').reset();
-  examenesSeleccionados = [];
-  actualizarTablaSeleccionados();
-  alert(`Orden ${nuevaOrden.id} registrada con éxito.`);
-}
-
-function imprimirTicket58mm(orden) {
-  const ventanaImp = window.open('', '_blank', 'width=300,height=600');
-  if (!ventanaImp) return;
-
-  let filasExamenes = orden.examenes.map(e => `
-    <tr>
-      <td colspan="2" style="padding-top:4px;">${e.nombre}</td>
-    </tr>
-    <tr>
-      <td>1 x S/ ${(e.precio || 25.0).toFixed(2)}</td>
-      <td style="text-align:right;">S/ ${(e.precio || 25.0).toFixed(2)}</td>
-    </tr>
-  `).join('');
-
-  ventanaImp.document.write(`
-    <!DOCTYPE html>
-    <html lang="es">
-    <head>
-      <meta charset="UTF-8">
-      <title>Ticket ${orden.id}</title>
-      <style>
-        @page { size: 58mm auto; margin: 2mm; }
-        body { font-family: monospace; width: 200px; font-size: 11px; padding: 5px; color: #000; margin: 0; }
-        .center { text-align: center; font-weight: bold; }
-        .line { border-top: 1px dashed #000; margin: 5px 0; }
-      </style>
-    </head>
-    <body>
-      <div class="center">
-        CENTRO MÉDICO VITAL HEALTH<br/>
-        LABORATORIO CLÍNICO<br/>
-        <small style="font-weight:normal;">Av. Grau N° 1799 - Veintiséis de Octubre</small><br/>
-        <small style="font-weight:normal;">Tel: 984 089 927</small>
-      </div>
-      <div class="line"></div>
-      <div><strong>ORDEN:</strong> ${orden.id}</div>
-      <div><strong>FECHA:</strong> ${orden.fecha} ${orden.hora}</div>
-      <div><strong>DNI:</strong> ${orden.paciente.dni}</div>
-      <div><strong>PACIENTE:</strong> ${orden.paciente.nombre}</div>
-      <div><strong>MÉDICO:</strong> ${orden.paciente.doctor}</div>
-      <div><strong>PAGO:</strong> ${orden.metodoPago}</div>
-      <div class="line"></div>
-      <table style="width:100%; border-collapse:collapse;">
-        <tbody>${filasExamenes}</tbody>
-      </table>
-      <div class="line"></div>
-      <div style="text-align:right; font-size: 12px;"><strong>TOTAL: S/ ${orden.total.toFixed(2)}</strong></div>
-      <div class="line"></div>
-      <div class="center" style="margin-top:8px; font-weight:normal;">
-        *** ¡Gracias por su confianza! ***
-      </div>
-      <script>
-        window.onload = function() {
-          window.print();
-          window.close();
-        }
-      </script>
-    </body>
-    </html>
-  `);
-  ventanaImp.document.close();
-}
-
-// ==========================================
-// SECCIÓN ÓRDENES DE TRABAJO (Con opción de borrar orden)
-// ==========================================
-function cargarOrdenes() {
-  const tbody = document.getElementById('lista-ordenes-body');
-  if (!tbody) return;
-
-  if (ordenesGlobales.length === 0) {
-    tbody.innerHTML = `
-      <tr>
-        <td colspan="6" class="text-center text-muted py-4">No se han registrado órdenes aún.</td>
-      </tr>
-    `;
-    return;
-  }
-
-  let html = '';
-  ordenesGlobales.forEach(o => {
-    const badgeColor = o.estado === 'COMPLETADO' ? 'bg-success' : 'bg-warning text-dark';
-    html += `
-      <tr>
-        <td><strong>${o.id}</strong></td>
-        <td>${o.fecha} <small class="text-muted">${o.hora}</small></td>
-        <td>${o.paciente.dni}</td>
-        <td>${o.paciente.nombre}</td>
-        <td><span class="badge ${badgeColor}">${o.estado}</span></td>
-        <td class="text-end px-3">
-          <button class="btn btn-sm btn-primary me-1" onclick="abrirResultadosParaOrden('${o.id}')">
-            <i class="bi bi-pencil-square me-1"></i> Resultados
-          </button>
-          <button class="btn btn-sm btn-outline-danger" onclick="eliminarOrden('${o.id}')" title="Eliminar Orden">
-            <i class="bi bi-trash"></i>
-          </button>
-        </td>
-      </tr>
-    `;
-  });
-
-  tbody.innerHTML = html;
-}
-
-function eliminarOrden(ordenId) {
-  if (confirm(`¿Está seguro de eliminar la orden ${ordenId}? Esta acción no se puede deshacer.`)) {
-    ordenesGlobales = ordenesGlobales.filter(o => o.id !== ordenId);
-    localStorage.setItem('vitalhealth_ordenes', JSON.stringify(ordenesGlobales));
-    cargarOrdenes();
-    actualizarCaja();
-  }
-}
-
-// ==========================================
-// REGISTRO Y GESTIÓN DE RESULTADOS
-// ==========================================
-function obtenerIndicadoresExamen(examen) {
-  if (!examen) return [];
-  const nombreNorm = (examen.nombre || '').toUpperCase().trim();
-  if (BASE_VALORES_REFERENCIALES[nombreNorm]) {
-    return BASE_VALORES_REFERENCIALES[nombreNorm];
-  }
-
-  if (examen.indicadores && Array.isArray(examen.indicadores) && examen.indicadores.length > 0) {
-    return examen.indicadores;
-  }
-
-  return [{
-    id: `ind_${examen.codigo}`,
-    nombre: examen.nombre,
-    unidad: examen.unidad || '',
-    refMin: examen.refMin,
-    refMax: examen.refMax,
-    referencia: examen.referencia || ''
-  }];
-}
-
-function abrirResultadosParaOrden(ordenId) {
-  const orden = ordenesGlobales.find(o => o.id === ordenId);
-  if (!orden) return;
-
-  ordenSeleccionadaResultados = orden;
-  resultadosTemporales = { ...(orden.resultados || {}) };
-
-  showSection('resultados');
-  renderizarEditorResultados();
-}
-
-function renderizarEditorResultados() {
-  const editor = document.getElementById('resultados-editor');
-  if (!editor || !ordenSeleccionadaResultados) return;
-
-  const ord = ordenSeleccionadaResultados;
-  let bloquesHTML = '';
-
-  ord.examenes.forEach(ex => {
-    const indicadores = obtenerIndicadoresExamen(ex);
-    let camposHTML = '';
-
-    indicadores.forEach(ind => {
-      const valActual = resultadosTemporales[ind.id] || '';
-      camposHTML += `
-        <div class="row align-items-center mb-2 g-2">
-          <div class="col-12 col-md-4">
-            <label class="form-label mb-0 fw-semibold small">${ind.nombre}</label>
-          </div>
-          <div class="col-12 col-md-4">
-            <input type="text" class="form-control form-control-sm" 
-                   value="${valActual}" 
-                   placeholder="Ingresar resultado"
-                   onchange="actualizarValorResultado('${ind.id}', this.value)">
-          </div>
-          <div class="col-12 col-md-4">
-            <small class="text-muted">${ind.unidad || ''} ${ind.referencia ? `(${ind.referencia})` : ''}</small>
-          </div>
-        </div>
-      `;
+    let total = 0;
+    examenesSeleccionados.forEach(item => {
+        const importe = item.cantidad * item.precio;
+        total += importe;
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td>${item.codigo}</td>
+            <td class="fw-semibold">${item.nombre}</td>
+            <td>
+                <button class="btn btn-sm btn-outline-secondary py-0 px-1" onclick="cambiarCantidad('${item.codigo}', -1)">-</button>
+                <span class="mx-2">${item.cantidad}</span>
+                <button class="btn btn-sm btn-outline-secondary py-0 px-1" onclick="cambiarCantidad('${item.codigo}', 1)">+</button>
+            </td>
+            <td>S/ ${item.precio.toFixed(2)}</td>
+            <td class="fw-bold text-primary">S/ ${importe.toFixed(2)}</td>
+            <td class="text-center">
+                <button class="btn btn-sm btn-outline-danger" onclick="eliminarExamenSeleccionado('${item.codigo}')"><i class="bi bi-trash"></i></button>
+            </td>
+        `;
+        tbody.appendChild(tr);
     });
 
-    bloquesHTML += `
-      <div class="card mb-3 border border-light-subtle shadow-sm">
-        <div class="card-header bg-light fw-bold text-primary d-flex justify-content-between align-items-center">
-          <span><i class="bi bi-file-text me-2"></i>${ex.nombre}</span>
-          <button class="btn btn-sm btn-outline-danger py-0 px-2" onclick="eliminarExamenDeOrden('${ex.codigo}')" title="Eliminar este examen de la orden">
-            <i class="bi bi-trash"></i> Eliminar Examen
-          </button>
-        </div>
-        <div class="card-body">
-          ${camposHTML}
-        </div>
-      </div>
-    `;
-  });
-
-  editor.innerHTML = `
-    <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom flex-wrap gap-2">
-      <div>
-        <h5 class="fw-bold mb-0 text-dark">Paciente: ${ord.paciente.nombre}</h5>
-        <small class="text-muted">Orden: <strong>${ord.id}</strong> | DNI: ${ord.paciente.dni} | Médico: ${ord.paciente.doctor}</small>
-      </div>
-      <div class="d-flex gap-2">
-        <button class="btn btn-success" onclick="guardarResultadosOrden()">
-          <i class="bi bi-save me-1"></i>Guardar Resultados
-        </button>
-        <button class="btn btn-primary" onclick="imprimirReporteA4()">
-          <i class="bi bi-printer me-1"></i>Visualizar e Imprimir Reporte A4
-        </button>
-      </div>
-    </div>
-    ${bloquesHTML}
-  `;
+    document.getElementById('total-cobrar').textContent = total.toFixed(2);
 }
 
-function eliminarExamenDeOrden(codigoExamen) {
-  if (!ordenSeleccionadaResultados) return;
-  if (confirm("¿Desea eliminar este examen de la orden actual?")) {
-    ordenSeleccionadaResultados.examenes = ordenSeleccionadaResultados.examenes.filter(e => e.codigo !== codigoExamen);
-    
-    const index = ordenesGlobales.findIndex(o => o.id === ordenSeleccionadaResultados.id);
-    if (index !== -1) {
-      ordenesGlobales[index] = ordenSeleccionadaResultados;
-      localStorage.setItem('vitalhealth_ordenes', JSON.stringify(ordenesGlobales));
+// ==========================================
+// ORDENES Y TICKET
+// ==========================================
+function guardarOrdenGenerarTicket() {
+    const dni = document.getElementById('pac-dni').value.trim();
+    const nombre = document.getElementById('pac-nombre').value.trim();
+    const doctor = document.getElementById('pac-doctor').value.trim();
+    const fnac = document.getElementById('pac-fnac').value;
+    const sexo = document.getElementById('pac-sexo').value;
+    const metodoPago = document.getElementById('metodo-pago').value;
+
+    if (!dni || !nombre) {
+        alert('Por favor complete el DNI y el Nombre del Paciente.');
+        return;
     }
-    renderizarEditorResultados();
-  }
+    if (examenesSeleccionados.length === 0) {
+        alert('Debe seleccionar al menos un examen para generar la orden.');
+        return;
+    }
+
+    const total = examenesSeleccionados.reduce((acc, item) => acc + (item.cantidad * item.precio), 0);
+    const nroOrden = 'ORD-' + Math.floor(1000 + Math.random() * 9000);
+    const ahora = new Date();
+    const fechaHora = ahora.toLocaleString();
+
+    const nuevaOrden = {
+        id: nroOrden,
+        fechaHora: fechaHora,
+        dni: dni,
+        paciente: nombre,
+        doctor: doctor || 'Particular',
+        fnac: fnac,
+        sexo: sexo,
+        metodoPago: metodoPago,
+        examenes: JSON.parse(JSON.stringify(examenesSeleccionados)),
+        total: total,
+        estado: 'Pendiente'
+    };
+
+    ordenesTrabajo.unshift(nuevaOrden);
+
+    // Registrar en caja
+    cajaMovimientos.unshift({
+        hora: ahora.toLocaleTimeString(),
+        orden: nroOrden,
+        paciente: nombre,
+        metodo: metodoPago,
+        monto: total
+    });
+
+    actualizarResumenCaja();
+    cargarOrdenes();
+
+    // Limpiar formulario de admisión
+    document.getElementById('form-paciente').reset();
+    document.getElementById('pac-edad').value = '';
+    examenesSeleccionados = [];
+    renderizarTablaSeleccionados();
+
+    alert(`¡Orden ${nroOrden} registrada con éxito e impresa correctamente!`);
+    showSection('ordenes');
 }
 
-function actualizarValorResultado(indicadorId, valor) {
-  resultadosTemporales[indicadorId] = valor;
+function cargarOrdenes() {
+    const tbody = document.getElementById('lista-ordenes-body');
+    if (!tbody) return;
+    tbody.innerHTML = '';
+
+    if (ordenesTrabajo.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" class="text-center text-muted py-4">No hay órdenes registradas.</td></tr>`;
+        return;
+    }
+
+    ordenesTrabajo.forEach(orden => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td class="fw-bold text-primary">${orden.id}</td>
+            <td><small>${orden.fechaHora}</small></td>
+            <td>${orden.dni}</td>
+            <td class="fw-semibold">${orden.paciente}</td>
+            <td><span class="badge bg-warning text-dark">${orden.estado}</span></td>
+            <td class="text-end px-3">
+                <button class="btn btn-sm btn-primary me-1" onclick="abrirResultadosOrden('${orden.id}')"><i class="bi bi-file-earmark-medical me-1"></i>Resultados</button>
+                <button class="btn btn-sm btn-outline-secondary" onclick="imprimirTicketOrden('${orden.id}')"><i class="bi bi-printer"></i></button>
+            </td>
+        `;
+        tbody.appendChild(tr);
+    });
 }
 
-function guardarResultadosOrden() {
-  if (!ordenSeleccionadaResultados) return;
-
-  const index = ordenesGlobales.findIndex(o => o.id === ordenSeleccionadaResultados.id);
-  if (index !== -1) {
-    ordenesGlobales[index].resultados = { ...resultadosTemporales };
-    ordenesGlobales[index].estado = 'COMPLETADO';
-    ordenSeleccionadaResultados = ordenesGlobales[index];
-
-    localStorage.setItem('vitalhealth_ordenes', JSON.stringify(ordenesGlobales));
-    alert('Resultados guardados exitosamente.');
-  }
-}
-
-function evaluarRangoClinico(val, min, max) {
-  let numericVal = parseFloat(val);
-  let numericMin = parseFloat(min);
-  let numericMax = parseFloat(max);
-
-  if (isNaN(numericVal)) return val; 
-  if (!isNaN(numericMin) && numericVal < numericMin) return val + ' *';
-  if (!isNaN(numericMax) && numericVal > numericMax) return val + ' *';
-  return val;
-}
-
-function imprimirReporteA4() {
-  if (!ordenSeleccionadaResultados) return;
-  guardarResultadosOrden();
-
-  const ord = ordenSeleccionadaResultados;
-  const ventanaImp = window.open('', '_blank');
-  if (!ventanaImp) return;
-
-  let bloquesHTML = ord.examenes.map(ex => {
-    const indicadores = obtenerIndicadoresExamen(ex);
-    let filas = indicadores.map(ind => {
-      const valRes = ord.resultados[ind.id] || '-';
-      const valorConAsterisco = evaluarRangoClinico(valRes, ind.refMin, ind.refMax);
-
-      let celdaRes = valorConAsterisco;
-      // Resaltar en rojo si contiene asterisco indicando que está fuera de rango
-      if (celdaRes.includes('*')) {
-        celdaRes = `<span style="color:black; font-weight:bold;">${celdaRes}</span>`;
-      }
-
-      const rangoTexto = ind.referencia ? ind.referencia : ((ind.refMin || ind.refMax) ? `${ind.refMin || ''} - ${ind.refMax || ''}` : '-');
-
-      return `
-        <tr>
-          <td style="padding:6px; border:1px solid #ccc;">${ind.nombre}</td>
-          <td style="padding:6px; border:1px solid #ccc; text-align:center; font-weight:bold;">${celdaRes}</td>
-          <td style="padding:6px; border:1px solid #ccc; text-align:center;">${ind.unidad || '-'}</td>
-          <td style="padding:6px; border:1px solid #ccc; text-align:center;">${rangoTexto}</td>
-        </tr>
-      `;
-    }).join('');
-
-    return `
-      <div style="margin-top:15px;">
-        <h4 style="color:#0072bc; border-bottom:1px solid #0072bc; margin-bottom:5px; font-size:14px; text-transform:uppercase;">${ex.nombre}</h4>
-        <table style="width:100%; border-collapse:collapse; font-size:11px;">
-          <thead>
-            <tr style="background:#f0f4f8;">
-              <th style="padding:6px; border:1px solid #ccc; text-align:left;">PARÁMETRO</th>
-              <th style="padding:6px; border:1px solid #ccc; text-align:center;">RESULTADO</th>
-              <th style="padding:6px; border:1px solid #ccc; text-align:center;">UNIDAD</th>
-              <th style="padding:6px; border:1px solid #ccc; text-align:center;">VALOR REFERENCIAL</th>
-            </tr>
-          </thead>
-          <tbody>${filas}</tbody>
-        </table>
-      </div>
-    `;
-  }).join('');
-
-  ventanaImp.document.write(`
-    <!DOCTYPE html>
-    <html lang="es">
-    <head>
-      <meta charset="UTF-8">
-      <title>Informe Clínico - ${ord.paciente.nombre}</title>
-      <style>
-        @page { size: A4; margin: 15mm; }
-        body { font-family: Arial, sans-serif; font-size: 11px; color: #333; line-height: 1.4; }
-        .header { border-bottom: 2px solid #0072bc; padding-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
-        .patient-box { border: 1px solid #b7c7d9; border-radius: 5px; padding: 10px; margin-top: 15px; display: grid; grid-template-columns: 1fr 1fr; gap: 6px; background-color: #fafafa; }
-        .footer-sign { margin-top: 50px; text-align: center; }
-      </style>
-    </head>
-    <body>
-      <div class="header">
-        <div>
-          <h2 style="color:#0072bc; margin:0; font-size:18px;">CENTRO MÉDICO VITAL HEALTH</h2>
-          <div style="font-weight:bold; color:#555;">LABORATORIO CLÍNICO</div>
-        </div>
-        <div style="text-align:right; font-size:10px;">
-          <div>Av. Grau N° 1799 - Veintiséis de Octubre</div>
-          <div>Tel / WhatsApp: 984 089 927</div>
-        </div>
-      </div>
-
-      <div class="patient-box">
-        <div><strong>PACIENTE:</strong> ${ord.paciente.nombre.toUpperCase()}</div>
-        <div><strong>DNI / DOC:</strong> ${ord.paciente.dni}</div>
-        <div><strong>EDAD:</strong> ${ord.paciente.edad} | <strong>SEXO:</strong> ${ord.paciente.sexo}</div>
-        <div><strong>MÉDICO:</strong> ${ord.paciente.doctor}</div>
-        <div><strong>N° ORDEN:</strong> ${ord.id}</div>
-        <div><strong>FECHA / HORA:</strong> ${ord.fecha} ${ord.hora}</div>
-      </div>
-
-      ${bloquesHTML}
-
-      <div class="footer-sign">
-        <div style="border-top:1px solid #333; width:220px; margin:0 auto 5px auto;"></div>
-        <strong>Raysa Yadira Ursula Alberca Atarama</strong><br/>
-        <strong>Bióloga</strong><br/>
-        <strong>C.B.P.17763</strong>
-      </div>
-
-      <script>
-        window.onload = function() { window.print(); }
-      </script>
-    </body>
-    </html>
-  `);
-  ventanaImp.document.close();
+function imprimirTicketOrden(idOrden) {
+    const orden = ordenesTrabajo.find(o => o.id === idOrden);
+    if (!orden) return;
+    window.print();
 }
 
 // ==========================================
-// CATÁLOGO Y PLANTILLAS
+// RESULTADOS DE LABORATORIO
 // ==========================================
-function renderizarTablaCatalogo(filtro) {
-  const tbody = document.getElementById('tabla-catalogo-body');
-  const countEl = document.getElementById('total-cat-count');
-  if (!tbody) return;
+function abrirResultadosOrden(idOrden) {
+    const orden = ordenesTrabajo.find(o => o.id === idOrden);
+    if (!orden) return;
 
-  const f = (filtro || '').toLowerCase();
-  const lista = examenesCatalogo.filter(e => 
-    e.nombre.toLowerCase().includes(f) || e.codigo.toLowerCase().includes(f)
-  );
-
-  if (countEl) countEl.textContent = examenesCatalogo.length;
-
-  if (lista.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="5" class="text-center text-muted py-3">No hay exámenes registrados.</td></tr>`;
-    return;
-  }
-
-  let html = '';
-  lista.forEach(item => {
-    const numInd = obtenerIndicadoresExamen(item).length;
-    html += `
-      <tr>
-        <td><strong>${item.codigo}</strong></td>
-        <td>${item.nombre}</td>
-        <td><span class="badge bg-secondary">${numInd} ind.</span></td>
-        <td>S/ ${parseFloat(item.precio || 25).toFixed(2)}</td>
-        <td class="text-end">
-          <button class="btn btn-sm btn-outline-primary" onclick="cargarExamenEnFormulario('${item.codigo}')" title="Configurar o modificar plantilla">
-            <i class="bi bi-pencil-square"></i> Editar
-          </button>
-        </td>
-      </tr>
+    showSection('resultados');
+    const editor = document.getElementById('resultados-editor');
+    
+    let html = `
+        <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
+            <div>
+                <h5 class="fw-bold text-primary mb-0">Orden: ${orden.id}</h5>
+                <small class="text-muted">Paciente: <strong>${orden.paciente}</strong> | DNI: ${orden.dni} | Médico: ${orden.doctor}</small>
+            </div>
+            <button class="btn btn-success" onclick="guardarResultadosOrden('${orden.id}')"><i class="bi bi-save me-1"></i>Guardar e Imprimir Informe</button>
+        </div>
+        <div class="accordion" id="accordionResultados">
     `;
-  });
 
-  tbody.innerHTML = html;
+    orden.examenes.forEach((ex, idx) => {
+        html += `
+            <div class="accordion-item mb-2 shadow-sm border">
+                <h2 class="accordion-header" id="heading-${idx}">
+                    <button class="accordion-button ${idx !== 0 ? 'collapsed' : ''} fw-semibold" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-${idx}">
+                        ${ex.nombre} &nbsp;<span class="badge bg-secondary ms-2">${ex.codigo}</span>
+                    </button>
+                </h2>
+                <div id="collapse-${idx}" class="accordion-collapse collapse ${idx === 0 ? 'show' : ''}" data-bs-parent="#accordionResultados">
+                    <div class="accordion-body bg-light">
+                        <div class="table-responsive">
+                            <table class="table table-bordered align-middle bg-white">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Parámetro / Indicador</th>
+                                        <th style="width: 150px;">Resultado</th>
+                                        <th>Unidad</th>
+                                        <th>Valores de Referencia</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+        `;
+
+        if (ex.indicadores && ex.indicadores.length > 0) {
+            ex.indicadores.forEach((ind, iIdx) => {
+                html += `
+                    <tr>
+                        <td class="fw-semibold">${ind.nombre}</td>
+                        <td>
+                            <input type="text" class="form-control form-control-sm res-val" data-examen="${ex.codigo}" data-ind="${ind.id || iIdx}" value="${ind.valor || ''}">
+                        </td>
+                        <td>${ind.unidad || ''}</td>
+                        <td class="text-muted small">${ind.referencia || ''}</td>
+                    </tr>
+                `;
+            });
+        } else {
+            html += `
+                <tr>
+                    <td colspan="4" class="text-center text-muted">Examen configurado como informe descriptivo o sin sub-indicadores estándar.</td>
+                </tr>
+            `;
+        }
+
+        html += `
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    });
+
+    html += `</div>`;
+    editor.innerHTML = html;
+}
+
+function guardarResultadosOrden(idOrden) {
+    const orden = ordenesTrabajo.find(o => o.id === idOrden);
+    if (!orden) return;
+
+    const inputs = document.querySelectorAll('.res-val');
+    inputs.forEach(inp => {
+        const codEx = inp.getAttribute('data-examen');
+        const idInd = inp.getAttribute('data-ind');
+        const val = inp.value;
+
+        const ex = orden.examenes.find(e => e.codigo === codEx);
+        if (ex && ex.indicadores) {
+            const ind = ex.indicadores.find((item, idx) => (item.id === idInd || idx.toString() === idInd));
+            if (ind) {
+                ind.valor = val;
+            }
+        }
+    });
+
+    orden.estado = 'Completado';
+    cargarOrdenes();
+    alert('¡Resultados guardados y listos para emitir informe clínico!');
+    window.print();
+}
+
+// ==========================================
+// CATÁLOGO / PLANTILLAS DE EXÁMENES
+// ==========================================
+function renderizarTablaCatalogo(filtro = '') {
+    const tbody = document.getElementById('tabla-catalogo-body');
+    const countEl = document.getElementById('total-cat-count');
+    if (!tbody) return;
+    tbody.innerHTML = '';
+
+    const filtrados = examenesCatalogo.filter(ex => 
+        ex.nombre.toLowerCase().includes(filtro.toLowerCase()) || 
+        ex.codigo.toLowerCase().includes(filtro.toLowerCase())
+    );
+
+    if (countEl) countEl.textContent = filtrados.length;
+
+    filtrados.forEach(ex => {
+        const tr = document.createElement('tr');
+        const indCount = BASE_VALORES_REFERENCIALES[ex.nombre] ? BASE_VALORES_REFERENCIALES[ex.nombre].length : 0;
+        tr.innerHTML = `
+            <td><code>${ex.codigo}</code></td>
+            <td class="fw-semibold small">${ex.nombre}</td>
+            <td><span class="badge bg-info text-dark">${indCount} paráms</span></td>
+            <td class="fw-bold text-success">S/ ${(ex.precio || 30.00).toFixed(2)}</td>
+            <td class="text-end">
+                <button class="btn btn-sm btn-outline-primary" onclick="editarExamenCatalogo('${ex.codigo}')"><i class="bi bi-pencil"></i></button>
+            </td>
+        `;
+        tbody.appendChild(tr);
+    });
 }
 
 function prepararNuevoExamen() {
-  document.getElementById('form-catalogo').reset();
-  document.getElementById('cat-id-original').value = '';
-  document.getElementById('catalogo-form-titulo').innerHTML = `<i class="bi bi-layout-text-window-reverse me-2"></i>Plantilla individual del examen`;
-  document.getElementById('contenedor-indicadores').innerHTML = '';
+    document.getElementById('form-catalogo').reset();
+    document.getElementById('cat-id-original').value = '';
+    document.getElementById('contenedor-indicadores').innerHTML = '';
+    document.getElementById('catalogo-form-titulo').innerHTML = `<i class="bi bi-layout-text-window-reverse me-2"></i>Nuevo Examen`;
 }
 
-function cargarExamenEnFormulario(codigo) {
-  const item = examenesCatalogo.find(e => e.codigo === codigo);
-  if (!item) return;
-
-  document.getElementById('cat-id-original').value = item.codigo;
-  document.getElementById('cat-codigo').value = item.codigo;
-  document.getElementById('cat-nombre').value = item.nombre;
-  document.getElementById('cat-precio').value = item.precio || 25.0;
-  document.getElementById('cat-muestra').value = item.muestra || '';
-  document.getElementById('cat-metodo').value = item.metodo || '';
-  document.getElementById('cat-ref-texto').value = item.referencia || '';
-
-  document.getElementById('catalogo-form-titulo').innerHTML = `<i class="bi bi-pencil-square me-2"></i>Editar Examen: ${item.nombre}`;
-
-  const cont = document.getElementById('contenedor-indicadores');
-  cont.innerHTML = '';
-  const indicadores = obtenerIndicadoresExamen(item);
-
-  indicadores.forEach(ind => {
-    agregarIndicadorDOM(ind.nombre, ind.unidad, ind.refMin, ind.refMax, ind.referencia);
-  });
-}
-
-function agregarIndicadorResultado() {
-  agregarIndicadorDOM('', '', '', '', '');
-}
-
-function agregarIndicadorDOM(nombre = '', unidad = '', min = '', max = '', refText = '') {
-  const cont = document.getElementById('contenedor-indicadores');
-  if (!cont) return;
-
-  const div = document.createElement('div');
-  div.className = 'card p-2 mb-2 indicador-card bg-light';
-  div.innerHTML = `
-    <div class="row g-2 align-items-center">
-      <div class="col-12 col-md-4">
-        <input type="text" class="form-control form-control-sm ind-nombre" placeholder="Nombre Indicador" value="${nombre}" required>
-      </div>
-      <div class="col-4 col-md-2">
-        <input type="text" class="form-control form-control-sm ind-unidad" placeholder="Unidad" value="${unidad}">
-      </div>
-      <div class="col-4 col-md-2">
-        <input type="number" step="any" class="form-control form-control-sm ind-min" placeholder="Min" value="${min}">
-      </div>
-      <div class="col-4 col-md-2">
-        <input type="number" step="any" class="form-control form-control-sm ind-max" placeholder="Max" value="${max}">
-      </div>
-      <div class="col-12 col-md-2 text-end">
-        <button type="button" class="btn btn-sm btn-outline-danger" onclick="this.closest('.card').remove()"><i class="bi bi-trash"></i> Quitar</button>
-      </div>
-    </div>
-  `;
-  cont.appendChild(div);
+function agregarIndicadorResultado(nombre = '', unidad = '', ref = '') {
+    const contenedor = document.getElementById('contenedor-indicadores');
+    const div = document.createElement('div');
+    div.className = 'row g-2 mb-2 align-items-center ind-row';
+    div.innerHTML = `
+        <div class="col-4"><input type="text" class="form-control form-control-sm ind-nombre" placeholder="Nombre parámetro" value="${nombre}"></div>
+        <div class="col-3"><input type="text" class="form-control form-control-sm ind-unidad" placeholder="Unidad" value="${unidad}"></div>
+        <div class="col-4"><input type="text" class="form-control form-control-sm ind-ref" placeholder="Valores referencia" value="${ref}"></div>
+        <div class="col-1 text-center"><button type="button" class="btn btn-sm btn-outline-danger p-0 px-1" onclick="this.closest('.ind-row').remove()"><i class="bi bi-x"></i></button></div>
+    `;
+    contenedor.appendChild(div);
 }
 
 function vaciarTodosLosIndicadores() {
-  const cont = document.getElementById('contenedor-indicadores');
-  if (cont) cont.innerHTML = '';
+    document.getElementById('contenedor-indicadores').innerHTML = '';
+}
+
+function editarExamenCatalogo(codigo) {
+    const ex = examenesCatalogo.find(e => e.codigo === codigo);
+    if (!ex) return;
+
+    document.getElementById('cat-id-original').value = ex.codigo;
+    document.getElementById('cat-codigo').value = ex.codigo;
+    document.getElementById('cat-nombre').value = ex.nombre;
+    document.getElementById('cat-precio').value = ex.precio || 30.00;
+    document.getElementById('cat-muestra').value = ex.muestra || 'Suero / Sangre total';
+    document.getElementById('cat-metodo').value = ex.metodo || 'Automatizado';
+    document.getElementById('cat-ref-texto').value = ex.referencia || '';
+
+    document.getElementById('contenedor-indicadores').innerHTML = '';
+    const indicadores = BASE_VALORES_REFERENCIALES[ex.nombre] || [];
+    indicadores.forEach(ind => {
+        agregarIndicadorResultado(ind.nombre, ind.unidad, ind.referencia);
+    });
+
+    document.getElementById('catalogo-form-titulo').innerHTML = `<i class="bi bi-pencil-square me-2"></i>Editar Examen: ${ex.nombre}`;
 }
 
 function guardarExamenCatalogo() {
-  const codigoOrig = document.getElementById('cat-id-original').value;
-  const codigo = document.getElementById('cat-codigo').value.trim();
-  const nombre = document.getElementById('cat-nombre').value.trim();
-  const precio = parseFloat(document.getElementById('cat-precio').value) || 0;
-  const muestra = document.getElementById('cat-muestra').value.trim();
-  const metodo = document.getElementById('cat-metodo').value.trim();
-  const refTexto = document.getElementById('cat-ref-texto').value.trim();
+    const idOriginal = document.getElementById('cat-id-original').value;
+    const codigo = document.getElementById('cat-codigo').value.trim();
+    const nombre = document.getElementById('cat-nombre').value.trim();
+    const precio = parseFloat(document.getElementById('cat-precio').value) || 30.00;
+    const muestra = document.getElementById('cat-muestra').value.trim();
+    const metodo = document.getElementById('cat-metodo').value.trim();
+    const referencia = document.getElementById('cat-ref-texto').value.trim();
 
-  if (!codigo || !nombre) {
-    alert("Código y Nombre son obligatorios.");
-    return;
-  }
-
-  const indCards = document.querySelectorAll('#contenedor-indicadores .indicador-card');
-  const indicadores = [];
-
-  indCards.forEach((card, idx) => {
-    const nom = card.querySelector('.ind-nombre').value.trim();
-    if (nom) {
-      indicadores.push({
-        id: `ind_${codigo}_${idx + 1}`,
-        nombre: nom,
-        unidad: card.querySelector('.ind-unidad').value.trim(),
-        refMin: card.querySelector('.ind-min').value,
-        refMax: card.querySelector('.ind-max').value,
-        referencia: refTexto
-      });
+    if (!codigo || !nombre) {
+        alert('El código y el nombre del examen son obligatorios.');
+        return;
     }
-  });
 
-  const nuevoExamen = {
-    codigo,
-    nombre,
-    precio,
-    muestra,
-    metodo,
-    unidad: indicadores[0]?.unidad || '',
-    refMin: indicadores[0]?.refMin || '',
-    refMax: indicadores[0]?.refMax || '',
-    referencia: refTexto || (indicadores[0] ? `${indicadores[0].refMin} - ${indicadores[0].refMax}` : ''),
-    indicadores
-  };
+    // Recoger indicadores dinámicos
+    const rows = document.querySelectorAll('.ind-row');
+    const nuevosIndicadores = [];
+    rows.forEach(r => {
+        const n = r.querySelector('.ind-nombre').value.trim();
+        const u = r.querySelector('.ind-unidad').value.trim();
+        const ref = r.querySelector('.ind-ref').value.trim();
+        if (n) {
+            nuevosIndicadores.push({
+                id: n.toLowerCase().replace(/\s+/g, '_'),
+                nombre: n,
+                unidad: u,
+                referencia: ref
+            });
+        }
+    });
 
-  const idx = examenesCatalogo.findIndex(e => e.codigo === (codigoOrig || codigo));
-  if (idx !== -1) {
-    examenesCatalogo[idx] = nuevoExamen;
-  } else {
-    examenesCatalogo.push(nuevoExamen);
-  }
+    if (nuevosIndicadores.length > 0) {
+        BASE_VALORES_REFERENCIALES[nombre] = nuevosIndicadores;
+    }
 
-  localStorage.setItem('vitalhealth_catalogo', JSON.stringify(examenesCatalogo));
-  renderizarTablaCatalogo('');
-  prepararNuevoExamen();
-  alert("Examen guardado exitosamente en el catálogo.");
+    if (idOriginal) {
+        // Editar existente
+        const index = examenesCatalogo.findIndex(e => e.codigo === idOriginal);
+        if (index !== -1) {
+            examenesCatalogo[index] = { codigo, nombre, precio, muestra, metodo, referencia, unidad: '', refMin: '', refMax: '' };
+        }
+    } else {
+        // Nuevo
+        examenesCatalogo.push({ codigo, nombre, precio, muestra, metodo, referencia, unidad: '', refMin: '', refMax: '' });
+    }
+
+    renderizarTablaCatalogo();
+    prepararNuevoExamen();
+    alert('Examen guardado correctamente en el catálogo.');
 }
 
 // ==========================================
-// ARQUEO Y CONTROL DE CAJA
+// CONTROL DE CAJA Y ARQUEO
 // ==========================================
-function actualizarCaja() {
-  const hoyStr = new Date().toLocaleDateString('es-PE');
-  const ordenesHoy = ordenesGlobales.filter(o => o.fecha === hoyStr);
+function actualizarResumenCaja() {
+    let totalHoy = 0;
+    let efectivo = 0;
+    let digital = 0;
 
-  let totalGeneral = 0;
-  let totalEfectivo = 0;
-  let totalDigital = 0;
+    cajaMovimientos.forEach(m => {
+        totalHoy += m.monto;
+        if (m.metodo === 'Efectivo') {
+            efectivo += m.monto;
+        } else {
+            digital += m.monto;
+        }
+    });
 
-  const tbody = document.getElementById('caja-tabla-body');
-  let html = '';
+    const elTotal = document.getElementById('caja-total-hoy');
+    const elEfectivo = document.getElementById('caja-efectivo');
+    const elDigital = document.getElementById('caja-digital');
 
-  ordenesHoy.forEach(o => {
-    const monto = parseFloat(o.total || 0);
-    totalGeneral += monto;
+    if (elTotal) elTotal.textContent = totalHoy.toFixed(2);
+    if (elEfectivo) elEfectivo.textContent = efectivo.toFixed(2);
+    if (elDigital) elDigital.textContent = digital.toFixed(2);
 
-    if (o.metodoPago === 'Efectivo') {
-      totalEfectivo += monto;
-    } else {
-      totalDigital += monto;
+    const tbody = document.getElementById('caja-tabla-body');
+    if (!tbody) return;
+    tbody.innerHTML = '';
+
+    if (cajaMovimientos.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" class="text-center text-muted py-4">No hay movimientos de caja registrados hoy.</td></tr>`;
+        return;
     }
 
-    html += `
-      <tr>
-        <td>${o.hora}</td>
-        <td><strong>${o.id}</strong></td>
-        <td>${o.paciente.nombre}</td>
-        <td><span class="badge bg-light text-dark border">${o.metodoPago}</span></td>
-        <td class="fw-bold">S/ ${monto.toFixed(2)}</td>
-      </tr>
-    `;
-  });
-
-  const elTotal = document.getElementById('caja-total-hoy');
-  const elEfec = document.getElementById('caja-efectivo');
-  const elDig = document.getElementById('caja-digital');
-
-  if (elTotal) elTotal.textContent = totalGeneral.toFixed(2);
-  if (elEfec) elEfec.textContent = totalEfectivo.toFixed(2);
-  if (elDig) elDig.textContent = totalDigital.toFixed(2);
-
-  if (tbody) {
-    tbody.innerHTML = html || `<tr><td colspan="5" class="text-center text-muted py-3">No hay movimientos registrados el día de hoy.</td></tr>`;
-  }
+    cajaMovimientos.forEach(m => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td>${m.hora}</td>
+            <td class="fw-bold">${m.orden}</td>
+            <td>${m.paciente}</td>
+            <td><span class="badge bg-light text-dark border">${m.metodo}</span></td>
+            <td class="fw-bold text-success">S/ ${m.monto.toFixed(2)}</td>
+        `;
+        tbody.appendChild(tr);
+    });
 }
