@@ -16,49 +16,47 @@
     <div id="sidebar-overlay" onclick="toggleSidebar()"></div>
 
     <div id="wrapper">
-        <!-- Reemplaza el bloque <aside id="sidebar"> por este -->
-<aside id="sidebar" class="sidebar">
-    <div class="sidebar-header p-3 text-center border-bottom border-secondary border-opacity-25">
-        <!-- Logo con clase restringida -->
-        <img src="logo.png" alt="Centro Médico Vital Health" class="sidebar-logo" onerror="this.style.display='none'">
-        <h5 class="fw-bold mb-0 text-white fs-6">Vital Health</h5>
-        <small class="text-white-50" style="font-size: 0.75rem;">Laboratorio Clínico</small>
-    </div>
+        <aside id="sidebar" class="sidebar">
+            <div class="sidebar-header p-3 text-center border-bottom border-secondary border-opacity-25">
+                <img src="logo.png" alt="Centro Médico Vital Health" class="sidebar-logo" onerror="this.style.display='none'">
+                <h5 class="fw-bold mb-0 text-white fs-6">Vital Health</h5>
+                <small class="text-white-50" style="font-size: 0.75rem;">Laboratorio Clínico</small>
+            </div>
 
-    <ul class="nav flex-column mt-3">
-        <li class="nav-item">
-            <a class="nav-link active" href="#" onclick="showSection('recepcion'); return false;">
-                <i class="bi bi-person-plus-fill me-2"></i> Recepción / Admisión
-            </a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" href="#" onclick="showSection('ordenes'); return false;">
-                <i class="bi bi-receipt me-2"></i> Órdenes de Trabajo
-            </a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" href="#" onclick="showSection('resultados'); return false;">
-                <i class="bi bi-file-earmark-medical-fill me-2"></i> Registro de Resultados
-            </a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" href="#" onclick="showSection('catalogo'); return false;">
-                <i class="bi bi-journal-bookmark-fill me-2"></i> Catálogo / Plantillas
-            </a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" href="#" onclick="showSection('caja'); return false;">
-                <i class="bi bi-cash-stack me-2"></i> Arqueo de Caja
-            </a>
-        </li>
-    </ul>
+            <ul class="nav flex-column mt-3">
+                <li class="nav-item">
+                    <a class="nav-link active" href="#" onclick="showSection('recepcion'); return false;">
+                        <i class="bi bi-person-plus-fill me-2"></i> Recepción / Admisión
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#" onclick="showSection('ordenes'); return false;">
+                        <i class="bi bi-receipt me-2"></i> Órdenes de Trabajo
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#" onclick="showSection('resultados'); return false;">
+                        <i class="bi bi-file-earmark-medical-fill me-2"></i> Registro de Resultados
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#" onclick="showSection('catalogo'); return false;">
+                        <i class="bi bi-journal-bookmark-fill me-2"></i> Catálogo / Plantillas
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#" onclick="showSection('caja'); return false;">
+                        <i class="bi bi-cash-stack me-2"></i> Arqueo de Caja
+                    </a>
+                </li>
+            </ul>
 
-    <div class="sidebar-footer p-3 text-white-50 text-center border-top border-secondary border-opacity-25">
-        <div class="fw-semibold small">Centro Médico Vital Health</div>
-        <div class="small" style="font-size: 0.7rem;">Av. Grau N° 1799 - Veintiséis de Octubre</div>
-        <div class="small mt-1" style="font-size: 0.7rem;"><i class="bi bi-whatsapp me-1"></i> 984 089 927</div>
-    </div>
-</aside>
+            <div class="sidebar-footer p-3 text-white-50 text-center border-top border-secondary border-opacity-25">
+                <div class="fw-semibold small">Centro Médico Vital Health</div>
+                <div class="small" style="font-size: 0.7rem;">Av. Grau N° 1799 - Veintiséis de Octubre</div>
+                <div class="small mt-1" style="font-size: 0.7rem;"><i class="bi bi-whatsapp me-1"></i> 984 089 927</div>
+            </div>
+        </aside>
 
         <!-- Main Content Wrapper -->
         <main id="main-content" class="content-area">
@@ -237,7 +235,7 @@
                                 </div>
                                 <div class="card-body">
                                     <div class="alert alert-primary-subtle border-primary-subtle small">
-                                        <i class="bi bi-lightbulb me-1"></i><strong>Cada examen es independiente.</strong> Los indicadores de un examen no se comparten con ningún otro. Puedes cambiar nombre, tipo, unidad, referencia y contenido de cada indicador sin afectar los demás exámenes.
+                                        <i class="bi bi-lightbulb me-1"></i><strong>Plantillas Normadas por Referencia Clínica (Balcells):</strong> Puedes modificar parámetros, valores referenciales por sexo/edad, unidades y formato del informe independientemente para cada análisis.
                                     </div>
                                     <form id="form-catalogo" onsubmit="event.preventDefault(); guardarExamenCatalogo();">
                                         <input type="hidden" id="cat-id-original" value="">
@@ -253,11 +251,11 @@
                                         <div class="mb-3"><label class="form-label fw-semibold small mb-1">Formato del informe</label><select id="cat-plantilla" class="form-select form-select-sm border-primary"><option value="personalizada">Plantilla personalizada</option><option value="texto_libre">Informe descriptivo</option><option value="estandar">Tabla de resultados</option></select></div>
                                         <hr class="my-3">
                                         <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
-                                            <div><h6 class="fw-bold text-secondary mb-0"><i class="bi bi-ui-checks-grid me-1"></i>Indicadores individuales del examen</h6><small class="text-muted">No son parámetros globales. Son campos propios de este examen.</small></div>
+                                            <div><h6 class="fw-bold text-secondary mb-0"><i class="bi bi-ui-checks-grid me-1"></i>Indicadores e Parámetros del Examen</h6><small class="text-muted">Rango de referencia, unidades y parámetros individuales.</small></div>
                                             <div class="btn-group btn-group-sm"><button type="button" class="btn btn-outline-danger" onclick="vaciarTodosLosIndicadores()"><i class="bi bi-trash"></i> Vaciar</button><button type="button" class="btn btn-outline-primary" onclick="agregarIndicadorResultado()"><i class="bi bi-plus-lg me-1"></i>Agregar indicador</button></div>
                                         </div>
                                         <div id="contenedor-indicadores" class="mb-3"></div>
-                                        <div class="mb-3"><label class="form-label fw-semibold small mb-1">Notas / Observaciones del Examen</label><textarea id="cat-ref-texto" class="form-control form-control-sm" rows="2" placeholder="Información adicional que corresponda a este examen..."></textarea></div>
+                                        <div class="mb-3"><label class="form-label fw-semibold small mb-1">Notas / Observaciones de Referencia Clínicas</label><textarea id="cat-ref-texto" class="form-control form-control-sm" rows="2" placeholder="Notas sobre ayuno, valores en pediatría, etc..."></textarea></div>
                                         <div class="d-grid"><button type="submit" class="btn btn-primary fw-semibold" id="btn-guardar-cat"><i class="bi bi-save me-1"></i>Guardar Configuración de Examen</button></div>
                                     </form>
                                 </div>
