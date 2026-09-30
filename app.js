@@ -1218,7 +1218,7 @@ function filtrarExamenes(query) {
 }
 
 function agregarExamenSeleccionado(ex) {
-    const existente = examenesSeleccionados.find(item => item.codigo === ex.codigo);
+    const existente = examenesSeleccionados.find(item => item.Codigo === ex.codigo);
     if (existente) {
         existente.cantidad += 1;
     } else {
@@ -1266,12 +1266,12 @@ function renderizarTablaSeleccionados() {
 
         const tr = document.createElement("tr");
         tr.innerHTML = `
-            <td>${item.codigo}</td>
+            <td>${item.Codigo}</td>
             <td>${item.nombre}</td>
-            <td><input type="number" class="form-control form-control-sm" style="width: 70px;" value="${item.cantidad}" min="1" onchange="cambiarCantidadExamen('${item.codigo}', this.value)"></td>
+            <td><input type="number" class="form-control form-control-sm" style="width: 70px;" value="${item.cantidad}" min="1" onchange="cambiarCantidadExamen('${item.Codigo}', this.value)"></td>
             <td>S/ ${item.Precio.toFixed(2)}</td>
             <td>S/ ${importe.toFixed(2)}</td>
-            <td class="text-center"><button class="btn btn-sm btn-outline-danger" onclick="eliminarExamenSeleccionado('${item.codigo}')"><i class="bi bi-trash"></i></button></td>
+            <td class="text-center"><button class="btn btn-sm btn-outline-danger" onclick="eliminarExamenSeleccionado('${item.Codigo}')"><i class="bi bi-trash"></i></button></td>
         `;
         tbody.appendChild(tr);
     });
