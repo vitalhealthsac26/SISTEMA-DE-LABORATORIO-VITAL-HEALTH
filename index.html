@@ -16,6 +16,7 @@
     <div id="sidebar-overlay" onclick="toggleSidebar()"></div>
 
     <div id="wrapper">
+        <!-- Sidebar de navegación -->
         <aside id="sidebar" class="sidebar">
             <div class="sidebar-header p-3 text-center border-bottom border-secondary border-opacity-25">
                 <img src="logo.png" alt="Centro Médico Vital Health" class="sidebar-logo" onerror="this.style.display='none'">
@@ -130,7 +131,7 @@
                             <div class="card shadow-sm border-0">
                                 <div class="card-header bg-white py-3 border-bottom">
                                     <h5 class="card-title fw-bold text-primary mb-0">
-                                        <i class="bi bi-ui-checks me-2"></i>Exámenes a Cotizar y Procesar
+                                        <i class="bi bi-ui-checks me-2"></i>Exámenes a Cotizar y Procesar (Precios desde Catálogo / JSON)
                                     </h5>
                                 </div>
                                 <div class="card-body">
@@ -157,8 +158,8 @@
                                                     <th>Código</th>
                                                     <th>Examen</th>
                                                     <th>Cant.</th>
-                                                    <th>Precio Unit.</th>
-                                                    <th>Importe</th>
+                                                    <th>Precio Unit. (S/)</th>
+                                                    <th>Importe (S/)</th>
                                                     <th class="text-center">Acción</th>
                                                 </tr>
                                             </thead>
@@ -235,7 +236,7 @@
                                 </div>
                                 <div class="card-body">
                                     <div class="alert alert-primary-subtle border-primary-subtle small">
-                                        <i class="bi bi-lightbulb me-1"></i><strong>Plantillas Normadas por Referencia Clínica:</strong> Puedes modificar parámetros, valores referenciales por sexo/edad, unidades y formato del informe independientemente para cada análisis.
+                                        <i class="bi bi-lightbulb me-1"></i><strong>Plantillas Normadas por Referencia Clínica:</strong> Modifica parámetros, valores referenciales y precios que impactarán en las cotizaciones.
                                     </div>
                                     <form id="form-catalogo" onsubmit="event.preventDefault(); guardarExamenCatalogo();">
                                         <input type="hidden" id="cat-id-original" value="">
@@ -251,11 +252,11 @@
                                         <div class="mb-3"><label class="form-label fw-semibold small mb-1">Formato del informe</label><select id="cat-plantilla" class="form-select form-select-sm border-primary"><option value="personalizada">Plantilla personalizada</option><option value="texto_libre">Informe descriptivo</option><option value="estandar">Tabla de resultados</option></select></div>
                                         <hr class="my-3">
                                         <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
-                                            <div><h6 class="fw-bold text-secondary mb-0"><i class="bi bi-ui-checks-grid me-1"></i>Indicadores e Parámetros del Examen</h6><small class="text-muted">Rango de referencia, unidades y parámetros individuales.</small></div>
+                                            <div><h6 class="fw-bold text-secondary mb-0"><i class="bi bi-ui-checks-grid me-1"></i>Indicadores e Parámetros del Examen</h6><small class="text-muted">Rango de referencia y unidades.</small></div>
                                             <div class="btn-group btn-group-sm"><button type="button" class="btn btn-outline-danger" onclick="vaciarTodosLosIndicadores()"><i class="bi bi-trash"></i> Vaciar</button><button type="button" class="btn btn-outline-primary" onclick="agregarIndicadorResultado()"><i class="bi bi-plus-lg me-1"></i>Agregar indicador</button></div>
                                         </div>
                                         <div id="contenedor-indicadores" class="mb-3"></div>
-                                        <div class="mb-3"><label class="form-label fw-semibold small mb-1">Notas / Observaciones de Referencia Clínicas</label><textarea id="cat-ref-texto" class="form-control form-control-sm" rows="2" placeholder="Notas sobre ayuno, valores en pediatría, etc..."></textarea></div>
+                                        <div class="mb-3"><label class="form-label fw-semibold small mb-1">Notas / Observaciones de Referencia Clínicas</label><textarea id="cat-ref-texto" class="form-control form-control-sm" rows="2" placeholder="Notas sobre ayuno, etc..."></textarea></div>
                                         <div class="d-grid"><button type="submit" class="btn btn-primary fw-semibold" id="btn-guardar-cat"><i class="bi bi-save me-1"></i>Guardar Configuración de Examen</button></div>
                                     </form>
                                 </div>
@@ -297,7 +298,7 @@
                                 <div class="card-body p-4">
                                     <h6 class="card-subtitle mb-2 opacity-75 fw-semibold">Pagos Digitales (Yape / Tarjeta)</h6>
                                     <h2 class="card-title mb-0 fw-bold">S/ <span id="caja-digital">0.00</span></h2>
-                                </div>
+                                }
                             </div>
                         </div>
                     </div>
@@ -334,3 +335,23 @@
     <script src="app.js"></script>
 </body>
 </html>
+```[cite: 56]
+
+---
+
+### ¿Cómo se comunican el `index.html` y el `productos.json` en tu archivo `app.js`?
+Tu archivo `app.js` debe encargarse de cargar los datos del archivo `productos.json` (o del almacenamiento local que los sincronice) al iniciar la página. Por ejemplo, mediante una función similar a esta:
+
+```javascript
+let catalogoExamenes = [];
+
+async function cargarCatalogoPrecios() {
+    try {
+        let respuesta = await fetch('productos.json');
+        catalogoExamenes = await respuesta.json();
+        // Renderizar la tabla del catálogo o preparar las sugerencias de búsqueda
+        renderizarTablaCatalogo();
+    } catch (error) {
+        console.log("Error al cargar el catálogo de precios:", error);
+    }
+}
