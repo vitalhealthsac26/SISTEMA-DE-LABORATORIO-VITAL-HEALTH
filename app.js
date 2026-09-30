@@ -1261,7 +1261,7 @@ function renderizarTablaSeleccionados() {
 
     let total = 0;
     examenesSeleccionados.forEach(item => {
-        const importe = item.cantidad * item.precio;
+        const importe = item.cantidad * item.Precio;
         total += importe;
 
         const tr = document.createElement("tr");
@@ -1269,7 +1269,7 @@ function renderizarTablaSeleccionados() {
             <td>${item.codigo}</td>
             <td>${item.nombre}</td>
             <td><input type="number" class="form-control form-control-sm" style="width: 70px;" value="${item.cantidad}" min="1" onchange="cambiarCantidadExamen('${item.codigo}', this.value)"></td>
-            <td>S/ ${item.precio.toFixed(2)}</td>
+            <td>S/ ${item.Precio.toFixed(2)}</td>
             <td>S/ ${importe.toFixed(2)}</td>
             <td class="text-center"><button class="btn btn-sm btn-outline-danger" onclick="eliminarExamenSeleccionado('${item.codigo}')"><i class="bi bi-trash"></i></button></td>
         `;
@@ -1298,7 +1298,7 @@ function guardarOrdenGenerarTicket() {
         return;
     }
 
-    const total = examenesSeleccionados.reduce((acc, item) => acc + (item.cantidad * item.precio), 0);
+    const total = examenesSeleccionados.reduce((acc, item) => acc + (item.cantidad * item.Precio), 0);
     const nroOrden = "ORD-" + Math.floor(100000 + Math.random() * 900000);
     const fechaHora = new Date().toLocaleString();
 
