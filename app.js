@@ -1551,3 +1551,36 @@ function actualizarTotalesCaja() {
 }
 // Cargar datos al iniciar script
 cargarAlmacenamiento();
+// ==========================================
+// FUNCIÓN PARA CAMBIAR DE SECCIÓN (CORREGIDA)
+// ==========================================
+function showSection(sectionId) {
+    // 1. Ocultar todas las secciones que tengan la clase 'section-content'
+    const sections = document.querySelectorAll('.section-content');
+    sections.forEach(sec => {
+        sec.classList.add('d-none');
+    });
+
+    // 2. Mostrar la sección seleccionada quitando la clase 'd-none'
+    const targetSection = document.getElementById('sec-' + sectionId);
+    if (targetSection) {
+        targetSection.classList.remove('d-none');
+    }
+
+    // 3. Actualizar la clase 'active' en los enlaces del menú lateral (sidebar)
+    const navLinks = document.querySelectorAll('#sidebar .nav-link');
+    navLinks.forEach(link => {
+        link.classList.remove('active');
+    });
+
+    // Buscar el enlace que hizo clic y activarlo
+    event.currentTarget.classList.add('active');
+
+    // 4. Si estás en dispositivos móviles, cerrar el sidebar automáticamente al hacer clic
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('sidebar-overlay');
+    if (sidebar && sidebar.classList.contains('active')) {
+        sidebar.classList.remove('active');
+        if (overlay) overlay.classList.remove('active');
+    }
+}
