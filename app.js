@@ -1585,3 +1585,35 @@ function showSection(sectionId) {
         if (overlay) overlay.classList.remove('active');
     }
 }
+// Función para cargar y mostrar los productos en el navegador
+async function inicializarPrecios() {
+    try {
+        const respuesta = await fetch('productos_4.json');
+        const productos = await respuesta.json();
+
+        // Ejemplo 1: Mostrar todos los productos con precios corridos en la consola
+        console.log("--- LISTA DE PRECIOS CORRIDA ---");
+        productos.forEach(prod => {
+            console.log(`[Código: ${prod.Codigo}] ${prod.Nombre} - S/. ${prod.Precio.toFixed(2)}`);
+        });
+
+        // Función de búsqueda opcional disponible globalmente si la necesitas
+        window.obtenerPrecioPorBusqueda = function(busqueda) {
+            const productoEncontrado = productos.find(p => 
+                p.Codigo === busqueda || p.Nombre.toLowerCase().includes(busqueda.toLowerCase())
+            );
+            
+            if (productoEncontrado) {
+                return `El precio de "${productoEncontrado.Nombre}" es: S/. ${productoEncontrado.Precio.toFixed(2)}`;
+            } else {
+                return "Producto no encontrado.";
+            }
+        };
+
+    } catch (error) {
+        console.error("No se pudo cargar el archivo productos_4.json:", error);
+    }
+}
+
+// Ejecutar la función al cargar el script
+inicializarPrecios();
