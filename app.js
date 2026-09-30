@@ -1551,6 +1551,7 @@ function actualizarTotalesCaja() {
 }
 // Cargar datos al iniciar script
 cargarAlmacenamiento();
+
 // ==========================================
 // FUNCIÓN PARA CAMBIAR DE SECCIÓN (CORREGIDA)
 // ==========================================
