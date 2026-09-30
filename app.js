@@ -708,7 +708,7 @@ let examenesCatalogo = [
   { codigo: "726", nombre: "LAMOTRIGINE", unidad: "µg/mL", refMin: 2.5, refMax: 15.0, referencia: "2.5 - 15.0 µg/mL" },
   { codigo: "727", nombre: "LAMOTRIGINE (LAMICTAL)", unidad: "µg/mL", refMin: 2.5, refMax: 15.0, referencia: "2.5 - 15.0 µg/mL" },
   { codigo: "728", nombre: "LDL OXIDADO ANTICUERPOS, LIPOPROTEINA BAJA DENSIDAD OXIDADA", unidad: "U/L", refMin: 0, refMax: 50, referencia: "< 50 U/L" },
-  { codigo: "729", nombre: "LEGIONELLA PNEUMOPHILA IGM", unidad: "", refMin: "", refMax: "", referencia: "NEGATIVO" }
+  { codigo: "729", nombre: "LEGIONELLA PNEUMOPHILA IGM", unidad: "", refMin: "", refMax: "", referencia: "NEGATIVO" },
 { codigo: "730", nombre: "LEGIONELLA SP, ANTIGENO EN ORINA", unidad: "", refMin: 0, refMax: 0, referencia: "<" },
 { codigo: "731", nombre: "LEISHMANIA , ANTICUERPOS IGG", unidad: "", refMin: 0, refMax: 0, referencia: "<" },
 { codigo: "732", nombre: "LEPTINA", unidad: "", refMin: 0, refMax: 0, referencia: "<" },
