@@ -1097,141 +1097,157 @@ let examenesCatalogo = [
 
 let examenesSeleccionados = [];
 let ordenesTrabajo = [];
-let cajaMovimientos = [];
 
 // ==========================================
-// INICIALIZACIÓN DE LA APLICACIÓN
+// INICIALIZACIÓN Y NAVEGACIÓN
 // ==========================================
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener("DOMContentLoaded", function() {
     actualizarFechaActual();
     renderizarTablaCatalogo();
     cargarOrdenes();
-    actualizarResumenCaja();
+    actualizarCaja();
 });
 
 function actualizarFechaActual() {
+    const opciones = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+    const fechaStr = new Date().toLocaleDateString('es-ES', opciones);
     const el = document.getElementById('current-date');
-    if (el) {
-        const opciones = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-        el.textContent = new Date().toLocaleDateString('es-ES', opciones);
-    }
-}
-
-// ==========================================
-// NAVEGACIÓN ENTRE SECCIONES
-// ==========================================
-function showSection(sectionId) {
-    document.querySelectorAll('.section-content').forEach(sec => {
-        sec.classList.add('d-none');
-    });
-    const target = document.getElementById('sec-' + sectionId);
-    if (target) {
-        target.classList.remove('d-none');
-    }
-    document.querySelectorAll('.sidebar .nav-link').forEach(link => {
-        link.classList.remove('active');
-    });
-    event.currentTarget.classList.add('active');
+    if(el) el.textContent = fechaStr.charAt(0).toUpperCase() + fechaStr.slice(1);
 }
 
 function toggleSidebar() {
     const sidebar = document.getElementById('sidebar');
     const overlay = document.getElementById('sidebar-overlay');
-    if (sidebar) sidebar.classList.toggle('show');
-    if (overlay) overlay.classList.toggle('show');
-}
-
-// ==========================================
-// GESTIÓN DE PACIENTES Y EDAD
-// ==========================================
-function calcularEdad() {
-    const fnacInput = document.getElementById('pac-fnac').value;
-    if (!fnacInput) return;
-    const hoy = new Date();
-    const nacimiento = new Date(fnacInput);
-    let edad = hoy.getFullYear() - nacimiento.getFullYear();
-    const m = hoy.getMonth() - nacimiento.getMonth();
-    if (m < 0 || (m === 0 && hoy.getDate() < nacimiento.getDate())) {
-        edad--;
+    if(sidebar && overlay) {
+        sidebar.classList.toggle('show');
+        overlay.classList.toggle('show');
     }
-    document.getElementById('pac-edad').value = edad >= 0 ? `${edad} AÑOS` : '0 AÑOS';
 }
 
+function showSection(sectionId) {
+    document.querySelectorAll('.section-content').forEach(sec => {
+        sec.classList.add('d-none');
+    });
+    const target = document.getElementById('sec-' + sectionId);
+    if(target) {
+        target.classList.remove('d-none');
+    }
+    
+    document.querySelectorAll('.sidebar .nav-link').forEach(link => {
+        link.classList.remove('active');
+    });
+    event && event.currentTarget && event.currentTarget.classList.add('active');
+
+    // Cerrar sidebar en móviles si está abierto
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('sidebar-overlay');
+    if(sidebar && sidebar.classList.contains('show')) {
+        sidebar.classList.remove('show');
+        overlay.classList.remove('show');
+    }
+}
+
+// ==========================================
+// MÓDULO DE PACIENTES Y RECEPCIÓN
+// ==========================================
 function buscarPaciente() {
     const dni = document.getElementById('pac-dni').value.trim();
-    if (!dni) {
+    if(!dni) {
         alert('Ingrese un número de DNI para buscar.');
         return;
     }
-    // Buscar en órdenes previas si existe
-    const encontrada = ordenesTrabajo.find(o => o.dni === dni);
-    if (encontrada) {
-        document.getElementById('pac-nombre').value = encontrada.paciente;
-        document.getElementById('pac-doctor').value = encontrada.doctor || '';
-        if (encontrada.fnac) {
-            document.getElementById('pac-fnac').value = encontrada.fnac;
-            calcularEdad();
-        }
-        if (encontrada.sexo) document.getElementById('pac-sexo').value = encontrada.sexo;
-        alert('Paciente encontrado en registros previos.');
+    // Simulación de búsqueda de paciente en historial o BD local
+    const ordenEncontrada = ordenesTrabajo.find(o => o.dni === dni);
+    if(ordenEncontrada) {
+        document.getElementById('pac-nombre').value = ordenEncontrada.paciente;
+        document.getElementById('pac-doctor').value = ordenEncontrada.doctor || '';
+        document.getElementById('pac-fnac').value = ordenEncontrada.fnac || '';
+        document.getElementById('pac-sexo').value = ordenEncontrada.sexo || 'MASCULINO';
+        calcularEdad();
+        alert('Paciente encontrado en registros anteriores.');
     } else {
         alert('No se encontraron registros previos con este DNI. Complete los datos del nuevo paciente.');
     }
 }
 
-// ==========================================
-// CATÁLOGO Y COTIZACIÓN DE EXÁMENES
-// ==========================================
-function filtrarExamenes(texto) {
-    const contenedor = document.getElementById('sugerencias-examenes');
-    contenedor.innerHTML = '';
-    if (!texto || texto.trim().length === 0) return;
+function calcularEdad() {
+    const fnacVal = document.getElementById('pac-fnac').value;
+    if(!fnacVal) return;
+    const hoy = new Date();
+    const nacimiento = new Date(fnacVal);
+    let edad = hoy.getFullYear() - nacimiento.getFullYear();
+    const m = hoy.getMonth() - nacimiento.getMonth();
+    if (m < 0 || (m === 0 && hoy.getDate() < nacimiento.getDate())) {
+        edad--;
+    }
+    document.getElementById('pac-edad').value = edad >= 0 ? edad + " AÑOS" : "0 AÑOS";
+}
 
-    const filtrados = examenesCatalogo.filter(ex => 
-        ex.nombre.toLowerCase().includes(texto.toLowerCase()) || 
-        ex.codigo.toLowerCase().includes(texto.toLowerCase())
+// ==========================================
+// CATÁLOGO Y BÚSQUEDA DE EXÁMENES EN COTIZACIÓN
+// ==========================================
+function filtrarExamenes(query) {
+    const contenedor = document.getElementById('sugerencias-examenes');
+    if(!contenedor) return;
+    contenedor.innerHTML = '';
+    
+    if(!query || query.trim().length === 0) {
+        contenedor.style.display = 'none';
+        return;
+    }
+
+    const filtro = query.toLowerCase();
+    const resultados = examenesCatalogo.filter(e => 
+        e.nombre.toLowerCase().includes(filtro) || e.codigo.toLowerCase().includes(filtro)
     );
 
-    filtrados.forEach(ex => {
+    if(resultados.length === 0) {
+        contenedor.style.display = 'none';
+        return;
+    }
+
+    contenedor.style.display = 'block';
+    resultados.forEach(ex => {
         const item = document.createElement('a');
         item.href = '#';
-        item.className = 'list-group-item list-group-item-action py-2';
-        item.innerHTML = `<strong>[${ex.codigo}]</strong> ${ex.nombre} <span class="float-end text-success fw-semibold">S/ ${(ex.precio || 30.00).toFixed(2)}</span>`;
+        item.className = 'list-group-item list-group-item-action d-flex justify-content-between align-items-center py-2';
+        item.innerHTML = `<span><strong>[${ex.codigo}]</strong> ${ex.nombre}</span> <span class="badge bg-primary rounded-pill">S/ ${(ex.precio || 20).toFixed(2)}</span>`;
         item.onclick = (e) => {
             e.preventDefault();
             agregarExamenSeleccionado(ex);
             document.getElementById('busqueda-examen').value = '';
-            contenedor.innerHTML = '';
+            contenedor.style.display = 'none';
         };
         contenedor.appendChild(item);
     });
 }
 
 function agregarExamenSeleccionado(ex) {
+    const precio = ex.precio || 20.00;
     const existente = examenesSeleccionados.find(item => item.codigo === ex.codigo);
-    if (existente) {
-        existente.cantidad++;
+    if(existente) {
+        existente.cantidad += 1;
     } else {
         examenesSeleccionados.push({
             codigo: ex.codigo,
             nombre: ex.nombre,
             cantidad: 1,
-            precio: ex.precio || 30.00,
-            indicadores: BASE_VALORES_REFERENCIALES[ex.nombre] || []
+            precio: precio,
+            indicadores: ex.indicadores || []
         });
     }
     renderizarTablaSeleccionados();
 }
 
-function cambiarCantidad(codigo, delta) {
+function cambiarCantidadExamen(codigo, delta) {
     const item = examenesSeleccionados.find(i => i.codigo === codigo);
-    if (item) {
+    if(item) {
         item.cantidad += delta;
-        if (item.cantidad <= 0) {
+        if(item.cantidad <= 0) {
             examenesSeleccionados = examenesSeleccionados.filter(i => i.codigo !== codigo);
         }
-        renderizarTablaSeleccionados();
     }
+    renderizarTablaSeleccionados();
 }
 
 function eliminarExamenSeleccionado(codigo) {
@@ -1241,9 +1257,10 @@ function eliminarExamenSeleccionado(codigo) {
 
 function renderizarTablaSeleccionados() {
     const tbody = document.querySelector('#tabla-examenes-seleccionados tbody');
+    if(!tbody) return;
     tbody.innerHTML = '';
 
-    if (examenesSeleccionados.length === 0) {
+    if(examenesSeleccionados.length === 0) {
         tbody.innerHTML = `<tr id="empty-row"><td colspan="6" class="text-center text-muted py-4">No hay exámenes agregados.</td></tr>`;
         document.getElementById('total-cobrar').textContent = '0.00';
         return;
@@ -1258,14 +1275,16 @@ function renderizarTablaSeleccionados() {
             <td>${item.codigo}</td>
             <td class="fw-semibold">${item.nombre}</td>
             <td>
-                <button class="btn btn-sm btn-outline-secondary py-0 px-1" onclick="cambiarCantidad('${item.codigo}', -1)">-</button>
-                <span class="mx-2">${item.cantidad}</span>
-                <button class="btn btn-sm btn-outline-secondary py-0 px-1" onclick="cambiarCantidad('${item.codigo}', 1)">+</button>
+                <div class="input-group input-group-sm" style="width: 100px;">
+                    <button class="btn btn-outline-secondary" type="button" onclick="cambiarCantidadExamen('${item.codigo}', -1)">-</button>
+                    <input type="text" class="form-control text-center" value="${item.cantidad}" readonly>
+                    <button class="btn btn-outline-secondary" type="button" onclick="cambiarCantidadExamen('${item.codigo}', 1)">+</button>
+                </div>
             </td>
             <td>S/ ${item.precio.toFixed(2)}</td>
-            <td class="fw-bold text-primary">S/ ${importe.toFixed(2)}</td>
+            <td class="fw-bold">S/ ${importe.toFixed(2)}</td>
             <td class="text-center">
-                <button class="btn btn-sm btn-outline-danger" onclick="eliminarExamenSeleccionado('${item.codigo}')"><i class="bi bi-trash"></i></button>
+                <button class="btn btn-sm btn-outline-danger" type="button" onclick="eliminarExamenSeleccionado('${item.codigo}')"><i class="bi bi-trash"></i></button>
             </td>
         `;
         tbody.appendChild(tr);
@@ -1285,221 +1304,228 @@ function guardarOrdenGenerarTicket() {
     const sexo = document.getElementById('pac-sexo').value;
     const metodoPago = document.getElementById('metodo-pago').value;
 
-    if (!dni || !nombre) {
-        alert('Por favor complete el DNI y el Nombre del Paciente.');
+    if(!dni || !nombre) {
+        alert('Por favor ingrese al menos el DNI y Nombre del paciente.');
         return;
     }
-    if (examenesSeleccionados.length === 0) {
-        alert('Debe seleccionar al menos un examen para generar la orden.');
+
+    if(examenesSeleccionados.length === 0) {
+        alert('Debe agregar al menos un examen a la orden.');
         return;
     }
 
     const total = examenesSeleccionados.reduce((acc, item) => acc + (item.cantidad * item.precio), 0);
-    const nroOrden = 'ORD-' + Math.floor(1000 + Math.random() * 9000);
-    const ahora = new Date();
-    const fechaHora = ahora.toLocaleString();
+    const nOrden = 'ORD-' + Math.floor(100000 + Math.random() * 900000);
+    const fechaHora = new Date().toLocaleString();
 
     const nuevaOrden = {
-        id: nroOrden,
+        id: nOrden,
         fechaHora: fechaHora,
         dni: dni,
         paciente: nombre,
-        doctor: doctor || 'Particular',
+        doctor: doctor,
         fnac: fnac,
         sexo: sexo,
         metodoPago: metodoPago,
-        examenes: JSON.parse(JSON.stringify(examenesSeleccionados)),
         total: total,
-        estado: 'Pendiente'
+        estado: 'Pendiente',
+        examenes: JSON.parse(JSON.stringify(examenesSeleccionados)),
+        resultadosData: {}
     };
 
     ordenesTrabajo.unshift(nuevaOrden);
-
-    // Registrar en caja
-    cajaMovimientos.unshift({
-        hora: ahora.toLocaleTimeString(),
-        orden: nroOrden,
-        paciente: nombre,
-        metodo: metodoPago,
-        monto: total
-    });
-
-    actualizarResumenCaja();
+    guardarAlmacenamiento();
     cargarOrdenes();
+    actualizarCaja();
 
-    // Limpiar formulario de admisión
+    alert(`¡Orden ${nOrden} registrada exitosamente!\nTotal Cobrado: S/ ${total.toFixed(2)} (${metodoPago})`);
+    
+    // Limpiar formulario de recepción
     document.getElementById('form-paciente').reset();
     document.getElementById('pac-edad').value = '';
     examenesSeleccionados = [];
     renderizarTablaSeleccionados();
-
-    alert(`¡Orden ${nroOrden} registrada con éxito e impresa correctamente!`);
     showSection('ordenes');
 }
 
 function cargarOrdenes() {
     const tbody = document.getElementById('lista-ordenes-body');
-    if (!tbody) return;
+    if(!tbody) return;
     tbody.innerHTML = '';
 
-    if (ordenesTrabajo.length === 0) {
+    if(ordenesTrabajo.length === 0) {
         tbody.innerHTML = `<tr><td colspan="6" class="text-center text-muted py-4">No hay órdenes registradas.</td></tr>`;
         return;
     }
 
-    ordenesTrabajo.forEach(orden => {
+    ordenesTrabajo.forEach(ord => {
         const tr = document.createElement('tr');
+        const badgeClass = ord.estado === 'Completado' ? 'bg-success' : 'bg-warning text-dark';
         tr.innerHTML = `
-            <td class="fw-bold text-primary">${orden.id}</td>
-            <td><small>${orden.fechaHora}</small></td>
-            <td>${orden.dni}</td>
-            <td class="fw-semibold">${orden.paciente}</td>
-            <td><span class="badge bg-warning text-dark">${orden.estado}</span></td>
+            <td class="fw-bold text-primary">${ord.id}</td>
+            <td><small class="text-muted">${ord.fechaHora}</small></td>
+            <td>${ord.dni}</td>
+            <td class="fw-semibold">${ord.paciente}</td>
+            <td><span class="badge ${badgeClass}">${ord.estado}</span></td>
             <td class="text-end px-3">
-                <button class="btn btn-sm btn-primary me-1" onclick="abrirResultadosOrden('${orden.id}')"><i class="bi bi-file-earmark-medical me-1"></i>Resultados</button>
-                <button class="btn btn-sm btn-outline-secondary" onclick="imprimirTicketOrden('${orden.id}')"><i class="bi bi-printer"></i></button>
+                <button class="btn btn-sm btn-outline-primary me-1" onclick="abrirEditorResultados('${ord.id}')"><i class="bi bi-file-earmark-text"></i> Resultados</button>
+                <button class="btn btn-sm btn-outline-danger" onclick="eliminarOrden('${ord.id}')"><i class="bi bi-trash"></i></button>
             </td>
         `;
         tbody.appendChild(tr);
     });
 }
 
-function imprimirTicketOrden(idOrden) {
-    const orden = ordenesTrabajo.find(o => o.id === idOrden);
-    if (!orden) return;
-    window.print();
+function eliminarOrden(id) {
+    if(confirm(`¿Está seguro de eliminar la orden ${id}?`)) {
+        ordenesTrabajo = ordenesTrabajo.filter(o => o.id !== id);
+        guardarAlmacenamiento();
+        cargarOrdenes();
+        actualizarCaja();
+    }
 }
 
 // ==========================================
-// RESULTADOS DE LABORATORIO
+// MÓDULO DE RESULTADOS
 // ==========================================
-function abrirResultadosOrden(idOrden) {
-    const orden = ordenesTrabajo.find(o => o.id === idOrden);
-    if (!orden) return;
+function abrirEditorResultados(id) {
+    const orden = ordenesTrabajo.find(o => o.id === id);
+    if(!orden) return;
 
     showSection('resultados');
     const editor = document.getElementById('resultados-editor');
     
     let html = `
-        <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
+        <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom flex-wrap gap-2">
             <div>
-                <h5 class="fw-bold text-primary mb-0">Orden: ${orden.id}</h5>
-                <small class="text-muted">Paciente: <strong>${orden.paciente}</strong> | DNI: ${orden.dni} | Médico: ${orden.doctor}</small>
+                <h4 class="fw-bold text-primary mb-1">Orden: ${orden.id}</h4>
+                <p class="mb-0 text-muted">Paciente: <strong>${orden.paciente}</strong> (DNI: ${orden.dni}) | Sexo: ${orden.sexo} | Médico: ${orden.doctor || 'Particular'}</p>
             </div>
-            <button class="btn btn-success" onclick="guardarResultadosOrden('${orden.id}')"><i class="bi bi-save me-1"></i>Guardar e Imprimir Informe</button>
+            <div>
+                <button class="btn btn-secondary me-2" onclick="showSection('ordenes')"><i class="bi bi-arrow-left me-1"></i> Volver</button>
+                <button class="btn btn-success" onclick="guardarResultadosOrden('${orden.id}')"><i class="bi bi-save me-1"></i> Guardar Resultados</button>
+            </div>
         </div>
         <div class="accordion" id="accordionResultados">
     `;
 
     orden.examenes.forEach((ex, idx) => {
         html += `
-            <div class="accordion-item mb-2 shadow-sm border">
+            <div class="accordion-item mb-3 shadow-sm border">
                 <h2 class="accordion-header" id="heading-${idx}">
-                    <button class="accordion-button ${idx !== 0 ? 'collapsed' : ''} fw-semibold" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-${idx}">
-                        ${ex.nombre} &nbsp;<span class="badge bg-secondary ms-2">${ex.codigo}</span>
+                    <button class="accordion-button fw-bold ${idx > 0 ? 'collapsed' : ''}" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-${idx}">
+                        <i class="bi bi-journal-medical me-2 text-primary"></i> ${ex.nombre} &nbsp;<span class="badge bg-secondary font-monospace">[${ex.codigo}]</span>
                     </button>
                 </h2>
                 <div id="collapse-${idx}" class="accordion-collapse collapse ${idx === 0 ? 'show' : ''}" data-bs-parent="#accordionResultados">
                     <div class="accordion-body bg-light">
-                        <div class="table-responsive">
-                            <table class="table table-bordered align-middle bg-white">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th>Parámetro / Indicador</th>
-                                        <th style="width: 150px;">Resultado</th>
-                                        <th>Unidad</th>
-                                        <th>Valores de Referencia</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
         `;
 
-        if (ex.indicadores && ex.indicadores.length > 0) {
-            ex.indicadores.forEach((ind, iIdx) => {
+        if(ex.indicadores && ex.indicadores.length > 0) {
+            html += `
+                <div class="table-responsive">
+                    <table class="table table-bordered align-middle bg-white">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Parámetro / Indicador</th>
+                                <th style="width: 200px;">Resultado</th>
+                                <th>Unidad</th>
+                                <th>Valores de Referencia</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+            ex.indicadores.forEach(ind => {
+                const valActual = (orden.resultadosData && orden.resultadosData[ex.codigo] && orden.resultadosData[ex.codigo][ind.id]) || '';
                 html += `
                     <tr>
                         <td class="fw-semibold">${ind.nombre}</td>
                         <td>
-                            <input type="text" class="form-control form-control-sm res-val" data-examen="${ex.codigo}" data-ind="${ind.id || iIdx}" value="${ind.valor || ''}">
+                            <input type="text" class="form-control form-control-sm res-input" data-examen="${ex.codigo}" data-indicador="${ind.id}" value="${valActual}" placeholder="Valor...">
                         </td>
-                        <td>${ind.unidad || ''}</td>
-                        <td class="text-muted small">${ind.referencia || ''}</td>
+                        <td><small class="text-muted">${ind.unidad || ''}</small></td>
+                        <td><small class="text-secondary">${ind.referencia || ''}</small></td>
                     </tr>
                 `;
             });
+            html += `</tbody></table></div>`;
         } else {
+            const valUnico = (orden.resultadosData && orden.resultadosData[ex.codigo] && orden.resultadosData[ex.codigo]['general']) || '';
             html += `
-                <tr>
-                    <td colspan="4" class="text-center text-muted">Examen configurado como informe descriptivo o sin sub-indicadores estándar.</td>
-                </tr>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Informe / Resultado Descriptivo</label>
+                    <textarea class="form-control res-input-general" data-examen="${ex.codigo}" rows="3" placeholder="Escriba el resultado o conclusión...">${valUnico}</textarea>
+                </div>
             `;
         }
 
-        html += `
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        `;
+        html += `</div></div></div>`;
     });
 
     html += `</div>`;
     editor.innerHTML = html;
 }
 
-function guardarResultadosOrden(idOrden) {
-    const orden = ordenesTrabajo.find(o => o.id === idOrden);
-    if (!orden) return;
+function guardarResultadosOrden(id) {
+    const orden = ordenesTrabajo.find(o => o.id === id);
+    if(!orden) return;
 
-    const inputs = document.querySelectorAll('.res-val');
-    inputs.forEach(inp => {
-        const codEx = inp.getAttribute('data-examen');
-        const idInd = inp.getAttribute('data-ind');
-        const val = inp.value;
+    if(!orden.resultadosData) orden.resultadosData = {};
 
-        const ex = orden.examenes.find(e => e.codigo === codEx);
-        if (ex && ex.indicadores) {
-            const ind = ex.indicadores.find((item, idx) => (item.id === idInd || idx.toString() === idInd));
-            if (ind) {
-                ind.valor = val;
+    orden.examenes.forEach(ex => {
+        if(!orden.resultadosData[ex.codigo]) orden.resultadosData[ex.codigo] = {};
+        
+        if(ex.indicadores && ex.indicadores.length > 0) {
+            ex.indicadores.forEach(ind => {
+                const input = document.querySelector(`.res-input[data-examen="${ex.codigo}"][data-indicador="${ind.id}"]`);
+                if(input) {
+                    orden.resultadosData[ex.codigo][ind.id] = input.value;
+                }
+            });
+        } else {
+            const textarea = document.querySelector(`.res-input-general[data-examen="${ex.codigo}"]`);
+            if(textarea) {
+                orden.resultadosData[ex.codigo]['general'] = textarea.value;
             }
         }
     });
 
     orden.estado = 'Completado';
+    guardarAlmacenamiento();
     cargarOrdenes();
-    alert('¡Resultados guardados y listos para emitir informe clínico!');
-    window.print();
+    alert('Resultados guardados exitosamente. Orden marcada como completada.');
+    showSection('ordenes');
 }
 
 // ==========================================
-// CATÁLOGO / PLANTILLAS DE EXÁMENES
+// MÓDULO DE CATÁLOGO Y PLANTILLAS
 // ==========================================
 function renderizarTablaCatalogo(filtro = '') {
     const tbody = document.getElementById('tabla-catalogo-body');
     const countEl = document.getElementById('total-cat-count');
-    if (!tbody) return;
+    if(!tbody) return;
     tbody.innerHTML = '';
 
-    const filtrados = examenesCatalogo.filter(ex => 
-        ex.nombre.toLowerCase().includes(filtro.toLowerCase()) || 
-        ex.codigo.toLowerCase().includes(filtro.toLowerCase())
+    const filtrados = examenesCatalogo.filter(e => 
+        e.nombre.toLowerCase().includes(filtro.toLowerCase()) || e.codigo.toLowerCase().includes(filtro.toLowerCase())
     );
 
-    if (countEl) countEl.textContent = filtrados.length;
+    if(countEl) countEl.textContent = filtrados.length;
+
+    if(filtrados.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" class="text-center text-muted py-3">No hay exámenes en el catálogo.</td></tr>`;
+        return;
+    }
 
     filtrados.forEach(ex => {
         const tr = document.createElement('tr');
-        const indCount = BASE_VALORES_REFERENCIALES[ex.nombre] ? BASE_VALORES_REFERENCIALES[ex.nombre].length : 0;
         tr.innerHTML = `
-            <td><code>${ex.codigo}</code></td>
+            <td><span class="badge bg-light text-dark font-monospace">${ex.codigo}</span></td>
             <td class="fw-semibold small">${ex.nombre}</td>
-            <td><span class="badge bg-info text-dark">${indCount} paráms</span></td>
-            <td class="fw-bold text-success">S/ ${(ex.precio || 30.00).toFixed(2)}</td>
+            <td><small class="text-muted">${ex.indicadores ? ex.indicadores.length : 0} params</small></td>
+            <td class="small fw-bold text-primary">S/ ${(ex.precio || 20).toFixed(2)}</td>
             <td class="text-end">
-                <button class="btn btn-sm btn-outline-primary" onclick="editarExamenCatalogo('${ex.codigo}')"><i class="bi bi-pencil"></i></button>
+                <button class="btn btn-sm btn-outline-primary py-0 px-1" onclick="editarExamenCatalogo('${ex.codigo}')"><i class="bi bi-pencil"></i></button>
             </td>
         `;
         tbody.appendChild(tr);
@@ -1509,92 +1535,70 @@ function renderizarTablaCatalogo(filtro = '') {
 function prepararNuevoExamen() {
     document.getElementById('form-catalogo').reset();
     document.getElementById('cat-id-original').value = '';
+    document.getElementById('catalogo-form-titulo').innerHTML = `<i class="bi bi-layout-text-window-reverse me-2"></i>Nueva Plantilla de Examen`;
     document.getElementById('contenedor-indicadores').innerHTML = '';
-    document.getElementById('catalogo-form-titulo').innerHTML = `<i class="bi bi-layout-text-window-reverse me-2"></i>Nuevo Examen`;
 }
 
-function agregarIndicadorResultado(nombre = '', unidad = '', ref = '') {
+function agregarIndicadorResultado(nombre = '', unidad = '', ref = '', id = '') {
     const contenedor = document.getElementById('contenedor-indicadores');
+    if(!contenedor) return;
+    const uniqId = id || 'ind_' + Math.random().toString(36).substr(2, 9);
+    
     const div = document.createElement('div');
-    div.className = 'row g-2 mb-2 align-items-center ind-row';
+    div.className = 'row g-2 mb-2 align-items-center indicador-row border p-2 rounded bg-white';
     div.innerHTML = `
-        <div class="col-4"><input type="text" class="form-control form-control-sm ind-nombre" placeholder="Nombre parámetro" value="${nombre}"></div>
-        <div class="col-3"><input type="text" class="form-control form-control-sm ind-unidad" placeholder="Unidad" value="${unidad}"></div>
-        <div class="col-4"><input type="text" class="form-control form-control-sm ind-ref" placeholder="Valores referencia" value="${ref}"></div>
-        <div class="col-1 text-center"><button type="button" class="btn btn-sm btn-outline-danger p-0 px-1" onclick="this.closest('.ind-row').remove()"><i class="bi bi-x"></i></button></div>
+        <input type="hidden" class="ind-id" value="${uniqId}">
+        <div class="col-md-4">
+            <input type="text" class="form-control form-control-sm ind-nombre" placeholder="Nombre parámetro" value="${nombre}" required>
+        </div>
+        <div class="col-md-3">
+            <input type="text" class="form-control form-control-sm ind-unidad" placeholder="Unidad (ej. mg/dL)" value="${unidad}">
+        </div>
+        <div class="col-md-4">
+            <input type="text" class="form-control form-control-sm ind-ref" placeholder="Referencia (ej. 0-10)" value="${ref}">
+        </div>
+        <div class="col-md-1 text-end">
+            <button type="button" class="btn btn-sm btn-outline-danger" onclick="this.closest('.indicador-row').remove()"><i class="bi bi-x-lg"></i></button>
+        </div>
     `;
     contenedor.appendChild(div);
 }
 
 function vaciarTodosLosIndicadores() {
-    document.getElementById('contenedor-indicadores').innerHTML = '';
-}
-
-function editarExamenCatalogo(codigo) {
-    const ex = examenesCatalogo.find(e => e.codigo === codigo);
-    if (!ex) return;
-
-    document.getElementById('cat-id-original').value = ex.codigo;
-    document.getElementById('cat-codigo').value = ex.codigo;
-    document.getElementById('cat-nombre').value = ex.nombre;
-    document.getElementById('cat-precio').value = ex.precio || 30.00;
-    document.getElementById('cat-muestra').value = ex.muestra || 'Suero / Sangre total';
-    document.getElementById('cat-metodo').value = ex.metodo || 'Automatizado';
-    document.getElementById('cat-ref-texto').value = ex.referencia || '';
-
-    document.getElementById('contenedor-indicadores').innerHTML = '';
-    const indicadores = BASE_VALORES_REFERENCIALES[ex.nombre] || [];
-    indicadores.forEach(ind => {
-        agregarIndicadorResultado(ind.nombre, ind.unidad, ind.referencia);
-    });
-
-    document.getElementById('catalogo-form-titulo').innerHTML = `<i class="bi bi-pencil-square me-2"></i>Editar Examen: ${ex.nombre}`;
+    const contenedor = document.getElementById('contenedor-indicadores');
+    if(contenedor) contenedor.innerHTML = '';
 }
 
 function guardarExamenCatalogo() {
-    const idOriginal = document.getElementById('cat-id-original').value;
     const codigo = document.getElementById('cat-codigo').value.trim();
     const nombre = document.getElementById('cat-nombre').value.trim();
-    const precio = parseFloat(document.getElementById('cat-precio').value) || 30.00;
+    const precio = parseFloat(document.getElementById('cat-precio').value) || 0;
     const muestra = document.getElementById('cat-muestra').value.trim();
     const metodo = document.getElementById('cat-metodo').value.trim();
-    const referencia = document.getElementById('cat-ref-texto').value.trim();
+    const originalId = document.getElementById('cat-id-original').value;
 
-    if (!codigo || !nombre) {
-        alert('El código y el nombre del examen son obligatorios.');
+    const indicadores = [];
+    document.querySelectorAll('.indicador-row').forEach(row => {
+        indicadores.push({
+            id: row.querySelector('.ind-id').value,
+            nombre: row.querySelector('.ind-nombre').value,
+            unidad: row.querySelector('.ind-unidad').value,
+            referencia: row.querySelector('.ind-ref').value
+        });
+    });
+
+    if(!codigo || !nombre) {
+        alert('Código y Nombre son obligatorios.');
         return;
     }
 
-    // Recoger indicadores dinámicos
-    const rows = document.querySelectorAll('.ind-row');
-    const nuevosIndicadores = [];
-    rows.forEach(r => {
-        const n = r.querySelector('.ind-nombre').value.trim();
-        const u = r.querySelector('.ind-unidad').value.trim();
-        const ref = r.querySelector('.ind-ref').value.trim();
-        if (n) {
-            nuevosIndicadores.push({
-                id: n.toLowerCase().replace(/\s+/g, '_'),
-                nombre: n,
-                unidad: u,
-                referencia: ref
-            });
-        }
-    });
+    const index = examenesCatalogo.findIndex(e => e.codigo === (originalId || codigo));
+    const nuevoExamenObj = { codigo, nombre, precio, muestra, metodo, indicadores };
 
-    if (nuevosIndicadores.length > 0) {
-        BASE_VALORES_REFERENCIALES[nombre] = nuevosIndicadores;
-    }
-
-    if (idOriginal) {
-        // Editar existente
-        const index = examenesCatalogo.findIndex(e => e.codigo === idOriginal);
-        if (index !== -1) {
-            examenesCatalogo[index] = { codigo, nombre, precio, muestra, metodo, referencia, unidad: '', refMin: '', refMax: '' };
-        }
+    if(index >= 0) {
+        examenesCatalogo[index] = nuevoExamenObj;
     } else {
-        // Nuevo
-        examenesCatalogo.push({ codigo, nombre, precio, muestra, metodo, referencia, unidad: '', refMin: '', refMax: '' });
+        examenesCatalogo.push(nuevoExamenObj);
     }
 
     renderizarTablaCatalogo();
@@ -1602,49 +1606,88 @@ function guardarExamenCatalogo() {
     alert('Examen guardado correctamente en el catálogo.');
 }
 
+function editarExamenCatalogo(codigo) {
+    const ex = examenesCatalogo.find(e => e.codigo === codigo);
+    if(!ex) return;
+
+    document.getElementById('cat-codigo').value = ex.codigo;
+    document.getElementById('cat-id-original').value = ex.codigo;
+    document.getElementById('cat-nombre').value = ex.nombre;
+    document.getElementById('cat-precio').value = ex.precio || 20;
+    document.getElementById('cat-muestra').value = ex.muestra || '';
+    document.getElementById('cat-metodo').value = ex.metodo || '';
+    document.getElementById('catalogo-form-titulo').innerHTML = `<i class="bi bi-pencil-square me-2"></i>Editando Examen: ${ex.codigo}`;
+
+    vaciarTodosLosIndicadores();
+    if(ex.indicadores) {
+        ex.indicadores.forEach(ind => {
+            agregarIndicadorResultado(ind.nombre, ind.unidad, ind.referencia, ind.id);
+        });
+    }
+}
+
 // ==========================================
-// CONTROL DE CAJA Y ARQUEO
+// MÓDULO DE CAJA Y ARQUEO
 // ==========================================
-function actualizarResumenCaja() {
+function actualizarCaja() {
     let totalHoy = 0;
     let efectivo = 0;
     let digital = 0;
-
-    cajaMovimientos.forEach(m => {
-        totalHoy += m.monto;
-        if (m.metodo === 'Efectivo') {
-            efectivo += m.monto;
-        } else {
-            digital += m.monto;
-        }
-    });
-
-    const elTotal = document.getElementById('caja-total-hoy');
-    const elEfectivo = document.getElementById('caja-efectivo');
-    const elDigital = document.getElementById('caja-digital');
-
-    if (elTotal) elTotal.textContent = totalHoy.toFixed(2);
-    if (elEfectivo) elEfectivo.textContent = efectivo.toFixed(2);
-    if (elDigital) elDigital.textContent = digital.toFixed(2);
-
     const tbody = document.getElementById('caja-tabla-body');
-    if (!tbody) return;
+    if(!tbody) return;
     tbody.innerHTML = '';
 
-    if (cajaMovimientos.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="5" class="text-center text-muted py-4">No hay movimientos de caja registrados hoy.</td></tr>`;
-        return;
-    }
+    ordenesTrabajo.forEach(ord => {
+        const monto = ord.total || 0;
+        totalHoy += monto;
+        if(ord.metodoPago === 'Efectivo') {
+            efectivo += monto;
+        } else {
+            digital += monto;
+        }
 
-    cajaMovimientos.forEach(m => {
         const tr = document.createElement('tr');
         tr.innerHTML = `
-            <td>${m.hora}</td>
-            <td class="fw-bold">${m.orden}</td>
-            <td>${m.paciente}</td>
-            <td><span class="badge bg-light text-dark border">${m.metodo}</span></td>
-            <td class="fw-bold text-success">S/ ${m.monto.toFixed(2)}</td>
+            <td><small class="text-muted">${ord.fechaHora}</small></td>
+            <td class="fw-bold text-primary">${ord.id}</td>
+            <td>${ord.paciente}</td>
+            <td><span class="badge bg-light text-dark">${ord.metodoPago || 'Efectivo'}</span></td>
+            <td class="fw-bold text-success">S/ ${monto.toFixed(2)}</td>
         `;
         tbody.appendChild(tr);
     });
-} 
+
+    if(ordenesTrabajo.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" class="text-center text-muted py-3">No hay movimientos registrados hoy.</td></tr>`;
+    }
+
+    document.getElementById('caja-total-hoy').textContent = totalHoy.toFixed(2);
+    document.getElementById('caja-efectivo').textContent = efectivo.toFixed(2);
+    document.getElementById('caja-digital').textContent = digital.toFixed(2);
+}
+
+// ==========================================
+// PERSISTENCIA LOCAL (STORAGE)
+// ==========================================
+function guardarAlmacenamiento() {
+    try {
+        localStorage.setItem('vital_health_ordenes', JSON.stringify(ordenesTrabajo));
+        localStorage.setItem('vital_health_catalogo', JSON.stringify(examenesCatalogo));
+    } catch(e) {
+        console.error("Error al guardar en localStorage", e);
+    }
+}
+
+function cargarAlmacenamiento() {
+    try {
+        const ords = localStorage.getItem('vital_health_ordenes');
+        if(ords) ordenesTrabajo = JSON.parse(ords);
+        const cats = localStorage.getItem('vital_health_catalogo');
+        if(cats) examenesCatalogo = JSON.parse(cats);
+    } catch(e) {
+        console.error("Error al cargar localStorage", e);
+    }
+}
+
+// Cargar datos al iniciar script
+cargarAlmacenamiento();
