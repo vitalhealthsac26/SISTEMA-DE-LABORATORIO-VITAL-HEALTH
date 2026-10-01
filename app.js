@@ -1983,8 +1983,9 @@ function construirInformeHTML(orden) {
         <div class="informe-firma">
             <img src="firma-biologa.png" alt="Firma" class="informe-firma-img" onerror="this.style.display='none'">
             <div class="informe-firma-linea"></div>
-            <div class="informe-firma-nombre">FIRMA DE LA BIÓLOGA</div>
-            <div class="informe-firma-det">Bióloga Responsable del Laboratorio &bull; Centro Médico Vital Health</div>
+            <div class="informe-firma-nombre">Raysa Yadira Ursula Alberca Atarama</div>
+            <div class="informe-firma-det">Bióloga</div>
+            <div class="informe-firma-det">C.B.P.17763</div>
         </div>
 
         <div class="informe-pie-fijo">
