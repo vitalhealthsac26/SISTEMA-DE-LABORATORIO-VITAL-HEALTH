@@ -1367,6 +1367,7 @@ function cargarOrdenes() {
             <td class="text-end px-3">
                 <button class="btn btn-sm btn-outline-secondary me-1" title="Reimprimir ticket" onclick="mostrarTicketPorNro('${ord.nroOrden}')"><i class="bi bi-receipt"></i></button>
                 ${ord.resultados ? `<button class="btn btn-sm btn-outline-primary me-1" title="Imprimir informe de resultados" onclick="imprimirInforme('${ord.nroOrden}')"><i class="bi bi-file-ear-medical"></i> Informe</button>` : ""}
+                ${ord.resultados ? `<button class="btn btn-sm btn-outline-danger me-1" title="Descargar informe en PDF" onclick="descargarInformePDF('${ord.nroOrden}')"><i class="bi bi-file-earmark-pdf"></i> PDF</button>` : ""}
                 <button class="btn btn-sm btn-outline-primary me-1" onclick="abrirResultados('${ord.nroOrden}')"><i class="bi bi-file-earmark-medical"></i> Resultados</button>
             </td>
         `;
@@ -1388,6 +1389,7 @@ function abrirResultados(nroOrden) {
             <div>
                 <button class="btn btn-success btn-sm" onclick="guardarResultados('${orden.nroOrden}')"><i class="bi bi-save me-1"></i> Guardar Resultados</button>
                 <button class="btn btn-outline-primary btn-sm ms-1" onclick="imprimirInforme('${orden.nroOrden}')"><i class="bi bi-printer me-1"></i> Imprimir Informe</button>
+                <button class="btn btn-outline-danger btn-sm ms-1" onclick="descargarInformePDF('${orden.nroOrden}')"><i class="bi bi-file-earmark-pdf me-1"></i> Descargar PDF</button>
             </div>
         </div>
         <div class="list-group">
@@ -1579,39 +1581,6 @@ function actualizarTotalesCaja() {
         tbody.appendChild(tr);
     });
 }
-// Función para cargar y mostrar los productos en el navegador
-async function inicializarPrecios() {
-    try {
-        const respuesta = await fetch('productos_4.json');
-        const productos = await respuesta.json();
-
-        // Ejemplo 1: Mostrar todos los productos con precios corridos en la consola
-        console.log("--- LISTA DE PRECIOS CORRIDA ---");
-        productos.forEach(prod => {
-            console.log(`[Código: ${prod.Codigo}] ${prod.Nombre} - S/. ${prod.Precio.toFixed(2)}`);
-        });
-
-        // Función de búsqueda opcional disponible globalmente si la necesitas
-        window.obtenerPrecioPorBusqueda = function(busqueda) {
-            const productoEncontrado = productos.find(p => 
-                p.Codigo === busqueda || p.Nombre.toLowerCase().includes(busqueda.toLowerCase())
-            );
-            
-            if (productoEncontrado) {
-                return `El precio de "${productoEncontrado.Nombre}" es: S/. ${productoEncontrado.Precio.toFixed(2)}`;
-            } else {
-                return "Producto no encontrado.";
-            }
-        };
-
-    } catch (error) {
-        console.error("No se pudo cargar el archivo productos_4.json:", error);
-    }
-}
-
-// Ejecutar la función al cargar el script
-inicializarPrecios();
-
 // ==========================================
 // UTILIDADES DE IMPRESIÓN Y RESULTADOS
 // ==========================================
@@ -1660,51 +1629,71 @@ function marcarRango(resultado, refMin, refMax) {
 // TICKET DE VENTA (TICKETERA TÉRMICA 58mm)
 // ==========================================
 function construirTicketHTML(orden) {
+    const fechaHora = String(orden.fechaHora || "").split(", ");
+    const fecha = fechaHora[0] || "";
+    const hora = fechaHora[1] || "";
+
     let lineas = "";
     orden.examenes.forEach(item => {
         const importe = item.cantidad * item.precio;
         lineas += `
-            <div class="t-flex">
-                <span>${item.cantidad} x ${escapeHTML(item.nombre)}</span>
-                <span>${importe.toFixed(2)}</span>
+            <div class="t-item">
+                <span class="t-cant">${item.cantidad} x</span>
+                <span class="t-desc">${escapeHTML(item.nombre)}</span>
+                <span class="t-importe">${importe.toFixed(2)}</span>
             </div>
         `;
     });
 
+    const datoExtra = orden.doctor
+        ? `<div class="t-row"><span>Médico:</span><span>${escapeHTML(orden.doctor)}</span></div>`
+        : "";
+
     return `
         <div class="ticket-contenido">
-            <div class="t-centro t-negrita t-titulo">CENTRO MEDICO VITAL HEALTH</div>
+            <img src="logo.png" alt="" class="t-logo" onerror="this.style.display='none'">
+            <div class="t-centro t-negrita t-titulo">CENTRO MEDICO</div>
+            <div class="t-centro t-negrita t-titulo">VITAL HEALTH</div>
             <div class="t-centro">Laboratorio Clínico</div>
-            <div class="t-centro">Av. Grau N° 1799 - 26 de Octubre</div>
-            <div class="t-centro">WhatsApp: 984 089 927</div>
+            <div class="t-centro t-dato">Av. Grau N° 1799 - Veintiséis de Octubre</div>
+            <div class="t-centro t-dato">WhatsApp: 984 089 927</div>
+            <div class="t-linea-doble"></div>
+            <div class="t-centro t-negrita t-subtitulo">TICKET DE VENTA</div>
+            <div class="t-centro t-dato">${escapeHTML(orden.nroOrden)}</div>
             <div class="t-linea"></div>
-            <div class="t-centro t-negrita">TICKET DE VENTA</div>
-            <div class="t-flex"><span>N° Orden</span><span>${escapeHTML(orden.nroOrden)}</span></div>
-            <div class="t-flex"><span>Fecha</span><span>${escapeHTML(orden.fechaHora)}</span></div>
-            <div class="t-flex"><span>Paciente</span><span>${escapeHTML(orden.nombre)}</span></div>
-            <div class="t-flex"><span>DNI</span><span>${escapeHTML(orden.dni)}</span></div>
+            <div class="t-row"><span>Fecha:</span><span>${escapeHTML(fecha)}</span></div>
+            <div class="t-row"><span>Hora:</span><span>${escapeHTML(hora)}</span></div>
+            <div class="t-row"><span>Paciente:</span><span>${escapeHTML(orden.nombre)}</span></div>
+            <div class="t-row"><span>DNI:</span><span>${escapeHTML(orden.dni)}</span></div>
+            ${datoExtra}
             <div class="t-linea"></div>
-            <div class="t-flex t-negrita"><span>CANT x DESCRIPCION</span><span>IMPORTE</span></div>
+            <div class="t-cabecera-items t-negrita">
+                <span>CANT</span><span>DESCRIPCION</span><span>IMPORTE</span>
+            </div>
+            <div class="t-linea"></div>
             ${lineas}
             <div class="t-linea"></div>
-            <div class="t-flex t-negrita t-total"><span>TOTAL S/</span><span>${Number(orden.total).toFixed(2)}</span></div>
-            <div class="t-flex"><span>Método de pago</span><span>${escapeHTML(orden.metodoPago)}</span></div>
-            <div class="t-linea"></div>
-            <div class="t-centro">¡Gracias por su preferencia!</div>
-            <div class="t-centro">Conserve este ticket para recoger</div>
-            <div class="t-centro">sus resultados de laboratorio</div>
+            <div class="t-row t-negrita t-total"><span>TOTAL S/</span><span>${Number(orden.total).toFixed(2)}</span></div>
+            <div class="t-row"><span>Pago:</span><span>${escapeHTML(orden.metodoPago)}</span></div>
+            <div class="t-linea-doble"></div>
+            <div class="t-centro t-obs">¡Gracias por su preferencia!</div>
+            <div class="t-centro t-obs">Conserve este ticket para recoger</div>
+            <div class="t-centro t-obs">sus resultados de laboratorio</div>
+            <div class="t-centro t-obs">"Análisis de calidad para el</div>
+            <div class="t-centro t-obs">cuidado de tu salud"</div>
         </div>
     `;
 }
 
 function mostrarTicket(orden) {
     const html = construirTicketHTML(orden);
+    window._ticketActual = orden;
 
     const cuerpo = document.getElementById("modal-ticket-body");
     if (cuerpo) cuerpo.innerHTML = `<div class="ticket-visual">${html}</div>`;
 
     const titulo = document.getElementById("modal-ticket-titulo");
-    if (titulo) titulo.innerHTML = `<i class="bi bi-receipt-cutoff me-1"></i>Ticket ${escapeHTML(orden.nroOrden)} registrado (58 mm)`;
+    if (titulo) titulo.innerHTML = `<i class="bi bi-receipt-cutoff me-1"></i>Ticket ${escapeHTML(orden.nroOrden)} (58 mm)`;
 
     const zona = document.getElementById("zona-impresion");
     if (zona) zona.innerHTML = `<div class="ticket-print">${html}</div>`;
@@ -1717,12 +1706,52 @@ function mostrarTicket(orden) {
     }
 }
 
+function descargarTicketPNG() {
+    const nodo = document.querySelector("#modal-ticket-body .ticket-visual");
+    const orden = window._ticketActual;
+
+    if (!nodo || !orden) {
+        alert("Primero registre una orden para poder descargar su ticket.");
+        return;
+    }
+    if (typeof window.html2canvas !== "function") {
+        alert("No se pudo cargar la librería de descarga. Revise su conexión a internet y vuelva a intentar.");
+        return;
+    }
+
+    window.html2canvas(nodo, { scale: 3, backgroundColor: "#ffffff", useCORS: true }).then(canvas => {
+        const enlace = document.createElement("a");
+        enlace.download = `Ticket-${orden.nroOrden}.png`;
+        enlace.href = canvas.toDataURL("image/png");
+        enlace.click();
+    }).catch(() => {
+        alert("No se pudo generar la imagen del ticket.");
+    });
+}
+
 function mostrarTicketPorNro(nroOrden) {
     const orden = ordenesRegistradas.find(o => o.nroOrden === nroOrden);
     if (orden) mostrarTicket(orden);
 }
 
+function ajustarPaginaTicket() {
+    const visual = document.querySelector("#modal-ticket-body .ticket-visual");
+    let altoMm = 200;
+    if (visual && visual.scrollHeight > 0) {
+        altoMm = Math.ceil((visual.scrollHeight * 25.4) / 96) + 10;
+    }
+
+    let estilo = document.getElementById("estilo-pagina-ticket");
+    if (!estilo) {
+        estilo = document.createElement("style");
+        estilo.id = "estilo-pagina-ticket";
+        document.head.appendChild(estilo);
+    }
+    estilo.textContent = `@page ticket { size: 58mm ${altoMm}mm; margin: 3mm 2mm; }`;
+}
+
 function imprimirTicket() {
+    ajustarPaginaTicket();
     const modalEl = document.getElementById("modalTicket");
     if (modalEl && window.bootstrap) {
         bootstrap.Modal.getInstance(modalEl)?.hide();
@@ -1790,6 +1819,7 @@ function guardarResultados(nroOrden, silencioso = false) {
 
 function construirInformeHTML(orden) {
     const fechaEmision = new Date().toLocaleDateString("es-PE", { day: "2-digit", month: "2-digit", year: "numeric" });
+    const horaEmision = new Date().toLocaleTimeString("es-PE", { hour: "2-digit", minute: "2-digit" });
 
     let tablas = "";
     (orden.resultados || []).forEach(ex => {
@@ -1797,14 +1827,15 @@ function construirInformeHTML(orden) {
         ex.indicadores.forEach(ind => {
             const flag = marcarRango(ind.resultado, ind.refMin, ind.refMax);
             const rango = formatoRango(ind.refMin, ind.refMax);
+            const clase = flag.indexOf("↑") >= 0 ? "res-flag res-alto" : (flag.indexOf("↓") >= 0 ? "res-flag res-bajo" : "res-flag");
             const celdasRango = rango
-                ? `<td>${escapeHTML(ind.refMin)}</td><td>${escapeHTML(ind.refMax)}</td>`
-                : `<td colspan="2">${escapeHTML(ind.referencia || "")}</td>`;
+                ? `<td class="td-centro">${escapeHTML(ind.refMin)}</td><td class="td-centro">${escapeHTML(ind.refMax)}</td>`
+                : `<td colspan="2" class="td-centro">${escapeHTML(ind.referencia || "")}</td>`;
             filas += `
                 <tr>
                     <td>${escapeHTML(ind.nombre)}</td>
-                    <td class="res-flag">${escapeHTML(ind.resultado || "______")}${flag}</td>
-                    <td>${escapeHTML(ind.unidad || "")}</td>
+                    <td class="${clase} td-centro">${escapeHTML(ind.resultado || "______")}${flag}</td>
+                    <td class="td-centro">${escapeHTML(ind.unidad || "")}</td>
                     ${celdasRango}
                 </tr>
             `;
@@ -1820,8 +1851,8 @@ function construirInformeHTML(orden) {
                         <th style="width:34%">Indicador</th>
                         <th style="width:18%">Resultado</th>
                         <th style="width:12%">Unidad</th>
-                        <th style="width:18%">Mínimo</th>
-                        <th style="width:18%">Máximo</th>
+                        <th style="width:18%">V. Mínimo</th>
+                        <th style="width:18%">V. Máximo</th>
                     </tr>
                 </thead>
                 <tbody>${filas}</tbody>
@@ -1829,35 +1860,64 @@ function construirInformeHTML(orden) {
         `;
     });
 
+    const nota = `Los valores de referencia son orientativos y deben interpretarse según la clínica del paciente. Los resultados corresponden únicamente a la muestra analizada.`;
+
     return `
         <div class="informe-cabecera">
+            <img src="logo.png" alt="Centro Médico Vital Health" class="informe-logo" onerror="this.style.display='none'">
             <h1>CENTRO MEDICO VITAL HEALTH</h1>
-            <p><em>Laboratorio clínico, comprometido con tu salud.</em></p>
+            <p><strong>Laboratorio Clínico</strong></p>
             <p>Av. Grau N° 1799 - Veintiséis de Octubre &nbsp;|&nbsp; WhatsApp: 984 089 927</p>
-            <p><strong>INFORME DE RESULTADOS DE LABORATORIO</strong></p>
         </div>
+
+        <div class="informe-titulo">INFORME DE RESULTADOS DE LABORATORIO</div>
+
         <table class="informe-datos">
             <tr>
-                <td><strong>PACIENTE:</strong> ${escapeHTML(orden.nombre)}</td>
-                <td><strong>EDAD:</strong> ${escapeHTML(orden.edad || "")}</td>
+                <td class="td-rotulo">PACIENTE</td>
+                <td colspan="3">${escapeHTML(orden.nombre)}</td>
             </tr>
             <tr>
-                <td><strong>DNI:</strong> ${escapeHTML(orden.dni)}</td>
-                <td><strong>SEXO:</strong> ${escapeHTML(orden.sexo || "")}</td>
+                <td class="td-rotulo">DNI</td>
+                <td>${escapeHTML(orden.dni)}</td>
+                <td class="td-rotulo">EDAD</td>
+                <td>${escapeHTML(orden.edad || "")}</td>
             </tr>
             <tr>
-                <td><strong>DOCTOR:</strong> ${escapeHTML(orden.doctor || "")}</td>
-                <td><strong>FECHA:</strong> ${fechaEmision}</td>
+                <td class="td-rotulo">SEXO</td>
+                <td>${escapeHTML(orden.sexo || "")}</td>
+                <td class="td-rotulo">MÉDICO</td>
+                <td>${escapeHTML(orden.doctor || "Particular")}</td>
             </tr>
             <tr>
-                <td><strong>N° ORDEN:</strong> ${escapeHTML(orden.nroOrden)}</td>
-                <td><strong>REGISTRADO:</strong> ${escapeHTML(orden.fechaHora)}</td>
+                <td class="td-rotulo">N° ORDEN</td>
+                <td>${escapeHTML(orden.nroOrden)}</td>
+                <td class="td-rotulo">TOMA DE MUESTRA</td>
+                <td>${escapeHTML(orden.fechaHora || "")}</td>
+            </tr>
+            <tr>
+                <td class="td-rotulo">FECHA DE INFORME</td>
+                <td>${fechaEmision} ${horaEmision}</td>
+                <td class="td-rotulo">TOTAL EXÁMENES</td>
+                <td>${(orden.resultados || []).length}</td>
             </tr>
         </table>
+
         ${tablas}
-        <div class="informe-pie">
-            <div><strong>984 089 927</strong> &nbsp;|&nbsp; SERVICIO A DOMICILIO &nbsp;|&nbsp; "ANÁLISIS DE CALIDAD PARA EL CUIDADO DE TU SALUD"</div>
-            <div>Av. Grau N° 1799 - Veintiséis de Octubre &nbsp;&bull;&nbsp; Informe generado el ${fechaEmision}</div>
+
+        <div class="informe-nota"><strong>Nota:</strong> ${nota}</div>
+
+        <div class="informe-firma">
+            <img src="firma-biologa.png" alt="Firma" class="informe-firma-img" onerror="this.style.display='none'">
+            <div class="informe-firma-linea"></div>
+            <div class="informe-firma-nombre">FIRMA DE LA BIÓLOGA</div>
+            <div class="informe-firma-det">Bióloga Responsable del Laboratorio</div>
+            <div class="informe-firma-det">Centro Médico Vital Health</div>
+        </div>
+
+        <div class="informe-pie-fijo">
+            <div><strong>CENTRO MEDICO VITAL HEALTH</strong> &nbsp;|&nbsp; <strong>984 089 927</strong> &nbsp;|&nbsp; SERVICIO A DOMICILIO</div>
+            <div>Av. Grau N° 1799 - Veintiséis de Octubre &nbsp;&bull;&nbsp; "Análisis de calidad para el cuidado de tu salud"</div>
         </div>
     `;
 }
@@ -1878,4 +1938,64 @@ function imprimirInforme(nroOrden) {
     if (!zona) return;
     zona.innerHTML = `<div class="informe-print">${construirInformeHTML(orden)}</div>`;
     imprimirZona();
+}
+
+function descargarInformePDF(nroOrden) {
+    const orden = ordenesRegistradas.find(o => o.nroOrden === nroOrden);
+    if (!orden) return;
+
+    if (!orden.resultados || !orden.resultados.length) {
+        const guardado = guardarResultados(nroOrden, true);
+        if (!guardado) {
+            alert("Primero capture los resultados en el editor y guárdelos.");
+            return;
+        }
+    }
+    if (typeof window.html2canvas !== "function" || !window.jspdf) {
+        alert("No se pudo cargar la librería de PDF. Revise su conexión a internet y vuelva a intentar.");
+        return;
+    }
+
+    const contenedor = document.createElement("div");
+    contenedor.style.position = "absolute";
+    contenedor.style.left = "-10000px";
+    contenedor.style.top = "0";
+    contenedor.style.width = "794px";
+    contenedor.style.background = "#ffffff";
+    contenedor.innerHTML = `<div class="informe-print">${construirInformeHTML(orden)}</div>`;
+    document.body.appendChild(contenedor);
+
+    const hoja = contenedor.querySelector(".informe-print");
+    hoja.querySelectorAll(".informe-pie-fijo").forEach(el => {
+        el.classList.remove("informe-pie-fijo");
+        el.classList.add("informe-pie-estatico");
+    });
+
+    window.html2canvas(hoja, { scale: 2, backgroundColor: "#ffffff", useCORS: true }).then(canvas => {
+        const pdf = new window.jspdf.jsPDF("p", "mm", "a4");
+        const anchoHoja = 210;
+        const altoHoja = 297;
+        const margen = 10;
+        const anchoUtil = anchoHoja - margen * 2;
+        const altoImagen = canvas.height * anchoUtil / canvas.width;
+        const altoUtil = altoHoja - margen * 2;
+
+        let restante = altoImagen;
+        let posicion = 0;
+        let pagina = 0;
+
+        while (restante > 0) {
+            if (pagina > 0) pdf.addPage();
+            pdf.addImage(canvas.toDataURL("image/jpeg", 0.95), "JPEG", margen, margen - posicion, anchoUtil, altoImagen);
+            posicion += altoUtil;
+            restante -= altoUtil;
+            pagina++;
+        }
+
+        pdf.save(`Informe-Resultados-${orden.nroOrden}.pdf`);
+    }).catch(() => {
+        alert("No se pudo generar el PDF del informe.");
+    }).finally(() => {
+        contenedor.remove();
+    });
 }
