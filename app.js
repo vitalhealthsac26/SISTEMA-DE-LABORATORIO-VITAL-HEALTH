@@ -1218,7 +1218,7 @@ function filtrarExamenes(query) {
 }
 
 function agregarExamenSeleccionado(ex) {
-    const existente = examenesSeleccionados.find(item => item.Codigo === ex.codigo);
+    const existente = examenesSeleccionados.find(item => item.codigo === ex.codigo);
     if (existente) {
         existente.cantidad += 1;
     } else {
@@ -1226,7 +1226,9 @@ function agregarExamenSeleccionado(ex) {
             codigo: ex.codigo,
             nombre: ex.nombre,
             cantidad: 1,
-            precio: Number(ex.precio || 0)
+            precio: Number(ex.precio || 0),
+            unidad: ex.unidad || '',
+            referencia: ex.referencia || ''
         });
     }
     renderizarTablaSeleccionados();
@@ -1261,17 +1263,17 @@ function renderizarTablaSeleccionados() {
 
     let total = 0;
     examenesSeleccionados.forEach(item => {
-        const importe = item.cantidad * item.Precio;
+        const importe = item.cantidad * item.precio;
         total += importe;
 
         const tr = document.createElement("tr");
         tr.innerHTML = `
-            <td>${item.Codigo}</td>
+            <td>${item.codigo}</td>
             <td>${item.nombre}</td>
-            <td><input type="number" class="form-control form-control-sm" style="width: 70px;" value="${item.cantidad}" min="1" onchange="cambiarCantidadExamen('${item.Codigo}', this.value)"></td>
-            <td>S/ ${item.Precio.toFixed(2)}</td>
+            <td><input type="number" class="form-control form-control-sm" style="width: 70px;" value="${item.cantidad}" min="1" onchange="cambiarCantidadExamen('${item.codigo}', this.value)"></td>
+            <td>S/ ${item.precio.toFixed(2)}</td>
             <td>S/ ${importe.toFixed(2)}</td>
-            <td class="text-center"><button class="btn btn-sm btn-outline-danger" onclick="eliminarExamenSeleccionado('${item.Codigo}')"><i class="bi bi-trash"></i></button></td>
+            <td class="text-center"><button class="btn btn-sm btn-outline-danger" onclick="eliminarExamenSeleccionado('${item.codigo}')"><i class="bi bi-trash"></i></button></td>
         `;
         tbody.appendChild(tr);
     });
@@ -1298,7 +1300,7 @@ function guardarOrdenGenerarTicket() {
         return;
     }
 
-    const total = examenesSeleccionados.reduce((acc, item) => acc + (item.cantidad * item.Precio), 0);
+    const total = examenesSeleccionados.reduce((acc, item) => acc + (item.cantidad * item.precio), 0);
     const nroOrden = "ORD-" + Math.floor(100000 + Math.random() * 900000);
     const fechaHora = new Date().toLocaleString();
 
@@ -1548,42 +1550,6 @@ function actualizarTotalesCaja() {
         `;
         tbody.appendChild(tr);
     });
-}
-// Cargar datos al iniciar script
-cargarAlmacenamiento();
-
-// ==========================================
-// FUNCIÓN PARA CAMBIAR DE SECCIÓN (CORREGIDA)
-// ==========================================
-function showSection(sectionId) {
-    // 1. Ocultar todas las secciones que tengan la clase 'section-content'
-    const sections = document.querySelectorAll('.section-content');
-    sections.forEach(sec => {
-        sec.classList.add('d-none');
-    });
-
-    // 2. Mostrar la sección seleccionada quitando la clase 'd-none'
-    const targetSection = document.getElementById('sec-' + sectionId);
-    if (targetSection) {
-        targetSection.classList.remove('d-none');
-    }
-
-    // 3. Actualizar la clase 'active' en los enlaces del menú lateral (sidebar)
-    const navLinks = document.querySelectorAll('#sidebar .nav-link');
-    navLinks.forEach(link => {
-        link.classList.remove('active');
-    });
-
-    // Buscar el enlace que hizo clic y activarlo
-    event.currentTarget.classList.add('active');
-
-    // 4. Si estás en dispositivos móviles, cerrar el sidebar automáticamente al hacer clic
-    const sidebar = document.getElementById('sidebar');
-    const overlay = document.getElementById('sidebar-overlay');
-    if (sidebar && sidebar.classList.contains('active')) {
-        sidebar.classList.remove('active');
-        if (overlay) overlay.classList.remove('active');
-    }
 }
 // Función para cargar y mostrar los productos en el navegador
 async function inicializarPrecios() {
