@@ -115,36 +115,37 @@ body { background-color: var(--bg-light); font-family: 'Segoe UI', Tahoma, Genev
     color: #1e293b;
     font-family: 'Segoe UI', Arial, Helvetica, sans-serif;
     font-size: 11.5px;
-    padding-bottom: 16mm;
+    padding-bottom: 14mm;
 }
-.informe-cabecera { text-align: center; padding-bottom: 10px; margin-bottom: 4px; border-bottom: 1px solid #cbd5e1; }
-.informe-logo { display: block; width: 84px; height: 84px; object-fit: contain; margin: 0 auto 6px auto; }
-.informe-cabecera h1 { font-size: 21px; margin: 0; letter-spacing: 2.5px; font-weight: 800; color: #0f172a; }
-.informe-cabecera p { margin: 2px 0; font-size: 10.5px; color: #475569; }
+.informe-cabecera { text-align: center; padding-bottom: 8px; margin-bottom: 2px; border-bottom: 1px solid #cbd5e1; }
+.informe-logo { display: block; width: 76px; height: 76px; object-fit: contain; margin: 0 auto 4px auto; }
+.informe-cabecera h1 { font-size: 20px; margin: 0; letter-spacing: 2.5px; font-weight: 800; color: #0f172a; }
+.informe-cabecera p { margin: 1px 0; font-size: 10px; color: #475569; }
 .informe-titulo {
     text-align: center;
     color: #0072bc;
     font-weight: 800;
-    font-size: 13px;
+    font-size: 12.5px;
     letter-spacing: 2px;
-    margin: 14px 0;
+    margin: 10px 0 12px 0;
 }
 .informe-datos {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 8px 24px;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 3px 18px;
     background: #f8fafc !important;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
     border-radius: 6px;
-    padding: 10px 14px;
-    margin-bottom: 16px;
+    padding: 7px 12px;
+    margin-bottom: 12px;
 }
-.dato { display: flex; flex-direction: column; }
+.dato { display: flex; align-items: baseline; gap: 5px; min-width: 0; }
 .dato-ancho { grid-column: 1 / -1; }
-.dato-rotulo { font-size: 8.5px; color: #64748b; text-transform: uppercase; letter-spacing: .7px; font-weight: 700; }
-.dato-valor { font-size: 11.5px; font-weight: 600; color: #0f172a; }
-.informe-tabla { width: 100%; border-collapse: collapse; margin: 0 0 16px 0; }
+.dato-rotulo { font-size: 8px; color: #64748b; text-transform: uppercase; letter-spacing: .6px; font-weight: 700; white-space: nowrap; }
+.dato-rotulo::after { content: ":"; }
+.dato-valor { font-size: 10.5px; font-weight: 600; color: #0f172a; min-width: 0; word-break: break-word; }
+.informe-tabla { width: 100%; border-collapse: collapse; margin: 0 0 12px 0; }
 .informe-tabla th,
 .informe-tabla td { border: 0; border-bottom: 1px solid #e2e8f0; padding: 4px 6px; font-size: 10.5px; text-align: left; vertical-align: top; }
 .informe-tabla thead th {
@@ -167,17 +168,17 @@ body { background-color: var(--bg-light); font-family: 'Segoe UI', Tahoma, Genev
     color: #0b5ea8;
 }
 .informe-metodo { float: right; font-weight: 600; font-size: 9px; color: #64748b; }
-.informe-nota { font-size: 9.5px; font-style: italic; color: #64748b; margin: 0 0 10px 0; }
+.informe-nota { font-size: 9px; font-style: italic; color: #64748b; margin: 0 0 4px 0; }
 .res-flag { font-weight: 700; }
 .res-alto { color: #c0263a; }
 .res-bajo { color: #b45309; }
 
 /* Firma de la bióloga */
-.informe-firma { margin-top: 44px; text-align: center; page-break-inside: avoid; }
-.informe-firma-img { height: 78px; object-fit: contain; display: block; margin: 0 auto 2px auto; }
-.informe-firma-linea { width: 250px; border-top: 1.5px solid #0f172a; margin: 0 auto 4px auto; }
-.informe-firma-nombre { font-weight: 700; font-size: 11.5px; color: #0f172a; }
-.informe-firma-det { font-size: 9.5px; color: #475569; }
+.informe-firma { margin-top: 26px; text-align: center; page-break-inside: avoid; }
+.informe-firma-img { height: 62px; object-fit: contain; display: block; margin: 0 auto 2px auto; }
+.informe-firma-linea { width: 230px; border-top: 1.5px solid #0f172a; margin: 0 auto 3px auto; }
+.informe-firma-nombre { font-weight: 700; font-size: 11px; color: #0f172a; }
+.informe-firma-det { font-size: 9px; color: #475569; }
 
 /* Pie de página del centro médico */
 .informe-pie-fijo {
