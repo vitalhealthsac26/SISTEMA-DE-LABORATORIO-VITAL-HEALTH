@@ -1180,6 +1180,7 @@ document.addEventListener("DOMContentLoaded", () => {
     renderizarTablaCatalogo();
     cargarOrdenes();
     actualizarTotalesCaja();
+    window.nubeIniciar?.();
 });
 
 function actualizarFechaActual() {
@@ -1391,23 +1392,29 @@ function guardarOrdenGenerarTicket() {
         metodoPago,
         examenes: [...examenesSeleccionados],
         total,
-        estado: "Pendiente"
+        estado: "Pendiente",
+        en: Date.now()
     };
 
     ordenesRegistradas.unshift(nuevaOrden);
 
     // Registrar en caja
-    cajaMovimientos.unshift({
+    const movimiento = {
+        id: `${Date.now()}-${nroOrden}`,
         hora: new Date().toLocaleTimeString(),
         nroOrden,
         paciente: nombre,
         metodoPago,
-        monto: total
-    });
+        monto: total,
+        en: Date.now()
+    };
+    cajaMovimientos.unshift(movimiento);
 
     actualizarTotalesCaja();
     cargarOrdenes();
     persistirDatos();
+    window.nubeGuardarOrden?.(nuevaOrden);
+    window.nubeGuardarMovimiento?.(movimiento);
 
     // Limpiar formulario
     document.getElementById("form-paciente").reset();
@@ -1551,7 +1558,7 @@ function guardarExamenCatalogo() {
         return;
     }
 
-    const nuevoEx = { codigo, nombre, precio, muestra, metodo, plantilla, refTexto };
+    const nuevoEx = { codigo, nombre, precio, muestra, metodo, plantilla, refTexto, en: Date.now() };
     
     // Verificar si ya existe para actualizar o agregar
     const index = examenesCatalogo.findIndex(e => e.codigo === codigo);
@@ -1563,6 +1570,7 @@ function guardarExamenCatalogo() {
 
     renderizarTablaCatalogo();
     persistirDatos();
+    window.nubeGuardarExamen?.(nuevoEx);
     alert("Examen guardado en el catálogo correctamente.");
     prepararNuevoExamen();
 }
@@ -1890,8 +1898,10 @@ function guardarResultados(nroOrden, silencioso = false) {
         };
     });
     orden.estado = "Resultados listos";
+    orden.en = Date.now();
     cargarOrdenes();
     persistirDatos();
+    window.nubeGuardarOrden?.(orden);
 
     if (!silencioso) {
         alert(`Resultados guardados correctamente para la orden ${nroOrden}.`);
@@ -1974,8 +1984,7 @@ function construirInformeHTML(orden) {
             <img src="firma-biologa.png" alt="Firma" class="informe-firma-img" onerror="this.style.display='none'">
             <div class="informe-firma-linea"></div>
             <div class="informe-firma-nombre">FIRMA DE LA BIÓLOGA</div>
-            <div class="informe-firma-det">Bióloga Responsable del Laboratorio</div>
-            <div class="informe-firma-det">Centro Médico Vital Health</div>
+            <div class="informe-firma-det">Bióloga Responsable del Laboratorio &bull; Centro Médico Vital Health</div>
         </div>
 
         <div class="informe-pie-fijo">
