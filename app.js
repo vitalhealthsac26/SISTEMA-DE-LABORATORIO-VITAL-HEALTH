@@ -1763,8 +1763,6 @@ function construirTicketHTML(orden) {
             <div class="t-centro t-obs">¡Gracias por su preferencia!</div>
             <div class="t-centro t-obs">Conserve este ticket para recoger</div>
             <div class="t-centro t-obs">sus resultados de laboratorio</div>
-            <div class="t-centro t-obs">"Análisis de calidad para el</div>
-            <div class="t-centro t-obs">cuidado de tu salud"</div>
         </div>
     `;
 }
