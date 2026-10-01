@@ -335,23 +335,3 @@
     <script src="app.js"></script>
 </body>
 </html>
-```[cite: 56]
-
----
-
-### ¿Cómo se comunican el `index.html` y el `productos.json` en tu archivo `app.js`?
-Tu archivo `app.js` debe encargarse de cargar los datos del archivo `productos.json` (o del almacenamiento local que los sincronice) al iniciar la página. Por ejemplo, mediante una función similar a esta:
-
-```javascript
-let catalogoExamenes = [];
-
-async function cargarCatalogoPrecios() {
-    try {
-        let respuesta = await fetch('productos.json');
-        catalogoExamenes = await respuesta.json();
-        // Renderizar la tabla del catálogo o preparar las sugerencias de búsqueda
-        renderizarTablaCatalogo();
-    } catch (error) {
-        console.log("Error al cargar el catálogo de precios:", error);
-    }
-}
