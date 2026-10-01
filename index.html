@@ -186,9 +186,14 @@
                 <!-- SECCIÓN ÓRDENES -->
                 <section id="sec-ordenes" class="section-content d-none">
                     <div class="card shadow-sm border-0">
-                        <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
+                        <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center flex-wrap gap-2">
                             <h5 class="card-title fw-bold text-primary mb-0"><i class="bi bi-receipt me-2"></i>Órdenes Registradas</h5>
-                            <button class="btn btn-sm btn-outline-secondary" onclick="cargarOrdenes()"><i class="bi bi-arrow-clockwise me-1"></i>Actualizar</button>
+                            <div class="d-flex gap-2 flex-wrap">
+                                <button class="btn btn-sm btn-outline-secondary" onclick="cargarOrdenes()"><i class="bi bi-arrow-clockwise me-1"></i>Actualizar</button>
+                                <button class="btn btn-sm btn-outline-success" onclick="respaldarDatos()" title="Descarga una copia de seguridad de órdenes, caja y catálogo"><i class="bi bi-download me-1"></i>Respaldar</button>
+                                <button class="btn btn-sm btn-outline-warning" onclick="document.getElementById('input-respaldo').click()" title="Restaura una copia de seguridad descargada antes"><i class="bi bi-upload me-1"></i>Restaurar</button>
+                                <input type="file" id="input-respaldo" accept=".json,application/json" class="d-none" onchange="if (this.files && this.files[0]) { restaurarRespaldo(this.files[0]); this.value = ''; }">
+                            </div>
                         </div>
                         <div class="card-body p-0">
                             <div class="table-responsive">
