@@ -1289,6 +1289,8 @@ function guardarOrdenGenerarTicket() {
     const nombre = document.getElementById("pac-nombre").value.trim();
     const doctor = document.getElementById("pac-doctor").value.trim();
     const metodoPago = document.getElementById("metodo-pago").value;
+    const edad = document.getElementById("pac-edad").value.trim();
+    const sexo = document.getElementById("pac-sexo").value;
 
     if (!dni || !nombre) {
         alert("Por favor ingrese al menos el DNI y los Nombres y Apellidos del paciente.");
@@ -1310,6 +1312,8 @@ function guardarOrdenGenerarTicket() {
         dni,
         nombre,
         doctor,
+        edad,
+        sexo,
         metodoPago,
         examenes: [...examenesSeleccionados],
         total,
@@ -1330,14 +1334,13 @@ function guardarOrdenGenerarTicket() {
     actualizarTotalesCaja();
     cargarOrdenes();
 
-    alert(`¡Orden ${nroOrden} registrada con éxito! Total a cobrar: S/ ${total.toFixed(2)}`);
-
     // Limpiar formulario
     document.getElementById("form-paciente").reset();
     document.getElementById("pac-edad").value = "";
     examenesSeleccionados = [];
     renderizarTablaSeleccionados();
     showSection('ordenes');
+    mostrarTicket(nuevaOrden);
 }
 
 // ==========================================
@@ -1362,6 +1365,8 @@ function cargarOrdenes() {
             <td>${ord.nombre}</td>
             <td><span class="badge bg-warning text-dark">${ord.estado}</span></td>
             <td class="text-end px-3">
+                <button class="btn btn-sm btn-outline-secondary me-1" title="Reimprimir ticket" onclick="mostrarTicketPorNro('${ord.nroOrden}')"><i class="bi bi-receipt"></i></button>
+                ${ord.resultados ? `<button class="btn btn-sm btn-outline-primary me-1" title="Imprimir informe de resultados" onclick="imprimirInforme('${ord.nroOrden}')"><i class="bi bi-file-ear-medical"></i> Informe</button>` : ""}
                 <button class="btn btn-sm btn-outline-primary me-1" onclick="abrirResultados('${ord.nroOrden}')"><i class="bi bi-file-earmark-medical"></i> Resultados</button>
             </td>
         `;
@@ -1378,22 +1383,45 @@ function abrirResultados(nroOrden) {
     if (!editor) return;
 
     let html = `
-        <div class="alert alert-secondary d-flex justify-content-between align-items-center">
-            <div><strong>Orden:</strong> ${orden.nroOrden} | <strong>Paciente:</strong> ${orden.nombre} (${orden.dni})</div>
-            <button class="btn btn-success btn-sm" onclick="alert('Resultados guardados correctamente')"><i class="bi bi-save me-1"></i> Guardar Resultados</button>
+        <div class="alert alert-secondary d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <div><strong>Orden:</strong> ${escapeHTML(orden.nroOrden)} | <strong>Paciente:</strong> ${escapeHTML(orden.nombre)} (${escapeHTML(orden.dni)})</div>
+            <div>
+                <button class="btn btn-success btn-sm" onclick="guardarResultados('${orden.nroOrden}')"><i class="bi bi-save me-1"></i> Guardar Resultados</button>
+                <button class="btn btn-outline-primary btn-sm ms-1" onclick="imprimirInforme('${orden.nroOrden}')"><i class="bi bi-printer me-1"></i> Imprimir Informe</button>
+            </div>
         </div>
         <div class="list-group">
     `;
 
-    orden.examenes.forEach(ex => {
+    orden.examenes.forEach((ex, exIdx) => {
+        const guardado = (orden.resultados || []).find(r => r.codigo === ex.codigo);
+        const plantilla = obtenerPlantillaIndicadores(ex.nombre);
+        const indicadores = plantilla || [{
+            nombre: "Resultado del análisis",
+            unidad: ex.unidad || "",
+            refMin: ex.refMin ?? "",
+            refMax: ex.refMax ?? "",
+            referencia: ex.referencia || ""
+        }];
+
+        let filas = "";
+        indicadores.forEach((ind, indIdx) => {
+            const previo = guardado && guardado.indicadores[indIdx] ? guardado.indicadores[indIdx] : null;
+            const referencia = ind.referencia || formatoRango(ind.refMin, ind.refMax);
+            filas += `
+                <div class="row g-2 mb-2 align-items-center" data-ex="${exIdx}" data-ind="${indIdx}" data-nombre="${escapeHTML(ind.nombre)}" data-refmin="${escapeHTML(ind.refMin ?? "")}" data-refmax="${escapeHTML(ind.refMax ?? "")}">
+                    <div class="col-md-4"><label class="form-label small mb-0">${escapeHTML(ind.nombre)}</label></div>
+                    <div class="col-md-2"><input type="text" class="form-control form-control-sm" data-campo="resultado" placeholder="Valor obtenido" value="${escapeHTML(previo ? previo.resultado : "")}"></div>
+                    <div class="col-md-2"><input type="text" class="form-control form-control-sm bg-light" data-campo="unidad" value="${escapeHTML(ind.unidad || "")}" readonly></div>
+                    <div class="col-md-4"><input type="text" class="form-control form-control-sm bg-light" data-campo="referencia" value="${escapeHTML(referencia)}" readonly></div>
+                </div>
+            `;
+        });
+
         html += `
             <div class="list-group-item mb-3 shadow-sm border rounded">
-                <h6 class="fw-bold text-primary">${ex.nombre} (${ex.codigo})</h6>
-                <div class="row g-2">
-                    <div class="col-md-4"><label class="form-label small">Resultado</label><input type="text" class="form-control form-control-sm" placeholder="Valor obtenido"></div>
-                    <div class="col-md-4"><label class="form-label small">Unidades</label><input type="text" class="form-control form-control-sm" value="${ex.unidad || ''}"></div>
-                    <div class="col-md-4"><label class="form-label small">Valores de Referencia</label><input type="text" class="form-control form-control-sm" value="${ex.referencia || ''}"></div>
-                </div>
+                <h6 class="fw-bold text-primary">${escapeHTML(ex.nombre)} (${escapeHTML(ex.codigo)})</h6>
+                ${filas}
             </div>
         `;
     });
@@ -1583,3 +1611,271 @@ async function inicializarPrecios() {
 
 // Ejecutar la función al cargar el script
 inicializarPrecios();
+
+// ==========================================
+// UTILIDADES DE IMPRESIÓN Y RESULTADOS
+// ==========================================
+function escapeHTML(valor) {
+    return String(valor ?? "").replace(/[&<>"']/g, c => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+    }[c]));
+}
+
+function formatoRango(refMin, refMax) {
+    const tieneMin = refMin !== "" && refMin !== null && refMin !== undefined;
+    const tieneMax = refMax !== "" && refMax !== null && refMax !== undefined;
+    if (tieneMin && tieneMax) return `${refMin} - ${refMax}`;
+    if (tieneMax) return `< ${refMax}`;
+    if (tieneMin) return `> ${refMin}`;
+    return "";
+}
+
+function obtenerPlantillaIndicadores(nombreExamen) {
+    const normalizado = (nombreExamen || "").toUpperCase();
+    const alias = {
+        "HEMOGRAMA": ["HEMOGRAMA"],
+        "PERFIL LIPIDICO": ["PERFIL LIPIDICO", "PERFIL DE LIPIDOS", "LIPIDICO"],
+        "PERFIL HEPATICO": ["PERFIL HEPATICO", "PERFIL DE HEPATICO", "HEPATICO"]
+    };
+    for (const clave in alias) {
+        const coincide = alias[clave].some(palabra => normalizado.includes(palabra));
+        if (coincide && BASE_VALORES_REFERENCIALES[clave]) {
+            return BASE_VALORES_REFERENCIALES[clave];
+        }
+    }
+    return null;
+}
+
+function marcarRango(resultado, refMin, refMax) {
+    const num = parseFloat(String(resultado).replace(",", "."));
+    if (resultado === "" || resultado === null || isNaN(num)) return "";
+    const min = parseFloat(refMin);
+    const max = parseFloat(refMax);
+    if (!isNaN(min) && num < min) return " ↓";
+    if (!isNaN(max) && num > max) return " ↑";
+    return "";
+}
+
+// ==========================================
+// TICKET DE VENTA (TICKETERA TÉRMICA 58mm)
+// ==========================================
+function construirTicketHTML(orden) {
+    let lineas = "";
+    orden.examenes.forEach(item => {
+        const importe = item.cantidad * item.precio;
+        lineas += `
+            <div class="t-flex">
+                <span>${item.cantidad} x ${escapeHTML(item.nombre)}</span>
+                <span>${importe.toFixed(2)}</span>
+            </div>
+        `;
+    });
+
+    return `
+        <div class="ticket-contenido">
+            <div class="t-centro t-negrita t-titulo">CENTRO MEDICO VITAL HEALTH</div>
+            <div class="t-centro">Laboratorio Clínico</div>
+            <div class="t-centro">Av. Grau N° 1799 - 26 de Octubre</div>
+            <div class="t-centro">WhatsApp: 984 089 927</div>
+            <div class="t-linea"></div>
+            <div class="t-centro t-negrita">TICKET DE VENTA</div>
+            <div class="t-flex"><span>N° Orden</span><span>${escapeHTML(orden.nroOrden)}</span></div>
+            <div class="t-flex"><span>Fecha</span><span>${escapeHTML(orden.fechaHora)}</span></div>
+            <div class="t-flex"><span>Paciente</span><span>${escapeHTML(orden.nombre)}</span></div>
+            <div class="t-flex"><span>DNI</span><span>${escapeHTML(orden.dni)}</span></div>
+            <div class="t-linea"></div>
+            <div class="t-flex t-negrita"><span>CANT x DESCRIPCION</span><span>IMPORTE</span></div>
+            ${lineas}
+            <div class="t-linea"></div>
+            <div class="t-flex t-negrita t-total"><span>TOTAL S/</span><span>${Number(orden.total).toFixed(2)}</span></div>
+            <div class="t-flex"><span>Método de pago</span><span>${escapeHTML(orden.metodoPago)}</span></div>
+            <div class="t-linea"></div>
+            <div class="t-centro">¡Gracias por su preferencia!</div>
+            <div class="t-centro">Conserve este ticket para recoger</div>
+            <div class="t-centro">sus resultados de laboratorio</div>
+        </div>
+    `;
+}
+
+function mostrarTicket(orden) {
+    const html = construirTicketHTML(orden);
+
+    const cuerpo = document.getElementById("modal-ticket-body");
+    if (cuerpo) cuerpo.innerHTML = `<div class="ticket-visual">${html}</div>`;
+
+    const titulo = document.getElementById("modal-ticket-titulo");
+    if (titulo) titulo.innerHTML = `<i class="bi bi-receipt-cutoff me-1"></i>Ticket ${escapeHTML(orden.nroOrden)} registrado (58 mm)`;
+
+    const zona = document.getElementById("zona-impresion");
+    if (zona) zona.innerHTML = `<div class="ticket-print">${html}</div>`;
+
+    const modalEl = document.getElementById("modalTicket");
+    if (modalEl && window.bootstrap) {
+        bootstrap.Modal.getOrCreateInstance(modalEl).show();
+    } else {
+        imprimirTicket();
+    }
+}
+
+function mostrarTicketPorNro(nroOrden) {
+    const orden = ordenesRegistradas.find(o => o.nroOrden === nroOrden);
+    if (orden) mostrarTicket(orden);
+}
+
+function imprimirTicket() {
+    const modalEl = document.getElementById("modalTicket");
+    if (modalEl && window.bootstrap) {
+        bootstrap.Modal.getInstance(modalEl)?.hide();
+    }
+    imprimirZona();
+}
+
+function imprimirZona() {
+    document.body.classList.add("imprimiendo");
+    const alTerminar = () => {
+        document.body.classList.remove("imprimiendo");
+        window.removeEventListener("afterprint", alTerminar);
+    };
+    window.addEventListener("afterprint", alTerminar);
+    window.print();
+}
+
+// ==========================================
+// GUARDADO E IMPRESIÓN DE RESULTADOS (A4)
+// ==========================================
+function guardarResultados(nroOrden, silencioso = false) {
+    const orden = ordenesRegistradas.find(o => o.nroOrden === nroOrden);
+    const editor = document.getElementById("resultados-editor");
+    if (!orden || !editor) return false;
+
+    const grupos = editor.querySelectorAll("[data-ex]");
+    if (!grupos.length) return false;
+
+    const porExamen = {};
+    grupos.forEach(fila => {
+        const exIdx = fila.dataset.ex;
+        if (!porExamen[exIdx]) porExamen[exIdx] = [];
+        const leer = campo => {
+            const el = fila.querySelector(`[data-campo="${campo}"]`);
+            return el ? el.value.trim() : "";
+        };
+        porExamen[exIdx].push({
+            nombre: fila.dataset.nombre || "Resultado",
+            resultado: leer("resultado"),
+            unidad: leer("unidad"),
+            refMin: fila.dataset.refmin || "",
+            refMax: fila.dataset.refmax || "",
+            referencia: leer("referencia")
+        });
+    });
+
+    orden.resultados = Object.keys(porExamen).sort((a, b) => a - b).map(exIdx => {
+        const base = orden.examenes[parseInt(exIdx, 10)];
+        const catalogo = examenesCatalogo.find(c => c.codigo === base.codigo);
+        return {
+            codigo: base.codigo,
+            nombre: base.nombre,
+            metodo: (catalogo && catalogo.metodo) || "",
+            indicadores: porExamen[exIdx]
+        };
+    });
+    orden.estado = "Resultados listos";
+    cargarOrdenes();
+
+    if (!silencioso) {
+        alert(`Resultados guardados correctamente para la orden ${nroOrden}.`);
+    }
+    return true;
+}
+
+function construirInformeHTML(orden) {
+    const fechaEmision = new Date().toLocaleDateString("es-PE", { day: "2-digit", month: "2-digit", year: "numeric" });
+
+    let tablas = "";
+    (orden.resultados || []).forEach(ex => {
+        let filas = "";
+        ex.indicadores.forEach(ind => {
+            const flag = marcarRango(ind.resultado, ind.refMin, ind.refMax);
+            const rango = formatoRango(ind.refMin, ind.refMax);
+            const celdasRango = rango
+                ? `<td>${escapeHTML(ind.refMin)}</td><td>${escapeHTML(ind.refMax)}</td>`
+                : `<td colspan="2">${escapeHTML(ind.referencia || "")}</td>`;
+            filas += `
+                <tr>
+                    <td>${escapeHTML(ind.nombre)}</td>
+                    <td class="res-flag">${escapeHTML(ind.resultado || "______")}${flag}</td>
+                    <td>${escapeHTML(ind.unidad || "")}</td>
+                    ${celdasRango}
+                </tr>
+            `;
+        });
+
+        tablas += `
+            <table class="informe-tabla">
+                <tr class="informe-examen-titulo">
+                    <th colspan="5">${escapeHTML(ex.nombre)} (${escapeHTML(ex.codigo)})${ex.metodo ? `<span class="informe-metodo">Método: ${escapeHTML(ex.metodo)}</span>` : ""}</th>
+                </tr>
+                <thead>
+                    <tr>
+                        <th style="width:34%">Indicador</th>
+                        <th style="width:18%">Resultado</th>
+                        <th style="width:12%">Unidad</th>
+                        <th style="width:18%">Mínimo</th>
+                        <th style="width:18%">Máximo</th>
+                    </tr>
+                </thead>
+                <tbody>${filas}</tbody>
+            </table>
+        `;
+    });
+
+    return `
+        <div class="informe-cabecera">
+            <h1>CENTRO MEDICO VITAL HEALTH</h1>
+            <p><em>Laboratorio clínico, comprometido con tu salud.</em></p>
+            <p>Av. Grau N° 1799 - Veintiséis de Octubre &nbsp;|&nbsp; WhatsApp: 984 089 927</p>
+            <p><strong>INFORME DE RESULTADOS DE LABORATORIO</strong></p>
+        </div>
+        <table class="informe-datos">
+            <tr>
+                <td><strong>PACIENTE:</strong> ${escapeHTML(orden.nombre)}</td>
+                <td><strong>EDAD:</strong> ${escapeHTML(orden.edad || "")}</td>
+            </tr>
+            <tr>
+                <td><strong>DNI:</strong> ${escapeHTML(orden.dni)}</td>
+                <td><strong>SEXO:</strong> ${escapeHTML(orden.sexo || "")}</td>
+            </tr>
+            <tr>
+                <td><strong>DOCTOR:</strong> ${escapeHTML(orden.doctor || "")}</td>
+                <td><strong>FECHA:</strong> ${fechaEmision}</td>
+            </tr>
+            <tr>
+                <td><strong>N° ORDEN:</strong> ${escapeHTML(orden.nroOrden)}</td>
+                <td><strong>REGISTRADO:</strong> ${escapeHTML(orden.fechaHora)}</td>
+            </tr>
+        </table>
+        ${tablas}
+        <div class="informe-pie">
+            <div><strong>984 089 927</strong> &nbsp;|&nbsp; SERVICIO A DOMICILIO &nbsp;|&nbsp; "ANÁLISIS DE CALIDAD PARA EL CUIDADO DE TU SALUD"</div>
+            <div>Av. Grau N° 1799 - Veintiséis de Octubre &nbsp;&bull;&nbsp; Informe generado el ${fechaEmision}</div>
+        </div>
+    `;
+}
+
+function imprimirInforme(nroOrden) {
+    const orden = ordenesRegistradas.find(o => o.nroOrden === nroOrden);
+    if (!orden) return;
+
+    if (!orden.resultados || !orden.resultados.length) {
+        const guardado = guardarResultados(nroOrden, true);
+        if (!guardado) {
+            alert("Primero capture los resultados en el editor y guárdelos.");
+            return;
+        }
+    }
+
+    const zona = document.getElementById("zona-impresion");
+    if (!zona) return;
+    zona.innerHTML = `<div class="informe-print">${construirInformeHTML(orden)}</div>`;
+    imprimirZona();
+}
