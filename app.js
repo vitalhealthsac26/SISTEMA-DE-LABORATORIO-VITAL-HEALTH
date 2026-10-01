@@ -1100,11 +1100,85 @@ let ordenesRegistradas = [];
 let cajaMovimientos = [];
 
 // ==========================================
+// GUARDADO PERMANENTE EN ESTE EQUIPO
+// ==========================================
+const CLAVE_ALMACEN = "vitalhealth_datos_v1";
+
+function persistirDatos() {
+    try {
+        localStorage.setItem(CLAVE_ALMACEN, JSON.stringify({
+            ordenes: ordenesRegistradas,
+            caja: cajaMovimientos,
+            catalogo: examenesCatalogo
+        }));
+    } catch (error) {
+        console.error("No se pudo guardar la información en este equipo:", error);
+    }
+}
+
+function cargarDatosGuardados() {
+    try {
+        const crudo = localStorage.getItem(CLAVE_ALMACEN);
+        if (!crudo) return;
+        const datos = JSON.parse(crudo);
+        if (Array.isArray(datos.ordenes)) ordenesRegistradas = datos.ordenes;
+        if (Array.isArray(datos.caja)) cajaMovimientos = datos.caja;
+        if (Array.isArray(datos.catalogo) && datos.catalogo.length) examenesCatalogo = datos.catalogo;
+    } catch (error) {
+        console.error("No se pudo leer la información guardada en este equipo:", error);
+    }
+}
+
+function respaldarDatos() {
+    const contenido = JSON.stringify({
+        ordenes: ordenesRegistradas,
+        caja: cajaMovimientos,
+        catalogo: examenesCatalogo
+    }, null, 2);
+    const blob = new Blob([contenido], { type: "application/json" });
+    const enlace = document.createElement("a");
+    enlace.download = `Respaldo-VitalHealth-${new Date().toISOString().slice(0, 10)}.json`;
+    enlace.href = URL.createObjectURL(blob);
+    enlace.click();
+    URL.revokeObjectURL(enlace.href);
+}
+
+function restaurarRespaldo(archivo) {
+    const lector = new FileReader();
+    lector.onload = () => {
+        try {
+            const datos = JSON.parse(lector.result);
+            if (!Array.isArray(datos.ordenes)) {
+                alert("El archivo no es un respaldo válido de Vital Health.");
+                return;
+            }
+            ordenesRegistradas = datos.ordenes;
+            cajaMovimientos = Array.isArray(datos.caja) ? datos.caja : [];
+            if (Array.isArray(datos.catalogo) && datos.catalogo.length) examenesCatalogo = datos.catalogo;
+            persistirDatos();
+            cargarOrdenes();
+            renderizarTablaCatalogo();
+            actualizarTotalesCaja();
+            alert("Respaldo restaurado correctamente.");
+        } catch (error) {
+            alert("El archivo no se pudo leer como respaldo válido.");
+        }
+    };
+    lector.readAsText(archivo);
+}
+
+// ==========================================
 // INICIALIZACIÓN Y NAVEGACIÓN (BOTONES DEL SIDEBAR)
 // ==========================================
 document.addEventListener("DOMContentLoaded", () => {
+    cargarDatosGuardados();
+    ["logo.png", "firma-biologa.png"].forEach(src => {
+        const imagen = new Image();
+        imagen.src = src;
+    });
     actualizarFechaActual();
     renderizarTablaCatalogo();
+    cargarOrdenes();
     actualizarTotalesCaja();
 });
 
@@ -1333,6 +1407,7 @@ function guardarOrdenGenerarTicket() {
 
     actualizarTotalesCaja();
     cargarOrdenes();
+    persistirDatos();
 
     // Limpiar formulario
     document.getElementById("form-paciente").reset();
@@ -1487,6 +1562,7 @@ function guardarExamenCatalogo() {
     }
 
     renderizarTablaCatalogo();
+    persistirDatos();
     alert("Examen guardado en el catálogo correctamente.");
     prepararNuevoExamen();
 }
@@ -1756,7 +1832,12 @@ function imprimirTicket() {
     if (modalEl && window.bootstrap) {
         bootstrap.Modal.getInstance(modalEl)?.hide();
     }
-    imprimirZona();
+    const zona = document.getElementById("zona-impresion");
+    if (zona) {
+        esperarImagenes(zona).then(() => imprimirZona());
+    } else {
+        imprimirZona();
+    }
 }
 
 function imprimirZona() {
@@ -1810,6 +1891,7 @@ function guardarResultados(nroOrden, silencioso = false) {
     });
     orden.estado = "Resultados listos";
     cargarOrdenes();
+    persistirDatos();
 
     if (!silencioso) {
         alert(`Resultados guardados correctamente para la orden ${nroOrden}.`);
@@ -1848,11 +1930,11 @@ function construirInformeHTML(orden) {
                 </tr>
                 <thead>
                     <tr>
-                        <th style="width:34%">Indicador</th>
-                        <th style="width:18%">Resultado</th>
-                        <th style="width:12%">Unidad</th>
-                        <th style="width:18%">V. Mínimo</th>
-                        <th style="width:18%">V. Máximo</th>
+                        <th style="width:36%">Indicador</th>
+                        <th class="th-centro" style="width:16%">Resultado</th>
+                        <th class="th-centro" style="width:12%">Unidad</th>
+                        <th class="th-centro" style="width:18%">V. Mínimo</th>
+                        <th class="th-centro" style="width:18%">V. Máximo</th>
                     </tr>
                 </thead>
                 <tbody>${filas}</tbody>
@@ -1872,40 +1954,21 @@ function construirInformeHTML(orden) {
 
         <div class="informe-titulo">INFORME DE RESULTADOS DE LABORATORIO</div>
 
-        <table class="informe-datos">
-            <tr>
-                <td class="td-rotulo">PACIENTE</td>
-                <td colspan="3">${escapeHTML(orden.nombre)}</td>
-            </tr>
-            <tr>
-                <td class="td-rotulo">DNI</td>
-                <td>${escapeHTML(orden.dni)}</td>
-                <td class="td-rotulo">EDAD</td>
-                <td>${escapeHTML(orden.edad || "")}</td>
-            </tr>
-            <tr>
-                <td class="td-rotulo">SEXO</td>
-                <td>${escapeHTML(orden.sexo || "")}</td>
-                <td class="td-rotulo">MÉDICO</td>
-                <td>${escapeHTML(orden.doctor || "Particular")}</td>
-            </tr>
-            <tr>
-                <td class="td-rotulo">N° ORDEN</td>
-                <td>${escapeHTML(orden.nroOrden)}</td>
-                <td class="td-rotulo">TOMA DE MUESTRA</td>
-                <td>${escapeHTML(orden.fechaHora || "")}</td>
-            </tr>
-            <tr>
-                <td class="td-rotulo">FECHA DE INFORME</td>
-                <td>${fechaEmision} ${horaEmision}</td>
-                <td class="td-rotulo">TOTAL EXÁMENES</td>
-                <td>${(orden.resultados || []).length}</td>
-            </tr>
-        </table>
+        <div class="informe-datos">
+            <div class="dato dato-ancho"><span class="dato-rotulo">Paciente</span><span class="dato-valor">${escapeHTML(orden.nombre)}</span></div>
+            <div class="dato"><span class="dato-rotulo">DNI</span><span class="dato-valor">${escapeHTML(orden.dni)}</span></div>
+            <div class="dato"><span class="dato-rotulo">Edad</span><span class="dato-valor">${escapeHTML(orden.edad || "—")}</span></div>
+            <div class="dato"><span class="dato-rotulo">Sexo</span><span class="dato-valor">${escapeHTML(orden.sexo || "—")}</span></div>
+            <div class="dato"><span class="dato-rotulo">Médico solicitante</span><span class="dato-valor">${escapeHTML(orden.doctor || "Particular")}</span></div>
+            <div class="dato"><span class="dato-rotulo">N° de orden</span><span class="dato-valor">${escapeHTML(orden.nroOrden)}</span></div>
+            <div class="dato"><span class="dato-rotulo">Toma de muestra</span><span class="dato-valor">${escapeHTML(orden.fechaHora || "")}</span></div>
+            <div class="dato"><span class="dato-rotulo">Fecha de informe</span><span class="dato-valor">${fechaEmision} ${horaEmision}</span></div>
+            <div class="dato"><span class="dato-rotulo">Exámenes incluidos</span><span class="dato-valor">${(orden.resultados || []).length}</span></div>
+        </div>
 
         ${tablas}
 
-        <div class="informe-nota"><strong>Nota:</strong> ${nota}</div>
+        <div class="informe-nota">Nota: ${nota}</div>
 
         <div class="informe-firma">
             <img src="firma-biologa.png" alt="Firma" class="informe-firma-img" onerror="this.style.display='none'">
@@ -1937,7 +2000,18 @@ function imprimirInforme(nroOrden) {
     const zona = document.getElementById("zona-impresion");
     if (!zona) return;
     zona.innerHTML = `<div class="informe-print">${construirInformeHTML(orden)}</div>`;
-    imprimirZona();
+    esperarImagenes(zona).then(() => imprimirZona());
+}
+
+function esperarImagenes(contenedor) {
+    const imagenes = Array.from(contenedor.querySelectorAll("img"));
+    return Promise.all(imagenes.map(img => {
+        if (img.complete && img.naturalWidth > 0) return Promise.resolve();
+        return new Promise(resolver => {
+            img.addEventListener("load", resolver, { once: true });
+            img.addEventListener("error", resolver, { once: true });
+        });
+    }));
 }
 
 function descargarInformePDF(nroOrden) {
