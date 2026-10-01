@@ -2081,3 +2081,209 @@ function descargarInformePDF(nroOrden) {
         contenedor.remove();
     });
 }
+// ==========================================
+// 1. INTEGRACIÓN CON API RENIEC (Búsqueda por DNI)
+// ==========================================
+async function consultarReniec() {
+    const dni = document.getElementById('pac-dni').value.trim();
+    if (dni.length !== 8) {
+        alert("Por favor ingrese un DNI válido de 8 dígitos.");
+        return;
+    }
+    
+    // Simulación de consulta o integración con tu API de RENIEC preferida
+    // Puedes reemplazar esta URL con tu proveedor de API (ej:apis.net.pe / decolecta, etc.)
+    try {
+        // Ejemplo genérico fetch a API externa o backend
+        document.getElementById('pac-nombre').value = "BUSCANDO DATOS...";
+        
+        // Simulación de respuesta exitosa (Reemplaza con tu token/API real)
+        setTimeout(() => {
+            // Datos de prueba simulados, en producción conecta tu API key
+            document.getElementById('pac-nombre').value = "PATRICIA DEL PILAR ZAPATA RAMIREZ";
+            document.getElementById('pac-fnac').value = "1992-05-14";
+            calcularEdad();
+        }, 600);
+        
+    } catch (e) {
+        console.error("Error al consultar RENIEC", e);
+        document.getElementById('pac-nombre').value = "";
+        alert("No se pudo conectar con el servicio de RENIEC.");
+    }
+}
+
+// ==========================================
+// 2. FILTRO DE ÓRDENES POR FECHA Y TEXTO
+// ==========================================
+function cargarOrdenes() {
+    const tbody = document.getElementById('lista-ordenes-body');
+    const filtroTexto = document.getElementById('filtro-texto-orden').value.toLowerCase();
+    const filtroFecha = document.getElementById('filtro-fecha-orden').value; // Formato YYYY-MM-DD
+    
+    let ordenes = JSON.parse(localStorage.getItem('vital_health_ordenes') || '[]');
+    
+    // Filtrar
+    let ordenesFiltradas = ordenes.filter(ord => {
+        let coincideTexto = !filtroTexto || 
+            ord.dni.toLowerCase().includes(filtroTexto) || 
+            ord.paciente.toLowerCase().includes(filtroTexto) ||
+            ord.id.toString().includes(filtroTexto);
+            
+        let coincideFecha = true;
+        if (filtroFecha) {
+            let fechaOrd = ord.fecha.split(' ')[0]; // Asumiendo formato YYYY-MM-DD o similar en la orden
+            coincideFecha = fechaOrd.includes(filtroFecha) || ord.fecha.includes(filtroFecha);
+        }
+        return coincideTexto && coincideFecha;
+    });
+
+    if (ordenesFiltradas.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" class="text-center text-muted py-4">No se encontraron órdenes registradas.</td></tr>`;
+        return;
+    }
+
+    tbody.innerHTML = ordenesFiltradas.map(ord => `
+        <tr>
+            <td class="fw-bold text-primary">#${ord.id}</td>
+            <td>${ord.fecha}</td>
+            <td>${ord.dni}</td>
+            <td class="fw-semibold">${ord.paciente}</td>
+            <td><span class="badge bg-${ord.estado === 'Completado' ? 'success' : 'warning'}">${ord.estado || 'Pendiente'}</span></td>
+            <td class="text-end px-3">
+                <button class="btn btn-sm btn-outline-primary me-1" onclick="abrirResultados(${ord.id})" title="Resultados"><i class="bi bi-file-earmark-medical"></i></button>
+                <button class="btn btn-sm btn-outline-danger" onclick="eliminarOrden(${ord.id})" title="Eliminar orden"><i class="bi bi-trash"></i></button>
+            </td>
+        </tr>
+    `).join('');
+}
+
+// ==========================================
+// 3. ELIMINAR ÓRDENES REGISTRADAS
+// ==========================================
+function eliminarOrden(idOrden) {
+    if (!confirm(`¿Está seguro de eliminar la orden #${idOrden}? Esta acción no se puede deshacer.`)) return;
+    
+    let ordenes = JSON.parse(localStorage.getItem('vital_health_ordenes') || '[]');
+    ordenes = ordenes.filter(o => o.id !== idOrden);
+    localStorage.setItem('vital_health_ordenes', JSON.stringify(ordenes));
+    
+    cargarOrdenes();
+    alert("Orden eliminada correctamente.");
+}
+
+// ==========================================
+// 4. ELIMINAR EXÁMENES DEL CATÁLOGO
+// ==========================================
+function eliminarExamenCatalogoActual() {
+    const codigoOriginal = document.getElementById('cat-id-original').value;
+    if (!codigoOriginal) {
+        alert("Seleccione un examen del catálogo para eliminar.");
+        return;
+    }
+    
+    if (!confirm(`¿Desea eliminar este examen del catálogo oficial?`)) return;
+    
+    let catalogo = JSON.parse(localStorage.getItem('vital_health_catalogo') || JSON.stringify(examenesCatalogo));
+    catalogo = catalogo.filter(ex => ex.codigo !== codigoOriginal);
+    
+    localStorage.setItem('vital_health_catalogo', JSON.stringify(catalogo));
+    examenesCatalogo = catalogo;
+    
+    renderizarTablaCatalogo();
+    prepararNuevoExamen();
+    alert("Examen eliminado del catálogo.");
+}
+
+// ==========================================
+// 5. COTIZACIONES RÁPIDAS
+// ==========================================
+let examenesCotizacion = [];
+
+function filtrarExamenesCotizacion(query) {
+    const contenedor = document.getElementById('sugerencias-cotizacion');
+    if (!query || query.length < 2) {
+        contenedor.innerHTML = '';
+        return;
+    }
+    const q = query.toLowerCase();
+    const catalogo = JSON.parse(localStorage.getItem('vital_health_catalogo') || JSON.stringify(examenesCatalogo));
+    const filtrados = catalogo.filter(ex => ex.nombre.toLowerCase().includes(q) || ex.codigo.toLowerCase().includes(q)).slice(0, 10);
+    
+    contenedor.innerHTML = filtrados.map(ex => `
+        <button type="button" class="list-group-item list-group-item-action" onclick='agregarExamenCotizacion(${JSON.stringify(ex).replace(/'/g, "&#39;")})'>
+            <div class="d-flex justify-content-between">
+                <span class="fw-semibold">${ex.nombre}</span>
+                <span class="text-primary">S/ ${parseFloat(ex.precio || 0).toFixed(2)}</span>
+            </div>
+        </button>
+    `).join('');
+}
+
+function agregarExamenCotizacion(ex) {
+    let existente = examenesCotizacion.find(item => item.codigo === ex.codigo);
+    if (existente) {
+        existente.cantidad += 1;
+    } else {
+        examenesCotizacion.push({ ...ex, cantidad: 1 });
+    }
+    document.getElementById('busqueda-cotizacion').value = '';
+    document.getElementById('sugerencias-cotizacion').innerHTML = '';
+    renderizarTablaCotizacion();
+}
+
+function renderizarTablaCotizacion() {
+    const tbody = document.querySelector('#tabla-cotizacion tbody');
+    const emptyRow = document.getElementById('empty-row-cot');
+    
+    if (examenesCotizacion.length === 0) {
+        tbody.innerHTML = `<tr id="empty-row-cot"><td colspan="6" class="text-center text-muted py-4">No hay exámenes en la cotización rápida.</td></tr>`;
+        document.getElementById('total-cotizacion').innerText = '0.00';
+        return;
+    }
+    
+    let total = 0;
+    tbody.innerHTML = examenesCotizacion.map((item, index) => {
+        let importe = item.cantidad * (parseFloat(item.precio) || 0);
+        total += importe;
+        return `
+            <tr>
+                <td>${item.codigo}</td>
+                <td class="fw-semibold">${item.nombre}</td>
+                <td><input type="number" class="form-control form-control-sm" style="width:70px" value="${item.cantidad}" min="1" onchange="cambiarCantidadCotizacion(${index}, this.value)"></td>
+                <td>S/ ${parseFloat(item.precio || 0).toFixed(2)}</td>
+                <td class="fw-bold text-primary">S/ ${importe.toFixed(2)}</td>
+                <td class="text-center"><button class="btn btn-sm btn-outline-danger" onclick="eliminarItemCotizacion(${index})"><i class="bi bi-trash"></i></button></td>
+            </tr>
+        `;
+    }).join('');
+    
+    document.getElementById('total-cotizacion').innerText = total.toFixed(2);
+}
+
+function cambiarCantidadCotizacion(index, val) {
+    let cant = parseInt(val) || 1;
+    examenesCotizacion[index].cantidad = cant;
+    renderizarTablaCotizacion();
+}
+
+function eliminarItemCotizacion(index) {
+    examenesCotizacion.splice(index, 1);
+    renderizarTablaCotizacion();
+}
+
+function limpiarCotizacion() {
+    examenesCotizacion = [];
+    renderizarTablaCotizacion();
+}
+
+function pasarCotizacionARecepcion() {
+    if (examenesCotizacion.length === 0) {
+        alert("Agregue exámenes a la cotización primero.");
+        return;
+    }
+    // Pasamos los exámenes seleccionados al array de recepción principal
+    examenesSeleccionados = [...examenesCotizacion];
+    renderizarTablaExamenes();
+    showSection('recepcion');
+    alert("Exámenes de la cotización cargados en Recepción.");
+}
