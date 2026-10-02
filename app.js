@@ -2334,3 +2334,27 @@ function actualizarVistaCotizacion() {
     contenedorTotal.textContent = `S/ ${subtotalGeneral.toFixed(2)}`;
   }
 }
+function showSection(sectionId) {
+    // 1. Ocultar todas las secciones que tengan la clase 'section-content'
+    const secciones = document.querySelectorAll('.section-content');
+    secciones.forEach(sec => {
+        sec.style.display = 'none';
+        sec.classList.add('d-none');
+    });
+
+    // 2. Mostrar la sección seleccionada
+    const seccionActiva = document.getElementById('sec-' + sectionId);
+    if (seccionActiva) {
+        seccionActiva.style.display = 'block';
+        seccionActiva.classList.remove('d-none');
+    }
+
+    // 3. Actualizar la clase 'active' en los enlaces del menú lateral
+    const navLinks = document.querySelectorAll('.sidebar .nav-link');
+    navLinks.forEach(link => {
+        link.classList.remove('active');
+    });
+    
+    // Encontrar el enlace presionado y activarlo
+    event.currentTarget.classList.add('active');
+}
