@@ -1494,7 +1494,7 @@ function abrirResultados(nroOrden) {
     if (!editor) return;
 
     let html = `
-        <div class="alert alert-secondary d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <div class="alert alert-secondary d-flex justify-content-between align-items-center flex-wrap gap-2 small py-2">
             <div><strong>Orden:</strong> ${escapeHTML(orden.nroOrden)} | <strong>Paciente:</strong> ${escapeHTML(orden.nombre)} (${escapeHTML(orden.dni)})</div>
             <div>
                 <button class="btn btn-success btn-sm" onclick="guardarResultados('${orden.nroOrden}')"><i class="bi bi-save me-1"></i> Guardar Resultados</button>
