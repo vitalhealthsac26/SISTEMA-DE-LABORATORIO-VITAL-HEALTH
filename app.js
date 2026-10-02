@@ -1983,6 +1983,7 @@ function construirTicketHTML(orden) {
     const fechaHora = String(orden.fechaHora || "").split(", ");
     const fecha = fechaHora[0] || "";
     const hora = fechaHora[1] || "";
+  let datoCelular = orden.celular ? `<p><strong>Celular:</strong> ${orden.celular}</p>` : '';
 
     let lineas = "";
     orden.examenes.forEach(item => {
