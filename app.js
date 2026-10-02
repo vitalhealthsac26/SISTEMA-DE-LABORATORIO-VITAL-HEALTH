@@ -2248,3 +2248,56 @@ function descargarInformePDF(nroOrden) {
         contenedor.remove();
     });
 }
+// ==========================================
+// LÓGICA DE COTIZACIONES
+// ==========================================
+let listaCotizacion = [];
+
+// Función para agregar un examen al carrito de cotización
+function agregarACotizacion(codigoExamen) {
+  const examen = examenesCatalogo.find(e => e.codigo === codigoExamen);
+  if (examen) {
+    // Evitar duplicados o incrementar cantidad si lo deseas
+    const existe = listaCotizacion.find(e => e.codigo === codigoExamen);
+    if (!existe) {
+      listaCotizacion.push({ ...examen, cantidad: 1 });
+      actualizarVistaCotizacion();
+    }
+  }
+}
+
+// Función para eliminar un ítem de la cotización
+function eliminarDeCotizacion(codigoExamen) {
+  listaCotizacion = listaCotizacion.filter(e => e.codigo !== codigoExamen);
+  actualizarVistaCotizacion();
+}
+
+// Función para renderizar la sección de cotizaciones en el HTML
+function actualizarVistaCotizacion() {
+  const contenedorTabla = document.getElementById('tabla-cotizacion-body');
+  const contenedorTotal = document.getElementById('total-cotizacion');
+  
+  if (!contenedorTabla) return;
+
+  contenedorTabla.innerHTML = '';
+  let subtotalGeneral = 0;
+
+  listaCotizacion.forEach(item => {
+    let totalItem = item.precio * item.cantidad;
+    subtotalGeneral += totalItem;
+
+    const fila = document.createElement('tr');
+    fila.innerHTML = `
+      <td>${item.nombre}</td>
+      <td>S/ ${item.precio.toFixed(2)}</td>
+      <td>${item.cantidad}</td>
+      <td>S/ ${totalItem.toFixed(2)}</td>
+      <td><button onclick="eliminarDeCotizacion('${item.codigo}')">Eliminar</button></td>
+    `;
+    contenedorTabla.appendChild(fila);
+  });
+
+  if (contenedorTotal) {
+    contenedorTotal.textContent = `S/ ${subtotalGeneral.toFixed(2)}`;
+  }
+}
