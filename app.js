@@ -1554,6 +1554,8 @@ function abrirResultados(nroOrden) {
 
     orden.examenes.forEach((ex, exIdx) => {
         const guardado = (orden.resultados || []).find(r => r.codigo === ex.codigo);
+        
+        // AQUÍ SE APLICA LA PLANTILLA SEGÚN EL NOMBRE DEL EXAMEN
         const plantilla = obtenerPlantillaIndicadores(ex.nombre);
         const indicadores = plantilla || [{
             nombre: "Resultado del análisis",
@@ -1565,7 +1567,7 @@ function abrirResultados(nroOrden) {
 
         let filas = "";
         indicadores.forEach((ind, indIdx) => {
-            const previo = guardado && guardado.indicadores[indIdx] ? guardado.indicadores[indIdx] : null;
+            const previo = guardado && guardado.indicadores && guardado.indicadores[indIdx] ? guardado.indicadores[indIdx] : null;
             const referencia = ind.referencia || formatoRango(ind.refMin, ind.refMax);
             filas += `
                 <div class="row g-2 mb-2 align-items-center" data-ex="${exIdx}" data-ind="${indIdx}" data-nombre="${escapeHTML(ind.nombre)}" data-refmin="${escapeHTML(ind.refMin ?? "")}" data-refmax="${escapeHTML(ind.refMax ?? "")}">
