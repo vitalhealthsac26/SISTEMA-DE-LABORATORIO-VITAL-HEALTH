@@ -192,7 +192,68 @@
                         </div>
                     </div>
                 </section>
-               
+
+                <section id="sec-cotizacion" class="section-content" style="display: none;">
+    <div class="container-fluid px-4 py-3">
+        <h2 class="mb-4 fw-bold text-primary">
+            <i class="bi bi-calculator me-2"></i>Módulo de Cotización
+        </h2>
+        
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-white py-3 border-bottom">
+                <h5 class="card-title fw-bold text-dark mb-0">Cotizar Exámenes Médicos</h5>
+            </div>
+            <div class="card-body">
+                <div class="row g-3 mb-3">
+                    <div class="col-12 col-md-8 position-relative">
+                        <label class="form-label fw-semibold">Buscar Examen del Catálogo</label>
+                        <input type="text" id="busqueda-examen-cotizacion" class="form-control" placeholder="Escriba el nombre o código..." oninput="filtrarExamenesCotizacion(this.value)">
+                        <div id="sugerencias-examenes-cotizacion" class="list-group position-absolute w-100 shadow z-3" style="max-height: 250px; overflow-y: auto;"></div>
+                    </div>
+                    <div class="col-12 col-md-4">
+                        <label class="form-label fw-semibold">Descuento / Convenio</label>
+                        <select id="tipo-convenio-cotizacion" class="form-select">
+                            <option value="Particular">Particular (Sin Descuento)</option>
+                            <option value="Convenio">Convenio / Empresa</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle" id="tabla-cotizacion-independiente">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Código</th>
+                                <th>Examen / Servicio</th>
+                                <th>Cant.</th>
+                                <th>Precio Unit. (S/)</th>
+                                <th>Importe (S/)</th>
+                                <th class="text-center">Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr id="empty-row-cotizacion">
+                                <td colspan="6" class="text-center text-muted py-4">No hay exámenes agregados para cotizar.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top">
+                    <div class="h4 mb-0 fw-bold text-dark">Total Cotización: <span class="text-primary">S/ <span id="total-cotizacion">0.00</span></span></div>
+                    <div>
+                        <button class="btn btn-outline-secondary me-2 px-4 fw-semibold" type="button" onclick="imprimirCotizacion()">
+                            <i class="bi bi-printer me-2"></i>Imprimir Cotización
+                        </button>
+                        <button class="btn btn-primary px-4 fw-semibold" type="button" onclick="pasarCotizacionARecepcion()">
+                            <i class="bi bi-arrow-right-circle me-2"></i>Pasar a Admisión
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
                 <!-- SECCIÓN ÓRDENES -->
                 <section id="sec-ordenes" class="section-content d-none">
                     <div class="card shadow-sm border-0">
