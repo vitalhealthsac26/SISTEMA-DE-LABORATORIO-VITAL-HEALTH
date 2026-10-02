@@ -18,7 +18,7 @@ const BASE_VALORES_REFERENCIALES = {
     { id: 'hdl', nombre: 'Colesterol HDL', unidad: 'mg/dL', refMin: 40, refMax: 100, referencia: '> 40 mg/dL' },
     { id: 'ldl', nombre: 'Colesterol LDL', unidad: 'mg/dL', refMin: 0, refMax: 100, referencia: '< 100 mg/dL' }
   ],
-  "PARASITOLOGICO SERIADO -3 MUESTRAS": [
+  "PARASITOLOGICO SERIADO 3 MUESTRAS": [
     { id: 'color', nombre: 'Color', referencia: '-' },
     { id: 'consistencia', nombre: 'Consistencia', referencia: '-' },
     { id: 'sangre_macro', nombre: 'Sangre Macro', referencia: '-' },
@@ -829,7 +829,7 @@ let examenesCatalogo = [
 { codigo: "836", nombre: "PAPP A - PROTEINA PLASMATICA PLACENTARIA (ASOCIADA AL EMBARAZO)", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 180.00 },
 { codigo: "837", nombre: "PARACOCCIDIOIDES BRASILIENSIS, ANTICUERPOS", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 204.00 },
 { codigo: "839", nombre: "PARASITOLOGICO ESPECIAL -3 METODOS", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 30.00 },
-{ codigo: "840", nombre: "PARASITOLOGICO SERIADO -3 MUESTRAS", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 30.00 },
+{ codigo: "840", nombre: "PARASITOLOGICO SERIADO 3 MUESTRAS", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 30.00 },
 { codigo: "842", nombre: "PARASITOLOGICO SIMPLE X 1 MUESTRA", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 10.00 },
 { codigo: "844", nombre: "PARATOHORMONA INTACTA (PTH-INTACTA)", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 60.00 },
 { codigo: "845", nombre: "PAROXETINA (SEROXAT)", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 891.00 },
