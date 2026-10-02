@@ -1448,9 +1448,12 @@ function guardarOrdenGenerarTicket() {
     window.nubeGuardarOrden?.(nuevaOrden);
     window.nubeGuardarMovimiento?.(movimiento);
 
-    // Limpiar formulario
+    // Limpiar formulario y vaciar campos de texto específicos por seguridad
     document.getElementById("form-paciente").reset();
     document.getElementById("pac-edad").value = "";
+    if (document.getElementById("pac-celular")) document.getElementById("pac-celular").value = ""; // <--- ¡Añadido para que se limpie!
+    if (document.getElementById("pac-fnacimiento")) document.getElementById("pac-fnacimiento").value = ""; // <--- ¡Añadido!
+    
     examenesSeleccionados = [];
     renderizarTablaSeleccionados();
     showSection('ordenes');
