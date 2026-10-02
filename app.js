@@ -1269,16 +1269,31 @@ function buscarPaciente() {
 }
 
 function calcularEdad() {
-    const fnacVal = document.getElementById("pac-fnac").value;
-    if (!fnacVal) return;
-    const fnac = new Date(fnacVal);
+    const fechaNacimientoInput = document.getElementById("pac-fnac").value;
+    const campoEdad = document.getElementById("pac-edad");
+
+    if (!fechaNacimientoInput) {
+        campoEdad.value = "";
+        return;
+    }
+
     const hoy = new Date();
-    let edad = hoy.getFullYear() - fnac.getFullYear();
-    const m = hoy.getMonth() - fnac.getMonth();
-    if (m < 0 || (m === 0 && hoy.getDate() < fnac.getDate())) {
+    const cumpleanos = new Date(fechaNacimientoInput);
+    
+    let edad = hoy.getFullYear() - cumpleanos.getFullYear();
+    const mes = hoy.getMonth() - cumpleanos.getMonth();
+
+    // Validar si aún no cumple años este año para restarle uno
+    if (mes < 0 || (mes === 0 && hoy.getDate() < cumpleanos.getDate())) {
         edad--;
     }
-    document.getElementById("pac-edad").value = `${edad} AÑOS`;
+
+    // Mostrar el resultado formateado en el input de edad
+    if (edad >= 0) {
+        campoEdad.value = edad + (edad === 1 ? " AÑO" : " AÑOS");
+    } else {
+        campoEdad.value = "0 AÑOS";
+    }
 }
 
 // ==========================================
