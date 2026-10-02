@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Centro Médico Vital Health - LIS System</title>
+    <meta name="description" content="Sistema integral de gestión de laboratorio clínico con admisión de pacientes, cotización con datos de clientes, emisión de órdenes, registro de resultados con firma proporcional e impresión de informes y tickets." />
+    <meta property="og:title" content="Centro Médico Vital Health - LIS System" />
+    <meta property="og:description" content="Sistema integral de gestión de laboratorio clínico con admisión de pacientes, cotización con datos de clientes, emisión de órdenes, registro de resultados con firma proporcional e impresión de informes y tickets." />
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Bootstrap Icons -->
@@ -19,7 +22,7 @@
         <!-- Sidebar de navegación -->
         <aside id="sidebar" class="sidebar">
             <div class="sidebar-header p-3 text-center border-bottom border-secondary border-opacity-25">
-                <img src="logo.png" alt="Centro Médico Vital Health" class="sidebar-logo" onerror="this.style.display='none'">
+                <img src="logo.png" alt="Centro Médico Vital Health" class="sidebar-logo" onerror="this.src='logo.svg'">
                 <h5 class="fw-bold mb-0 text-white fs-6">Vital Health</h5>
                 <small class="text-white-50" style="font-size: 0.75rem;">Laboratorio Clínico</small>
             </div>
@@ -30,12 +33,11 @@
                         <i class="bi bi-person-plus-fill me-2"></i> Recepción / Admisión
                     </a>
                 </li>
-                <!-- NUEVA OPCIÓN: Cotización -->
-    <li class="nav-item">
-        <a class="nav-link" href="#" onclick="showSection('cotizacion'); return false;">
-            <i class="bi bi-calculator me-2"></i> Cotización
-        </a>
-    </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#" onclick="showSection('cotizacion'); return false;">
+                        <i class="bi bi-calculator me-2"></i> Cotización
+                    </a>
+                </li>
                 <li class="nav-item">
                     <a class="nav-link" href="#" onclick="showSection('ordenes'); return false;">
                         <i class="bi bi-receipt me-2"></i> Órdenes de Trabajo
@@ -71,15 +73,22 @@
 
         <!-- Main Content Wrapper -->
         <main id="main-content" class="content-area">
-            <!-- Topbar Navigation -->
+            <!-- Topbar Navigation con botón Regresar y Breadcrumb -->
             <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom px-3 mb-4 shadow-sm rounded-3">
-                <div class="container-fluid p-0">
+                <div class="container-fluid p-0 d-flex align-items-center flex-wrap gap-2">
                     <button class="btn btn-outline-primary d-md-none me-2" type="button" onclick="toggleSidebar()">
                         <i class="bi bi-list"></i>
                     </button>
-                    <span class="navbar-brand fw-bold text-primary m-0 fs-5">
+                    
+                    <!-- Botón de navegación Regresar -->
+                    <button id="btn-regresar-topbar" class="btn btn-outline-secondary btn-sm fw-semibold me-2 d-none" onclick="regresarSeccion()">
+                        <i class="bi bi-arrow-left me-1"></i>Regresar
+                    </button>
+
+                    <span class="navbar-brand fw-bold text-primary m-0 fs-5 d-flex align-items-center">
                         <i class="bi bi-hospital me-2"></i>Sistema de Gestión de Laboratorio Clínico
                     </span>
+
                     <span class="ms-auto text-secondary small fw-semibold" id="current-date"></span>
                 </div>
             </nav>
@@ -91,10 +100,13 @@
                     <div class="row g-4">
                         <div class="col-12">
                             <div class="card shadow-sm border-0">
-                                <div class="card-header bg-white py-3 border-bottom">
+                                <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center flex-wrap gap-2">
                                     <h5 class="card-title fw-bold text-primary mb-0">
-                                        <i class="bi bi-person-vcard me-2"></i>Ficha del Paciente
+                                        <i class="bi bi-person-vcard me-2"></i>Ficha del Paciente (Admisión)
                                     </h5>
+                                    <button class="btn btn-sm btn-outline-primary" type="button" onclick="showSection('cotizacion')">
+                                        <i class="bi bi-calculator me-1"></i>Ir a Cotización
+                                    </button>
                                 </div>
                                 <div class="card-body">
                                     <form id="form-paciente" onsubmit="event.preventDefault();">
@@ -149,7 +161,7 @@
                                         <div class="col-12 col-md-8 position-relative">
                                             <label class="form-label fw-semibold">Buscar Examen del Catálogo</label>
                                             <input type="text" id="busqueda-examen" class="form-control" placeholder="Escriba el nombre o código..." oninput="filtrarExamenes(this.value)">
-                                            <div id="sugerencias-examenes" class="list-group position-absolute w-100 shadow z-3" style="max-height: 250px; overflow-y: auto;"></div>
+                                            <div id="sugerencias-examenes" class="list-group position-absolute w-100 shadow z-3" style="max-height: 250px; overflow-y: auto; display:none;"></div>
                                         </div>
                                         <div class="col-12 col-md-4">
                                             <label class="form-label fw-semibold">Método de Pago</label>
@@ -181,7 +193,7 @@
                                         </table>
                                     </div>
 
-                                    <div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top">
+                                    <div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top flex-wrap gap-2">
                                         <div class="h4 mb-0 fw-bold text-dark">Total: <span class="text-primary">S/ <span id="total-cobrar">0.00</span></span></div>
                                         <button class="btn btn-success btn-lg px-4 fw-semibold" type="button" onclick="guardarOrdenGenerarTicket()">
                                             <i class="bi bi-printer me-2"></i>Registrar e Imprimir Ticket
@@ -193,72 +205,171 @@
                     </div>
                 </section>
 
+                <!-- SECCIÓN COTIZACIÓN (CON DATOS DE CLIENTE COMPLETOS) -->
                 <section id="sec-cotizacion" class="section-content" style="display: none;">
-    <div class="container-fluid px-4 py-3">
-        <h2 class="mb-4 fw-bold text-primary">
-            <i class="bi bi-calculator me-2"></i>Módulo de Cotización
-        </h2>
-        
-        <div class="card shadow-sm border-0">
-            <div class="card-header bg-white py-3 border-bottom">
-                <h5 class="card-title fw-bold text-dark mb-0">Cotizar Exámenes Médicos</h5>
-            </div>
-            <div class="card-body">
-                <div class="row g-3 mb-3">
-                    <div class="col-12 col-md-8 position-relative">
-                        <label class="form-label fw-semibold">Buscar Examen del Catálogo</label>
-                        <input type="text" id="busqueda-examen-cotizacion" class="form-control" placeholder="Escriba el nombre o código..." oninput="filtrarExamenesCotizacion(this.value)">
-                        <div id="sugerencias-examenes-cotizacion" class="list-group position-absolute w-100 shadow z-3" style="max-height: 250px; overflow-y: auto;"></div>
-                    </div>
-                    <div class="col-12 col-md-4">
-                        <label class="form-label fw-semibold">Descuento / Convenio</label>
-                        <select id="tipo-convenio-cotizacion" class="form-select">
-                            <option value="Particular">Particular (Sin Descuento)</option>
-                            <option value="Convenio">Convenio / Empresa</option>
-                        </select>
-                    </div>
-                </div>
+                    <div class="row g-4">
+                        <div class="col-12">
+                            <div class="card shadow-sm border-0">
+                                <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center flex-wrap gap-2">
+                                    <h5 class="card-title fw-bold text-primary mb-0">
+                                        <i class="bi bi-calculator me-2"></i>Módulo de Cotización de Exámenes Médicos
+                                    </h5>
+                                    <div class="d-flex gap-2">
+                                        <button class="btn btn-sm btn-outline-secondary" onclick="regresarSeccion()">
+                                            <i class="bi bi-arrow-left me-1"></i>Regresar
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-danger" onclick="limpiarCotizacion()">
+                                            <i class="bi bi-arrow-counterclockwise me-1"></i>Limpiar
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="card-body">
+                                    <!-- Datos del Cliente para la Cotización -->
+                                    <div class="row g-3 mb-4">
+                                        <div class="col-12">
+                                            <span class="text-muted small fw-bold text-uppercase">1. Datos del Cliente / Paciente</span>
+                                        </div>
+                                        <div class="col-12 col-md-3">
+                                            <label class="form-label fw-semibold">DNI / Documento</label>
+                                            <div class="input-group">
+                                                <input type="text" id="cot-pac-dni" class="form-control" placeholder="8 dígitos" maxlength="12">
+                                                <button class="btn btn-outline-primary" type="button" onclick="buscarPacienteCotizacion()" title="Buscar datos">
+                                                    <i class="bi bi-search"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div class="col-12 col-md-6">
+                                            <label class="form-label fw-semibold">Nombres y Apellidos</label>
+                                            <input type="text" id="cot-pac-nombre" class="form-control" placeholder="Nombre completo del cliente">
+                                        </div>
+                                        <div class="col-12 col-md-3">
+                                            <label class="form-label fw-semibold">Fecha de Nacimiento</label>
+                                            <input type="date" id="cot-pac-fnac" class="form-control" onchange="calcularEdadCotizacion()">
+                                        </div>
+                                        <div class="col-12 col-md-3">
+                                            <label class="form-label fw-semibold">Edad</label>
+                                            <input type="text" id="cot-pac-edad" class="form-control bg-light" placeholder="0 AÑOS">
+                                        </div>
+                                        <div class="col-12 col-md-3">
+                                            <label class="form-label fw-semibold">Sexo</label>
+                                            <select id="cot-pac-sexo" class="form-select">
+                                                <option value="MASCULINO">MASCULINO</option>
+                                                <option value="FEMENINO">FEMENINO</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-12 col-md-3">
+                                            <label class="form-label fw-semibold">Médico Solicitante</label>
+                                            <input type="text" id="cot-pac-doctor" class="form-control" placeholder="Dr. / Particular">
+                                        </div>
+                                        <div class="col-12 col-md-3">
+                                            <label class="form-label fw-semibold">Descuento / Convenio</label>
+                                            <select id="tipo-convenio-cotizacion" class="form-select">
+                                                <option value="Particular (Sin Descuento)">Particular (Sin Descuento)</option>
+                                                <option value="Convenio / Empresa">Convenio / Empresa</option>
+                                                <option value="Campaña Preventiva">Campaña Preventiva</option>
+                                            </select>
+                                        </div>
+                                    </div>
 
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle" id="tabla-cotizacion-independiente">
-                        <thead class="table-light">
-                            <tr>
-                                <th>Código</th>
-                                <th>Examen / Servicio</th>
-                                <th>Cant.</th>
-                                <th>Precio Unit. (S/)</th>
-                                <th>Importe (S/)</th>
-                                <th class="text-center">Acción</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr id="empty-row-cotizacion">
-                                <td colspan="6" class="text-center text-muted py-4">No hay exámenes agregados para cotizar.</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
+                                    <hr class="my-3">
 
-                <div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top">
-                    <div class="h4 mb-0 fw-bold text-dark">Total Cotización: <span class="text-primary">S/ <span id="total-cotizacion">0.00</span></span></div>
-                    <div>
-                        <button class="btn btn-outline-secondary me-2 px-4 fw-semibold" type="button" onclick="imprimirCotizacion()">
-                            <i class="bi bi-printer me-2"></i>Imprimir Cotización
-                        </button>
-                        <button class="btn btn-primary px-4 fw-semibold" type="button" onclick="pasarCotizacionARecepcion()">
-                            <i class="bi bi-arrow-right-circle me-2"></i>Pasar a Admisión
-                        </button>
+                                    <!-- Búsqueda de Exámenes para Cotizar -->
+                                    <div class="row g-3 mb-3">
+                                        <div class="col-12">
+                                            <span class="text-muted small fw-bold text-uppercase">2. Búsqueda y Selección de Exámenes</span>
+                                        </div>
+                                        <div class="col-12 position-relative">
+                                            <label class="form-label fw-semibold">Buscar Examen del Catálogo</label>
+                                            <div class="input-group">
+                                                <span class="input-group-text bg-white"><i class="bi bi-search text-muted"></i></span>
+                                                <input type="text" id="busqueda-examen-cotizacion" class="form-control" placeholder="Escriba el nombre o código del examen a cotizar..." oninput="filtrarExamenesCotizacion(this.value)">
+                                            </div>
+                                            <div id="sugerencias-examenes-cotizacion" class="list-group position-absolute w-100 shadow z-3" style="max-height: 250px; overflow-y: auto; display:none;"></div>
+                                        </div>
+                                    </div>
+
+                                    <div class="table-responsive mb-3">
+                                        <table class="table table-hover align-middle" id="tabla-cotizacion-independiente">
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <th>Código</th>
+                                                    <th>Examen / Servicio</th>
+                                                    <th class="text-center" style="width: 100px;">Cant.</th>
+                                                    <th>Precio Unit. (S/)</th>
+                                                    <th>Importe (S/)</th>
+                                                    <th class="text-center">Acción</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr id="empty-row-cotizacion">
+                                                    <td colspan="6" class="text-center text-muted py-4">No hay exámenes agregados para cotizar.</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+                                    <div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top flex-wrap gap-3">
+                                        <div class="h4 mb-0 fw-bold text-dark">Total Cotización: <span class="text-primary">S/ <span id="total-cotizacion">0.00</span></span></div>
+                                        <div class="d-flex gap-2 flex-wrap">
+                                            <button class="btn btn-primary px-3 fw-semibold" type="button" onclick="guardarCotizacion()">
+                                                <i class="bi bi-save me-1"></i>Guardar Cotización
+                                            </button>
+                                            <button class="btn btn-outline-secondary px-3 fw-semibold" type="button" onclick="imprimirCotizacion()">
+                                                <i class="bi bi-printer me-1"></i>Imprimir Cotización
+                                            </button>
+                                            <button class="btn btn-success px-3 fw-semibold" type="button" onclick="pasarCotizacionARecepcion()">
+                                                <i class="bi bi-arrow-right-circle me-1"></i>Pasar a Admisión
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Historial de Cotizaciones Guardadas -->
+                        <div class="col-12">
+                            <div class="card shadow-sm border-0">
+                                <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center flex-wrap gap-2">
+                                    <h5 class="card-title fw-bold text-primary mb-0">
+                                        <i class="bi bi-clock-history me-2"></i>Cotizaciones Guardadas
+                                    </h5>
+                                    <div style="max-width: 280px;" class="w-100">
+                                        <input type="text" id="busqCotizaciones" class="form-control form-control-sm" placeholder="Buscar por cliente o DNI..." oninput="renderizarCotizacionesGuardadas()">
+                                    </div>
+                                </div>
+                                <div class="card-body p-0">
+                                    <div class="table-responsive">
+                                        <table class="table table-hover align-middle mb-0">
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <th>N° Cotización</th>
+                                                    <th>Fecha</th>
+                                                    <th>DNI</th>
+                                                    <th>Cliente / Paciente</th>
+                                                    <th>Edad / Sexo</th>
+                                                    <th>Total (S/)</th>
+                                                    <th class="text-end px-3">Acciones</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="listaCotizacionesGuardadasBody"></tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
+                </section>
+
                 <!-- SECCIÓN ÓRDENES -->
                 <section id="sec-ordenes" class="section-content d-none">
                     <div class="card shadow-sm border-0">
                         <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center flex-wrap gap-2">
-                            <h5 class="card-title fw-bold text-primary mb-0"><i class="bi bi-receipt me-2"></i>Órdenes Registradas</h5>
+                            <div class="d-flex align-items-center gap-2">
+                                <button class="btn btn-sm btn-outline-secondary" onclick="regresarSeccion()">
+                                    <i class="bi bi-arrow-left me-1"></i>Regresar
+                                </button>
+                                <h5 class="card-title fw-bold text-primary mb-0"><i class="bi bi-receipt me-2"></i>Órdenes Registradas</h5>
+                            </div>
                             <div class="d-flex gap-2 flex-wrap">
                                 <button class="btn btn-sm btn-outline-secondary" onclick="cargarOrdenes()"><i class="bi bi-arrow-clockwise me-1"></i>Actualizar</button>
                                 <button class="btn btn-sm btn-outline-success" onclick="respaldarDatos()" title="Descarga una copia de seguridad de órdenes, caja y catálogo"><i class="bi bi-download me-1"></i>Respaldar</button>
@@ -289,8 +400,13 @@
                 <!-- SECCIÓN RESULTADOS -->
                 <section id="sec-resultados" class="section-content d-none">
                     <div class="card shadow-sm border-0">
-                        <div class="card-header bg-white py-3 border-bottom">
-                            <h5 class="card-title fw-bold text-primary mb-0"><i class="bi bi-file-earmark-medical-fill me-2"></i>Ingreso de Resultados de Laboratorio</h5>
+                        <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center flex-wrap gap-2">
+                            <div class="d-flex align-items-center gap-2">
+                                <button class="btn btn-sm btn-outline-secondary" onclick="regresarSeccion()">
+                                    <i class="bi bi-arrow-left me-1"></i>Volver a Órdenes
+                                </button>
+                                <h5 class="card-title fw-bold text-primary mb-0"><i class="bi bi-file-earmark-medical-fill me-2"></i>Ingreso de Resultados de Laboratorio</h5>
+                            </div>
                         </div>
                         <div class="card-body" id="resultados-editor">
                             <div class="text-center text-muted py-5">
@@ -344,7 +460,22 @@
                                     <h5 class="card-title fw-bold text-primary mb-0"><i class="bi bi-journal-text me-2"></i>Catálogo (<span id="total-cat-count">0</span>)</h5>
                                     <div style="max-width:220px" class="w-100"><input type="text" class="form-control form-control-sm" placeholder="Buscar examen..." oninput="renderizarTablaCatalogo(this.value)"></div>
                                 </div>
-                                <div class="card-body p-0"><div class="table-responsive" style="max-height:650px;overflow-y:auto"><table class="table table-hover align-middle mb-0"><thead class="table-light sticky-top"><tr><th>Código</th><th>Examen</th><th>Indicadores</th><th>Precio</th><th></th></tr></thead><tbody id="tabla-catalogo-body"></tbody></table></div></div>
+                                <div class="card-body p-0">
+                                    <div class="table-responsive" style="max-height:650px;overflow-y:auto">
+                                        <table class="table table-hover align-middle mb-0">
+                                            <thead class="table-light sticky-top">
+                                                <tr>
+                                                    <th>Código</th>
+                                                    <th>Examen</th>
+                                                    <th>Indicadores</th>
+                                                    <th>Precio</th>
+                                                    <th class="text-end px-3">Acciones</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="tabla-catalogo-body"></tbody>
+                                        </table>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -462,6 +593,8 @@
     <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
     <script src="firebase-config.js"></script>
+    <script src="catalog-data.js"></script>
+    <script src="catalog-exams.js"></script>
     <script src="app.js"></script>
     <script type="module" src="cloud.js"></script>
 </body>
