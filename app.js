@@ -1684,109 +1684,134 @@ function renderizarTablaOrdenes(lista = ordenesLaboratorio) {
 // 4. COTIZACIÓN RÁPIDA Y GESTIÓN DE COTIZACIONES
 // ==========================================
 let carritoCotizacion = [];
+let cotizacionesGuardadas = JSON.parse(localStorage.getItem('cotizacionesGuardadas')) || [];
+
+// Cargar las cotizaciones guardadas en la tabla al iniciar la aplicación
+document.addEventListener('DOMContentLoaded', () => {
+    renderizarCotizacionesGuardadas();
+});
 
 function agregarItemCotizacion(codigoExamen) {
-  const examenEncontrado = examenesCatalogo.find(e => e.codigo === codigoExamen);
-  if (examenEncontrado) {
-    carritoCotizacion.push(examenEncontrado);
-    actualizarVistaCotizacionRapida();
-  }
+    if (typeof examenesCatalogo === 'undefined') {
+        console.error("El catálogo de exámenes no está definido.");
+        return;
+    }
+    const examenEncontrado = examenesCatalogo.find(e => e.codigo === codigoExamen);
+    if (examenEncontrado) {
+        carritoCotizacion.push(examenEncontrado);
+        actualizarVistaCotizacionRapida();
+    } else {
+        alert("No se encontró el examen en el catálogo.");
+    }
 }
 
 function actualizarVistaCotizacionRapida() {
-  const contenedor = document.getElementById('detalleCotizacionBody');
-  const totalSpan = document.getElementById('totalCotizacion');
-  if (!contenedor) return;
+    const contenedor = document.getElementById('detalleCotizacionBody');
+    const totalSpan = document.getElementById('totalCotizacion');
+    if (!contenedor) return;
 
-  contenedor.innerHTML = '';
-  let total = 0;
+    contenedor.innerHTML = '';
+    let total = 0;
 
-  carritoCotizacion.forEach((item, index) => {
-    total += item.precio;
-    contenedor.innerHTML += `
-      <tr>
-        <td>${item.nombre}</td>
-        <td>S/ ${item.precio.toFixed(2)}</td>
-        <td><button class="btn btn-sm btn-danger" onclick="removerItemCotizacion(${index})">X</button></td>
-      </tr>
-    `;
-  });
+    if (carritoCotizacion.length === 0) {
+        contenedor.innerHTML = `<tr><td colspan="3" class="text-center text-muted">No hay exámenes agregados.</td></tr>`;
+        if (totalSpan) totalSpan.innerText = `S/ 0.00`;
+        return;
+    }
 
-  if (totalSpan) totalSpan.innerText = `S/ ${total.toFixed(2)}`;
+    carritoCotizacion.forEach((item, index) => {
+        total += Number(item.precio || 0);
+        contenedor.innerHTML += `
+            <tr>
+                <td>${item.nombre}</td>
+                <td>S/ ${Number(item.precio || 0).toFixed(2)}</td>
+                <td><button class="btn btn-sm btn-danger" type="button" onclick="removerItemCotizacion(${index})">X</button></td>
+            </tr>
+        `;
+    });
+
+    if (totalSpan) totalSpan.innerText = `S/ ${total.toFixed(2)}`;
 }
 
 function removerItemCotizacion(index) {
-  carritoCotizacion.splice(index, 1);
-  actualizarVistaCotizacionRapida();
+    carritoCotizacion.splice(index, 1);
+    actualizarVistaCotizacionRapida();
 }
 
 function guardarCotizacion() {
-  const nombrePaciente = document.getElementById('nombrePacienteCotizacion').value.trim();
-  if (!nombrePaciente) {
-    alert("Por favor ingrese el nombre del paciente para guardar la cotización.");
-    return;
-  }
-  if (carritoCotizacion.length === 0) {
-    alert("La cotización está vacía.");
-    return;
-  }
+    const inputPaciente = document.getElementById('nombrePacienteCotizacion');
+    const nombrePaciente = inputPaciente ? inputPaciente.value.trim() : '';
+    
+    if (!nombrePaciente) {
+        alert("Por favor ingrese el nombre del paciente para guardar la cotización.");
+        return;
+    }
+    if (carritoCotizacion.length === 0) {
+        alert("La cotización está vacía.");
+        return;
+    }
 
-  const totalCotizacion = carritoCotizacion.reduce((acc, curr) => acc + curr.precio, 0);
-  const nuevaCotizacion = {
-    id: Date.now(),
-    fecha: new Date().toISOString().split('T')[0],
-    paciente: nombrePaciente,
-    items: [...carritoCotizacion],
-    total: totalCotizacion
-  };
+    const totalCotizacion = carritoCotizacion.reduce((acc, curr) => acc + Number(curr.precio || 0), 0);
+    const nuevaCotizacion = {
+        id: Date.now(),
+        fecha: new Date().toISOString().split('T')[0],
+        paciente: nombrePaciente,
+        items: [...carritoCotizacion],
+        total: totalCotizacion
+    };
 
-  cotizacionesGuardadas.push(nuevaCotizacion);
-  localStorage.setItem('cotizacionesGuardadas', JSON.stringify(cotizacionesGuardadas));
+    cotizacionesGuardadas.push(nuevaCotizacion);
+    localStorage.setItem('cotizacionesGuardadas', JSON.stringify(cotizacionesGuardadas));
 
-  alert("¡Cotización guardada exitosamente!");
-  carritoCotizacion = [];
-  document.getElementById('nombrePacienteCotizacion').value = '';
-  actualizarVistaCotizacionRapida();
-  renderizarCotizacionesGuardadas();
+    alert("¡Cotización guardada exitosamente!");
+    carritoCotizacion = [];
+    if (inputPaciente) inputPaciente.value = '';
+    actualizarVistaCotizacionRapida();
+    renderizarCotizacionesGuardadas();
 }
 
 function renderizarCotizacionesGuardadas(lista = cotizacionesGuardadas) {
-  const contenedor = document.getElementById('listaCotizacionesGuardadasBody');
-  if (!contenedor) return;
+    const contenedor = document.getElementById('listaCotizacionesGuardadasBody');
+    if (!contenedor) return;
 
-  const textoBusq = document.getElementById('busqCotizaciones')?.value.toLowerCase() || '';
-  const fechaBusq = document.getElementById('fechaCotizaciones')?.value || '';
+    const textoBusq = document.getElementById('busqCotizaciones')?.value.toLowerCase() || '';
+    const fechaBusq = document.getElementById('fechaCotizaciones')?.value || '';
 
-  const filtradas = lista.filter(cot => {
-    const coincideTexto = cot.paciente.toLowerCase().includes(textoBusq);
-    const coincideFecha = fechaBusq ? cot.fecha === fechaBusq : true;
-    return coincideTexto && coincideFecha;
-  });
+    const filtradas = lista.filter(cot => {
+        const coincideTexto = cot.paciente.toLowerCase().includes(textoBusq);
+        const coincideFecha = fechaBusq ? cot.fecha === fechaBusq : true;
+        return coincideTexto && coincideFecha;
+    });
 
-  contenedor.innerHTML = '';
-  filtradas.forEach(cot => {
-    contenedor.innerHTML += `
-      <tr>
-        <td>${cot.fecha}</td>
-        <td>${cot.paciente}</td>
-        <td>S/ ${cot.total.toFixed(2)}</td>
-        <td>
-          <button class="btn btn-sm btn-info" onclick="verDetalleCotizacion(${cot.id})">Ver</button>
-        </td>
-      </tr>
-    `;
-  });
+    contenedor.innerHTML = '';
+    if (filtradas.length === 0) {
+        contenedor.innerHTML = `<tr><td colspan="4" class="text-center text-muted">No hay cotizaciones registradas.</td></tr>`;
+        return;
+    }
+
+    filtradas.forEach(cot => {
+        contenedor.innerHTML += `
+            <tr>
+                <td>${cot.fecha}</td>
+                <td>${cot.paciente}</td>
+                <td>S/ ${Number(cot.total || 0).toFixed(2)}</td>
+                <td>
+                    <button class="btn btn-sm btn-info" type="button" onclick="verDetalleCotizacion(${cot.id})">Ver</button>
+                </td>
+            </tr>
+        `;
+    });
 }
 
 function verDetalleCotizacion(id) {
-  const cot = cotizacionesGuardadas.find(c => c.id === id);
-  if (!cot) return;
-  let detalleStr = `Paciente: ${cot.paciente}\nFecha: ${cot.fecha}\nExámenes:\n`;
-  cot.items.forEach(i => {
-    detalleStr += `- ${i.nombre}: S/ ${i.precio.toFixed(2)}\n`;
-  });
-  detalleStr += `TOTAL: S/ ${cot.total.toFixed(2)}`;
-  alert(detalleStr);
+    const cot = cotizacionesGuardadas.find(c => c.id === id);
+    if (!cot) return;
+    let detalleStr = `Paciente: ${cot.paciente}\nFecha: ${cot.fecha}\nExámenes:\n`;
+    cot.items.forEach(i => {
+        detalleStr += `- ${i.nombre}: S/ ${Number(i.precio || 0).toFixed(2)}\n`;
+    });
+    detalleStr += `TOTAL: S/ ${Number(cot.total || 0).toFixed(2)}`;
+    alert(detalleStr);
 }
 
 // ==========================================
