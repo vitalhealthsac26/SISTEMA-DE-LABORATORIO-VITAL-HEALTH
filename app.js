@@ -18,6 +18,21 @@ const BASE_VALORES_REFERENCIALES = {
     { id: 'hdl', nombre: 'Colesterol HDL', unidad: 'mg/dL', refMin: 40, refMax: 100, referencia: '> 40 mg/dL' },
     { id: 'ldl', nombre: 'Colesterol LDL', unidad: 'mg/dL', refMin: 0, refMax: 100, referencia: '< 100 mg/dL' }
   ],
+  "PARASITOLOGICO SERIADO -3 MUESTRAS": [
+    { id: 'color', nombre: 'Color', referencia: '-' },
+    { id: 'consistencia', nombre: 'Consistencia', referencia: '-' },
+    { id: 'sangre_macro', nombre: 'Sangre Macro', referencia: '-' },
+    { id: 'moco', nombre: 'Moco', referencia: '-' },
+    { id: 'leucocitos', nombre: 'Leucocitos', referencia: '-' },
+    { id: 'eritrocitos', nombre: 'Eritrocitos', referencia: '-' },
+    { id: 'cristales', nombre: 'Cristales', referencia: '-' },
+    { id: 'levaduras', nombre: 'Levaduras', referencia: '-' },
+    { id: 'trofozoitos', nombre: 'Trofozoitos', referencia: '-' },
+    { id: 'otros', nombre: 'Otros', referencia: '-' },
+    { id: 'muestra_1', nombre: 'MUESTRA I', referencia: '' },
+    { id: 'muestra_2', nombre: 'MUESTRA II', referencia: '' },
+    { id: 'muestra_3', nombre: 'MUESTRA III', referencia: '' }
+  ],
   "PERFIL HEPATICO": [
     { id: 'bt', nombre: 'Bilirrubina Total', unidad: 'mg/dL', refMin: 0.2, refMax: 1.2, referencia: '0.2 - 1.2 mg/dL' },
     { id: 'bd', nombre: 'Bilirrubina Directa', unidad: 'mg/dL', refMin: 0.0, refMax: 0.3, referencia: '0.0 - 0.3 mg/dL' },
