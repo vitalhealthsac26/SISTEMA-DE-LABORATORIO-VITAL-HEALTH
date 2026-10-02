@@ -231,3 +231,32 @@ body { background-color: var(--bg-light); font-family: 'Segoe UI', Tahoma, Genev
     text-align: right;
     width: 60px;
 }
+/* ==========================================
+   UNIFICACIÓN GLOBAL DE TAMAÑO DE FUENTE
+   ========================================== */
+
+/* Ajuste general para textos, formularios y botones en todo el sistema */
+.card-body, 
+.form-control, 
+.form-select, 
+.btn {
+    font-size: 12.5px !important;
+}
+
+/* Encabezados de todas las tablas del sistema */
+.table th {
+    font-size: 11px !important;
+    text-transform: uppercase;
+    letter-spacing: .4px;
+}
+
+/* Celdas de datos en todas las tablas (Catálogo, Órdenes, Cotizaciones, Arqueo) */
+.table td {
+    font-size: 12px !important;
+    vertical-align: middle;
+}
+
+/* Etiquetas (Labels) de los formularios */
+.form-label {
+    font-size: 12px !important;
+}
