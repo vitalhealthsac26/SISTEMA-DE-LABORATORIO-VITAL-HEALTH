@@ -18,7 +18,7 @@ const BASE_VALORES_REFERENCIALES = {
     { id: 'hdl', nombre: 'Colesterol HDL', unidad: 'mg/dL', refMin: 40, refMax: 100, referencia: '> 40 mg/dL' },
     { id: 'ldl', nombre: 'Colesterol LDL', unidad: 'mg/dL', refMin: 0, refMax: 100, referencia: '< 100 mg/dL' }
   ],
-  "PARASITOLOGICO SERIADO -3 MUESTRAS": [
+  "840": [
     { id: 'color', nombre: 'Color', referencia: '-' },
     { id: 'consistencia', nombre: 'Consistencia', referencia: '-' },
     { id: 'sangre_macro', nombre: 'Sangre Macro', referencia: '-' },
