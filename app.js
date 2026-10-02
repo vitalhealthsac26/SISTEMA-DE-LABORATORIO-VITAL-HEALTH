@@ -1629,11 +1629,36 @@ function renderizarTablaCatalogo(filtro = "") {
             <td><span class="badge bg-light text-dark border">Plantilla</span></td>
             <td>S/ ${Number(ex.precio || 0).toFixed(2)}</td>
             <td class="text-end">
-                <button class="btn btn-sm btn-outline-primary" onclick="editarExamenCatalogo('${ex.codigo}')"><i class="bi bi-pencil"></i></button>
+                <!-- Botón de Editar -->
+                <button class="btn btn-sm btn-outline-primary me-1" onclick="editarExamenCatalogo('${ex.codigo}')" title="Editar">
+                    <i class="bi bi-pencil"></i>
+                </button>
+                <!-- Botón de Borrar / Eliminar -->
+                <button class="btn btn-sm btn-outline-danger" onclick="eliminarExamenCatalogo('${ex.codigo}')" title="Eliminar">
+                    <i class="bi bi-trash"></i>
+                </button>
             </td>
         `;
         tbody.appendChild(tr);
     });
+}
+
+function eliminarExamenCatalogo(codigo) {
+    if (confirm(`¿Estás seguro de eliminar el examen con código ${codigo} del catálogo?`)) {
+        // Filtramos el array excluyendo el examen que coincide con el código
+        examenesCatalogo = examenesCatalogo.filter(e => e.codigo !== codigo);
+        
+        // Volvemos a pintar la tabla para reflejar el cambio
+        renderizarTablaCatalogo();
+        
+        // Guardamos los cambios en tus funciones de persistencia y localStorage
+        if (typeof persistirDatos === 'function') {
+            persistirDatos();
+        }
+        localStorage.setItem('examenesCatalogo', JSON.stringify(examenesCatalogo));
+        
+        alert("Examen eliminado del catálogo correctamente.");
+    }
 }
 
 function editarExamenCatalogo(codigo) {
