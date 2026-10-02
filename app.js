@@ -1300,6 +1300,7 @@ function calcularEdad() {
         campoEdad.value = "0 AÑOS";
     }
 }
+const doctor = document.getElementById("pac-medico") ? document.getElementById("pac-medico").value.trim() : "Particular";
 
 // ==========================================
 // FILTRAR Y AGREGAR EXÁMENES
