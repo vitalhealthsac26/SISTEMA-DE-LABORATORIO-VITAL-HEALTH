@@ -1393,7 +1393,7 @@ function guardarOrdenGenerarTicket() {
   const sexo = document.getElementById("pac-sexo").value;
   const fechaNacimiento = document.getElementById("pac-fnacimiento") ? document.getElementById("pac-fnacimiento").value.trim() : "";
     const edad = document.getElementById("pac-edad").value.trim();
-  const celular = document.getElementById("pac-celular") ? document.getElementById("pac-celular").value.trim() : "";
+  const celularPaciente = document.getElementById("pac-celular").value;
     const doctor = document.getElementById("pac-doctor").value.trim();
     const metodoPago = document.getElementById("metodo-pago").value;
   
@@ -1419,7 +1419,7 @@ function guardarOrdenGenerarTicket() {
       sexo,
       fechaNacimiento,
       edad,
-      celular,
+      celular: celularPaciente
         doctor,
         metodoPago,
         examenes: [...examenesSeleccionados],
