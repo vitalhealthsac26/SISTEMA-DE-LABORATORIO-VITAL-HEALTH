@@ -1099,6 +1099,23 @@ let examenesSeleccionados = [];
 let ordenesRegistradas = [];
 let cajaMovimientos = [];
 
+// Almacenamiento local para cotizaciones y órdenes
+let cotizacionesGuardadas = JSON.parse(localStorage.getItem('cotizacionesGuardadas')) || [];
+let ordenesLaboratorio = JSON.parse(localStorage.getItem('ordenesLaboratorio')) || [];
+
+// ==========================================
+// 1. NAVEGACIÓN FLUIDA ENTRE SECCIONES
+// ==========================================
+function cambiarSeccion(seccionId) {
+  document.querySelectorAll('.seccion-sistema').forEach(sec => {
+    sec.style.display = 'none';
+  });
+  const seccionActiva = document.getElementById(seccionId);
+  if (seccionActiva) {
+    seccionActiva.style.display = 'block';
+  }
+}
+
 // ==========================================
 // GUARDADO PERMANENTE EN ESTE EQUIPO
 // ==========================================
