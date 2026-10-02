@@ -217,3 +217,17 @@ body { background-color: var(--bg-light); font-family: 'Segoe UI', Tahoma, Genev
     text-align: right;
     width: 60px;
 }
+/* Ajuste del tamaño de letra y diseño de la tabla del catálogo */
+#tabla-catalogo-body td, 
+#sec-catalogo .table th {
+    font-size: 11px !important; /* Reduce ligeramente el tamaño de la letra de los exámenes */
+    vertical-align: middle;
+}
+
+/* Forzar a que la columna de acciones (editar/eliminar) no se mueva ni se oculte */
+#sec-catalogo .table td:last-child, 
+#sec-catalogo .table th:last-child {
+    white-space: nowrap;
+    text-align: right;
+    width: 60px;
+}
