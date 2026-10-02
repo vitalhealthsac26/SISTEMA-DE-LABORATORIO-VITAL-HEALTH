@@ -1390,10 +1390,12 @@ function renderizarTablaSeleccionados() {
 function guardarOrdenGenerarTicket() {
     const dni = document.getElementById("pac-dni").value.trim();
     const nombre = document.getElementById("pac-nombre").value.trim();
+  const sexo = document.getElementById("pac-sexo").value;
+  const fechaNacimiento = document.getElementById("pac-fnacimiento") ? document.getElementById("pac-fnacimiento").value.trim() : "";
+    const edad = document.getElementById("pac-edad").value.trim();
     const doctor = document.getElementById("pac-doctor").value.trim();
     const metodoPago = document.getElementById("metodo-pago").value;
-    const edad = document.getElementById("pac-edad").value.trim();
-    const sexo = document.getElementById("pac-sexo").value;
+  
 
     if (!dni || !nombre) {
         alert("Por favor ingrese al menos el DNI y los Nombres y Apellidos del paciente.");
