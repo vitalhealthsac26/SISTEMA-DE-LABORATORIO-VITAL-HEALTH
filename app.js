@@ -1300,7 +1300,9 @@ function calcularEdad() {
         campoEdad.value = "0 AÑOS";
     }
 }
-const doctor = document.getElementById("pac-medico") ? document.getElementById("pac-medico").value.trim() : "Particular";
+// Capturamos el valor del médico usando el ID correcto que acabamos de ver
+const inputDoctor = document.getElementById("pac-doctor");
+const doctor = inputDoctor ? inputDoctor.value.trim() : "Particular";
 
 // ==========================================
 // FILTRAR Y AGREGAR EXÁMENES
