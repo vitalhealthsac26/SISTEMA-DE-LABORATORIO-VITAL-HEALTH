@@ -1756,17 +1756,36 @@ function buscarPaciente() {
 
 function calcularEdad() {
     const fnacVal = document.getElementById("pac-fnac").value;
-    if (!fnacVal) return;
-    const fnac = new Date(fnacVal);
+    const campoEdad = document.getElementById("pac-edad");
+
+    if (!fnacVal) {
+        campoEdad.value = "";
+        return;
+    }
+
+    // Separar año, mes y día para evitar errores de zona horaria (UTC)
+    const partes = fnacVal.split('-');
+    const anioNac = parseInt(partes[0], 10);
+    const mesNac = parseInt(partes[1], 10) - 1; // Los meses en JS empiezan en 0 (Enero = 0)
+    const diaNac = parseInt(partes[2], 10);
+
     const hoy = new Date();
-    let edad = hoy.getFullYear() - fnac.getFullYear();
-    const m = hoy.getMonth() - fnac.getMonth();
-    if (m < 0 || (m === 0 && hoy.getDate() < fnac.getDate())) {
+    let edad = hoy.getFullYear() - anioNac;
+    const mesActual = hoy.getMonth();
+    const diaActual = hoy.getDate();
+
+    // Restar un año si todavía no ha cumplido años en el año actual
+    if (mesActual < mesNac || (mesActual === mesNac && diaActual < diaNac)) {
         edad--;
     }
-    document.getElementById("pac-edad").value = `${edad} AÑOS`;
-}
 
+    // Mostrar el resultado en el input
+    if (edad >= 0) {
+        campoEdad.value = edad + (edad === 1 ? " AÑO" : " AÑOS");
+    } else {
+        campoEdad.value = "0 AÑOS";
+    }
+}
 let carritoCotizacion = [];
 
 document.addEventListener('DOMContentLoaded', () => {
