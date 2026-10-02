@@ -1211,36 +1211,47 @@ function actualizarFechaActual() {
 function toggleSidebar() {
     const sidebar = document.getElementById("sidebar");
     const overlay = document.getElementById("sidebar-overlay");
-    if (sidebar && overlay) {
-        sidebar.classList.toggle("active");
+    if (!sidebar) return;
+    sidebar.classList.toggle("active");
+    sidebar.classList.toggle("show");
+    if (overlay) {
         overlay.classList.toggle("active");
+        overlay.classList.toggle("show");
     }
 }
 
 function showSection(sectionId) {
-    // Ocultar todas las secciones
+    // 1. Ocultar todas las secciones (clase d-none + estilo inline)
     document.querySelectorAll('.section-content').forEach(sec => {
         sec.classList.add('d-none');
+        sec.style.display = 'none';
     });
 
-    // Mostrar la sección seleccionada
+    // 2. Mostrar la sección seleccionada
     const target = document.getElementById(`sec-${sectionId}`);
     if (target) {
         target.classList.remove('d-none');
+        target.style.display = 'block';
     }
 
-    // Actualizar enlaces activos en el menú
+    // 3. Actualizar enlaces activos del menú lateral
     document.querySelectorAll('.sidebar .nav-link').forEach(link => {
         link.classList.remove('active');
     });
-    event?.currentTarget?.classList?.add('active');
+    if (typeof event !== 'undefined' && event && event.currentTarget) {
+        event.currentTarget.classList.add('active');
+    }
 
-    // Cerrar sidebar en dispositivos móviles si está abierto
+    // 4. Cerrar sidebar en móviles si está abierto
     const sidebar = document.getElementById("sidebar");
     const overlay = document.getElementById("sidebar-overlay");
-    if (sidebar && sidebar.classList.contains('active')) {
+    if (sidebar) {
         sidebar.classList.remove('active');
+        sidebar.classList.remove('show');
+    }
+    if (overlay) {
         overlay.classList.remove('active');
+        overlay.classList.remove('show');
     }
 }
 
@@ -1642,7 +1653,8 @@ function editarExamenCatalogo(codigo) {
 function eliminarExamenCatalogo(index) {
   if (confirm("¿Estás seguro de eliminar este examen del catálogo?")) {
     examenesCatalogo.splice(index, 1);
-    renderizarCatalogo();
+    renderizarTablaCatalogo();
+    persistirDatos();
     // Actualizar almacenamiento si usas localStorage para el catálogo
     localStorage.setItem('examenesCatalogo', JSON.stringify(examenesCatalogo));
   }
@@ -1686,10 +1698,6 @@ function renderizarTablaOrdenes(lista = ordenesLaboratorio) {
 // ==========================================
 
 let carritoCotizacion = [];
-
-let cotizacionesGuardadas = JSON.parse(
-    localStorage.getItem('cotizacionesGuardadas') || '[]'
-);
 
 document.addEventListener('DOMContentLoaded', () => {
     if (typeof renderizarCotizacionesGuardadas === 'function') {
@@ -2339,30 +2347,7 @@ function actualizarVistaCotizacion() {
     contenedorTotal.textContent = `S/ ${subtotalGeneral.toFixed(2)}`;
   }
 }
-function showSection(sectionId) {
-    // 1. Ocultar todas las secciones que tengan la clase 'section-content'
-    const secciones = document.querySelectorAll('.section-content');
-    secciones.forEach(sec => {
-        sec.style.display = 'none';
-        sec.classList.add('d-none');
-    });
 
-    // 2. Mostrar la sección seleccionada
-    const seccionActiva = document.getElementById('sec-' + sectionId);
-    if (seccionActiva) {
-        seccionActiva.style.display = 'block';
-        seccionActiva.classList.remove('d-none');
-    }
-
-    // 3. Actualizar la clase 'active' en los enlaces del menú lateral
-    const navLinks = document.querySelectorAll('.sidebar .nav-link');
-    navLinks.forEach(link => {
-        link.classList.remove('active');
-    });
-    
-    // Encontrar el enlace presionado y activarlo
-    event.currentTarget.classList.add('active');
-}
 // ==========================================
 // CONTROL DE NAVEGACIÓN Y BOTONES
 // ==========================================
@@ -2374,36 +2359,179 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 });
 
-function showSection(sectionId) {
-  document.querySelectorAll('.section-content').forEach(section => {
-    section.classList.add('d-none');
-    section.style.display = 'none';
-  });
 
-  const targetSection = document.getElementById(`sec-${sectionId}`);
-  if (targetSection) {
-    targetSection.classList.remove('d-none');
-    targetSection.style.display = 'block';
-  }
 
-  document.querySelectorAll('.sidebar .nav-link').forEach(link => {
-    link.classList.remove('active');
-  });
-  if (event && event.currentTarget) {
-    event.currentTarget.classList.add('active');
-  }
 
-  const sidebar = document.getElementById('sidebar');
-  const overlay = document.getElementById('sidebar-overlay');
-  if (sidebar && sidebar.classList.contains('show')) {
-    sidebar.classList.remove('show');
-    if (overlay) overlay.classList.remove('show');
-  }
+// ==========================================
+// COTIZACIÓN INDEPENDIENTE (sec-cotizacion)
+// ==========================================
+let listaCotizacionInd = [];
+
+function filtrarExamenesCotizacion(query) {
+    const contenedor = document.getElementById("sugerencias-examenes-cotizacion");
+    if (!contenedor) return;
+    contenedor.innerHTML = "";
+
+    if (!query || query.trim() === "") {
+        contenedor.style.display = "none";
+        return;
+    }
+
+    const filtrados = examenesCatalogo.filter(ex =>
+        ex.nombre.toLowerCase().includes(query.toLowerCase()) ||
+        ex.codigo.toLowerCase().includes(query.toLowerCase())
+    );
+
+    if (filtrados.length === 0) {
+        contenedor.style.display = "none";
+        return;
+    }
+
+    contenedor.style.display = "block";
+    filtrados.forEach(ex => {
+        const item = document.createElement("a");
+        item.href = "#";
+        item.className = "list-group-item list-group-item-action py-2";
+        item.innerHTML = `<strong>${ex.codigo}</strong> - ${ex.nombre} <span class="float-end text-primary">S/ ${Number(ex.precio || 0).toFixed(2)}</span>`;
+        item.onclick = (e) => {
+            e.preventDefault();
+            agregarExamenCotizacion(ex);
+            document.getElementById("busqueda-examen-cotizacion").value = "";
+            contenedor.style.display = "none";
+        };
+        contenedor.appendChild(item);
+    });
 }
 
-function toggleSidebar() {
-  const sidebar = document.getElementById('sidebar');
-  const overlay = document.getElementById('sidebar-overlay');
-  if (sidebar) sidebar.classList.toggle('show');
-  if (overlay) overlay.classList.toggle('show');
+function agregarExamenCotizacion(ex) {
+    const existente = listaCotizacionInd.find(i => i.codigo === ex.codigo);
+    if (existente) {
+        existente.cantidad += 1;
+    } else {
+        listaCotizacionInd.push({
+            codigo: ex.codigo,
+            nombre: ex.nombre,
+            cantidad: 1,
+            precio: Number(ex.precio || 0)
+        });
+    }
+    renderizarTablaCotizacion();
+}
+
+function cambiarCantidadCotizacion(codigo, nuevaCant) {
+    const item = listaCotizacionInd.find(i => i.codigo === codigo);
+    if (item) {
+        item.cantidad = parseInt(nuevaCant) || 1;
+        if (item.cantidad <= 0) item.cantidad = 1;
+        renderizarTablaCotizacion();
+    }
+}
+
+function eliminarExamenCotizacion(codigo) {
+    listaCotizacionInd = listaCotizacionInd.filter(i => i.codigo !== codigo);
+    renderizarTablaCotizacion();
+}
+
+function renderizarTablaCotizacion() {
+    const tbody = document.querySelector("#tabla-cotizacion-independiente tbody");
+    const totalEl = document.getElementById("total-cotizacion");
+    if (!tbody) return;
+
+    tbody.innerHTML = "";
+    if (listaCotizacionInd.length === 0) {
+        tbody.innerHTML = `<tr id="empty-row-cotizacion"><td colspan="6" class="text-center text-muted py-4">No hay exámenes agregados para cotizar.</td></tr>`;
+        if (totalEl) totalEl.textContent = "0.00";
+        return;
+    }
+
+    let total = 0;
+    listaCotizacionInd.forEach(item => {
+        const importe = item.cantidad * item.precio;
+        total += importe;
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+            <td>${item.codigo}</td>
+            <td>${item.nombre}</td>
+            <td><input type="number" class="form-control form-control-sm" style="width: 70px;" value="${item.cantidad}" min="1" onchange="cambiarCantidadCotizacion('${item.codigo}', this.value)"></td>
+            <td>S/ ${item.precio.toFixed(2)}</td>
+            <td>S/ ${importe.toFixed(2)}</td>
+            <td class="text-center"><button class="btn btn-sm btn-outline-danger" onclick="eliminarExamenCotizacion('${item.codigo}')"><i class="bi bi-trash"></i></button></td>
+        `;
+        tbody.appendChild(tr);
+    });
+
+    if (totalEl) totalEl.textContent = total.toFixed(2);
+}
+
+function imprimirCotizacion() {
+    if (listaCotizacionInd.length === 0) {
+        alert("No hay exámenes en la cotización para imprimir.");
+        return;
+    }
+    const total = listaCotizacionInd.reduce((acc, i) => acc + i.cantidad * i.precio, 0);
+    const convenio = document.getElementById("tipo-convenio-cotizacion")?.value || "Particular";
+    const fecha = new Date().toLocaleDateString("es-PE");
+
+    let filas = "";
+    listaCotizacionInd.forEach(i => {
+        filas += `<tr><td>${escapeHTML(i.nombre)}</td><td style="text-align:center">${i.cantidad}</td><td style="text-align:right">S/ ${i.precio.toFixed(2)}</td><td style="text-align:right">S/ ${(i.cantidad * i.precio).toFixed(2)}</td></tr>`;
+    });
+
+    const zona = document.getElementById("zona-impresion");
+    if (!zona) return;
+    zona.innerHTML = `
+        <div style="font-family: Arial, sans-serif; padding: 20px; max-width: 700px; margin: 0 auto;">
+            <div style="text-align:center; border-bottom: 2px solid #0d6efd; padding-bottom: 10px; margin-bottom: 15px;">
+                <h2 style="margin:0; color:#0d6efd;">CENTRO MÉDICO VITAL HEALTH</h2>
+                <div>Laboratorio Clínico &nbsp;|&nbsp; Av. Grau N° 1799 - Veintiséis de Octubre</div>
+                <div>WhatsApp: 984 089 927</div>
+            </div>
+            <h3 style="text-align:center;">COTIZACIÓN DE EXÁMENES</h3>
+            <div style="margin-bottom: 10px;"><strong>Fecha:</strong> ${fecha} &nbsp;|&nbsp; <strong>Tipo:</strong> ${escapeHTML(convenio)}</div>
+            <table style="width:100%; border-collapse: collapse;" border="1" cellpadding="6">
+                <thead>
+                    <tr style="background:#e7f1ff;">
+                        <th>Examen</th><th>Cant.</th><th>P. Unit.</th><th>Importe</th>
+                    </tr>
+                </thead>
+                <tbody>${filas}</tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="3" style="text-align:right; font-weight:bold;">TOTAL</td>
+                        <td style="text-align:right; font-weight:bold;">S/ ${total.toFixed(2)}</td>
+                    </tr>
+                </tfoot>
+            </table>
+            <p style="margin-top: 15px; font-size: 12px; color: #555;">Cotización válida por 7 días. Los precios pueden variar según convenio.</p>
+        </div>
+    `;
+    imprimirZona();
+}
+
+function pasarCotizacionARecepcion() {
+    if (listaCotizacionInd.length === 0) {
+        alert("No hay exámenes en la cotización para pasar a admisión.");
+        return;
+    }
+    listaCotizacionInd.forEach(item => {
+        const existente = examenesSeleccionados.find(i => i.codigo === item.codigo);
+        if (existente) {
+            existente.cantidad += item.cantidad;
+        } else {
+            const catalogo = examenesCatalogo.find(c => c.codigo === item.codigo);
+            examenesSeleccionados.push({
+                codigo: item.codigo,
+                nombre: item.nombre,
+                cantidad: item.cantidad,
+                precio: item.precio,
+                unidad: catalogo ? catalogo.unidad || '' : '',
+                referencia: catalogo ? catalogo.referencia || '' : ''
+            });
+        }
+    });
+    listaCotizacionInd = [];
+    renderizarTablaCotizacion();
+    renderizarTablaSeleccionados();
+    showSection('recepcion');
+    alert("Cotización pasada a admisión. Complete los datos del paciente y registre la orden.");
 }
