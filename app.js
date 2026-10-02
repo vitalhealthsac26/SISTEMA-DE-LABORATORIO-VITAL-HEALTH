@@ -1722,6 +1722,29 @@ function renderizarTablaOrdenes(lista = ordenesLaboratorio) {
 // COTIZACIÓN RÁPIDA Y GESTIÓN DE COTIZACIONES
 // ==========================================
 
+function buscarPaciente() {
+    const dni = document.getElementById("pac-dni").value.trim();
+    if (dni.length < 8) {
+        alert("Ingrese un DNI o documento válido de al menos 8 dígitos.");
+        return;
+    }
+    // Simulación de búsqueda o integración
+    alert(`Buscando datos para el documento: ${dni}`);
+}
+
+function calcularEdad() {
+    const fnacVal = document.getElementById("pac-fnac").value;
+    if (!fnacVal) return;
+    const fnac = new Date(fnacVal);
+    const hoy = new Date();
+    let edad = hoy.getFullYear() - fnac.getFullYear();
+    const m = hoy.getMonth() - fnac.getMonth();
+    if (m < 0 || (m === 0 && hoy.getDate() < fnac.getDate())) {
+        edad--;
+    }
+    document.getElementById("pac-edad").value = `${edad} AÑOS`;
+}
+
 let carritoCotizacion = [];
 
 document.addEventListener('DOMContentLoaded', () => {
