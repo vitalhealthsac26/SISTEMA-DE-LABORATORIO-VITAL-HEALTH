@@ -2,7 +2,7 @@
 // DICCIONARIOS Y BASE DE DATOS INICIAL
 // ==========================================
 const BASE_VALORES_REFERENCIALES = {
-  "HEMOGRAMA": [
+  "HEMOGRAMA COMPLETO AUTOMATIZADO": [
     { id: 'leucocitos', nombre: 'Leucocitos', unidad: 'Cél/uL', refMin: 4500, refMax: 11000, referencia: '4,500 - 11,000 /uL' },
     { id: 'hematies', nombre: 'Hematíes (Glóbulos Rojos)', unidad: 'M/uL', refMin: 4.2, refMax: 5.8, referencia: 'V: 4.5-5.8 | M: 4.2-5.2 M/uL' },
     { id: 'hemoglobina', nombre: 'Hemoglobina', unidad: 'g/dL', refMin: 12.0, refMax: 16.5, referencia: 'V: 13.5-16.5 | M: 12.0-15.0 g/dL' },
@@ -582,8 +582,7 @@ let examenesCatalogo = [
   { codigo: "590", nombre: "HEMOGLOBINA-HEMATOCRITO", unidad: "", refMin: "", refMax: "", referencia: "Hb: 12-18 g/dL, Hcto: 37-52%", precio: 15.00 },
   { codigo: "591", nombre: "HEMOGLOBINOPATIAS ESTUDIO COMPLETO", unidad: "", refMin: "", refMax: "", referencia: "PATRÓN ELECTROFORÉTICO NORMAL (HbA1 > 95%)", precio: 680.00 },
   { codigo: "592", nombre: "HEMOGLOBINURIA PAROXISTICA NOCTURNA (HPN)", unidad: "", refMin: "", refMax: "", referencia: "EXPRESIÓN NORMAL DE CD55 Y CD59", precio: 1044.00 },
-  { codigo: "593", nombre: "HEMOGRAMA", unidad: "", refMin: "", refMax: "", referencia: "Leucocitos: 6000-10000/µL, Hematíes: 4.8-5.5x10¹²/L, Plaquetas: 150-350k/µL", precio: 25.00 },
-  { codigo: "1164", nombre: "HEMOGRAMA COMPLETO AUTOMATIZADO", unidad: "", refMin: "", refMax: "", referencia: "Leucocitos: 6000-10000/µL, Hematíes: 4.8-5.5x10¹²/L, Plaquetas: 150-350k/µL", precio: 25.00 },
+  { codigo: "593", nombre: "HEMOGRAMA COMPLETO AUTOMATIZADO", unidad: "", refMin: "", refMax: "", referencia: "Leucocitos: 6000-10000/µL, Hematíes: 4.8-5.5x10¹²/L, Plaquetas: 150-350k/µL", precio: 25.00 },
   { codigo: "595", nombre: "HEMOSIDERINA EN ORINA SIMPLE", unidad: "", refMin: "", refMax: "", referencia: "NEGATIVO", precio: 76.00 },
   { codigo: "596", nombre: "HEPATITIS A ANTICUERPOS IGM", unidad: "", refMin: "", refMax: "", referencia: "NO REACTIVO", precio: 50.00 },
   { codigo: "597", nombre: "HEPATITIS A ANTICUERPOS TOTALES", unidad: "", refMin: "", refMax: "", referencia: "NO REACTIVO", precio: 70.00 },
