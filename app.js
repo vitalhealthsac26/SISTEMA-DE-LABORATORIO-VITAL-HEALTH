@@ -1639,6 +1639,14 @@ function editarExamenCatalogo(codigo) {
     document.getElementById("cat-ref-texto").value = ex.refTexto || "";
     document.getElementById("catalogo-form-titulo").innerHTML = `<i class="bi bi-pencil-square me-2"></i>Editar Examen: ${ex.codigo}`;
 }
+function eliminarExamenCatalogo(index) {
+  if (confirm("¿Estás seguro de eliminar este examen del catálogo?")) {
+    examenesCatalogo.splice(index, 1);
+    renderizarCatalogo();
+    // Actualizar almacenamiento si usas localStorage para el catálogo
+    localStorage.setItem('examenesCatalogo', JSON.stringify(examenesCatalogo));
+  }
+}
 
 // ==========================================
 // CONTROL DE CAJA
