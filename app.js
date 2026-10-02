@@ -1647,6 +1647,147 @@ function eliminarExamenCatalogo(index) {
     localStorage.setItem('examenesCatalogo', JSON.stringify(examenesCatalogo));
   }
 }
+// ==========================================
+// 3. BÚSQUEDA Y FILTRADO POR FECHA DE ÓRDENES
+// ==========================================
+function filtrarOrdenes() {
+  const textoBusqueda = document.getElementById('inputBusquedaOrdenes').value.toLowerCase();
+  const fechaFiltro = document.getElementById('inputFechaOrdenes').value;
+
+  const ordenesFiltradas = ordenesLaboratorio.filter(orden => {
+    const coincideTexto = orden.paciente.toLowerCase().includes(textoBusqueda) || 
+                          orden.codigo.toLowerCase().includes(textoBusqueda);
+    const coincideFecha = fechaFiltro ? orden.fecha === fechaFiltro : true;
+    return coincideTexto && coincideFecha;
+  });
+
+  renderizarTablaOrdenes(ordenesFiltradas);
+}
+
+function renderizarTablaOrdenes(lista = ordenesLaboratorio) {
+  const contenedor = document.getElementById('tablaOrdenesBody');
+  if (!contenedor) return;
+
+  contenedor.innerHTML = '';
+  lista.forEach(orden => {
+    contenedor.innerHTML += `
+      <tr>
+        <td>${orden.fecha}</td>
+        <td>${orden.codigo}</td>
+        <td>${orden.paciente}</td>
+        <td>${orden.detalles}</td>
+      </tr>
+    `;
+  });
+}
+// ==========================================
+// 4. COTIZACIÓN RÁPIDA Y GESTIÓN DE COTIZACIONES
+// ==========================================
+let carritoCotizacion = [];
+
+function agregarItemCotizacion(codigoExamen) {
+  const examenEncontrado = examenesCatalogo.find(e => e.codigo === codigoExamen);
+  if (examenEncontrado) {
+    carritoCotizacion.push(examenEncontrado);
+    actualizarVistaCotizacionRapida();
+  }
+}
+
+function actualizarVistaCotizacionRapida() {
+  const contenedor = document.getElementById('detalleCotizacionBody');
+  const totalSpan = document.getElementById('totalCotizacion');
+  if (!contenedor) return;
+
+  contenedor.innerHTML = '';
+  let total = 0;
+
+  carritoCotizacion.forEach((item, index) => {
+    total += item.precio;
+    contenedor.innerHTML += `
+      <tr>
+        <td>${item.nombre}</td>
+        <td>S/ ${item.precio.toFixed(2)}</td>
+        <td><button class="btn btn-sm btn-danger" onclick="removerItemCotizacion(${index})">X</button></td>
+      </tr>
+    `;
+  });
+
+  if (totalSpan) totalSpan.innerText = `S/ ${total.toFixed(2)}`;
+}
+
+function removerItemCotizacion(index) {
+  carritoCotizacion.splice(index, 1);
+  actualizarVistaCotizacionRapida();
+}
+
+function guardarCotizacion() {
+  const nombrePaciente = document.getElementById('nombrePacienteCotizacion').value.trim();
+  if (!nombrePaciente) {
+    alert("Por favor ingrese el nombre del paciente para guardar la cotización.");
+    return;
+  }
+  if (carritoCotizacion.length === 0) {
+    alert("La cotización está vacía.");
+    return;
+  }
+
+  const totalCotizacion = carritoCotizacion.reduce((acc, curr) => acc + curr.precio, 0);
+  const nuevaCotizacion = {
+    id: Date.now(),
+    fecha: new Date().toISOString().split('T')[0],
+    paciente: nombrePaciente,
+    items: [...carritoCotizacion],
+    total: totalCotizacion
+  };
+
+  cotizacionesGuardadas.push(nuevaCotizacion);
+  localStorage.setItem('cotizacionesGuardadas', JSON.stringify(cotizacionesGuardadas));
+
+  alert("¡Cotización guardada exitosamente!");
+  carritoCotizacion = [];
+  document.getElementById('nombrePacienteCotizacion').value = '';
+  actualizarVistaCotizacionRapida();
+  renderizarCotizacionesGuardadas();
+}
+
+function renderizarCotizacionesGuardadas(lista = cotizacionesGuardadas) {
+  const contenedor = document.getElementById('listaCotizacionesGuardadasBody');
+  if (!contenedor) return;
+
+  const textoBusq = document.getElementById('busqCotizaciones')?.value.toLowerCase() || '';
+  const fechaBusq = document.getElementById('fechaCotizaciones')?.value || '';
+
+  const filtradas = lista.filter(cot => {
+    const coincideTexto = cot.paciente.toLowerCase().includes(textoBusq);
+    const coincideFecha = fechaBusq ? cot.fecha === fechaBusq : true;
+    return coincideTexto && coincideFecha;
+  });
+
+  contenedor.innerHTML = '';
+  filtradas.forEach(cot => {
+    contenedor.innerHTML += `
+      <tr>
+        <td>${cot.fecha}</td>
+        <td>${cot.paciente}</td>
+        <td>S/ ${cot.total.toFixed(2)}</td>
+        <td>
+          <button class="btn btn-sm btn-info" onclick="verDetalleCotizacion(${cot.id})">Ver</button>
+        </td>
+      </tr>
+    `;
+  });
+}
+
+function verDetalleCotizacion(id) {
+  const cot = cotizacionesGuardadas.find(c => c.id === id);
+  if (!cot) return;
+  let detalleStr = `Paciente: ${cot.paciente}\nFecha: ${cot.fecha}\nExámenes:\n`;
+  cot.items.forEach(i => {
+    detalleStr += `- ${i.nombre}: S/ ${i.precio.toFixed(2)}\n`;
+  });
+  detalleStr += `TOTAL: S/ ${cot.total.toFixed(2)}`;
+  alert(detalleStr);
+}
 
 // ==========================================
 // CONTROL DE CAJA
