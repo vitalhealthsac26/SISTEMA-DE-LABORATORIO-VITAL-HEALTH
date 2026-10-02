@@ -124,6 +124,17 @@
                                                 <label class="form-label fw-semibold">Edad Calculada</label>
                                                 <input type="text" id="pac-edad" class="form-control bg-light" placeholder="0 AÑOS" readonly>
                                             </div>
+                                            <div class="campo-formulario">
+  <label for="pac-celular">Celular / WhatsApp:</label>
+  <input 
+    type="tel" 
+    id="pac-celular" 
+    placeholder="Ingrese 9 dígitos" 
+    maxlength="9" 
+    pattern="[0-9]{9}" 
+    oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 9);" 
+  />
+</div>
                                             <div class="col-12 col-md-4">
                                                 <label class="form-label fw-semibold">Sexo Biológico</label>
                                                 <select id="pac-sexo" class="form-select">
