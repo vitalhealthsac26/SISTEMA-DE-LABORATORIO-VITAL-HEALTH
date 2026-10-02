@@ -1680,17 +1680,22 @@ function renderizarTablaOrdenes(lista = ordenesLaboratorio) {
     `;
   });
 }
+
 // ==========================================
-// 4. COTIZACIÓN RÁPIDA Y GESTIÓN DE COTIZACIONES
+// COTIZACIÓN RÁPIDA Y GESTIÓN DE COTIZACIONES
 // ==========================================
+
 let carritoCotizacion = [];
 
-// Declaración segura para evitar errores si la variable ya existe en otro lado
-if (typeof cotizacionesGuardadas === 'undefined') {
-    var cotizacionesGuardadas = JSON.parse(localStorage.getItem('cotizacionesGuardadas')) || [];
-} else {
-    cotizacionesGuardadas = JSON.parse(localStorage.getItem('cotizacionesGuardadas')) || cotizacionesGuardadas;
-}
+let cotizacionesGuardadas = JSON.parse(
+    localStorage.getItem('cotizacionesGuardadas') || '[]'
+);
+
+document.addEventListener('DOMContentLoaded', () => {
+    if (typeof renderizarCotizacionesGuardadas === 'function') {
+        renderizarCotizacionesGuardadas();
+    }
+});
 
 // Cargar las cotizaciones guardadas en la tabla al iniciar la aplicación de forma segura
 document.addEventListener('DOMContentLoaded', () => {
