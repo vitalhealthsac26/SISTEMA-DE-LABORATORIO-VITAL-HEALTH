@@ -2015,6 +2015,7 @@ function construirTicketHTML(orden) {
             <div class="t-row"><span>DNI:</span><span>${escapeHTML(orden.dni)}</span></div>
             <div class="t-row"><span>F. Nac:</span><span>${escapeHTML(orden.fechaNacimiento || "-")}</span></div>
             <div class="t-row"><span>Edad:</span><span>${escapeHTML(orden.edad || "")} AÑOS</span></div>
+            ${datoCelular}
             ${datoExtra}
             <div class="t-linea"></div>
             <div class="t-cabecera-items t-negrita">
