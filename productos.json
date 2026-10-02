@@ -554,7 +554,6 @@
   {"Codigo": "590", "Nombre": "HEMOGLOBINA-HEMATOCRITO", "Precio": 15.00},
   {"Codigo": "591", "Nombre": "HEMOGLOBINOPATIAS ESTUDIO COMPLETO", "Precio": 680.00},
   {"Codigo": "592", "Nombre": "HEMOGLOBINURIA PAROXISTICA NOCTURNA (HPN)", "Precio": 1044.00},
-  {"Codigo": "593", "Nombre": "HEMOGRAMA", "Precio": 25.00},
   {"Codigo": "1164", "Nombre": "HEMOGRAMA COMPLETO AUTOMATIZADO", "Precio": 25.00},
   {"Codigo": "595", "Nombre": "HEMOSIDERINA EN ORINA SIMPLE", "Precio": 76.00},
   {"Codigo": "596", "Nombre": "HEPATITIS A ANTICUERPOS IGM", "Precio": 50.00},
