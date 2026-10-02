@@ -2010,18 +2010,30 @@ function formatoRango(refMin, refMax) {
 }
 
 function obtenerPlantillaIndicadores(nombreExamen) {
-    const normalizado = (nombreExamen || "").toUpperCase();
-    const alias = {
-        "HEMOGRAMA": ["HEMOGRAMA"],
-        "PERFIL LIPIDICO": ["PERFIL LIPIDICO", "PERFIL DE LIPIDOS", "LIPIDICO"],
-        "PERFIL HEPATICO": ["PERFIL HEPATICO", "PERFIL DE HEPATICO", "HEPATICO"]
-    };
-    for (const clave in alias) {
-        const coincide = alias[clave].some(palabra => normalizado.includes(palabra));
-        if (coincide && BASE_VALORES_REFERENCIALES[clave]) {
+    const normalizado = (nombreExamen || "").toUpperCase().trim();
+    
+    // Diccionario de equivalencias para aplicar plantillas complejas automáticas
+    if (normalizado.includes("HEMOGRAMA")) {
+        return BASE_VALORES_REFERENCIALES["HEMOGRAMA COMPLETO AUTOMATIZADO"];
+    }
+    if (normalizado.includes("LIPIDICO") || normalizado.includes("LÍPIDICO")) {
+        return BASE_VALORES_REFERENCIALES["PERFIL LIPIDICO"];
+    }
+    if (normalizado.includes("PARASITOLOGICO") || normalizado.includes("PARASITOLÓGICO")) {
+        return BASE_VALORES_REFERENCIALES["PARASITOLOGICO SERIADO 3 MUESTRAS"];
+    }
+    if (normalizado.includes("HEPATICO") || normalizado.includes("HEPÁTICO")) {
+        return BASE_VALORES_REFERENCIALES["PERFIL HEPATICO"];
+    }
+
+    // Buscar coincidencia exacta en el diccionario base
+    for (const clave in BASE_VALORES_REFERENCIALES) {
+        if (normalizado === clave.toUpperCase()) {
             return BASE_VALORES_REFERENCIALES[clave];
         }
     }
+
+    // Si no tiene plantilla compleja predefinida, retorna un parámetro estándar listo para llenar
     return null;
 }
 
