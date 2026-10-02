@@ -1269,26 +1269,31 @@ function buscarPaciente() {
 }
 
 function calcularEdad() {
-    const fechaNacimientoInput = document.getElementById("pac-fnac").value;
+    const fnacVal = document.getElementById("pac-fnac").value;
     const campoEdad = document.getElementById("pac-edad");
 
-    if (!fechaNacimientoInput) {
+    if (!fnacVal) {
         campoEdad.value = "";
         return;
     }
 
-    const hoy = new Date();
-    const cumpleanos = new Date(fechaNacimientoInput);
-    
-    let edad = hoy.getFullYear() - cumpleanos.getFullYear();
-    const mes = hoy.getMonth() - cumpleanos.getMonth();
+    // Separar año, mes y día para evitar errores de zona horaria (UTC)
+    const partes = fnacVal.split('-');
+    const anioNac = parseInt(partes[0], 10);
+    const mesNac = parseInt(partes[1], 10) - 1; // Los meses en JS empiezan en 0 (Enero = 0)
+    const diaNac = parseInt(partes[2], 10);
 
-    // Validar si aún no cumple años este año para restarle uno
-    if (mes < 0 || (mes === 0 && hoy.getDate() < cumpleanos.getDate())) {
+    const hoy = new Date();
+    let edad = hoy.getFullYear() - anioNac;
+    const mesActual = hoy.getMonth();
+    const diaActual = hoy.getDate();
+
+    // Restar un año si todavía no ha cumplido años en el año actual
+    if (mesActual < mesNac || (mesActual === mesNac && diaActual < diaNac)) {
         edad--;
     }
 
-    // Mostrar el resultado formateado en el input de edad
+    // Mostrar el resultado en el input
     if (edad >= 0) {
         campoEdad.value = edad + (edad === 1 ? " AÑO" : " AÑOS");
     } else {
