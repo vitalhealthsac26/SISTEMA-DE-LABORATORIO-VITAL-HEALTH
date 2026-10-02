@@ -2011,6 +2011,8 @@ function construirTicketHTML(orden) {
             <div class="t-row"><span>Hora:</span><span>${escapeHTML(hora)}</span></div>
             <div class="t-row"><span>Paciente:</span><span>${escapeHTML(orden.nombre)}</span></div>
             <div class="t-row"><span>DNI:</span><span>${escapeHTML(orden.dni)}</span></div>
+            <div class="t-row"><span>F. Nac:</span><span>${escapeHTML(orden.fechaNacimiento || "-")}</span></div>
+            <div class="t-row"><span>Edad:</span><span>${escapeHTML(orden.edad || "")} AÑOS</span></div>
             ${datoExtra}
             <div class="t-linea"></div>
             <div class="t-cabecera-items t-negrita">
@@ -2025,8 +2027,6 @@ function construirTicketHTML(orden) {
             <div class="t-centro t-obs">¡Gracias por su preferencia!</div>
             <div class="t-centro t-obs">Conserve este ticket para recoger</div>
             <div class="t-centro t-obs">sus resultados de laboratorio</div>
-            <div class="t-centro t-obs">"Análisis de calidad para el</div>
-            <div class="t-centro t-obs">cuidado de tu salud"</div>
         </div>
     `;
 }
