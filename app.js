@@ -1320,6 +1320,9 @@ const doctor = inputDoctor ? inputDoctor.value.trim() : "Particular";
 // ==========================================
 // FILTRAR Y AGREGAR EXÁMENES
 // ==========================================
+// ==========================================
+// FILTRAR Y AGREGAR EXÁMENES (Recepción / Admisión)
+// ==========================================
 function filtrarExamenes(query) {
     const contenedor = document.getElementById("sugerencias-examenes");
     if (!contenedor) return;
@@ -1330,9 +1333,10 @@ function filtrarExamenes(query) {
         return;
     }
 
+    const textoBusqueda = query.toLowerCase().trim();
     const filtrados = examenesCatalogo.filter(ex => 
-        ex.nombre.toLowerCase().includes(query.toLowerCase()) || 
-        ex.codigo.toLowerCase().includes(query.toLowerCase())
+        ex.nombre.toLowerCase().includes(textoBusqueda) || 
+        ex.codigo.toLowerCase().includes(textoBusqueda)
     );
 
     if (filtrados.length === 0) {
@@ -1345,7 +1349,7 @@ function filtrarExamenes(query) {
         const item = document.createElement("a");
         item.href = "#";
         item.className = "list-group-item list-group-item-action py-2";
-        item.innerHTML = `<strong>${ex.codigo}</strong> - ${ex.nombre} <span class="float-end text-primary">S/ ${Number(ex.precio || 0).toFixed(2)}</span>`;
+        item.innerHTML = `<strong>${escapeHTML(ex.codigo)}</strong> - ${escapeHTML(ex.nombre)} <span class="float-end text-primary">S/ ${Number(ex.precio || 0).toFixed(2)}</span>`;
         item.onclick = (e) => {
             e.preventDefault();
             agregarExamenSeleccionado(ex);
