@@ -1443,7 +1443,7 @@ function guardarOrdenGenerarTicket() {
       fechaNacimiento,
       edad,
       celular: celularPaciente
-        doctor,
+        doctor: doctor,
         metodoPago,
         examenes: [...examenesSeleccionados],
         total,
