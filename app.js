@@ -1396,7 +1396,6 @@ function guardarOrdenGenerarTicket() {
     const doctor = document.getElementById("pac-doctor").value.trim();
     const metodoPago = document.getElementById("metodo-pago").value;
   
-
     if (!dni || !nombre) {
         alert("Por favor ingrese al menos el DNI y los Nombres y Apellidos del paciente.");
         return;
