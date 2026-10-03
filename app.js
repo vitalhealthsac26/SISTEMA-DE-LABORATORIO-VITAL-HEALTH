@@ -2787,3 +2787,4 @@ function pasarCotizacionARecepcion() {
     showSection('recepcion');
     alert("Cotización pasada a admisión. Complete los datos del paciente y registre la orden.");
 }
+}
