@@ -2042,18 +2042,19 @@ function formatoRango(refMin, refMax) {
 function obtenerPlantillaIndicadores(nombreExamen) {
     if (!nombreExamen) return [];
     
-    // 1. Normalizar el texto ingresado: mayúsculas, quitar tildes y reemplazar guiones por espacios
+    // 1. Normalizar el texto: mayúsculas, quitar tildes, reemplazar guiones y espacios múltiples
     const normalizado = nombreExamen.toUpperCase()
-        .replace(/-/g, " ")       // Convierte cualquier guion en espacio (ej: "-3" -> " 3")
-        .replace(/\s+/g, " ")     // Reduce espacios múltiples a uno solo
+        .normalize("NFD").replace(/[\u0300-\u036f]/g, "") // <-- Esto quita las tildes realmente
+        .replace(/-/g, " ")        // Convierte guiones en espacios
+        .replace(/\s+/g, " ")       // Reduce espacios múltiples a uno solo
         .trim();
 
     // 2. Diccionario de equivalencias flexibles
     const equivalencias = [
         { terms: ["HEMOGRAMA"], key: "HEMOGRAMA COMPLETO AUTOMATIZADO" },
-        { terms: ["LIPIDICO", "LÍPIDICO"], key: "PERFIL LIPIDICO" },
-        { terms: ["PARASITOLOGICO", "PARASITOLÓGICO"], key: "PARASITOLOGICO SERIADO 3 MUESTRAS" },
-        { terms: ["HEPATICO", "HEPÁTICO"], key: "PERFIL HEPATICO" }
+        { terms: ["LIPIDICO"], key: "PERFIL LIPIDICO" },
+        { terms: ["PARASITOLOGICO"], key: "PARASITOLOGICO SERIADO 3 MUESTRAS" },
+        { terms: ["HEPATICO"], key: "PERFIL HEPATICO" }
     ];
 
     for (const item of equivalencias) {
@@ -2063,9 +2064,10 @@ function obtenerPlantillaIndicadores(nombreExamen) {
         }
     }
 
-    // 3. Búsqueda inteligente en el diccionario ignorando guiones y espacios
+    // 3. Búsqueda inteligente en el diccionario ignorando tildes, guiones y espacios
     for (const clave in BASE_VALORES_REFERENCIALES) {
         const claveNormalizada = clave.toUpperCase()
+            .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
             .replace(/-/g, " ")
             .replace(/\s+/g, " ")
             .trim();
