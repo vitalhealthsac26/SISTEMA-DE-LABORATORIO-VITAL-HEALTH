@@ -2340,9 +2340,8 @@ function construirTicketHTML(orden) {
         fechaNac = `${dia}/${mes}/${anio}`;
     }
   
-    // Limpiar la edad para asegurarnos de que si ya trae la palabra "AÑOS", no se duplique
-    let edadLimpia = String(orden.edad || "").replace(/años/gi, "").trim();
-    const textoEdad = edadLimpia ? `${edadLimpia} AÑOS` : "-";
+    // Mostrar la edad tal como viene guardada del formulario
+    const textoEdad = orden.edad ? String(orden.edad).trim() : "-";
 
     return `
         <div class="ticket-contenido">
