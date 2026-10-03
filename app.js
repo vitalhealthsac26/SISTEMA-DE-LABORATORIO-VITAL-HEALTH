@@ -2251,14 +2251,14 @@ function construirTicketHTML(orden) {
         ? `<div class="t-row"><span>Médico:</span><span>${escapeHTML(orden.doctor)}</span></div>`
         : "";
 
-    // Buscar la fecha de nacimiento en las posibles propiedades que pueda tener el objeto
-    const fechaNacimiento = orden.fechaNacimiento || 
-                             orden.fnac || 
-                             orden.fechaNac || 
-                             orden.nacimiento || 
-                             orden.fecha_nacimiento || 
-                             (orden.paciente && (orden.paciente.fechaNacimiento || orden.paciente.fnac)) || 
-                             "-";
+    // 1. Buscar la fecha de nacimiento con todas las variantes posibles
+    let fechaNac = orden.fechaNacimiento || orden.fnac || orden.fechaNac || orden.nacimiento || orden.fecha_nacimiento || "-";
+
+    // 2. Si la fecha viene en formato de input HTML (YYYY-MM-DD), la pasamos a DD/MM/YYYY
+    if (fechaNac && fechaNac.includes("-") && fechaNac.length === 10) {
+        const [anio, mes, dia] = fechaNac.split("-");
+        fechaNac = `${dia}/${mes}/${anio}`;
+    }
 
     // Limpiar la edad para asegurarnos de que si ya trae la palabra "AÑOS", no se duplique
     let edadLimpia = String(orden.edad || "").replace(/años/gi, "").trim();
@@ -2280,7 +2280,7 @@ function construirTicketHTML(orden) {
             <div class="t-row"><span>Hora:</span><span>${escapeHTML(hora)}</span></div>
             <div class="t-row"><span>Paciente:</span><span>${escapeHTML(orden.nombre)}</span></div>
             <div class="t-row"><span>DNI:</span><span>${escapeHTML(orden.dni)}</span></div>
-            <div class="t-row"><span>F. Nac:</span><span>${escapeHTML(fechaNacimiento)}</span></div>
+            <div class="t-row"><span>F. Nac:</span><span>${escapeHTML(fechaNac)}</span></div>
             <div class="t-row"><span>Edad:</span><span>${escapeHTML(textoEdad)}</span></div>
             ${datoCelular}
             ${datoExtra}
