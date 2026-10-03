@@ -2299,69 +2299,29 @@ function guardarResultados(nroOrden, silencioso = false) {
 }
 
 function construirInformeHTML(orden) {
-    const fechaEmision = new Date().toLocaleDateString("es-PE", { day: "2-digit", month: "2-digit", year: "numeric" });
-    const horaEmision = new Date().toLocaleTimeString("es-PE", { hour: "2-digit", minute: "2-digit" });
-
-    let tablas = "";
-    (orden.resultados || []).forEach(ex => {
-        let filas = "";
-        ex.indicadores.forEach(ind => {
-            // Si el indicador es una sección, pintamos una fila de cabecera que abarque toda la tabla
-            if (ind.esSeccion) {
-                filas += `
-                    <tr>
-                        <td colspan="5" style="background-color: #f1f3f5; font-weight: bold; text-transform: uppercase; padding: 6px 10px; color: #333; font-size: 10pt; border-top: 1px solid #ddd; border-bottom: 1px solid #ddd;">
-                            ${escapeHTML(ind.nombre)}
-                        </td>
-                    </tr>
-                `;
-                return;
-            }
-
-            const flag = marcarRango(ind.resultado, ind.refMin, ind.refMax);
-            const rango = formatoRango(ind.refMin, ind.refMax);
-            const clase = flag.indexOf("↑") >= 0 ? "res-flag res-alto" : (flag.indexOf("↓") >= 0 ? "res-flag res-bajo" : "res-flag");
-            const celdasRango = rango
-                ? `<td class="td-centro">${escapeHTML(ind.refMin)}</td><td class="td-centro">${escapeHTML(ind.refMax)}</td>`
-                : `<td colspan="2" class="td-centro">${escapeHTML(ind.referencia || "")}</td>`;
-            
-            filas += `
-                <tr>
-                    <td style="padding-left: 15px;">${escapeHTML(ind.nombre)}</td>
-                    <td class="${clase} td-centro">${escapeHTML(ind.resultado || "______")}${flag}</td>
-                    <td class="td-centro">${escapeHTML(ind.unidad || "")}</td>
-                    ${celdasRango}
-                </tr>
-            `;
-        });
-
-        tablas += `
-            <table class="informe-tabla">
-                <tr class="informe-examen-titulo">
-                    <th colspan="5">${escapeHTML(ex.nombre)} (${escapeHTML(ex.codigo)})${ex.metodo ? `<span class="informe-metodo">Método: ${escapeHTML(ex.metodo)}</span>` : ""}</th>
-                </tr>
-                <thead>
-                    <tr>
-                        <th style="width:36%">Indicador</th>
-                        <th class="th-centro" style="width:16%">Resultado</th>
-                        <th class="th-centro" style="width:12%">Unidad</th>
-                        <th class="th-centro" style="width:18%">V. Mínimo</th>
-                        <th class="th-centro" style="width:18%">V. Máximo</th>
-                    </tr>
-                </thead>
-                <tbody>${filas}</tbody>
-            </table>
-        `;
-    });
-
-    const nota = `Los valores de referencia son orientativos y deben interpretarse según la clínica del paciente. Los resultados corresponden únicamente a la muestra analizada.`;
+    const fechaEmision = new Date().toLocaleDateString();
+    const horaEmision = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const nota = orden.nota || "Ninguna.";
+    const tablas = generarTablasResultadosHTML(orden.resultados || []);
 
     return `
-        <div class="informe-cabecera">
-            <img src="logo.png" alt="Centro Médico Vital Health" class="informe-logo" onerror="this.style.display='none'">
-            <h1>CENTRO MEDICO VITAL HEALTH</h1>
-            <p><strong>Laboratorio Clínico</strong></p>
-            <p>Av. Grau N° 1799 - Veintiséis de Octubre &nbsp;|&nbsp; WhatsApp: 984 089 927</p>
+        <div class="informe-cabecera" style="border-bottom: 1px solid #cbd5e1; padding-bottom: 8px; margin-bottom: 10px;">
+            <div style="display: flex; align-items: center; justify-content: space-between;">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <img src="logo.png" alt="Centro Médico Vital Health" class="informe-logo" style="width: 76px; height: 76px; object-fit: contain;" onerror="this.style.display='none'">
+                    <div>
+                        <h1 style="font-size: 20px; margin: 0; letter-spacing: 2.5px; font-weight: 800; color: #0f172a;">CENTRO MEDICO VITAL HEALTH</h1>
+                        <p style="margin: 1px 0; font-size: 10px; color: #475569;"><strong>Laboratorio clínico, comprometido con tu salud.</strong></p>
+                    </div>
+                </div>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 6px; font-size: 9.5px; color: #334155;">
+                <div>📍 Av. Grau N° 1799 - Veintiséis de Octubre</div>
+                <div style="display: flex; gap: 15px;">
+                    <span>📷 Vitalhealthlaboratorio</span>
+                    <span>f Vital Health's Lab</span>
+                </div>
+            </div>
         </div>
 
         <div class="informe-titulo">INFORME DE RESULTADOS DE LABORATORIO</div>
@@ -2382,16 +2342,25 @@ function construirInformeHTML(orden) {
 
         <div class="informe-nota">Nota: ${nota}</div>
 
-        <div class="informe-firma">
-            <img src="firma-biologa.png" alt="Firma" class="informe-firma-img" onerror="this.style.display='none'">
-            <div class="informe-firma-linea"></div>
-            <div class="informe-firma-nombre">FIRMA DE LA BIÓLOGA</div>
-            <div class="informe-firma-det">Bióloga Responsable del Laboratorio &bull; Centro Médico Vital Health</div>
+        <div class="informe-firma" style="margin-top: 35px; text-align: center; page-break-inside: avoid;">
+            <img src="firma-biologa.png" alt="Firma" class="informe-firma-img" style="height: 85px; object-fit: contain; display: block; margin: 0 auto 2px auto;" onerror="this.style.display='none'">
+            <div class="informe-firma-linea" style="width: 250px; border-top: 1.5px solid #0f172a; margin: 0 auto 3px auto;"></div>
+            <div class="informe-firma-nombre" style="font-weight: 700; font-size: 11.5px; color: #0f172a;">FIRMA DE LA BIÓLOGA</div>
+            <div class="informe-firma-det" style="font-size: 9.5px; color: #475569;">Bióloga Responsable del Laboratorio &bull; Centro Médico Vital Health</div>
         </div>
 
-        <div class="informe-pie-fijo">
-            <div><strong>CENTRO MEDICO VITAL HEALTH</strong> &nbsp;|&nbsp; <strong>984 089 927</strong> &nbsp;|&nbsp; SERVICIO A DOMICILIO</div>
-            <div>Av. Grau N° 1799 - Veintiséis de Octubre &nbsp;&bull;&nbsp; "Análisis de calidad para el cuidado de tu salud"</div>
+        <div class="informe-pie-fijo" style="border-top: 1px solid #0072bc; margin-top: 20px; padding-top: 6px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 0 5px; font-size: 9.5px; color: #000;">
+                <div style="display: flex; align-items: center; gap: 5px;">
+                    <span style="font-size: 13px;">🟢</span> <strong style="font-size: 10px; color: #0f172a;">984 089 927</strong>
+                </div>
+                <div style="display: flex; align-items: center; gap: 5px;">
+                    <span style="font-size: 13px;">🏠</span> <strong style="font-size: 10px; color: #0f172a;">SERVICIO A DOMICILIO</strong>
+                </div>
+                <div style="font-weight: 700; font-style: italic; font-size: 9.5px; color: #0f172a;">
+                    “ANÁLISIS DE CALIDAD PARA EL CUIDADO DE TU SALUD”
+                </div>
+            </div>
         </div>
     `;
 }
