@@ -2382,54 +2382,78 @@ function construirInformeHTML(orden) {
     `;
 }
 
-function generarTablasResultadosHTML(resultados) {
-    if (!resultados || typeof resultados !== 'object') return '<p>No hay resultados registrados.</p>';
+function generarTablasResultadosHTML(orden) {
+    // Si pasas la orden completa o solo resultados, lo manejamos de forma segura
+    const examenes = orden.examenes || (Array.isArray(orden) ? null : Object.values(orden));
+    
+    if (!examenes || !examenes.length) {
+        return '<p>No hay exámenes registrados.</p>';
+    }
     
     let html = '';
     
-    for (const [key, examen] of Object.entries(resultados)) {
+    examenes.forEach(ex => {
+        // 1. Obtenemos la plantilla oficial usando el nombre del examen
+        const plantilla = obtenerPlantillaIndicadores(ex.nombre);
+        
+        // 2. Buscamos los resultados guardados para este examen según su código
+        const guardado = (orden.resultados || []).find(r => r.codigo === ex.codigo) || 
+                         (Array.isArray(orden) ? orden.find(r => r.codigo === ex.codigo) : null);
+        
         html += `
             <div style="margin-bottom: 20px; page-break-inside: avoid;">
                 <h3 style="background-color: #f1f5f9; padding: 6px 10px; font-size: 14px; color: #1e293b; border-left: 4px solid #2563eb; margin-bottom: 8px;">
-                    ${examen.nombre || key}
+                    ${escapeHTML(ex.nombre)} <span style="font-weight: normal; color: #64748b; font-size: 11px;">(${escapeHTML(ex.codigo)})</span>
                 </h3>
+                <table style="width: 100%; border-collapse: collapse; font-size: 11px; margin-bottom: 6px;">
+                    <tr style="background-color: #f8fafc; border-bottom: 1px solid #cbd5e1;">
+                        <th style="text-align: left; padding: 4px; width: 45%;">Parámetro / Indicador</th>
+                        <th style="text-align: left; padding: 4px; width: 25%;">Resultado</th>
+                        <th style="text-align: left; padding: 4px; width: 30%;">Valores de Referencia</th>
+                    </tr>
         `;
         
-        if (examen.subsecciones && typeof examen.subsecciones === 'object') {
-            for (const [subName, subValues] of Object.entries(examen.subsecciones)) {
-                html += `<div style="font-weight: bold; font-size: 12px; margin: 6px 0 2px 0; color: #475569;">${subName}</div>`;
-                html += `<table style="width: 100%; border-collapse: collapse; font-size: 11px; margin-bottom: 6px;">`;
-                html += `<tr style="background-color: #f8fafc; border-bottom: 1px solid #cbd5e1;"><th style="text-align: left; padding: 4px;">Parámetro</th><th style="text-align: left; padding: 4px;">Resultado</th><th style="text-align: left; padding: 4px;">Unidad / Referencia</th></tr>`;
-                
-                for (const [paramKey, paramData] of Object.entries(subValues)) {
-                    let val = typeof paramData === 'object' ? (paramData.valor || '') : paramData;
-                    let ref = typeof paramData === 'object' ? (paramData.referencia || '-') : '-';
-                    html += `<tr style="border-bottom: 1px solid #e2e8f0;">
-                        <td style="padding: 4px; color: #334155;">${paramKey}</td>
-                        <td style="padding: 4px; font-weight: bold; color: #0f172a;">${val}</td>
-                        <td style="padding: 4px; color: #64748b;">${ref}</td>
-                    </tr>`;
+        if (plantilla && plantilla.length > 0) {
+            plantilla.forEach((ind, indIdx) => {
+                // SI ES UNA SECCIÓN (Ej: "FÍSICO", "MICROSCOPICO", etc.)
+                if (ind.esSeccion) {
+                    html += `
+                        <tr>
+                            <td colspan="3" style="background-color: #e2e8f0; font-weight: bold; color: #0f172a; padding: 6px 4px; font-size: 11.5px;">
+                                ${escapeHTML(ind.nombre)}
+                            </td>
+                        </tr>
+                    `;
+                    return;
                 }
-                html += `</table>`;
-            }
-        } else if (examen.parametros && typeof examen.parametros === 'object') {
-            html += `<table style="width: 100%; border-collapse: collapse; font-size: 11px; margin-bottom: 6px;">`;
-            html += `<tr style="background-color: #f8fafc; border-bottom: 1px solid #cbd5e1;"><th style="text-align: left; padding: 4px;">Parámetro</th><th style="text-align: left; padding: 4px;">Resultado</th><th style="text-align: left; padding: 4px;">Unidad / Referencia</th></tr>`;
-            
-            for (const [paramKey, paramData] of Object.entries(examen.parametros)) {
-                let val = typeof paramData === 'object' ? (paramData.valor || '') : paramData;
-                let ref = typeof paramData === 'object' ? (paramData.referencia || '-') : '-';
-                html += `<tr style="border-bottom: 1px solid #e2e8f0;">
-                    <td style="padding: 4px; color: #334155;">${paramKey}</td>
-                    <td style="padding: 4px; font-weight: bold; color: #0f172a;">${val}</td>
-                    <td style="padding: 4px; color: #64748b;">${ref}</td>
-                </tr>`;
-            }
-            html += `</table>`;
+                
+                // Extraer el valor registrado previamente en el editor
+                const previo = guardado && guardado.indicadores && guardado.indicadores[indIdx] ? guardado.indicadores[indIdx] : null;
+                const valorObtenido = previo ? previo.resultado : '';
+                const unidadTexto = ind.unidad ? ` ${ind.unidad}` : '';
+                const referencia = ind.referencia || formatoRango(ind.refMin, ind.refMax) || '-';
+                
+                html += `
+                    <tr style="border-bottom: 1px solid #e2e8f0;">
+                        <td style="padding: 4px; color: #334155; padding-left: 10px;">${escapeHTML(ind.nombre)}</td>
+                        <td style="padding: 4px; font-weight: bold; color: #0f172a;">${escapeHTML(valorObtenido)}${escapeHTML(unidadTexto)}</td>
+                        <td style="padding: 4px; color: #64748b;">${escapeHTML(referencia)}</td>
+                    </tr>
+                `;
+            });
+        } else {
+            html += `
+                <tr>
+                    <td colspan="3" style="padding: 6px; color: #64748b; text-align: center;">Sin parámetros configurados para este examen.</td>
+                </tr>
+            `;
         }
         
-        html += `</div>`;
-    }
+        html += `
+                </table>
+            </div>
+        `;
+    });
     
     return html;
 }
