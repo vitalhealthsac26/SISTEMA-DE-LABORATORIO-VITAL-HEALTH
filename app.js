@@ -2252,18 +2252,16 @@ function construirTicketHTML(orden) {
         : "";
 
     // 1. Buscar la fecha de nacimiento con todas las variantes posibles
-    let fechaNac = orden.fechaNacimiento || orden.fnac || orden.fechaNac || orden.nacimiento || orden.fecha_nacimiento || "-";
-
-    // 2. Si la fecha viene en formato de input HTML (YYYY-MM-DD), la pasamos a DD/MM/YYYY
-    if (fechaNac && fechaNac.includes("-") && fechaNac.length === 10) {
-        const [anio, mes, dia] = fechaNac.split("-");
-        fechaNac = `${dia}/${mes}/${anio}`;
-    }
+    const inputFnac = document.getElementById("pac-fnac");
+    const fechaNacimiento = inputFnac ? inputFnac.value.trim() : "";
 
     // Limpiar la edad para asegurarnos de que si ya trae la palabra "AÑOS", no se duplique
     let edadLimpia = String(orden.edad || "").replace(/años/gi, "").trim();
     const textoEdad = edadLimpia ? `${edadLimpia} AÑOS` : "-";
 
+  const doctor = document.getElementById("pac-doctor").value.trim();
+    const metodoPago = document.getElementById("metodo-pago").value;
+  
     return `
         <div class="ticket-contenido">
             <img src="logo.png" alt="" class="t-logo" onerror="this.style.display='none'">
