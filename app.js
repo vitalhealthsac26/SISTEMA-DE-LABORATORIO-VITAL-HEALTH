@@ -2042,29 +2042,31 @@ function formatoRango(refMin, refMax) {
 function obtenerPlantillaIndicadores(nombreExamen) {
     const normalizado = (nombreExamen || "").toUpperCase().trim();
     
-    // Diccionario de equivalencias para aplicar plantillas complejas automáticas
-    if (normalizado.includes("HEMOGRAMA")) {
-        return BASE_VALORES_REFERENCIALES["HEMOGRAMA COMPLETO AUTOMATIZADO"];
-    }
-    if (normalizado.includes("LIPIDICO") || normalizado.includes("LÍPIDICO")) {
-        return BASE_VALORES_REFERENCIALES["PERFIL LIPIDICO"];
-    }
-    if (normalizado.includes("PARASITOLOGICO") || normalizado.includes("PARASITOLÓGICO")) {
-        return BASE_VALORES_REFERENCIALES["PARASITOLOGICO SERIADO 3 MUESTRAS"];
-    }
-    if (normalizado.includes("HEPATICO") || normalizado.includes("HEPÁTICO")) {
-        return BASE_VALORES_REFERENCIALES["PERFIL HEPATICO"];
+    // 1. Diccionario de equivalencias organizado de forma segura
+    const equivalencias = [
+        { terms: ["HEMOGRAMA"], key: "HEMOGRAMA COMPLETO AUTOMATIZADO" },
+        { terms: ["LIPIDICO", "LÍPIDICO"], key: "PERFIL LIPIDICO" },
+        { terms: ["PARASITOLOGICO", "PARASITOLÓGICO"], key: "PARASITOLOGICO SERIADO 3 MUESTRAS" },
+        { terms: ["HEPATICO", "HEPÁTICO"], key: "PERFIL HEPATICO" }
+    ];
+
+    for (const item of equivalencias) {
+        const coincide = item.terms.some(term => normalizado.includes(term));
+        if (coincide && BASE_VALORES_REFERENCIALES[item.key]) {
+            return BASE_VALORES_REFERENCIALES[item.key];
+        }
     }
 
-    // Buscar coincidencia exacta en el diccionario base
+    // 2. Buscar coincidencia exacta en el diccionario base
     for (const clave in BASE_VALORES_REFERENCIALES) {
         if (normalizado === clave.toUpperCase()) {
             return BASE_VALORES_REFERENCIALES[clave];
         }
     }
 
-    // Si no tiene plantilla compleja predefinida, retorna un parámetro estándar listo para llenar
-    return null;
+    // 3. Fallback seguro: Retornar un array vacío en lugar de null 
+    // (esto evita que falle si la interfaz intenta recorrer los indicadores)
+    return []; 
 }
 
 function marcarRango(resultado, refMin, refMax) {
