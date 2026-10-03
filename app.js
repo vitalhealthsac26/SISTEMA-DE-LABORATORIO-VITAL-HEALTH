@@ -39,7 +39,6 @@ const BASE_VALORES_REFERENCIALES = {
     { id: 'muestra_1', nombre: 'MUESTRA I', referencia: '' },
     { id: 'muestra_2', nombre: 'MUESTRA II', referencia: '' },
     { id: 'muestra_3', nombre: 'MUESTRA III', referencia: '' }
-]
   ],
   "PERFIL HEPATICO": [
     { id: 'bt', nombre: 'Bilirrubina Total', unidad: 'mg/dL', refMin: 0.2, refMax: 1.2, referencia: '0.2 - 1.2 mg/dL' },
