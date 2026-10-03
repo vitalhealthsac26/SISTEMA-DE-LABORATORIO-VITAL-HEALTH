@@ -2040,9 +2040,15 @@ function formatoRango(refMin, refMax) {
 }
 
 function obtenerPlantillaIndicadores(nombreExamen) {
-    const normalizado = (nombreExamen || "").toUpperCase().trim();
+    if (!nombreExamen) return [];
     
-    // 1. Diccionario de equivalencias organizado de forma segura
+    // 1. Normalizar el texto ingresado: mayúsculas, quitar tildes y reemplazar guiones por espacios
+    const normalizado = nombreExamen.toUpperCase()
+        .replace(/-/g, " ")       // Convierte cualquier guion en espacio (ej: "-3" -> " 3")
+        .replace(/\s+/g, " ")     // Reduce espacios múltiples a uno solo
+        .trim();
+
+    // 2. Diccionario de equivalencias flexibles
     const equivalencias = [
         { terms: ["HEMOGRAMA"], key: "HEMOGRAMA COMPLETO AUTOMATIZADO" },
         { terms: ["LIPIDICO", "LÍPIDICO"], key: "PERFIL LIPIDICO" },
@@ -2057,16 +2063,20 @@ function obtenerPlantillaIndicadores(nombreExamen) {
         }
     }
 
-    // 2. Buscar coincidencia exacta en el diccionario base
+    // 3. Búsqueda inteligente en el diccionario ignorando guiones y espacios
     for (const clave in BASE_VALORES_REFERENCIALES) {
-        if (normalizado === clave.toUpperCase()) {
+        const claveNormalizada = clave.toUpperCase()
+            .replace(/-/g, " ")
+            .replace(/\s+/g, " ")
+            .trim();
+
+        if (normalizado === claveNormalizada || normalizado.includes(claveNormalizada) || claveNormalizada.includes(normalizado)) {
             return BASE_VALORES_REFERENCIALES[clave];
         }
     }
 
-    // 3. Fallback seguro: Retornar un array vacío en lugar de null 
-    // (esto evita que falle si la interfaz intenta recorrer los indicadores)
-    return []; 
+    // Si de plano no encuentra nada, retorna un array vacío para evitar que se rompa la interfaz
+    return [];
 }
 
 function marcarRango(resultado, refMin, refMax) {
