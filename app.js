@@ -1634,16 +1634,17 @@ function guardarOrdenGenerarTicket() {
 // GESTIÓN DE ÓRDENES Y RESULTADOS
 // ==========================================
 function cargarOrdenes() {
-    const tbody = document.getElementById("lista-ordenes-body");
+    let ordenes = JSON.parse(localStorage.getItem('vital_health_ordenes')) || [];
+    let tbody = document.getElementById('lista-ordenes-body');
     if (!tbody) return;
 
     tbody.innerHTML = "";
-    if (ordenesRegistradas.length === 0) {
+    if (ordenes.length === 0) {
         tbody.innerHTML = `<tr><td colspan="6" class="text-center text-muted py-4">No hay órdenes registradas.</td></tr>`;
         return;
     }
 
-    ordenesRegistradas.forEach(ord => {
+    ordenes.forEach(ord => {
         const tr = document.createElement("tr");
         tr.innerHTML = `
             <td class="fw-bold text-primary">${ord.nroOrden}</td>
@@ -1655,15 +1656,27 @@ function cargarOrdenes() {
                 <button class="btn btn-sm btn-outline-secondary me-1" title="Reimprimir ticket" onclick="mostrarTicketPorNro('${ord.nroOrden}')"><i class="bi bi-receipt"></i></button>
                 ${ord.resultados ? `<button class="btn btn-sm btn-outline-primary me-1" title="Imprimir informe de resultados" onclick="imprimirInforme('${ord.nroOrden}')"><i class="bi bi-file-ear-medical"></i> Informe</button>` : ""}
                 ${ord.resultados ? `<button class="btn btn-sm btn-outline-danger me-1" title="Descargar informe en PDF" onclick="descargarInformePDF('${ord.nroOrden}')"><i class="bi bi-file-earmark-pdf"></i> PDF</button>` : ""}
-                <button class="btn btn-sm btn-outline-primary me-1" onclick="abrirResultados('${ord.nroOrden}')"><i class="bi bi-file-earmark-medical"></i> Resultados</button>
+                <button class="btn btn-sm btn-outline-primary me-1" onclick="abrirResultados('${ord.nroOrden}')" title="Resultados"><i class="bi bi-file-earmark-medical"></i> Resultados</button>
+                <button class="btn btn-sm btn-outline-danger" onclick="eliminarOrden('${ord.nroOrden}')" title="Eliminar Orden"><i class="bi bi-trash"></i></button>
             </td>
         `;
         tbody.appendChild(tr);
     });
 }
 
+// Función auxiliar para eliminar la orden
+function eliminarOrden(nroOrden) {
+    if (!confirm(`¿Estás seguro de que deseas eliminar la orden N° ${nroOrden}?`)) return;
+    let ordenes = JSON.parse(localStorage.getItem('vital_health_ordenes')) || [];
+    ordenes = ordenes.filter(o => o.nroOrden !== nroOrden);
+    localStorage.setItem('vital_health_ordenes', JSON.stringify(ordenes));
+    cargarOrdenes();
+    if (typeof cargarCaja === 'function') cargarCaja();
+}
+
 function abrirResultados(nroOrden) {
-    const orden = ordenesRegistradas.find(o => o.nroOrden === nroOrden);
+    let ordenes = JSON.parse(localStorage.getItem('vital_health_ordenes')) || [];
+    const orden = ordenes.find(o => o.nroOrden === nroOrden);
     if (!orden) return;
 
     showSection('resultados');
@@ -1701,15 +1714,15 @@ function abrirResultados(nroOrden) {
             
             // SI ES UNA SECCIÓN (TÍTULO INTERNO)
             if (ind.esSeccion) {
-    filas += `
-        <div class="row g-2 mb-2 mt-3" data-ex="${exIdx}" data-esseccion="true" data-nombre="${escapeHTML(ind.nombre)}">
-            <div class="col-12">
-                <h6 class="fw-bold text-dark bg-light p-2 border-start border-primary border-4 mb-0">${escapeHTML(ind.nombre)}</h6>
-            </div>
-        </div>
-    `;
-    return;
-}
+                filas += `
+                    <div class="row g-2 mb-2 mt-3" data-ex="${exIdx}" data-esseccion="true" data-nombre="${escapeHTML(ind.nombre)}">
+                        <div class="col-12">
+                            <h6 class="fw-bold text-dark bg-light p-2 border-start border-primary border-4 mb-0">${escapeHTML(ind.nombre)}</h6>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
             const referencia = ind.referencia || formatoRango(ind.refMin, ind.refMax);
             const tieneUnidad = ind.unidad && ind.unidad.trim() !== "";
             
@@ -3006,4 +3019,129 @@ function pasarCotizacionARecepcion() {
     renderizarTablaSeleccionados();
     showSection('recepcion');
     alert("Cotización pasada a admisión. Complete los datos del paciente y registre la orden.");
+}
+// ==========================================
+// GESTIÓN Y EDICIÓN DE PACIENTES
+// ==========================================
+function cargarPacientes() {
+    let ordenes = JSON.parse(localStorage.getItem('vital_health_ordenes')) || [];
+    let pacientesMap = new Map();
+
+    // Recolectar pacientes de las órdenes
+    ordenes.forEach(o => {
+        if (o.dni) {
+            pacientesMap.set(o.dni, {
+                dni: o.dni,
+                nombre: o.nombre || '',
+                celular: o.celular || '',
+                fnac: o.fnac || '',
+                edad: o.edad || '',
+                sexo: o.sexo || 'MASCULINO'
+            });
+        }
+    });
+
+    window.listaPacientesCache = Array.from(pacientesMap.values());
+    renderizarTablaPacientes(window.listaPacientesCache);
+}
+
+function renderizarTablaPacientes(pacientes) {
+    let tbody = document.getElementById('lista-pacientes-body');
+    if (!tbody) return;
+
+    tbody.innerHTML = '';
+    if (pacientes.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" class="text-center text-muted py-4">No se encontraron pacientes registrados.</td></tr>`;
+        return;
+    }
+
+    pacientes.forEach(p => {
+        let tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td class="fw-bold">${p.dni}</td>
+            <td>${p.nombre}</td>
+            <td>${p.celular || '-'}</td>
+            <td>${p.fnac || '-'}</td>
+            <td>${p.edad || '-'}</td>
+            <td>${p.sexo || '-'}</td>
+            <td class="text-end px-3">
+                <button class="btn btn-sm btn-outline-primary" onclick="abrirEditarPaciente('${p.dni}')" title="Editar Paciente"><i class="bi bi-pencil-square"></i></button>
+            </td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
+
+function filtrarPacientesTabla(filtro) {
+    if (!window.listaPacientesCache) return;
+    let texto = filtro.toLowerCase();
+    let filtrados = window.listaPacientesCache.filter(p => 
+        p.dni.toLowerCase().includes(texto) || p.nombre.toLowerCase().includes(texto)
+    );
+    renderizarTablaPacientes(filtrados);
+}
+
+function abrirEditarPaciente(dni) {
+    let pacientes = window.listaPacientesCache || [];
+    let pac = pacientes.find(p => p.dni === dni);
+    if (!pac) return;
+
+    document.getElementById('edit-pac-original-dni').value = pac.dni;
+    document.getElementById('edit-pac-dni').value = pac.dni;
+    document.getElementById('edit-pac-nombre').value = pac.nombre;
+    document.getElementById('edit-pac-celular').value = pac.celular;
+    document.getElementById('edit-pac-sexo').value = pac.sexo;
+    document.getElementById('edit-pac-fnac').value = pac.fnac;
+    document.getElementById('edit-pac-edad').value = pac.edad;
+
+    let modal = new bootstrap.Modal(document.getElementById('modalEditarPaciente'));
+    modal.show();
+}
+
+function calcularEdadEdicion() {
+    let fnac = document.getElementById('edit-pac-fnac').value;
+    if (!fnac) return;
+    let hoy = new Date();
+    let nacimiento = new Date(fnac);
+    let edad = hoy.getFullYear() - nacimiento.getFullYear();
+    let m = hoy.getMonth() - nacimiento.getMonth();
+    if (m < 0 || (m === 0 && hoy.getDate() < nacimiento.getDate())) {
+        edad--;
+    }
+    document.getElementById('edit-pac-edad').value = edad >= 0 ? `${edad} AÑOS` : '';
+}
+
+function guardarCambiosPaciente() {
+    let dniOriginal = document.getElementById('edit-pac-original-dni').value;
+    let nuevoDni = document.getElementById('edit-pac-dni').value;
+    let nuevoNombre = document.getElementById('edit-pac-nombre').value;
+    let nuevoCelular = document.getElementById('edit-pac-celular').value;
+    let nuevoSexo = document.getElementById('edit-pac-sexo').value;
+    let nuevaFnac = document.getElementById('edit-pac-fnac').value;
+    let nuevaEdad = document.getElementById('edit-pac-edad').value;
+
+    if (!nuevoDni || !nuevoNombre) {
+        alert('El DNI y el Nombre son obligatorios.');
+        return;
+    }
+
+    let ordenes = JSON.parse(localStorage.getItem('vital_health_ordenes')) || [];
+    ordenes.forEach(o => {
+        if (o.dni === dniOriginal) {
+            o.dni = nuevoDni;
+            o.nombre = nuevoNombre;
+            o.celular = nuevoCelular;
+            o.sexo = nuevoSexo;
+            o.fnac = nuevaFnac;
+            o.edad = nuevaEdad;
+        }
+    });
+    localStorage.setItem('vital_health_ordenes', JSON.stringify(ordenes));
+
+    let modalEl = document.getElementById('modalEditarPaciente');
+    let modal = bootstrap.Modal.getInstance(modalEl);
+    modal.hide();
+
+    cargarPacientes();
+    alert('Datos del paciente actualizados correctamente.');
 }
