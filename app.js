@@ -2313,10 +2313,13 @@ function guardarResultados(nroOrden, silencioso = false) {
 }
 
 function construirInformeHTML(orden) {
+    function construirInformeHTML(orden) {
     const fechaEmision = new Date().toLocaleDateString();
     const horaEmision = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     const nota = orden.nota || "Ninguna.";
-    const tablas = generarTablasResultadosHTML(orden.resultados || []);
+    
+    // CAMBIO AQUÍ: Le pasamos 'orden' en lugar de solo 'orden.resultados'
+    const tablas = generarTablasResultadosHTML(orden);
 
     return `
         <div class="informe-cabecera" style="border-bottom: 1px solid #cbd5e1; padding-bottom: 8px; margin-bottom: 10px;">
