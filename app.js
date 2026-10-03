@@ -2177,10 +2177,22 @@ function obtenerPlantillaIndicadores(nombreExamen) {
     // 2. Diccionario de equivalencias flexibles
     const equivalencias = [
         { terms: ["HEMOGRAMA"], key: "HEMOGRAMA COMPLETO AUTOMATIZADO" },
-        { terms: ["LIPIDICO"], key: "PERFIL LIPIDICO" },
-        { terms: ["PARASITOLOGICO"], key: "PARASITOLOGICO SERIADO 3 MUESTRAS" },
-        { terms: ["HEPATICO"], key: "PERFIL HEPATICO" }
-    ];
+    { terms: ["LIPIDICO"], key: "PERFIL LIPIDICO" },
+    { terms: ["HEPATICO"], key: "PERFIL HEPATICO" },
+    { terms: ["RENAL"], key: "PERFIL RENAL" },
+    { terms: ["GLICOSILADA", "HBA1C"], key: "HEMOGLOBINA GLICOSILADA" },
+    { terms: ["GRUPO SANGUINEO", "FACTOR RH", "GRUPO Y FACTOR"], key: "GRUPO SANGUINEO Y FACTOR RH" },
+    { terms: ["DENGUE"], key: "DENGUE IGG / IGM" },
+    { terms: ["UROCULTIVO"], key: "UROCULTIVO Y ANTIBIOGRAMA" },
+    { terms: ["ORINA"], key: "EXAMEN COMPLETO DE ORINA" },
+    { terms: ["REACCION INFLAMATORIA", "EXAMEN GENERAL DE HECES"], key: "REACCION INFLAMATORIA EN HECES" },
+    { terms: ["PARASITOLOGICO"], key: "PARASITOLOGICO SERIADO 3 MUESTRAS" },
+    { terms: ["PSA"], key: "INDICE DE PSA" },
+    { terms: ["PROTEINA C REACTIVA"], key: "PROTEINA C REACTIVA" },
+    { terms: ["SEDIMENTACION", "VSG"], key: "VELOCIDAD DE SEDIMENTACION GLOBULAR" },
+    { terms: ["HIV", "RPR", "SIFILIS", "SEROLOGICAS", "VDRL"], key: "SEROLOGIA (VIH / SIFILIS)" },
+    { terms: ["BIOQUIMICA", "BIOQUÍMICA", "PERFIL DE RUTINA", "GLUCOSA"], key: "EXAMEN DE BIOQUIMICA" }
+];
 
     for (const item of equivalencias) {
         const coincide = item.terms.some(term => normalizado.includes(term));
