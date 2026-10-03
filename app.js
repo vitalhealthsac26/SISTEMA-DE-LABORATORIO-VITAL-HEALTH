@@ -1569,12 +1569,23 @@ function abrirResultados(nroOrden) {
         indicadores.forEach((ind, indIdx) => {
             const previo = guardado && guardado.indicadores && guardado.indicadores[indIdx] ? guardado.indicadores[indIdx] : null;
             const referencia = ind.referencia || formatoRango(ind.refMin, ind.refMax);
+            
+            // Verificamos si el indicador usa unidad (ej. mg/dL). Si no tiene, adaptamos a 3 columnas limpias.
+            const tieneUnidad = ind.unidad && ind.unidad.trim() !== "";
+            
             filas += `
                 <div class="row g-2 mb-2 align-items-center" data-ex="${exIdx}" data-ind="${indIdx}" data-nombre="${escapeHTML(ind.nombre)}" data-refmin="${escapeHTML(ind.refMin ?? "")}" data-refmax="${escapeHTML(ind.refMax ?? "")}">
                     <div class="col-md-4"><label class="form-label small mb-0">${escapeHTML(ind.nombre)}</label></div>
-                    <div class="col-md-2"><input type="text" class="form-control form-control-sm" data-campo="resultado" placeholder="Valor obtenido" value="${escapeHTML(previo ? previo.resultado : "")}"></div>
-                    <div class="col-md-2"><input type="text" class="form-control form-control-sm bg-light" data-campo="unidad" value="${escapeHTML(ind.unidad || "")}" readonly></div>
-                    <div class="col-md-4"><input type="text" class="form-control form-control-sm bg-light" data-campo="referencia" value="${escapeHTML(referencia)}" readonly></div>
+                    <div class="${tieneUnidad ? 'col-md-3' : 'col-md-4'}">
+                        <input type="text" class="form-control form-control-sm" data-campo="resultado" placeholder="Valor obtenido" value="${escapeHTML(previo ? previo.resultado : "")}">
+                    </div>
+                    ${tieneUnidad ? `
+                    <div class="col-md-2">
+                        <input type="text" class="form-control form-control-sm bg-light" data-campo="unidad" value="${escapeHTML(ind.unidad)}" readonly>
+                    </div>` : `<input type="hidden" data-campo="unidad" value="">`}
+                    <div class="${tieneUnidad ? 'col-md-3' : 'col-md-4'}">
+                        <input type="text" class="form-control form-control-sm bg-light" data-campo="referencia" value="${escapeHTML(referencia)}" readonly>
+                    </div>
                 </div>
             `;
         });
