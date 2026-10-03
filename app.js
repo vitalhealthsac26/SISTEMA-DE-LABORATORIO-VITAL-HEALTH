@@ -2227,6 +2227,86 @@ function marcarRango(resultado, refMin, refMax) {
 }
 
 // ==========================================
+// REGISTRAR ORDEN Y GENERAR TICKET
+// ==========================================
+function guardarOrdenGenerarTicket() {
+    const dni = document.getElementById("pac-dni").value.trim();
+    const nombre = document.getElementById("pac-nombre").value.trim();
+    const sexo = document.getElementById("pac-sexo").value;
+    
+    // Capturamos correctamente la fecha de nacimiento desde el input con id "pac-fnac"
+    const inputFnac = document.getElementById("pac-fnac");
+    const fechaNacimiento = inputFnac ? inputFnac.value.trim() : "";
+
+    const edad = document.getElementById("pac-edad").value.trim();
+    const celularPaciente = document.getElementById("pac-celular") ? document.getElementById("pac-celular").value.trim() : "";
+    const doctor = document.getElementById("pac-doctor").value.trim();
+    const metodoPago = document.getElementById("metodo-pago").value;
+  
+    if (!dni || !nombre) {
+        alert("Por favor ingrese al menos el DNI y los Nombres y Apellidos del paciente.");
+        return;
+    }
+
+    if (examenesSeleccionados.length === 0) {
+        alert("Debe agregar al menos un examen a la orden.");
+        return;
+    }
+
+    const total = examenesSeleccionados.reduce((acc, item) => acc + (item.cantidad * item.precio), 0);
+    const nroOrden = "ORD-" + Math.floor(100000 + Math.random() * 900000);
+    const fechaHora = new Date().toLocaleString();
+
+    const nuevaOrden = {
+        nroOrden,
+        fechaHora,
+        dni,
+        nombre,
+        sexo,
+        fechaNacimiento, // <--- Aquí viaja y se guarda la fecha seleccionada
+        edad,
+        celular: celularPaciente,
+        doctor: doctor,
+        metodoPago,
+        examenes: [...examenesSeleccionados],
+        total,
+        estado: "Pendiente",
+        en: Date.now()
+    };
+
+    ordenesRegistradas.unshift(nuevaOrden);
+
+    // Registrar en caja
+    const movimiento = {
+        id: `${Date.now()}-${nroOrden}`,
+        hora: new Date().toLocaleTimeString(),
+        nroOrden,
+        paciente: nombre,
+        metodoPago,
+        monto: total,
+        en: Date.now()
+    };
+    cajaMovimientos.unshift(movimiento);
+
+    actualizarTotalesCaja();
+    cargarOrdenes();
+    persistirDatos();
+    window.nubeGuardarOrden?.(nuevaOrden);
+    window.nubeGuardarMovimiento?.(movimiento);
+
+    // Limpiar formulario
+    document.getElementById("form-paciente").reset();
+    document.getElementById("pac-edad").value = "";
+    if (document.getElementById("pac-celular")) document.getElementById("pac-celular").value = ""; 
+    if (inputFnac) inputFnac.value = ""; 
+    
+    examenesSeleccionados = [];
+    renderizarTablaSeleccionados();
+    showSection('ordenes');
+    mostrarTicket(nuevaOrden);
+}
+
+// ==========================================
 // TICKET DE VENTA (TICKETERA TÉRMICA 58mm)
 // ==========================================
 function construirTicketHTML(orden) {
@@ -2251,11 +2331,7 @@ function construirTicketHTML(orden) {
         ? `<div class="t-row"><span>Médico:</span><span>${escapeHTML(orden.doctor)}</span></div>`
         : "";
 
-    // 1. Buscar la fecha de nacimiento con todas las variantes posibles
-    const inputFnac = document.getElementById("pac-fnac");
-    const fechaNacimiento = inputFnac ? inputFnac.value.trim() : "";
-
-    // 1. Declarar y buscar la fecha de nacimiento correctamente
+    // 1. Declarar y buscar la fecha de nacimiento correctamente desde el objeto orden
     let fechaNac = orden.fechaNacimiento || orden.fnac || orden.fechaNac || orden.nacimiento || orden.fecha_nacimiento || "-";
 
     // 2. Formatear la fecha de YYYY-MM-DD a DD/MM/YYYY si aplica
@@ -2268,9 +2344,6 @@ function construirTicketHTML(orden) {
     let edadLimpia = String(orden.edad || "").replace(/años/gi, "").trim();
     const textoEdad = edadLimpia ? `${edadLimpia} AÑOS` : "-";
 
-  const doctor = document.getElementById("pac-doctor").value.trim();
-    const metodoPago = document.getElementById("metodo-pago").value;
-  
     return `
         <div class="ticket-contenido">
             <img src="logo.png" alt="" class="t-logo" onerror="this.style.display='none'">
