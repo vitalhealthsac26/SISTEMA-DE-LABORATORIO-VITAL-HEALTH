@@ -978,7 +978,6 @@ let examenesCatalogo = [
 { codigo: "857", nombre: "PERFIL DE COAGULACIÓN: COAGULACIÓN Y SANGRÍA, TIEMPO DE TROMBINA, TIEMPO DE TROMBOPLASTINA PARCIAL, TIEMPO DE PROTOMBINA, FIBRINOGENO, GRUPO Y FACTOR, RECUENTO DE PLAQUETAS", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 130.00 },
 { codigo: "858", nombre: "PERFIL DE DROGAS DE ABUSO 5 (CUALITATIVO)", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 50.00 },
 { codigo: "859", nombre: "PERFIL DE ESTUDIO GENETICO: ALFA FETOPROTEINAS(AFP), BETA HCG SUBUNIDAD CUANTITATIVO ESTRADIOL LIBRE(IM)", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 224.00 },
-{ codigo: "860", nombre: "PERFIL DE LIPIDOS", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 50.00 },
 { codigo: "861", nombre: "PERFIL DE PRECLANCIA", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 80.00 },
 { codigo: "862", nombre: "PERFIL DROGAS DE ABUSO: BENZODIAZEPINAS (ORINA), COCAINNPBC CUANTITATIVO(M), MARIHUANA-THC(ORINA SIMPLE) CUANTITATIVO", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 198.00 },
 { codigo: "864", nombre: "PERFIL HEPATICO: BILIRRUBINAS FRACCIONADAS, FOSFATASA ALCALINA, GAMMA-GLUTAMIL TRANSPEPTIDASA, PROTEINAS TOTALES Y FRACCIONADAS, TRANSAMINASA OXALACETICA, TRANSAMINASA PIRUVICA", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 85.00 },
