@@ -2365,6 +2365,58 @@ function construirInformeHTML(orden) {
     `;
 }
 
+function generarTablasResultadosHTML(resultados) {
+    if (!resultados || typeof resultados !== 'object') return '<p>No hay resultados registrados.</p>';
+    
+    let html = '';
+    
+    for (const [key, examen] of Object.entries(resultados)) {
+        html += `
+            <div style="margin-bottom: 20px; page-break-inside: avoid;">
+                <h3 style="background-color: #f1f5f9; padding: 6px 10px; font-size: 14px; color: #1e293b; border-left: 4px solid #2563eb; margin-bottom: 8px;">
+                    ${examen.nombre || key}
+                </h3>
+        `;
+        
+        if (examen.subsecciones && typeof examen.subsecciones === 'object') {
+            for (const [subName, subValues] of Object.entries(examen.subsecciones)) {
+                html += `<div style="font-weight: bold; font-size: 12px; margin: 6px 0 2px 0; color: #475569;">${subName}</div>`;
+                html += `<table style="width: 100%; border-collapse: collapse; font-size: 11px; margin-bottom: 6px;">`;
+                html += `<tr style="background-color: #f8fafc; border-bottom: 1px solid #cbd5e1;"><th style="text-align: left; padding: 4px;">Parámetro</th><th style="text-align: left; padding: 4px;">Resultado</th><th style="text-align: left; padding: 4px;">Unidad / Referencia</th></tr>`;
+                
+                for (const [paramKey, paramData] of Object.entries(subValues)) {
+                    let val = typeof paramData === 'object' ? (paramData.valor || '') : paramData;
+                    let ref = typeof paramData === 'object' ? (paramData.referencia || '-') : '-';
+                    html += `<tr style="border-bottom: 1px solid #e2e8f0;">
+                        <td style="padding: 4px; color: #334155;">${paramKey}</td>
+                        <td style="padding: 4px; font-weight: bold; color: #0f172a;">${val}</td>
+                        <td style="padding: 4px; color: #64748b;">${ref}</td>
+                    </tr>`;
+                }
+                html += `</table>`;
+            }
+        } else if (examen.parametros && typeof examen.parametros === 'object') {
+            html += `<table style="width: 100%; border-collapse: collapse; font-size: 11px; margin-bottom: 6px;">`;
+            html += `<tr style="background-color: #f8fafc; border-bottom: 1px solid #cbd5e1;"><th style="text-align: left; padding: 4px;">Parámetro</th><th style="text-align: left; padding: 4px;">Resultado</th><th style="text-align: left; padding: 4px;">Unidad / Referencia</th></tr>`;
+            
+            for (const [paramKey, paramData] of Object.entries(examen.parametros)) {
+                let val = typeof paramData === 'object' ? (paramData.valor || '') : paramData;
+                let ref = typeof paramData === 'object' ? (paramData.referencia || '-') : '-';
+                html += `<tr style="border-bottom: 1px solid #e2e8f0;">
+                    <td style="padding: 4px; color: #334155;">${paramKey}</td>
+                    <td style="padding: 4px; font-weight: bold; color: #0f172a;">${val}</td>
+                    <td style="padding: 4px; color: #64748b;">${ref}</td>
+                </tr>`;
+            }
+            html += `</table>`;
+        }
+        
+        html += `</div>`;
+    }
+    
+    return html;
+}
+
 function imprimirInforme(nroOrden) {
     const orden = ordenesRegistradas.find(o => o.nroOrden === nroOrden);
     if (!orden) return;
