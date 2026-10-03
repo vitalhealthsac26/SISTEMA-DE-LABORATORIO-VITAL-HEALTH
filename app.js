@@ -1578,16 +1578,15 @@ function abrirResultados(nroOrden) {
             
             // SI ES UNA SECCIÓN (TÍTULO INTERNO)
             if (ind.esSeccion) {
-                filas += `
-                    <div class="row g-2 mb-2 mt-3">
-                        <div class="col-12">
-                            <h6 class="fw-bold text-dark bg-light p-2 border-start border-primary border-4 mb-0">${escapeHTML(ind.nombre)}</h6>
-                        </div>
-                    </div>
-                `;
-                return; // Salta a la siguiente iteración
-            }
-
+    filas += `
+        <div class="row g-2 mb-2 mt-3" data-ex="${exIdx}" data-esseccion="true" data-nombre="${escapeHTML(ind.nombre)}">
+            <div class="col-12">
+                <h6 class="fw-bold text-dark bg-light p-2 border-start border-primary border-4 mb-0">${escapeHTML(ind.nombre)}</h6>
+            </div>
+        </div>
+    `;
+    return;
+}
             const referencia = ind.referencia || formatoRango(ind.refMin, ind.refMax);
             const tieneUnidad = ind.unidad && ind.unidad.trim() !== "";
             
