@@ -1576,14 +1576,25 @@ function abrirResultados(nroOrden) {
         let filas = "";
         indicadores.forEach((ind, indIdx) => {
             const previo = guardado && guardado.indicadores && guardado.indicadores[indIdx] ? guardado.indicadores[indIdx] : null;
-            const referencia = ind.referencia || formatoRango(ind.refMin, ind.refMax);
             
-            // Verificamos si el indicador usa unidad (ej. mg/dL). Si no tiene, adaptamos a 3 columnas limpias.
+            // SI ES UNA SECCIÓN (TÍTULO INTERNO)
+            if (ind.esSeccion) {
+                filas += `
+                    <div class="row g-2 mb-2 mt-3">
+                        <div class="col-12">
+                            <h6 class="fw-bold text-dark bg-light p-2 border-start border-primary border-4 mb-0">${escapeHTML(ind.nombre)}</h6>
+                        </div>
+                    </div>
+                `;
+                return; // Salta a la siguiente iteración
+            }
+
+            const referencia = ind.referencia || formatoRango(ind.refMin, ind.refMax);
             const tieneUnidad = ind.unidad && ind.unidad.trim() !== "";
             
             filas += `
                 <div class="row g-2 mb-2 align-items-center" data-ex="${exIdx}" data-ind="${indIdx}" data-nombre="${escapeHTML(ind.nombre)}" data-refmin="${escapeHTML(ind.refMin ?? "")}" data-refmax="${escapeHTML(ind.refMax ?? "")}">
-                    <div class="col-md-4"><label class="form-label small mb-0">${escapeHTML(ind.nombre)}</label></div>
+                    <div class="col-md-4"><label class="form-label small mb-0 ps-3">${escapeHTML(ind.nombre)}</label></div>
                     <div class="${tieneUnidad ? 'col-md-3' : 'col-md-4'}">
                         <input type="text" class="form-control form-control-sm" data-campo="resultado" placeholder="Valor obtenido" value="${escapeHTML(previo ? previo.resultado : "")}">
                     </div>
