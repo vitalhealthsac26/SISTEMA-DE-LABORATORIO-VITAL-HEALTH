@@ -2252,7 +2252,13 @@ function construirTicketHTML(orden) {
         : "";
 
     // Buscar la fecha de nacimiento en las posibles propiedades que pueda tener el objeto
-    const fechaNacimiento = orden.fechaNacimiento || orden.fnac || orden.fechaNac || "-";
+    const fechaNacimiento = orden.fechaNacimiento || 
+                             orden.fnac || 
+                             orden.fechaNac || 
+                             orden.nacimiento || 
+                             orden.fecha_nacimiento || 
+                             (orden.paciente && (orden.paciente.fechaNacimiento || orden.paciente.fnac)) || 
+                             "-";
 
     // Limpiar la edad para asegurarnos de que si ya trae la palabra "AÑOS", no se duplique
     let edadLimpia = String(orden.edad || "").replace(/años/gi, "").trim();
