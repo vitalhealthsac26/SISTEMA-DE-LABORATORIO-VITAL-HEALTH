@@ -2232,7 +2232,6 @@ function imprimirZona() {
 // GUARDADO E IMPRESIÓN DE RESULTADOS (A4)
 // ==========================================
 function guardarResultados(nroOrden, silencioso = false) {
-    function guardarResultados(nroOrden, silencioso = false) {
     const orden = ordenesRegistradas.find(o => o.nroOrden === nroOrden);
     const editor = document.getElementById("resultados-editor");
     if (!orden || !editor) return false;
