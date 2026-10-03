@@ -2450,12 +2450,10 @@ function guardarResultados(nroOrden, silencioso = false) {
 }
 
 function construirInformeHTML(orden) {
-    function construirInformeHTML(orden) {
     const fechaEmision = new Date().toLocaleDateString();
     const horaEmision = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     const nota = orden.nota || "Ninguna.";
     
-    // CAMBIO AQUÍ: Le pasamos 'orden' en lugar de solo 'orden.resultados'
     const tablas = generarTablasResultadosHTML(orden);
 
     return `
@@ -2520,7 +2518,6 @@ function construirInformeHTML(orden) {
 }
 
 function generarTablasResultadosHTML(orden) {
-    // Si pasas la orden completa o solo resultados, lo manejamos de forma segura
     const examenes = orden.examenes || (Array.isArray(orden) ? null : Object.values(orden));
     
     if (!examenes || !examenes.length) {
@@ -2530,10 +2527,7 @@ function generarTablasResultadosHTML(orden) {
     let html = '';
     
     examenes.forEach(ex => {
-        // 1. Obtenemos la plantilla oficial usando el nombre del examen
         const plantilla = obtenerPlantillaIndicadores(ex.nombre);
-        
-        // 2. Buscamos los resultados guardados para este examen según su código
         const guardado = (orden.resultados || []).find(r => r.codigo === ex.codigo) || 
                          (Array.isArray(orden) ? orden.find(r => r.codigo === ex.codigo) : null);
         
@@ -2552,7 +2546,6 @@ function generarTablasResultadosHTML(orden) {
         
         if (plantilla && plantilla.length > 0) {
             plantilla.forEach((ind, indIdx) => {
-                // SI ES UNA SECCIÓN (Ej: "FÍSICO", "MICROSCOPICO", etc.)
                 if (ind.esSeccion) {
                     html += `
                         <tr>
@@ -2564,7 +2557,6 @@ function generarTablasResultadosHTML(orden) {
                     return;
                 }
                 
-                // Extraer el valor registrado previamente en el editor
                 const previo = guardado && guardado.indicadores && guardado.indicadores[indIdx] ? guardado.indicadores[indIdx] : null;
                 const valorObtenido = previo ? previo.resultado : '';
                 const unidadTexto = ind.unidad ? ` ${ind.unidad}` : '';
@@ -2592,6 +2584,7 @@ function generarTablasResultadosHTML(orden) {
         `;
     });
     
+    html += '';
     return html;
 }
 
