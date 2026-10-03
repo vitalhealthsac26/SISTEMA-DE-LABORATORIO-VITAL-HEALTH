@@ -519,5 +519,57 @@
     <script src="firebase-config.js"></script>
     <script src="app.js"></script>
     <script type="module" src="cloud.js"></script>
+
+    <!-- Modal Editar Paciente -->
+<div class="modal fade" id="modalEditarPaciente" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header py-3">
+                <h5 class="modal-title fw-bold text-primary"><i class="bi bi-pencil-square me-2"></i>Editar Datos del Paciente</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <form id="form-editar-paciente">
+                    <input type="hidden" id="edit-pac-original-dni">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">DNI / Documento</label>
+                        <input type="text" id="edit-pac-dni" class="form-control" maxlength="8" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 8);">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Nombres y Apellidos</label>
+                        <input type="text" id="edit-pac-nombre" class="form-control">
+                    </div>
+                    <div class="row g-2 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Celular</label>
+                            <input type="text" id="edit-pac-celular" class="form-control" maxlength="9" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 9);">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Sexo Biológico</label>
+                            <select id="edit-pac-sexo" class="form-select">
+                                <option value="MASCULINO">MASCULINO</option>
+                                <option value="FEMENINO">FEMENINO</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row g-2 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Fecha de Nacimiento</label>
+                            <input type="date" id="edit-pac-fnac" class="form-control" onchange="calcularEdadEdicion()">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Edad</label>
+                            <input type="text" id="edit-pac-edad" class="form-control bg-light" readonly>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="guardarCambiosPaciente()">Guardar Cambios</button>
+            </div>
+        </div>
+    </div>
+</div>
 </body>
 </html>
