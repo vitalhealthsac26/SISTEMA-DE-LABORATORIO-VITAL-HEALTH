@@ -2255,6 +2255,15 @@ function construirTicketHTML(orden) {
     const inputFnac = document.getElementById("pac-fnac");
     const fechaNacimiento = inputFnac ? inputFnac.value.trim() : "";
 
+    // 1. Declarar y buscar la fecha de nacimiento correctamente
+    let fechaNac = orden.fechaNacimiento || orden.fnac || orden.fechaNac || orden.nacimiento || orden.fecha_nacimiento || "-";
+
+    // 2. Formatear la fecha de YYYY-MM-DD a DD/MM/YYYY si aplica
+    if (fechaNac && fechaNac.includes("-") && fechaNac.length === 10) {
+        const [anio, mes, dia] = fechaNac.split("-");
+        fechaNac = `${dia}/${mes}/${anio}`;
+    }
+  
     // Limpiar la edad para asegurarnos de que si ya trae la palabra "AÑOS", no se duplique
     let edadLimpia = String(orden.edad || "").replace(/años/gi, "").trim();
     const textoEdad = edadLimpia ? `${edadLimpia} AÑOS` : "-";
