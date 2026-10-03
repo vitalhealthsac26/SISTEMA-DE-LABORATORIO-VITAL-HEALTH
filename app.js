@@ -2232,6 +2232,7 @@ function imprimirZona() {
 // GUARDADO E IMPRESIÓN DE RESULTADOS (A4)
 // ==========================================
 function guardarResultados(nroOrden, silencioso = false) {
+    function guardarResultados(nroOrden, silencioso = false) {
     const orden = ordenesRegistradas.find(o => o.nroOrden === nroOrden);
     const editor = document.getElementById("resultados-editor");
     if (!orden || !editor) return false;
@@ -2243,12 +2244,30 @@ function guardarResultados(nroOrden, silencioso = false) {
     grupos.forEach(fila => {
         const exIdx = fila.dataset.ex;
         if (!porExamen[exIdx]) porExamen[exIdx] = [];
+
+        // Identificar si la fila es una sección
+        const esSeccion = fila.dataset.esseccion === "true";
+        if (esSeccion) {
+            porExamen[exIdx].push({
+                nombre: fila.dataset.nombre || "",
+                esSeccion: true,
+                resultado: "",
+                unidad: "",
+                refMin: "",
+                refMax: "",
+                referencia: ""
+            });
+            return;
+        }
+
         const leer = campo => {
             const el = fila.querySelector(`[data-campo="${campo}"]`);
             return el ? el.value.trim() : "";
         };
+
         porExamen[exIdx].push({
             nombre: fila.dataset.nombre || "Resultado",
+            esSeccion: false,
             resultado: leer("resultado"),
             unidad: leer("unidad"),
             refMin: fila.dataset.refmin || "",
@@ -2267,6 +2286,7 @@ function guardarResultados(nroOrden, silencioso = false) {
             indicadores: porExamen[exIdx]
         };
     });
+
     orden.estado = "Resultados listos";
     orden.en = Date.now();
     cargarOrdenes();
