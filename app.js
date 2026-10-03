@@ -2307,15 +2307,28 @@ function construirInformeHTML(orden) {
     (orden.resultados || []).forEach(ex => {
         let filas = "";
         ex.indicadores.forEach(ind => {
+            // Si el indicador es una sección, pintamos una fila de cabecera que abarque toda la tabla
+            if (ind.esSeccion) {
+                filas += `
+                    <tr>
+                        <td colspan="5" style="background-color: #f1f3f5; font-weight: bold; text-transform: uppercase; padding: 6px 10px; color: #333; font-size: 10pt; border-top: 1px solid #ddd; border-bottom: 1px solid #ddd;">
+                            ${escapeHTML(ind.nombre)}
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
             const flag = marcarRango(ind.resultado, ind.refMin, ind.refMax);
             const rango = formatoRango(ind.refMin, ind.refMax);
             const clase = flag.indexOf("↑") >= 0 ? "res-flag res-alto" : (flag.indexOf("↓") >= 0 ? "res-flag res-bajo" : "res-flag");
             const celdasRango = rango
                 ? `<td class="td-centro">${escapeHTML(ind.refMin)}</td><td class="td-centro">${escapeHTML(ind.refMax)}</td>`
                 : `<td colspan="2" class="td-centro">${escapeHTML(ind.referencia || "")}</td>`;
+            
             filas += `
                 <tr>
-                    <td>${escapeHTML(ind.nombre)}</td>
+                    <td style="padding-left: 15px;">${escapeHTML(ind.nombre)}</td>
                     <td class="${clase} td-centro">${escapeHTML(ind.resultado || "______")}${flag}</td>
                     <td class="td-centro">${escapeHTML(ind.unidad || "")}</td>
                     ${celdasRango}
