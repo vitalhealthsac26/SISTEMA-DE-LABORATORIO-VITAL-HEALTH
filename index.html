@@ -247,88 +247,157 @@
 </section>
 
                 <!-- SECCIÓN COTIZACIÓN -->
-                <section id="sec-cotizacion" class="section-content" style="display: none;">
-                    <div class="container-fluid px-0 py-0">
-                        <h2 class="mb-4 fw-bold text-primary">
-                            <i class="bi bi-calculator me-2"></i>Módulo de Cotización
-                        </h2>
+<section id="sec-cotizacion" class="section-content" style="display: none;">
+    <div class="container-fluid px-0 py-0">
+        <h2 class="mb-4 fw-bold text-primary">
+            <i class="bi bi-calculator me-2"></i>Módulo de Cotización
+        </h2>
 
-                        <div class="row mb-3">
-    <div class="col-md-6">
-        <input type="text" id="input-buscar-cotizacion" class="form-control" placeholder="Buscar por nombre, DNI o fecha..." onkeyup="buscarCotizaciones()">
-    </div>
-</div>
+        <!-- Buscador para encontrar cotizaciones pasadas -->
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold text-muted">Buscar cotizaciones guardadas:</label>
+                        <input type="text" id="input-buscar-cotizacion" class="form-control" placeholder="Buscar por nombre, DNI, celular o fecha..." onkeyup="buscarCotizaciones()">
+                    </div>
+                </div>
+                <div class="table-responsive mt-3">
+                    <table class="table table-bordered table-sm">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Nro</th>
+                                <th>Fecha y Hora</th>
+                                <th>Paciente / DNI</th>
+                                <th>Total</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabla-cotizaciones-body">
+                            <tr><td colspan="5" class="text-center text-muted">Use el buscador para filtrar cotizaciones anteriores.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
 
-<!-- Tu tabla donde se muestran las cotizaciones guardadas -->
-<table class="table table-bordered">
-    <thead>
-        <tr>
-            <th>Nro</th>
-            <th>Fecha y Hora</th>
-            <th>Paciente / DNI</th>
-            <th>Total</th>
-            <th>Acciones</th>
-        </tr>
-    </thead>
-    <tbody id="tabla-cotizaciones-body">
-        <!-- Aquí se cargan dinámicamente -->
-    </tbody>
-</table>
-                        <div class="card shadow-sm border-0">
-                            <div class="card-header bg-white py-3 border-bottom">
-                                <h5 class="card-title fw-bold text-dark mb-0">Cotizar Exámenes Médicos</h5>
-                            </div>
-                            <div class="card-body">
-                                <div class="row g-3 mb-3">
-                                    <div class="col-12 col-md-8 position-relative">
-                                        <label class="form-label fw-semibold">Buscar Examen del Catálogo</label>
-                                        <input type="text" id="busqueda-examen-cotizacion" class="form-control" placeholder="Escriba el nombre o código..." oninput="filtrarExamenesCotizacion(this.value)">
-                                        <div id="sugerencias-examenes-cotizacion" class="list-group position-absolute w-100 shadow z-3" style="max-height: 250px; overflow-y: auto;"></div>
-                                    </div>
-                                    <div class="col-12 col-md-4">
-                                        <label class="form-label fw-semibold">Descuento / Convenio</label>
-                                        <select id="tipo-convenio-cotizacion" class="form-select">
-                                            <option value="Particular">Particular (Sin Descuento)</option>
-                                            <option value="Convenio">Convenio / Empresa</option>
-                                        </select>
-                                    </div>
-                                </div>
-
-                                <div class="table-responsive">
-                                    <table class="table table-hover align-middle" id="tabla-cotizacion-independiente">
-                                        <thead class="table-light">
-                                            <tr>
-                                                <th>Código</th>
-                                                <th>Examen / Servicio</th>
-                                                <th>Cant.</th>
-                                                <th>Precio Unit. (S/)</th>
-                                                <th>Importe (S/)</th>
-                                                <th class="text-center">Acción</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <tr id="empty-row-cotizacion">
-                                                <td colspan="6" class="text-center text-muted py-4">No hay exámenes agregados para cotizar.</td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
-
-                                <div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top">
-                                    <div class="h4 mb-0 fw-bold text-dark">Total Cotización: <span class="text-primary">S/ <span id="total-cotizacion">0.00</span></span></div>
-                                    <div>
-                                        <button class="btn btn-outline-secondary me-2 px-4 fw-semibold" type="button" onclick="imprimirCotizacion()">
-                                            <i class="bi bi-printer me-2"></i>Imprimir Cotización
-                                        </button>
-                                        <button class="btn btn-primary px-4 fw-semibold" type="button" onclick="pasarCotizacionARecepcion()">
-                                            <i class="bi bi-arrow-right-circle me-2"></i>Pasar a Admisión
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
+        <!-- CAJONES DE DATOS DEL PACIENTE PARA LA COTIZACIÓN -->
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-white py-3 border-bottom">
+                <h5 class="card-title fw-bold text-dark mb-0">
+                    <i class="bi bi-person-plus-fill me-2 text-primary"></i>Datos del Paciente
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <!-- DNI / Documento -->
+                    <div class="col-12 col-md-3">
+                        <label for="dni" class="form-label fw-semibold">DNI / Documento</label>
+                        <div class="input-group">
+                            <input type="text" id="dni" class="form-control" placeholder="8 dígitos" maxlength="8">
+                            <button class="btn btn-primary" type="button"><i class="bi bi-search"></i></button>
                         </div>
                     </div>
-                </section>
+
+                    <!-- Nombres y Apellidos -->
+                    <div class="col-12 col-md-5">
+                        <label for="nombres" class="form-label fw-semibold">Nombres y Apellidos</label>
+                        <input type="text" id="nombres" class="form-control" placeholder="Nombre completo del paciente">
+                    </div>
+
+                    <!-- Médico Solicitante -->
+                    <div class="col-12 col-md-4">
+                        <label for="medico" class="form-label fw-semibold">Médico Solicitante</label>
+                        <input type="text" id="medico" class="form-control" placeholder="Dr. / Particular">
+                    </div>
+
+                    <!-- Fecha de Nacimiento -->
+                    <div class="col-12 col-md-3">
+                        <label for="fechaNacimiento" class="form-label fw-semibold">Fecha de Nacimiento</label>
+                        <input type="date" id="fechaNacimiento" class="form-control">
+                    </div>
+
+                    <!-- Edad Calculada -->
+                    <div class="col-12 col-md-2">
+                        <label for="edad" class="form-label fw-semibold">Edad Calculada</label>
+                        <input type="text" id="edad" class="form-control" placeholder="0 AÑOS" readonly>
+                    </div>
+
+                    <!-- Celular / WhatsApp -->
+                    <div class="col-12 col-md-3">
+                        <label for="celular" class="form-label fw-semibold">Celular / WhatsApp</label>
+                        <input type="text" id="celular" class="form-control" placeholder="Ingrese 9 dígitos" maxlength="9">
+                    </div>
+
+                    <!-- Sexo Biológico (Con las opciones que pediste) -->
+                    <div class="col-12 col-md-4">
+                        <label for="sexo" class="form-label fw-semibold">Sexo Biológico</label>
+                        <select id="sexo" class="form-select">
+                            <option value="MASCULINO">MASCULINO</option>
+                            <option value="FEMENINO">FEMENINO</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- FIN DE CAJONES DE DATOS DEL PACIENTE -->
+
+        <!-- SECCIÓN DE EXÁMENES A COTIZAR -->
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-white py-3 border-bottom">
+                <h5 class="card-title fw-bold text-dark mb-0">Cotizar Exámenes Médicos</h5>
+            </div>
+            <div class="card-body">
+                <div class="row g-3 mb-3">
+                    <div class="col-12 col-md-8 position-relative">
+                        <label class="form-label fw-semibold">Buscar Examen del Catálogo</label>
+                        <input type="text" id="busqueda-examen-cotizacion" class="form-control" placeholder="Escriba el nombre o código..." oninput="filtrarExamenesCotizacion(this.value)">
+                        <div id="sugerencias-examenes-cotizacion" class="list-group position-absolute w-100 shadow z-3" style="max-height: 250px; overflow-y: auto;"></div>
+                    </div>
+                    <div class="col-12 col-md-4">
+                        <label class="form-label fw-semibold">Descuento / Convenio</label>
+                        <select id="tipo-convenio-cotizacion" class="form-select">
+                            <option value="Particular">Particular (Sin Descuento)</option>
+                            <option value="Convenio">Convenio / Empresa</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle" id="tabla-cotizacion-independiente">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Código</th>
+                                <th>Examen / Servicio</th>
+                                <th>Cant.</th>
+                                <th>Precio Unit. (S/)</th>
+                                <th>Importe (S/)</th>
+                                <th class="text-center">Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr id="empty-row-cotizacion">
+                                <td colspan="6" class="text-center text-muted py-4">No hay exámenes agregados para cotizar.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top">
+                    <div class="h4 mb-0 fw-bold text-dark">Total Cotización: <span class="text-primary">S/ <span id="total-cotizacion">0.00</span></span></div>
+                    <div>
+                        <button class="btn btn-outline-secondary me-2 px-4 fw-semibold" type="button" onclick="imprimirCotizacion()">
+                            <i class="bi bi-printer me-2"></i>Imprimir Cotización
+                        </button>
+                        <button class="btn btn-primary px-4 fw-semibold" type="button" onclick="pasarCotizacionARecepcion()">
+                            <i class="bi bi-arrow-right-circle me-2"></i>Pasar a Admisión
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
 
                 <!-- SECCIÓN ÓRDENES -->
                 <section id="sec-ordenes" class="section-content d-none">
