@@ -3179,3 +3179,31 @@ function cargarDatosCaja() {
         `;
     });
 }
+// --- 2. SECCIÓN PACIENTES ---
+
+// Función para listar y mostrar los pacientes en la tabla del HTML
+function renderizarPacientes() {
+    let pacientes = JSON.parse(localStorage.getItem('vital_health_pacientes')) || [];
+    let tabla = document.getElementById('tabla-pacientes-body'); // Reemplaza con el ID de tu tabla de pacientes
+    if (!tabla) return;
+
+    tabla.innerHTML = '';
+    pacientes.forEach((p, index) => {
+        tabla.innerHTML += `
+            <tr>
+                <td>${index + 1}</td>
+                <td>${p.nombres || ''} ${p.apellidos || ''}</td>
+                <td>${p.dni || ''}</td>
+                <td>${p.celular || ''}</td>
+            </tr>
+        `;
+    });
+}
+
+// Función para registrar un nuevo paciente y actualizar la tabla de inmediato
+function agregarPaciente(nuevoPaciente) {
+    let pacientes = JSON.parse(localStorage.getItem('vital_health_pacientes')) || [];
+    pacientes.push(nuevoPaciente);
+    localStorage.setItem('vital_health_pacientes', JSON.stringify(pacientes));
+    renderizarPacientes(); // Actualiza la vista automáticamente
+}
