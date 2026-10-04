@@ -1411,147 +1411,257 @@ function buscarPaciente() {
     alert(`Buscando datos para el documento: ${dni}`);
 }
 
+let currentCotizacionId = null; // Rinde el control si estamos editando una cotización existente
+
+// 1. CALCULAR EDAD AUTOMÁTICAMENTE
 function calcularEdad() {
-    const fnacVal = document.getElementById("pac-fnac").value;
-    const campoEdad = document.getElementById("pac-edad");
+    const inputFecha = document.getElementById('fechaNacimiento').value;
+    if (!inputFecha) return;
 
-    if (!fnacVal) {
-        campoEdad.value = "";
-        return;
-    }
-
-    // Separar año, mes y día para evitar errores de zona horaria (UTC)
-    const partes = fnacVal.split('-');
-    const anioNac = parseInt(partes[0], 10);
-    const mesNac = parseInt(partes[1], 10) - 1; // Los meses en JS empiezan en 0 (Enero = 0)
-    const diaNac = parseInt(partes[2], 10);
-
+    const fechaNacimiento = new Date(inputFecha);
     const hoy = new Date();
-    let edad = hoy.getFullYear() - anioNac;
-    const mesActual = hoy.getMonth();
-    const diaActual = hoy.getDate();
 
-    // Restar un año si todavía no ha cumplido años en el año actual
-    if (mesActual < mesNac || (mesActual === mesNac && diaActual < diaNac)) {
+    let edad = hoy.getFullYear() - fechaNacimiento.getFullYear();
+    const mes = hoy.getMonth() - fechaNacimiento.getMonth();
+
+    if (mes < 0 || (mes === 0 && hoy.getDate() < fechaNacimiento.getDate())) {
         edad--;
     }
 
-    // Mostrar el resultado en el input
-    if (edad >= 0) {
-        campoEdad.value = edad + (edad === 1 ? " AÑO" : " AÑOS");
-    } else {
-        campoEdad.value = "0 AÑOS";
-    }
+    document.getElementById('edad').value = (edad >= 0 ? edad : 0) + " AÑOS";
 }
-// Capturamos el valor del médico usando el ID correcto que acabamos de ver
-const inputDoctor = document.getElementById("pac-doctor");
-const doctor = inputDoctor ? inputDoctor.value.trim() : "Particular";
 
-// ==========================================
-// FILTRAR Y AGREGAR EXÁMENES
-// ==========================================
-// ==========================================
-// FILTRAR Y AGREGAR EXÁMENES (Recepción / Admisión)
-// ==========================================
-function filtrarExamenes(query) {
-    const contenedor = document.getElementById("sugerencias-examenes");
-    if (!contenedor) return;
-    contenedor.innerHTML = "";
+// 2. GUARDAR O ACTUALIZAR COTIZACIÓN (No limpia los cajones automáticamente)
+function guardarCotizacion() {
+    const dni = document.getElementById('dni').value.trim();
+    const nombres = document.getElementById('nombres').value.trim();
 
-    if (!query || query.trim() === "") {
-        contenedor.style.display = "none";
+    if (!dni || !nombres) {
+        alert('Por favor ingrese al menos el DNI y los Nombres del paciente para guardar la cotización.');
         return;
     }
 
-    const textoBusqueda = query.toLowerCase().trim();
-    const filtrados = examenesCatalogo.filter(ex => 
-        ex.nombre.toLowerCase().includes(textoBusqueda) || 
-        ex.codigo.toLowerCase().includes(textoBusqueda)
+    const filas = document.querySelectorAll('#tabla-cotizacion-independiente tbody tr:not(#empty-row-cotizacion)');
+    if (filas.length === 0) {
+        alert('Debe agregar al menos un examen para guardar la cotización.');
+        return;
+    }
+
+    let examenes = [];
+    filas.forEach(fila => {
+        const cols = fila.querySelectorAll('td');
+        if (cols.length >= 5) {
+            examenes.push({
+                codigo: cols[0].innerText,
+                nombre: cols[1].innerText,
+                cantidad: cols[2].querySelector('input') ? cols[2].querySelector('input').value : cols[2].innerText,
+                precioUnit: cols[3].innerText,
+                importe: cols[4].innerText
+            });
+        }
+    });
+
+    let cotizaciones = JSON.parse(localStorage.getItem('vitalhealth_cotizaciones')) || [];
+
+    if (currentCotizacionId) {
+        // Actualizar cotización existente cargada
+        let index = cotizaciones.findIndex(item => item.id === currentCotizacionId);
+        if (index !== -1) {
+            cotizaciones[index].paciente = {
+                dni: dni,
+                nombres: nombres,
+                medico: document.getElementById('medico').value,
+                fechaNacimiento: document.getElementById('fechaNacimiento').value,
+                edad: document.getElementById('edad').value,
+                celular: document.getElementById('celular').value,
+                sexo: document.getElementById('sexo').value
+            };
+            cotizaciones[index].convenio = document.getElementById('tipo-convenio-cotizacion').value;
+            cotizaciones[index].examenes = examenes;
+            cotizaciones[index].total = document.getElementById('total-cotizacion').innerText;
+        }
+        alert('¡Cotización actualizada con éxito!');
+    } else {
+        // Crear nueva cotización
+        const nuevaCotizacion = {
+            id: Date.now(),
+            fechaHora: new Date().toLocaleString(),
+            paciente: {
+                dni: dni,
+                nombres: nombres,
+                medico: document.getElementById('medico').value,
+                fechaNacimiento: document.getElementById('fechaNacimiento').value,
+                edad: document.getElementById('edad').value,
+                celular: document.getElementById('celular').value,
+                sexo: document.getElementById('sexo').value
+            },
+            convenio: document.getElementById('tipo-convenio-cotizacion').value,
+            examenes: examenes,
+            total: document.getElementById('total-cotizacion').innerText
+        };
+        cotizaciones.push(nuevaCotizacion);
+        currentCotizacionId = nuevaCotizacion.id; // Vinculamos el ID actual
+        alert('¡Cotización guardada exitosamente!');
+    }
+
+    localStorage.setItem('vitalhealth_cotizaciones', JSON.stringify(cotizaciones));
+    buscarCotizaciones(); // Se actualiza y aparece inmediatamente en la tabla superior
+}
+
+// 3. BUSCAR COTIZACIONES GUARDADAS MEDIANTE EL BOTÓN
+function buscarCotizaciones() {
+    const filtro = document.getElementById('input-buscar-cotizacion').value.toLowerCase().trim();
+    const cotizaciones = JSON.parse(localStorage.getItem('vitalhealth_cotizaciones')) || [];
+    const tbody = document.getElementById('tabla-cotizaciones-body');
+    
+    tbody.innerHTML = '';
+
+    const filtradas = cotizaciones.filter(c => 
+        filtro === '' || 
+        c.paciente.nombres.toLowerCase().includes(filtro) ||
+        c.paciente.dni.toLowerCase().includes(filtro) ||
+        (c.paciente.celular && c.paciente.celular.toLowerCase().includes(filtro)) ||
+        c.fechaHora.toLowerCase().includes(filtro)
     );
 
-    if (filtrados.length === 0) {
-        contenedor.style.display = "none";
+    if (filtradas.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" class="text-center text-muted">No se encontraron cotizaciones registradas.</td></tr>`;
         return;
     }
 
-    contenedor.style.display = "block";
-    filtrados.forEach(ex => {
-        const item = document.createElement("a");
-        item.href = "#";
-        item.className = "list-group-item list-group-item-action py-2";
-        item.innerHTML = `<strong>${escapeHTML(ex.codigo)}</strong> - ${escapeHTML(ex.nombre)} <span class="float-end text-primary">S/ ${Number(ex.precio || 0).toFixed(2)}</span>`;
-        item.onclick = (e) => {
-            e.preventDefault();
-            agregarExamenSeleccionado(ex);
-            document.getElementById("busqueda-examen").value = "";
-            contenedor.style.display = "none";
-        };
-        contenedor.appendChild(item);
-    });
-}
-
-function agregarExamenSeleccionado(ex) {
-    const existente = examenesSeleccionados.find(item => item.codigo === ex.codigo);
-    if (existente) {
-        existente.cantidad += 1;
-    } else {
-        examenesSeleccionados.push({
-            codigo: ex.codigo,
-            nombre: ex.nombre,
-            cantidad: 1,
-            precio: Number(ex.precio || 0),
-            unidad: ex.unidad || '',
-            referencia: ex.referencia || ''
-        });
-    }
-    renderizarTablaSeleccionados();
-}
-
-function cambiarCantidadExamen(codigo, nuevaCant) {
-    const item = examenesSeleccionados.find(i => i.codigo === codigo);
-    if (item) {
-        item.cantidad = parseInt(nuevaCant) || 1;
-        if (item.cantidad <= 0) item.cantidad = 1;
-        renderizarTablaSeleccionados();
-    }
-}
-
-function eliminarExamenSeleccionado(codigo) {
-    examenesSeleccionados = examenesSeleccionados.filter(i => i.codigo !== codigo);
-    renderizarTablaSeleccionados();
-}
-
-function renderizarTablaSeleccionados() {
-    const tbody = document.querySelector("#tabla-examenes-seleccionados tbody");
-    const totalCobrarEl = document.getElementById("total-cobrar");
-    if (!tbody) return;
-
-    tbody.innerHTML = "";
-
-    if (examenesSeleccionados.length === 0) {
-        tbody.innerHTML = `<tr id="empty-row"><td colspan="6" class="text-center text-muted py-4">No hay exámenes agregados.</td></tr>`;
-        if (totalCobrarEl) totalCobrarEl.textContent = "0.00";
-        return;
-    }
-
-    let total = 0;
-    examenesSeleccionados.forEach(item => {
-        const importe = item.cantidad * item.precio;
-        total += importe;
-
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-            <td>${item.codigo}</td>
-            <td>${item.nombre}</td>
-            <td><input type="number" class="form-control form-control-sm" style="width: 70px;" value="${item.cantidad}" min="1" onchange="cambiarCantidadExamen('${item.codigo}', this.value)"></td>
-            <td>S/ ${item.precio.toFixed(2)}</td>
-            <td>S/ ${importe.toFixed(2)}</td>
-            <td class="text-center"><button class="btn btn-sm btn-outline-danger" onclick="eliminarExamenSeleccionado('${item.codigo}')"><i class="bi bi-trash"></i></button></td>
+    filtradas.forEach((c, index) => {
+        tbody.innerHTML += `
+            <tr>
+                <td>${index + 1}</td>
+                <td>${c.fechaHora}</td>
+                <td><strong>${c.paciente.nombres}</strong> - DNI: ${c.paciente.dni}</td>
+                <td>S/ ${c.total}</td>
+                <td class="text-center">
+                    <button class="btn btn-sm btn-primary me-1" onclick="cargarCotizacion(${c.id})" title="Modificar o Ver"><i class="bi bi-pencil-square"></i> Modificar / Ver</button>
+                    <button class="btn btn-sm btn-danger" onclick="eliminarCotizacion(${c.id})" title="Eliminar"><i class="bi bi-trash"></i></button>
+                </td>
+            </tr>
         `;
-        tbody.appendChild(tr);
     });
+}
 
-    if (totalCobrarEl) totalCobrarEl.textContent = total.toFixed(2);
+// 4. CARGAR COTIZACIÓN PARA MODIFICAR, VISUALIZAR O RE-IMPRIMIR
+function cargarCotizacion(id) {
+    let cotizaciones = JSON.parse(localStorage.getItem('vitalhealth_cotizaciones')) || [];
+    let c = cotizaciones.find(item => item.id === id);
+    if (!c) return;
+
+    currentCotizacionId = c.id; // Fijamos el ID para habilitar la edición
+
+    // Rellenar cajones del paciente
+    document.getElementById('dni').value = c.paciente.dni || '';
+    document.getElementById('nombres').value = c.paciente.nombres || '';
+    document.getElementById('medico').value = c.paciente.medico || '';
+    document.getElementById('fechaNacimiento').value = c.paciente.fechaNacimiento || '';
+    document.getElementById('edad').value = c.paciente.edad || '';
+    document.getElementById('celular').value = c.paciente.celular || '';
+    document.getElementById('sexo').value = c.paciente.sexo || 'MASCULINO';
+    document.getElementById('tipo-convenio-cotizacion').value = c.convenio || 'Particular';
+
+    // Rellenar tabla de exámenes con opción de eliminar/modificar
+    const tbodyExamenes = document.querySelector('#tabla-cotizacion-independiente tbody');
+    tbodyExamenes.innerHTML = '';
+
+    if (c.examenes && c.examenes.length > 0) {
+        c.examenes.forEach(ex => {
+            tbodyExamenes.innerHTML += `
+                <tr>
+                    <td>${ex.codigo}</td>
+                    <td>${ex.nombre}</td>
+                    <td><input type="number" class="form-control form-control-sm" value="${ex.cantidad}" style="width: 70px;" onchange="recalcularTotalCotizacion()"></td>
+                    <td>${ex.precioUnit}</td>
+                    <td class="importe-fila">${ex.importe}</td>
+                    <td class="text-center">
+                        <button class="btn btn-sm btn-outline-danger" onclick="this.closest('tr').remove(); recalcularTotalCotizacion();"><i class="bi bi-trash"></i></button>
+                    </td>
+                </tr>
+            `;
+        });
+    } else {
+        tbodyExamenes.innerHTML = `<tr id="empty-row-cotizacion"><td colspan="6" class="text-center text-muted py-4">No hay exámenes agregados para cotizar.</td></tr>`;
+    }
+
+    document.getElementById('total-cotizacion').innerText = c.total;
+    window.scrollTo({ top: 0, behavior: 'smooth' }); // Sube la pantalla para visualizar los datos cargados
+}
+
+// 5. IMPRIMIR COTIZACIÓN (Aquí SÍ se limpian los cajones automáticamente al terminar)
+function imprimirCotizacion() {
+    const dni = document.getElementById('dni').value.trim();
+    if (!dni) {
+        alert('No hay una cotización activa para imprimir.');
+        return;
+    }
+    window.print();
+    limpiarFormularioCotizacion();
+}
+
+// 6. PASAR A ADMISIÓN (Aquí SÍ se limpian los cajones automáticamente)
+function pasarCotizacionARecepcion() {
+    const dni = document.getElementById('dni').value.trim();
+    const nombres = document.getElementById('nombres').value.trim();
+
+    if (!dni || !nombres) {
+        alert('Debe tener los datos del paciente cargados para pasar a admisión.');
+        return;
+    }
+
+    alert('¡Cotización pasada a Admisión exitosamente!');
+    limpiarFormularioCotizacion();
+}
+
+// 7. LIMPIAR TODOS LOS CAJONES Y REINICIAR ESTADO
+function limpiarFormularioCotizacion() {
+    currentCotizacionId = null;
+    document.getElementById('dni').value = '';
+    document.getElementById('nombres').value = '';
+    document.getElementById('medico').value = '';
+    document.getElementById('fechaNacimiento').value = '';
+    document.getElementById('edad').value = '';
+    document.getElementById('celular').value = '';
+    document.getElementById('sexo').value = 'MASCULINO';
+    document.getElementById('tipo-convenio-cotizacion').value = 'Particular';
+    
+    const tbodyExamenes = document.querySelector('#tabla-cotizacion-independiente tbody');
+    tbodyExamenes.innerHTML = `<tr id="empty-row-cotizacion"><td colspan="6" class="text-center text-muted py-4">No hay exámenes agregados para cotizar.</td></tr>`;
+    document.getElementById('total-cotizacion').innerText = '0.00';
+}
+
+// 8. ELIMINAR COTIZACIÓN GUARDADA
+function eliminarCotizacion(id) {
+    if (!confirm('¿Desea eliminar esta cotización guardada?')) return;
+    let cotizaciones = JSON.parse(localStorage.getItem('vitalhealth_cotizaciones')) || [];
+    cotizaciones = cotizaciones.filter(item => item.id !== id);
+    localStorage.setItem('vitalhealth_cotizaciones', JSON.stringify(cotizaciones));
+    if (currentCotizacionId === id) {
+        limpiarFormularioCotizacion();
+    }
+    buscarCotizaciones();
+}
+
+// 9. RECALCULAR TOTAL SI SE MODIFICAN CANTIDADES
+function recalcularTotalCotizacion() {
+    let total = 0;
+    const filas = document.querySelectorAll('#tabla-cotizacion-independiente tbody tr:not(#empty-row-cotizacion)');
+    filas.forEach(fila => {
+        const inputCant = fila.querySelector('input[type="number"]');
+        const cant = inputCant ? parseFloat(inputCant.value) || 1 : 1;
+        const tdPrecio = fila.querySelectorAll('td')[3];
+        const tdImporte = fila.querySelectorAll('td')[4];
+        
+        let precioVal = tdPrecio.innerText.replace('S/', '').replace(',', '').trim();
+        let precio = parseFloat(precioVal) || 0;
+        let importe = cant * precio;
+        
+        if (tdImporte) tdImporte.innerText = 'S/ ' + importe.toFixed(2);
+        total += importe;
+    });
+    document.getElementById('total-cotizacion').innerText = total.toFixed(2);
 }
 
 // ==========================================
