@@ -2937,6 +2937,50 @@ document.addEventListener("DOMContentLoaded", () => {
 // ==========================================
 // COTIZACIÓN INDEPENDIENTE (sec-cotizacion)
 // ==========================================
+// ==========================================
+// GUARDAR COTIZACIÓN CON TODOS LOS DATOS DEL PACIENTE
+// ==========================================
+function guardarCotizacionCompleta() {
+    // Capturamos todos los campos del formulario de la imagen
+    const dni = document.getElementById('dni')?.value || '';
+    const nombres = document.getElementById('nombres')?.value || '';
+    const doctor = document.getElementById('medico')?.value || '';
+    const fechaNacimiento = document.getElementById('fechaNacimiento')?.value || '';
+    const edad = document.getElementById('edad')?.value || '';
+    const celular = document.getElementById('celular')?.value || '';
+    const sexo = document.getElementById('sexo')?.value || 'MASCULINO';
+
+    if (!nombres) {
+        alert("Por favor ingrese al menos el nombre del paciente para guardar la cotización.");
+        return;
+    }
+
+    const nuevaCotizacion = {
+        id: 'COT-' + Date.now(),
+        nroCotizacion: 'COT-' + Math.floor(1000 + Math.random() * 9000),
+        dni: dni,
+        nombre: nombres,
+        doctor: doctor,
+        fechaNacimiento: fechaNacimiento,
+        edad: edad,
+        celular: celular,
+        sexo: sexo,
+        examenes: window.examenesSeleccionados || [],
+        total: typeof calcularTotal === 'function' ? calcularTotal() : 0,
+        fechaHora: new Date().toLocaleString() // Guarda la fecha y hora exacta del día
+    };
+
+    let cotizaciones = JSON.parse(localStorage.getItem('vital_health_cotizaciones')) || [];
+    cotizaciones.push(nuevaCotizacion);
+    localStorage.setItem('vital_health_cotizaciones', JSON.stringify(cotizaciones));
+
+    alert("¡Cotización guardada exitosamente con todos los datos!");
+    
+    // Actualizar la tabla si ya tienes una función para listar cotizaciones
+    if (typeof cargarListaCotizaciones === 'function') {
+        cargarListaCotizaciones();
+    }
+}
 let listaCotizacionInd = [];
 
 function filtrarExamenesCotizacion(query) {
@@ -3326,4 +3370,61 @@ function aceptarCotizacionYPasarARecepcion(cotizacion) {
     }
 
     alert(`¡Cotización ${cotizacion.nroCotizacion || ''} transferida a Recepción exitosamente! Ya puede generar la orden.`);
+}
+// ==========================================
+// BUSCAR COTIZACIONES POR NOMBRE, DNI O FECHA
+// ==========================================
+function buscarCotizaciones() {
+    const inputBusqueda = document.getElementById('input-buscar-cotizacion');
+    if (!inputBusqueda) return;
+    
+    const textoBusqueda = inputBusqueda.value.toLowerCase().trim();
+    const cotizaciones = JSON.parse(localStorage.getItem('vital_health_cotizaciones')) || [];
+    
+    let resultados = cotizaciones;
+
+    if (textoBusqueda !== '') {
+        resultados = cotizaciones.filter(cot => {
+            const nombrePaciente = (cot.nombre || '').toLowerCase();
+            const fechaCotizacion = (cot.fechaHora || '').toLowerCase();
+            const dniPaciente = (cot.dni || '').toLowerCase();
+            const nroCot = (cot.nroCotizacion || '').toLowerCase();
+
+            // Compara si el texto coincide con nombre, DNI, número de cotización o fecha
+            return nombrePaciente.includes(textoBusqueda) || 
+                   dniPaciente.includes(textoBusqueda) || 
+                   nroCot.includes(textoBusqueda) || 
+                   fechaCotizacion.includes(textoBusqueda);
+        });
+    }
+
+    renderizarTablaCotizaciones(resultados);
+}
+
+// Función para pintar los resultados en la tabla HTML de cotizaciones
+function renderizarTablaCotizaciones(lista) {
+    const tbody = document.getElementById('tabla-cotizaciones-body'); // Ajusta según el ID de tu <tbody>
+    if (!tbody) return;
+
+    tbody.innerHTML = '';
+
+    if (lista.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" class="text-center text-muted">No se encontraron cotizaciones registradas</td></tr>`;
+        return;
+    }
+
+    lista.forEach(cot => {
+        tbody.innerHTML += `
+            <tr>
+                <td>${cot.nroCotizacion || cot.id}</td>
+                <td>${cot.fechaHora || ''}</td>
+                <td><strong>${cot.nombre || 'N/A'}</strong><br><small class="text-muted">DNI: ${cot.dni || '-'}</small></td>
+                <td>S/ ${Number(cot.total || 0).toFixed(2)}</td>
+                <td>
+                    <button class="btn btn-sm btn-info text-white" onclick='mostrarTicketCotizacion(${JSON.stringify(cot)})'><i class="bi bi-printer"></i> Imprimir</button>
+                    <button class="btn btn-sm btn-success" onclick='aceptarCotizacionYPasarARecepcion(${JSON.stringify(cot)})'><i class="bi bi-check-circle"></i> Pasar a Recepción</button>
+                </td>
+            </tr>
+        `;
+    });
 }
