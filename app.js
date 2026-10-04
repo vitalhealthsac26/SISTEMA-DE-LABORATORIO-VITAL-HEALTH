@@ -3145,3 +3145,37 @@ function guardarCambiosPaciente() {
     cargarPacientes();
     alert('Datos del paciente actualizados correctamente.');
 }
+// --- 1. SECCIÓN ORDENES Y CAJA ---
+
+// Coloca esto donde procesas y guardas la orden de trabajo:
+function registrarNuevaOrden(ordenData) {
+    let ordenes = JSON.parse(localStorage.getItem('vital_health_ordenes')) || [];
+    ordenData.id = ordenData.id || 'OT-' + Date.now();
+    ordenData.fecha = ordenData.fecha || new Date().toISOString();
+    
+    ordenes.push(ordenData);
+    localStorage.setItem('vital_health_ordenes', JSON.stringify(ordenes));
+}
+
+// Coloca esto para que lea la caja (llámalo cuando abras la sección de caja):
+function cargarDatosCaja() {
+    let ordenes = JSON.parse(localStorage.getItem('vital_health_ordenes')) || [];
+    let cuerpoTablaCaja = document.getElementById('tabla-caja-body'); // Reemplaza por el ID real de tu <tbody> en HTML
+    if (!cuerpoTablaCaja) return;
+
+    cuerpoTablaCaja.innerHTML = '';
+    let totalCaja = 0;
+
+    ordenes.forEach(orden => {
+        let monto = parseFloat(orden.total || orden.monto || 0);
+        totalCaja += monto;
+        cuerpoTablaCaja.innerHTML += `
+            <tr>
+                <td>${orden.id || 'N/A'}</td>
+                <td>${orden.paciente || 'General'}</td>
+                <td>S/ ${monto.toFixed(2)}</td>
+                <td>${orden.fecha ? new Date(orden.fecha).toLocaleDateString() : ''}</td>
+            </tr>
+        `;
+    });
+}
