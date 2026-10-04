@@ -3401,28 +3401,52 @@ function buscarCotizaciones() {
     renderizarTablaCotizaciones(resultados);
 }
 
-// Función para pintar los resultados en la tabla HTML de cotizaciones
+// ==========================================
+// RENDERIZAR TABLA DE COTIZACIONES CON TODOS LOS DATOS
+// ==========================================
 function renderizarTablaCotizaciones(lista) {
-    const tbody = document.getElementById('tabla-cotizaciones-body'); // Ajusta según el ID de tu <tbody>
+    const tbody = document.getElementById('tabla-cotizaciones-body');
     if (!tbody) return;
 
     tbody.innerHTML = '';
 
-    if (lista.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="5" class="text-center text-muted">No se encontraron cotizaciones registradas</td></tr>`;
+    if (!lista || lista.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" class="text-center text-muted py-3">No se encontraron cotizaciones registradas</td></tr>`;
         return;
     }
 
     lista.forEach(cot => {
+        // Formatear fecha de nacimiento si viene en formato YYYY-MM-DD
+        let fNac = cot.fechaNacimiento || '-';
+        if (fNac && fNac.includes("-") && fNac.length === 10) {
+            const [anio, mes, dia] = fNac.split("-");
+            fNac = `${dia}/${mes}/${anio}`;
+        }
+
         tbody.innerHTML += `
             <tr>
-                <td>${cot.nroCotizacion || cot.id}</td>
-                <td>${cot.fechaHora || ''}</td>
-                <td><strong>${cot.nombre || 'N/A'}</strong><br><small class="text-muted">DNI: ${cot.dni || '-'}</small></td>
-                <td>S/ ${Number(cot.total || 0).toFixed(2)}</td>
+                <td><strong>${escapeHTML(cot.nroCotizacion || cot.id)}</strong></td>
+                <td><small>${escapeHTML(cot.fechaHora || '')}</small></td>
                 <td>
-                    <button class="btn btn-sm btn-info text-white" onclick='mostrarTicketCotizacion(${JSON.stringify(cot)})'><i class="bi bi-printer"></i> Imprimir</button>
-                    <button class="btn btn-sm btn-success" onclick='aceptarCotizacionYPasarARecepcion(${JSON.stringify(cot)})'><i class="bi bi-check-circle"></i> Pasar a Recepción</button>
+                    <strong>${escapeHTML(cot.nombre || 'N/A')}</strong><br>
+                    <span class="text-muted">DNI: ${escapeHTML(cot.dni || '-')}</span><br>
+                    <small class="text-primary">Médico: ${escapeHTML(cot.doctor || 'Particular')}</small>
+                </td>
+                <td>
+                    <small><strong>F. Nac:</strong> ${escapeHTML(fNac)} | <strong>Edad:</strong> ${escapeHTML(cot.edad || '-')}</small><br>
+                    <small><strong>Cel:</strong> ${escapeHTML(cot.celular || '-')}</small><br>
+                    <small><strong>Sexo:</strong> ${escapeHTML(cot.sexo || '-')}</small>
+                </td>
+                <td><strong>S/ ${Number(cot.total || 0).toFixed(2)}</strong></td>
+                <td>
+                    <div class="d-flex gap-1 flex-column">
+                        <button class="btn btn-sm btn-info text-white" onclick='mostrarTicketCotizacion(${JSON.stringify(cot)})'>
+                            <i class="bi bi-printer"></i> Imprimir
+                        </button>
+                        <button class="btn btn-sm btn-success" onclick='aceptarCotizacionYPasarARecepcion(${JSON.stringify(cot)})'>
+                            <i class="bi bi-check-circle"></i> A Recepción
+                        </button>
+                    </div>
                 </td>
             </tr>
         `;
