@@ -3206,8 +3206,9 @@ function renderizarTablaCotizacion() {
 }
 
 function imprimirCotizacion() {
-    if (listaCotizacionInd.length === 0) {
-        alert("No hay exámenes en la cotización para imprimir.");
+    const dni = document.getElementById('dni').value.trim();
+    if (!dni) {
+        alert('No hay una cotización activa para imprimir.');
         return;
     }
     const total = listaCotizacionInd.reduce((acc, i) => acc + i.cantidad * i.precio, 0);
