@@ -1590,18 +1590,55 @@ function cargarCotizacion(id) {
     window.scrollTo({ top: 0, behavior: 'smooth' }); // Sube la pantalla para visualizar los datos cargados
 }
 
-// 5. IMPRIMIR COTIZACIÓN (Aquí SÍ se limpian los cajones automáticamente al terminar)
+// ==========================================
+// IMPRIMIR COTIZACIÓN (Formato 58mm)
+// ==========================================
 function imprimirCotizacion() {
     const dni = document.getElementById('dni').value.trim();
     if (!dni) {
         alert('No hay una cotización activa para imprimir.');
         return;
     }
-    window.print();
-    limpiarFormularioCotizacion();
+
+    // Armamos el objeto temporal actual para enviarlo al visor del ticket térmico
+    const cotActual = {
+        id: currentCotizacionId || Date.now(),
+        nroCotizacion: currentCotizacionId ? 'COT-' + currentCotizacionId.toString().slice(-4) : 'COT-001',
+        fechaHora: new Date().toLocaleString(),
+        paciente: {
+            dni: document.getElementById('dni').value,
+            nombres: document.getElementById('nombres').value,
+            medico: document.getElementById('medico').value,
+            fechaNacimiento: document.getElementById('fechaNacimiento').value,
+            edad: document.getElementById('edad').value,
+            celular: document.getElementById('celular').value
+        },
+        convenio: document.getElementById('tipo-convenio-cotizacion').value,
+        examenes: [],
+        total: document.getElementById('total-cotizacion').innerText
+    };
+
+    const filas = document.querySelectorAll('#tabla-cotizacion-independiente tbody tr:not(#empty-row-cotizacion)');
+    filas.forEach(fila => {
+        const cols = fila.querySelectorAll('td');
+        if (cols.length >= 5) {
+            const inputCant = cols[2].querySelector('input');
+            cotActual.examenes.push({
+                nombre: cols[1].innerText,
+                cantidad: inputCant ? inputCant.value : cols[2].innerText,
+                precioUnit: cols[3].innerText,
+                importe: cols[4].innerText
+            });
+        }
+    });
+
+    // Llamamos a la función de mostrar ticket térmico de 58mm
+    mostrarTicketCotizacion(cotActual);
 }
 
-// 6. PASAR A ADMISIÓN (Aquí SÍ se limpian los cajones automáticamente)
+// ==========================================
+// PASAR A ADMISIÓN
+// ==========================================
 function pasarCotizacionARecepcion() {
     const dni = document.getElementById('dni').value.trim();
     const nombres = document.getElementById('nombres').value.trim();
