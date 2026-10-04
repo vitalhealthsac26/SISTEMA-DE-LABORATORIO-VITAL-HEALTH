@@ -3294,3 +3294,36 @@ function agregarPaciente(nuevoPaciente) {
     localStorage.setItem('vital_health_pacientes', JSON.stringify(pacientes));
     renderizarPacientes(); // Actualiza la vista automáticamente
 }
+// ==========================================
+// PASAR COTIZACIÓN A RECEPCIÓN (CONVERTIR EN ORDEN)
+// ==========================================
+function aceptarCotizacionYPasarARecepcion(cotizacion) {
+    if (!cotizacion) {
+        alert("No hay datos de cotización seleccionados.");
+        return;
+    }
+
+    // 1. Rellenar los inputs del formulario de pacientes con los datos guardados en la cotización
+    if (document.getElementById('dni')) document.getElementById('dni').value = cotizacion.dni || '';
+    if (document.getElementById('nombres')) document.getElementById('nombres').value = cotizacion.nombre || cotizacion.paciente || '';
+    if (document.getElementById('medico')) document.getElementById('medico').value = cotizacion.doctor || '';
+    if (document.getElementById('fechaNacimiento')) document.getElementById('fechaNacimiento').value = cotizacion.fechaNacimiento || '';
+    if (document.getElementById('edad')) document.getElementById('edad').value = cotizacion.edad || '';
+    if (document.getElementById('celular')) document.getElementById('celular').value = cotizacion.celular || '';
+    if (document.getElementById('sexo')) document.getElementById('sexo').value = cotizacion.sexo || 'MASCULINO';
+
+    // 2. Cargar los exámenes al carrito de ventas o tabla de la orden
+    window.examenesSeleccionados = cotizacion.examenes || [];
+    if (typeof actualizarTablaVenta === 'function') {
+        actualizarTablaVenta();
+    }
+
+    // 3. Redirigir al usuario automáticamente a la pestaña de Recepción u Órdenes
+    // (Asegúrate de cambiar 'menu-recepcion' por el ID del botón o pestaña que activa tu sección de órdenes)
+    const pestanaRecepcion = document.getElementById('menu-recepcion') || document.getElementById('tab-recepcion-tab');
+    if (pestanaRecepcion) {
+        pestanaRecepcion.click();
+    }
+
+    alert(`¡Cotización ${cotizacion.nroCotizacion || ''} transferida a Recepción exitosamente! Ya puede generar la orden.`);
+}
