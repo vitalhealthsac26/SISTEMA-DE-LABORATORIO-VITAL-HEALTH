@@ -2483,6 +2483,93 @@ function imprimirZona() {
 }
 
 // ==========================================
+// TICKET TÉRMICO DE COTIZACIÓN (58mm)
+// ==========================================
+function construirTicketCotizacionHTML(cot) {
+    const fechaHora = String(cot.fechaHora || new Date().toLocaleString()).split(", ");
+    const fecha = fechaHora[0] || "";
+    const hora = fechaHora[1] || "";
+    const datoCelular = cot.celular ? `<div class="t-row"><span>Celular:</span><span>${escapeHTML(cot.celular)}</span></div>` : '';
+
+    let lineas = "";
+    (cot.examenes || []).forEach(item => {
+        const importe = item.cantidad * item.precio;
+        lineas += `
+            <div class="t-item">
+                <span class="t-cant">${item.cantidad} x</span>
+                <span class="t-desc">${escapeHTML(item.nombre)}</span>
+                <span class="t-importe">${importe.toFixed(2)}</span>
+            </div>
+        `;
+    });
+
+    const datoExtra = cot.doctor
+        ? `<div class="t-row"><span>Médico:</span><span>${escapeHTML(cot.doctor)}</span></div>`
+        : "";
+
+    let fechaNac = cot.fechaNacimiento || cot.fnac || cot.fechaNac || cot.nacimiento || "-";
+    if (fechaNac && fechaNac.includes("-") && fechaNac.length === 10) {
+        const [anio, mes, dia] = fechaNac.split("-");
+        fechaNac = `${dia}/${mes}/${anio}`;
+    }
+    const textoEdad = cot.edad ? String(cot.edad).trim() : "-";
+
+    return `
+        <div class="ticket-contenido">
+            <img src="logo.png" alt="" class="t-logo" onerror="this.style.display='none'">
+            <div class="t-centro t-negrita t-titulo">CENTRO MEDICO</div>
+            <div class="t-centro t-negrita t-titulo">VITAL HEALTH</div>
+            <div class="t-centro">Laboratorio Clínico</div>
+            <div class="t-centro t-dato">Av. Grau N° 1799 - Veintiséis de Octubre</div>
+            <div class="t-centro t-dato">WhatsApp: 984 089 927</div>
+            <div class="t-linea-doble"></div>
+            <div class="t-centro t-negrita t-subtitulo" style="background:#eaeaea; padding:3px;">COTIZACION DE EXAMENES</div>
+            <div class="t-centro t-dato">Nro: ${escapeHTML(cot.nroCotizacion || cot.id || 'COT-001')}</div>
+            <div class="t-linea"></div>
+            <div class="t-row"><span>Fecha:</span><span>${escapeHTML(fecha)}</span></div>
+            <div class="t-row"><span>Hora:</span><span>${escapeHTML(hora)}</span></div>
+            <div class="t-row"><span>Paciente:</span><span>${escapeHTML(cot.nombre || cot.paciente || 'Cliente General')}</span></div>
+            <div class="t-row"><span>DNI:</span><span>${escapeHTML(cot.dni || '-')}</span></div>
+            <div class="t-row"><span>F. Nac:</span><span>${escapeHTML(fechaNac)}</span></div>
+            <div class="t-row"><span>Edad:</span><span>${escapeHTML(textoEdad)}</span></div>
+            ${datoCelular}
+            ${datoExtra}
+            <div class="t-linea"></div>
+            <div class="t-cabecera-items t-negrita">
+                <span>CANT</span><span>DESCRIPCION</span><span>IMPORTE</span>
+            </div>
+            <div class="t-linea"></div>
+            ${lineas}
+            <div class="t-linea"></div>
+            <div class="t-row t-negrita t-total"><span>TOTAL S/</span><span>${Number(cot.total || 0).toFixed(2)}</span></div>
+            <div class="t-linea-doble"></div>
+            <div class="t-centro t-negrita" style="font-size: 10px; color: #000;">¡VALIDEZ: 7 DÍAS!</div>
+            <div class="t-centro t-obs" style="font-size: 9px;">Pasado este plazo los precios pueden cambiar.</div>
+        </div>
+    `;
+}
+
+function mostrarTicketCotizacion(cot) {
+    const html = construirTicketCotizacionHTML(cot);
+    window._cotizacionActual = cot;
+
+    const cuerpo = document.getElementById("modal-ticket-body");
+    if (cuerpo) cuerpo.innerHTML = `<div class="ticket-visual">${html}</div>`;
+
+    const titulo = document.getElementById("modal-ticket-titulo");
+    if (titulo) titulo.innerHTML = `<i class="bi bi-file-earmark-text me-1"></i>Cotización ${escapeHTML(cot.nroCotizacion || cot.id)} (58 mm)`;
+
+    const zona = document.getElementById("zona-impresion");
+    if (zona) zona.innerHTML = `<div class="ticket-print">${html}</div>`;
+
+    const modalEl = document.getElementById("modalTicket");
+    if (modalEl && window.bootstrap) {
+        bootstrap.Modal.getOrCreateInstance(modalEl).show();
+    } else {
+        imprimirTicket();
+    }
+}
+// ==========================================
 // GUARDADO E IMPRESIÓN DE RESULTADOS (A4)
 // ==========================================
 function guardarResultados(nroOrden, silencioso = false) {
