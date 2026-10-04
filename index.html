@@ -255,31 +255,36 @@
 
         <!-- Buscador para encontrar cotizaciones pasadas -->
         <div class="card shadow-sm border-0 mb-4">
-            <div class="card-body">
-                <div class="row align-items-center">
-                    <div class="col-md-6">
-                        <label class="form-label fw-semibold text-muted">Buscar cotizaciones guardadas:</label>
-                        <input type="text" id="input-buscar-cotizacion" class="form-control" placeholder="Buscar por nombre, DNI, celular o fecha..." onkeyup="buscarCotizaciones()">
-                    </div>
-                </div>
-                <div class="table-responsive mt-3">
-                    <table class="table table-bordered table-sm">
-                        <thead class="table-light">
-                            <tr>
-                                <th>Nro</th>
-                                <th>Fecha y Hora</th>
-                                <th>Paciente / DNI</th>
-                                <th>Total</th>
-                                <th>Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tabla-cotizaciones-body">
-                            <tr><td colspan="5" class="text-center text-muted">Use el buscador para filtrar cotizaciones anteriores.</td></tr>
-                        </tbody>
-                    </table>
+    <div class="card-body">
+        <div class="row align-items-center">
+            <div class="col-md-6">
+                <label class="form-label fw-semibold text-muted">Buscar cotizaciones guardadas:</label>
+                <div class="input-group">
+                    <input type="text" id="input-buscar-cotizacion" class="form-control" placeholder="Buscar por nombre, DNI, celular o fecha...">
+                    <button class="btn btn-primary" type="button" onclick="buscarCotizaciones()">
+                        <i class="bi bi-search me-1"></i> Buscar
+                    </button>
                 </div>
             </div>
         </div>
+        <div class="table-responsive mt-3">
+            <table class="table table-bordered table-sm">
+                <thead class="table-light">
+                    <tr>
+                        <th>Nro</th>
+                        <th>Fecha y Hora</th>
+                        <th>Paciente / DNI</th>
+                        <th>Total</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="tabla-cotizaciones-body">
+                    <tr><td colspan="5" class="text-center text-muted">Use el buscador o guarde una cotización para verla aquí.</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
 
         <!-- CAJONES DE DATOS DEL PACIENTE PARA LA COTIZACIÓN -->
         <div class="card shadow-sm border-0 mb-4">
