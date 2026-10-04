@@ -252,7 +252,28 @@
                         <h2 class="mb-4 fw-bold text-primary">
                             <i class="bi bi-calculator me-2"></i>Módulo de Cotización
                         </h2>
-                        
+
+                        <div class="row mb-3">
+    <div class="col-md-6">
+        <input type="text" id="input-buscar-cotizacion" class="form-control" placeholder="Buscar por nombre, DNI o fecha..." onkeyup="buscarCotizaciones()">
+    </div>
+</div>
+
+<!-- Tu tabla donde se muestran las cotizaciones guardadas -->
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Nro</th>
+            <th>Fecha y Hora</th>
+            <th>Paciente / DNI</th>
+            <th>Total</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody id="tabla-cotizaciones-body">
+        <!-- Aquí se cargan dinámicamente -->
+    </tbody>
+</table>
                         <div class="card shadow-sm border-0">
                             <div class="card-header bg-white py-3 border-bottom">
                                 <h5 class="card-title fw-bold text-dark mb-0">Cotizar Exámenes Médicos</h5>
