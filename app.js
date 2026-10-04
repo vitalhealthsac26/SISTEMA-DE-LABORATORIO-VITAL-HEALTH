@@ -3372,7 +3372,7 @@ function aceptarCotizacionYPasarARecepcion(cotizacion) {
     alert(`¡Cotización ${cotizacion.nroCotizacion || ''} transferida a Recepción exitosamente! Ya puede generar la orden.`);
 }
 // ==========================================
-// BUSCAR COTIZACIONES POR NOMBRE, DNI O FECHA
+// BUSCAR COTIZACIONES (ACTUALIZADO)
 // ==========================================
 function buscarCotizaciones() {
     const inputBusqueda = document.getElementById('input-buscar-cotizacion');
@@ -3389,11 +3389,12 @@ function buscarCotizaciones() {
             const fechaCotizacion = (cot.fechaHora || '').toLowerCase();
             const dniPaciente = (cot.dni || '').toLowerCase();
             const nroCot = (cot.nroCotizacion || '').toLowerCase();
+            const celularPaciente = (cot.celular || '').toLowerCase();
 
-            // Compara si el texto coincide con nombre, DNI, número de cotización o fecha
             return nombrePaciente.includes(textoBusqueda) || 
                    dniPaciente.includes(textoBusqueda) || 
                    nroCot.includes(textoBusqueda) || 
+                   celularPaciente.includes(textoBusqueda) ||
                    fechaCotizacion.includes(textoBusqueda);
         });
     }
