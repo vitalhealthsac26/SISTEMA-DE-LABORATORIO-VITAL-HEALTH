@@ -2583,30 +2583,35 @@ function construirTicketCotizacionHTML(cot) {
     const fechaHora = String(cot.fechaHora || new Date().toLocaleString()).split(", ");
     const fecha = fechaHora[0] || "";
     const hora = fechaHora[1] || "";
-    const datoCelular = cot.celular ? `<div class="t-row"><span>Celular:</span><span>${escapeHTML(cot.celular)}</span></div>` : '';
+    
+    // Capturar datos del paciente desde el objeto guardado
+    const pac = cot.paciente || {};
+    const datoCelular = pac.celular ? `<div class="t-row"><span>Celular:</span><span>${escapeHTML(pac.celular)}</span></div>` : '';
+    const datoExtra = pac.medico ? `<div class="t-row"><span>Médico:</span><span>${escapeHTML(pac.medico)}</span></div>` : "";
 
     let lineas = "";
     (cot.examenes || []).forEach(item => {
-        const importe = item.cantidad * item.precio;
+        // Soporte para los nombres de propiedades de la tabla de cotización
+        let precioNum = parseFloat(String(item.precioUnit || item.precio || "0").replace('S/', '').trim()) || 0;
+        let cantNum = parseFloat(item.cantidad) || 1;
+        const importe = cantNum * precioNum;
+
         lineas += `
             <div class="t-item">
-                <span class="t-cant">${item.cantidad} x</span>
+                <span class="t-cant">${cantNum} x</span>
                 <span class="t-desc">${escapeHTML(item.nombre)}</span>
                 <span class="t-importe">${importe.toFixed(2)}</span>
             </div>
         `;
     });
 
-    const datoExtra = cot.doctor
-        ? `<div class="t-row"><span>Médico:</span><span>${escapeHTML(cot.doctor)}</span></div>`
-        : "";
-
-    let fechaNac = cot.fechaNacimiento || cot.fnac || cot.fechaNac || cot.nacimiento || "-";
+    let fechaNac = pac.fechaNacimiento || "-";
     if (fechaNac && fechaNac.includes("-") && fechaNac.length === 10) {
         const [anio, mes, dia] = fechaNac.split("-");
         fechaNac = `${dia}/${mes}/${anio}`;
     }
-    const textoEdad = cot.edad ? String(cot.edad).trim() : "-";
+    const textoEdad = pac.edad ? String(pac.edad).trim() : "-";
+    const nroId = cot.nroCotizacion || cot.id || 'COT-001';
 
     return `
         <div class="ticket-contenido">
@@ -2617,13 +2622,13 @@ function construirTicketCotizacionHTML(cot) {
             <div class="t-centro t-dato">Av. Grau N° 1799 - Veintiséis de Octubre</div>
             <div class="t-centro t-dato">WhatsApp: 984 089 927</div>
             <div class="t-linea-doble"></div>
-            <div class="t-centro t-negrita t-subtitulo" style="background:#eaeaea; padding:3px;">COTIZACION DE EXAMENES</div>
-            <div class="t-centro t-dato">Nro: ${escapeHTML(cot.nroCotizacion || cot.id || 'COT-001')}</div>
+            <div class="t-centro t-negrita t-subtitulo">COTIZACIÓN DE EXÁMENES</div>
+            <div class="t-centro t-dato">Nro: ${escapeHTML(String(nroId))}</div>
             <div class="t-linea"></div>
             <div class="t-row"><span>Fecha:</span><span>${escapeHTML(fecha)}</span></div>
             <div class="t-row"><span>Hora:</span><span>${escapeHTML(hora)}</span></div>
-            <div class="t-row"><span>Paciente:</span><span>${escapeHTML(cot.nombre || cot.paciente || 'Cliente General')}</span></div>
-            <div class="t-row"><span>DNI:</span><span>${escapeHTML(cot.dni || '-')}</span></div>
+            <div class="t-row"><span>Paciente:</span><span>${escapeHTML(pac.nombres || 'Cliente General')}</span></div>
+            <div class="t-row"><span>DNI:</span><span>${escapeHTML(pac.dni || '-')}</span></div>
             <div class="t-row"><span>F. Nac:</span><span>${escapeHTML(fechaNac)}</span></div>
             <div class="t-row"><span>Edad:</span><span>${escapeHTML(textoEdad)}</span></div>
             ${datoCelular}
@@ -2636,6 +2641,7 @@ function construirTicketCotizacionHTML(cot) {
             ${lineas}
             <div class="t-linea"></div>
             <div class="t-row t-negrita t-total"><span>TOTAL S/</span><span>${Number(cot.total || 0).toFixed(2)}</span></div>
+            <div class="t-row"><span>Tipo:</span><span>${escapeHTML(cot.convenio || 'Particular')}</span></div>
             <div class="t-linea-doble"></div>
             <div class="t-centro t-negrita" style="font-size: 10px; color: #000;">¡VALIDEZ: 7 DÍAS!</div>
             <div class="t-centro t-obs" style="font-size: 9px;">Pasado este plazo los precios pueden cambiar.</div>
