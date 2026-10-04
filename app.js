@@ -1945,176 +1945,160 @@ function buscarPaciente() {
     alert(`Buscando datos para el documento: ${dni}`);
 }
 
+// 1. CALCULAR EDAD AUTOMÁTICAMENTE
 function calcularEdad() {
-    const fnacVal = document.getElementById("pac-fnac").value;
-    const campoEdad = document.getElementById("pac-edad");
+    const inputFecha = document.getElementById('fechaNacimiento').value;
+    if (!inputFecha) return;
 
-    if (!fnacVal) {
-        campoEdad.value = "";
-        return;
-    }
-
-    // Separar año, mes y día para evitar errores de zona horaria (UTC)
-    const partes = fnacVal.split('-');
-    const anioNac = parseInt(partes[0], 10);
-    const mesNac = parseInt(partes[1], 10) - 1; // Los meses en JS empiezan en 0 (Enero = 0)
-    const diaNac = parseInt(partes[2], 10);
-
+    const fechaNacimiento = new Date(inputFecha);
     const hoy = new Date();
-    let edad = hoy.getFullYear() - anioNac;
-    const mesActual = hoy.getMonth();
-    const diaActual = hoy.getDate();
 
-    // Restar un año si todavía no ha cumplido años en el año actual
-    if (mesActual < mesNac || (mesActual === mesNac && diaActual < diaNac)) {
+    let edad = hoy.getFullYear() - fechaNacimiento.getFullYear();
+    const mes = hoy.getMonth() - fechaNacimiento.getMonth();
+
+    if (mes < 0 || (mes === 0 && hoy.getDate() < fechaNacimiento.getDate())) {
         edad--;
     }
 
-    // Mostrar el resultado en el input
-    if (edad >= 0) {
-        campoEdad.value = edad + (edad === 1 ? " AÑO" : " AÑOS");
-    } else {
-        campoEdad.value = "0 AÑOS";
-    }
-}
-let carritoCotizacion = [];
-
-document.addEventListener('DOMContentLoaded', () => {
-    if (typeof renderizarCotizacionesGuardadas === 'function') {
-        renderizarCotizacionesGuardadas();
-    }
-});
-
-// Cargar las cotizaciones guardadas en la tabla al iniciar la aplicación de forma segura
-document.addEventListener('DOMContentLoaded', () => {
-    if (typeof renderizarCotizacionesGuardadas === 'function') {
-        renderizarCotizacionesGuardadas();
-    }
-});
-
-function agregarItemCotizacion(codigoExamen) {
-    if (typeof examenesCatalogo === 'undefined') {
-        console.error("El catálogo de exámenes no está definido.");
-        return;
-    }
-    const examenEncontrado = examenesCatalogo.find(e => e.codigo === codigoExamen);
-    if (examenEncontrado) {
-        carritoCotizacion.push(examenEncontrado);
-        actualizarVistaCotizacionRapida();
-    } else {
-        alert("No se encontró el examen en el catálogo.");
-    }
+    document.getElementById('edad').value = (edad >= 0 ? edad : 0) + " AÑOS";
 }
 
-function actualizarVistaCotizacionRapida() {
-    const contenedor = document.getElementById('detalleCotizacionBody');
-    const totalSpan = document.getElementById('totalCotizacion');
-    if (!contenedor) return;
+// 2. GUARDAR COTIZACIÓN
+function guardarCotizacion() {
+    const dni = document.getElementById('dni').value.trim();
+    const nombres = document.getElementById('nombres').value.trim();
 
-    contenedor.innerHTML = '';
-    let total = 0;
-
-    if (carritoCotizacion.length === 0) {
-        contenedor.innerHTML = `<tr><td colspan="3" class="text-center text-muted">No hay exámenes agregados.</td></tr>`;
-        if (totalSpan) totalSpan.innerText = `S/ 0.00`;
+    if (!dni || !nombres) {
+        alert('Por favor ingrese al menos el DNI y los Nombres del paciente para guardar la cotización.');
         return;
     }
 
-    carritoCotizacion.forEach((item, index) => {
-        total += Number(item.precio || 0);
-        contenedor.innerHTML += `
-            <tr>
-                <td>${item.nombre}</td>
-                <td>S/ ${Number(item.precio || 0).toFixed(2)}</td>
-                <td><button class="btn btn-sm btn-danger" type="button" onclick="removerItemCotizacion(${index})">X</button></td>
-            </tr>
-        `;
+    // Capturar filas de exámenes de la tabla
+    const filas = document.querySelectorAll('#tabla-cotizacion-independiente tbody tr:not(#empty-row-cotizacion)');
+    if (filas.length === 0) {
+        alert('Debe agregar al menos un examen para guardar la cotización.');
+        return;
+    }
+
+    let examenes = [];
+    filas.forEach(fila => {
+        const cols = fila.querySelectorAll('td');
+        if (cols.length >= 5) {
+            examenes.push({
+                codigo: cols[0].innerText,
+                nombre: cols[1].innerText,
+                cantidad: cols[2].querySelector('input') ? cols[2].querySelector('input').value : cols[2].innerText,
+                precioUnit: cols[3].innerText,
+                importe: cols[4].innerText
+            });
+        }
     });
 
-    if (totalSpan) totalSpan.innerText = `S/ ${total.toFixed(2)}`;
-}
-
-function removerItemCotizacion(index) {
-    carritoCotizacion.splice(index, 1);
-    actualizarVistaCotizacionRapida();
-}
-
-function guardarCotizacion() {
-    const inputPaciente = document.getElementById('nombrePacienteCotizacion');
-    const nombrePaciente = inputPaciente ? inputPaciente.value.trim() : '';
-    
-    if (!nombrePaciente) {
-        alert("Por favor ingrese el nombre del paciente para guardar la cotización.");
-        return;
-    }
-    if (carritoCotizacion.length === 0) {
-        alert("La cotización está vacía.");
-        return;
-    }
-
-    const totalCotizacion = carritoCotizacion.reduce((acc, curr) => acc + Number(curr.precio || 0), 0);
     const nuevaCotizacion = {
         id: Date.now(),
-        fecha: new Date().toISOString().split('T')[0],
-        paciente: nombrePaciente,
-        items: [...carritoCotizacion],
-        total: totalCotizacion
+        fechaHora: new Date().toLocaleString(),
+        paciente: {
+            dni: dni,
+            nombres: nombres,
+            medico: document.getElementById('medico').value,
+            fechaNacimiento: document.getElementById('fechaNacimiento').value,
+            edad: document.getElementById('edad').value,
+            celular: document.getElementById('celular').value,
+            sexo: document.getElementById('sexo').value
+        },
+        convenio: document.getElementById('tipo-convenio-cotizacion').value,
+        examenes: examenes,
+        total: document.getElementById('total-cotizacion').innerText
     };
 
-    cotizacionesGuardadas.push(nuevaCotizacion);
-    localStorage.setItem('cotizacionesGuardadas', JSON.stringify(cotizacionesGuardadas));
+    let cotizaciones = JSON.parse(localStorage.getItem('vitalhealth_cotizaciones')) || [];
+    cotizaciones.push(nuevaCotizacion);
+    localStorage.setItem('vitalhealth_cotizaciones', JSON.stringify(cotizaciones));
 
-    alert("¡Cotización guardada exitosamente!");
-    carritoCotizacion = [];
-    if (inputPaciente) inputPaciente.value = '';
-    actualizarVistaCotizacionRapida();
-    renderizarCotizacionesGuardadas();
+    alert('¡Cotización guardada exitosamente!');
+    buscarCotizaciones(); // Refrescar la tabla de búsqueda superior
 }
 
-function renderizarCotizacionesGuardadas(lista = cotizacionesGuardadas) {
-    const contenedor = document.getElementById('listaCotizacionesGuardadasBody');
-    if (!contenedor) return;
+// 3. BUSCAR COTIZACIONES GUARDADAS
+function buscarCotizaciones() {
+    const filtro = document.getElementById('input-buscar-cotizacion').value.toLowerCase();
+    const cotizaciones = JSON.parse(localStorage.getItem('vitalhealth_cotizaciones')) || [];
+    const tbody = document.getElementById('tabla-cotizaciones-body');
+    
+    tbody.innerHTML = '';
 
-    const textoBusq = document.getElementById('busqCotizaciones')?.value.toLowerCase() || '';
-    const fechaBusq = document.getElementById('fechaCotizaciones')?.value || '';
+    const filtradas = cotizaciones.filter(c => 
+        c.paciente.nombres.toLowerCase().includes(filtro) ||
+        c.paciente.dni.toLowerCase().includes(filtro) ||
+        c.fechaHora.toLowerCase().includes(filtro)
+    );
 
-    const filtradas = lista.filter(cot => {
-        const coincideTexto = cot.paciente.toLowerCase().includes(textoBusq);
-        const coincideFecha = fechaBusq ? cot.fecha === fechaBusq : true;
-        return coincideTexto && coincideFecha;
-    });
-
-    contenedor.innerHTML = '';
     if (filtradas.length === 0) {
-        contenedor.innerHTML = `<tr><td colspan="4" class="text-center text-muted">No hay cotizaciones registradas.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="5" class="text-center text-muted">No se encontraron cotizaciones guardadas.</td></tr>`;
         return;
     }
 
-    filtradas.forEach(cot => {
-        contenedor.innerHTML += `
+    filtradas.forEach((c, index) => {
+        tbody.innerHTML += `
             <tr>
-                <td>${cot.fecha}</td>
-                <td>${cot.paciente}</td>
-                <td>S/ ${Number(cot.total || 0).toFixed(2)}</td>
-                <td>
-                    <button class="btn btn-sm btn-info" type="button" onclick="verDetalleCotizacion(${cot.id})">Ver</button>
+                <td>${index + 1}</td>
+                <td>${c.fechaHora}</td>
+                <td><strong>${c.paciente.nombres}</strong> - DNI: ${c.paciente.dni}</td>
+                <td>S/ ${c.total}</td>
+                <td class="text-center">
+                    <button class="btn btn-sm btn-primary me-1" onclick="cargarCotizacion(${c.id})" title="Ver detalles"><i class="bi bi-eye"></i> Ver</button>
+                    <button class="btn btn-sm btn-danger" onclick="eliminarCotizacion(${c.id})" title="Eliminar"><i class="bi bi-trash"></i></button>
                 </td>
             </tr>
         `;
     });
 }
 
-function verDetalleCotizacion(id) {
-    const cot = cotizacionesGuardadas.find(c => c.id === id);
-    if (!cot) return;
-    let detalleStr = `Paciente: ${cot.paciente}\nFecha: ${cot.fecha}\nExámenes:\n`;
-    cot.items.forEach(i => {
-        detalleStr += `- ${i.nombre}: S/ ${Number(i.precio || 0).toFixed(2)}\n`;
+// 4. CARGAR LA COTIZACIÓN SELECCIONADA EN LOS CAJONES Y TABLA
+function cargarCotizacion(id) {
+    let cotizaciones = JSON.parse(localStorage.getItem('vitalhealth_cotizaciones')) || [];
+    let c = cotizaciones.find(item => item.id === id);
+    if (!c) return;
+
+    // Rellenar cajones del paciente
+    document.getElementById('dni').value = c.paciente.dni;
+    document.getElementById('nombres').value = c.paciente.nombres;
+    document.getElementById('medico').value = c.paciente.medico;
+    document.getElementById('fechaNacimiento').value = c.paciente.fechaNacimiento;
+    document.getElementById('edad').value = c.paciente.edad;
+    document.getElementById('celular').value = c.paciente.celular;
+    document.getElementById('sexo').value = c.paciente.sexo;
+    document.getElementById('tipo-convenio-cotizacion').value = c.convenio;
+
+    // Rellenar tabla de exámenes solicitados
+    const tbodyExamenes = document.querySelector('#tabla-cotizacion-independiente tbody');
+    tbodyExamenes.innerHTML = '';
+
+    c.examenes.forEach(ex => {
+        tbodyExamenes.innerHTML += `
+            <tr>
+                <td>${ex.codigo}</td>
+                <td>${ex.nombre}</td>
+                <td>${ex.cantidad}</td>
+                <td>${ex.precioUnit}</td>
+                <td>${ex.importe}</td>
+                <td class="text-center"><span class="badge bg-success">Cargado</span></td>
+            </tr>
+        `;
     });
-    detalleStr += `TOTAL: S/ ${Number(cot.total || 0).toFixed(2)}`;
-    alert(detalleStr);
+
+    document.getElementById('total-cotizacion').innerText = c.total;
+    window.scrollTo({ top: 0, behavior: 'smooth' }); // Sube la pantalla para ver los datos cargados
 }
 
+// 5. ELIMINAR COTIZACIÓN GUARDADA
+function eliminarCotizacion(id) {
+    if (!confirm('¿Desea eliminar esta cotización guardada?')) return;
+    let cotizaciones = JSON.parse(localStorage.getItem('vitalhealth_cotizaciones')) || [];
+    cotizaciones = cotizaciones.filter(item => item.id !== id);
+    localStorage.setItem('vitalhealth_cotizaciones', JSON.stringify(cotizaciones));
+    buscarCotizaciones();
+}
 // ==========================================
 // CONTROL DE CAJA
 // ==========================================
