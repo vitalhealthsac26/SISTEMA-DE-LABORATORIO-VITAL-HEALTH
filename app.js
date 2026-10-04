@@ -2073,7 +2073,9 @@ function calcularEdad() {
     document.getElementById('edad').value = (edad >= 0 ? edad : 0) + " AÑOS";
 }
 
-// 2. GUARDAR COTIZACIÓN
+// ==========================================
+// GUARDAR COTIZACIÓN CORREGIDO (Refresca la tabla de inmediato)
+// ==========================================
 function guardarCotizacion() {
     const dni = document.getElementById('dni').value.trim();
     const nombres = document.getElementById('nombres').value.trim();
@@ -2083,10 +2085,9 @@ function guardarCotizacion() {
         return;
     }
 
-    // Capturar filas de exámenes de la tabla
     const filas = document.querySelectorAll('#tabla-cotizacion-independiente tbody tr:not(#empty-row-cotizacion)');
     if (filas.length === 0) {
-        alert('Debe agregar al menos un examen para guardar la cotización.');
+        alert('Debe agregar al menos un examen para cotizar.');
         return;
     }
 
@@ -2094,39 +2095,64 @@ function guardarCotizacion() {
     filas.forEach(fila => {
         const cols = fila.querySelectorAll('td');
         if (cols.length >= 5) {
+            const inputCant = cols[2].querySelector('input');
             examenes.push({
                 codigo: cols[0].innerText,
                 nombre: cols[1].innerText,
-                cantidad: cols[2].querySelector('input') ? cols[2].querySelector('input').value : cols[2].innerText,
+                cantidad: inputCant ? inputCant.value : cols[2].innerText,
                 precioUnit: cols[3].innerText,
                 importe: cols[4].innerText
             });
         }
     });
 
-    const nuevaCotizacion = {
-        id: Date.now(),
-        fechaHora: new Date().toLocaleString(),
-        paciente: {
-            dni: dni,
-            nombres: nombres,
-            medico: document.getElementById('medico').value,
-            fechaNacimiento: document.getElementById('fechaNacimiento').value,
-            edad: document.getElementById('edad').value,
-            celular: document.getElementById('celular').value,
-            sexo: document.getElementById('sexo').value
-        },
-        convenio: document.getElementById('tipo-convenio-cotizacion').value,
-        examenes: examenes,
-        total: document.getElementById('total-cotizacion').innerText
-    };
-
     let cotizaciones = JSON.parse(localStorage.getItem('vitalhealth_cotizaciones')) || [];
-    cotizaciones.push(nuevaCotizacion);
-    localStorage.setItem('vitalhealth_cotizaciones', JSON.stringify(cotizaciones));
 
-    alert('¡Cotización guardada exitosamente!');
-    buscarCotizaciones(); // Refrescar la tabla de búsqueda superior
+    if (currentCotizacionId) {
+        let index = cotizaciones.findIndex(item => item.id === currentCotizacionId);
+        if (index !== -1) {
+            cotizaciones[index].paciente = {
+                dni: dni,
+                nombres: nombres,
+                medico: document.getElementById('medico').value,
+                fechaNacimiento: document.getElementById('fechaNacimiento').value,
+                edad: document.getElementById('edad').value,
+                celular: document.getElementById('celular').value,
+                sexo: document.getElementById('sexo').value
+            };
+            cotizaciones[index].convenio = document.getElementById('tipo-convenio-cotizacion').value;
+            cotizaciones[index].examenes = examenes;
+            cotizaciones[index].total = document.getElementById('total-cotizacion').innerText;
+        }
+        alert('¡Cotización actualizada con éxito!');
+    } else {
+        const nuevaCotizacion = {
+            id: Date.now(),
+            nroCotizacion: 'COT-' + Math.floor(1000 + Math.random() * 9000),
+            fechaHora: new Date().toLocaleString(),
+            paciente: {
+                dni: dni,
+                nombres: nombres,
+                medico: document.getElementById('medico').value,
+                fechaNacimiento: document.getElementById('fechaNacimiento').value,
+                edad: document.getElementById('edad').value,
+                celular: document.getElementById('celular').value,
+                sexo: document.getElementById('sexo').value
+            },
+            convenio: document.getElementById('tipo-convenio-cotizacion').value,
+            examenes: examenes,
+            total: document.getElementById('total-cotizacion').innerText
+        };
+        cotizaciones.push(nuevaCotizacion);
+        currentCotizacionId = nuevaCotizacion.id;
+        alert('¡Cotización guardada exitosamente!');
+    }
+
+    localStorage.setItem('vitalhealth_cotizaciones', JSON.stringify(cotizaciones));
+    
+    // LIMPIAR EL BUSCADOR E INVOCAR LA TABLA PARA QUE APAREZCA AL INSTANTE
+    document.getElementById('input-buscar-cotizacion').value = '';
+    buscarCotizaciones(); 
 }
 
 // 3. BUSCAR COTIZACIONES GUARDADAS
