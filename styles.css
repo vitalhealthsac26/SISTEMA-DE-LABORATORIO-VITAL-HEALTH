@@ -214,7 +214,7 @@ body { background-color: var(--bg-light); font-family: 'Segoe UI', Tahoma, Genev
 
 @page {
     size: A4 portrait;
-    margin: 38mm 12mm 20mm 12mm; /* Margen nativo: deja espacio arriba para cabecera y abajo para pie */
+    margin: 12mm 10mm 12mm 10mm; /* Margen estándar limpio para toda la hoja */
 }
 
 @media print {
@@ -259,20 +259,18 @@ body { background-color: var(--bg-light); font-family: 'Segoe UI', Tahoma, Genev
 
 
     /* =====================================================
-       CABECERA FIJA NATIVA POR PÁGINA
+       CABECERA (FLUJO NORMAL SEGURO)
        ===================================================== */
     .informe-cabecera {
-        position: fixed !important;
-        top: -36mm !important; /* Se posiciona en el margen superior reservado */
-        left: 0 !important;
-        right: 0 !important;
-        height: 35mm !important;
-        margin: 0 !important;
-        padding: 2mm 0 !important;
+        position: relative !important;
+        display: block !important;
+        width: 100% !important;
+        margin-bottom: 10px !important;
+        padding-bottom: 6px !important;
         background: #ffffff !important;
         border-bottom: 1px solid #cbd5e1 !important;
-        z-index: 9999 !important;
-        display: block !important;
+        page-break-after: avoid !important;
+        break-after: avoid !important;
     }
 
     .informe-logo {
@@ -284,8 +282,8 @@ body { background-color: var(--bg-light); font-family: 'Segoe UI', Tahoma, Genev
     }
 
     .informe-qr {
-        width: 50px !important;
-        height: 50px !important;
+        width: 48px !important;
+        height: 48px !important;
         object-fit: contain !important;
     }
 
@@ -300,45 +298,36 @@ body { background-color: var(--bg-light); font-family: 'Segoe UI', Tahoma, Genev
         margin: 1px 0 !important;
     }
 
-
-    /* =====================================================
-       PIE DE PÁGINA FIJO NATIVO POR PÁGINA
-       ===================================================== */
-    .informe-pie-fijo {
-        position: fixed !important;
-        bottom: -18mm !important; /* Se posiciona en el margen inferior reservado */
-        left: 0 !important;
-        right: 0 !important;
-        height: 15mm !important;
-        margin: 0 !important;
-        padding: 2mm 0 !important;
-        background: #ffffff !important;
-        border-top: 1px solid #0072bc !important;
-        text-align: center !important;
-        font-size: 8px !important;
-        color: #475569 !important;
-        z-index: 9999 !important;
-        display: block !important;
-    }
-
-    .informe-pie-fijo strong {
-        font-size: 8.5px !important;
-        color: #0f172a !important;
+    .informe-datos {
+        margin-bottom: 10px !important;
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
     }
 
 
     /* =====================================================
-       CONTROL INTELIGENTE DE TABLAS Y SALTOS DE PÁGINA
-       (Evita que los exámenes se corten mal y los manda a otra hoja)
+       CONTROL INTELIGENTE DE EXÁMENES Y TABLAS
+       (Evita que un examen se rompa a la mitad o deje el título solo)
        ===================================================== */
     .informe-tabla {
         width: 100% !important;
         border-collapse: collapse !important;
-        margin-bottom: 8px !important;
+        margin-bottom: 10px !important;
+        page-break-inside: auto !important;
+        break-inside: auto !important;
     }
 
     .informe-tabla thead {
         display: table-header-group !important;
+    }
+
+    /* Cada bloque completo de examen (Título + Tabla) no se rompe por dentro */
+    .resultado-seccion,
+    .card,
+    .informe-examen-titulo,
+    table.informe-tabla {
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
     }
 
     .informe-tabla tr,
@@ -348,28 +337,42 @@ body { background-color: var(--bg-light); font-family: 'Segoe UI', Tahoma, Genev
         break-inside: avoid !important;
     }
 
-    .resultado-seccion,
-    .card,
-    .informe-examen-titulo,
-    .informe-datos {
-        page-break-inside: avoid !important;
-        break-inside: avoid !important;
-        margin-bottom: 8px !important;
+
+    /* =====================================================
+       PIE DE PÁGINA (ESTÁTICO AL FINAL DE CADA BLOQUE DE HOJA)
+       ===================================================== */
+    .informe-pie-fijo {
+        position: relative !important;
+        display: block !important;
+        width: 100% !important;
+        margin-top: 15mm !important;
+        padding-top: 4px !important;
+        background: #ffffff !important;
+        border-top: 1px solid #0072bc !important;
+        text-align: center !important;
+        font-size: 8px !important;
+        color: #475569 !important;
+    }
+
+    .informe-pie-fijo strong {
+        font-size: 8.5px !important;
+        color: #0f172a !important;
     }
 
 
     /* =====================================================
-       SECCIÓN DE FIRMA (AL FINAL DE LA ÚLTIMA HOJA)
+       SECCIÓN DE FIRMA (GARANTIZADA AL FINAL DE LA ÚLTIMA HOJA)
        ===================================================== */
     .informe-seccion-final {
         display: flex !important;
         width: 100% !important;
         justify-content: space-between !important;
         align-items: flex-end !important;
-        margin-top: 15mm !important;
-        margin-bottom: 5mm !important;
+        margin-top: 20mm !important;
+        margin-bottom: 10mm !important;
         page-break-inside: avoid !important;
         break-inside: avoid !important;
+        page-break-before: auto !important;
     }
 
     .informe-firma {
@@ -406,16 +409,6 @@ body { background-color: var(--bg-light); font-family: 'Segoe UI', Tahoma, Genev
 
     /* Forzar colores exactos en impresión y PDF */
     * {
-        -webkit-print-color-adjust: exact !important;
-        print-color-adjust: exact !important;
-    }
-}
-    /* =====================================================
-       EVITAR ESPACIOS EXTRAÑOS DEL NAVEGADOR
-       ===================================================== */
-
-    * {
-
         -webkit-print-color-adjust: exact !important;
         print-color-adjust: exact !important;
     }
