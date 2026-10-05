@@ -113,7 +113,7 @@ body { background-color: var(--bg-light); font-family: 'Segoe UI', Tahoma, Genev
 }
 
 /* ==========================================
-   INFORME DE RESULTADOS (HOJA A4)
+   INFORME DE RESULTADOS (HOJA A4) - PANTALLA
    ========================================== */
 .informe-print {
     color: #1e293b;
@@ -194,10 +194,6 @@ body { background-color: var(--bg-light); font-family: 'Segoe UI', Tahoma, Genev
 
 /* Pie de página del centro médico */
 .informe-pie-fijo {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
     border-top: 1px solid #0072bc;
     padding-top: 5px;
     text-align: center;
@@ -206,81 +202,64 @@ body { background-color: var(--bg-light); font-family: 'Segoe UI', Tahoma, Genev
     background: #ffffff;
 }
 .informe-pie-fijo strong { color: #0f172a; font-size: 9px; }
-.informe-pie-estatico {
-    border-top: 1px solid #0072bc;
-    margin-top: 14px;
-    padding-top: 5px;
-    text-align: center;
-    font-size: 8.5px;
-    color: #475569;
-}
-.informe-pie-estatico strong { color: #0f172a; font-size: 9px; }
 
 /* ==========================================
-   CONFIGURACIÓN DE IMPRESIÓN Y PDF
+   CONFIGURACIÓN UNIFICADA DE IMPRESIÓN Y PDF
    ========================================== */
 @media print {
-    /* Configuración general de la página */
     @page {
-        size: A4;
-        margin: 15mm 10mm 15mm 10mm; /* Márgenes superior, derecho, inferior, izquierdo */
+        size: A4 portrait;
+        margin: 12mm 10mm 12mm 10mm;
     }
 
     body {
         margin: 0 !important;
         padding: 0 !important;
+        background: #ffffff !important;
         -webkit-print-color-adjust: exact;
         print-color-adjust: exact;
     }
 
-    /* Ocultar elementos innecesarios al imprimir (botones, menús, etc.) */
-    .no-print, .btn, nav, header:not(.informe-cabecera), footer:not(.informe-pie-fijo) {
-        display: none !important;
+    /* Ocultar elementos de la interfaz que no van en el reporte */
+    .no-print, .btn, nav, header:not(.informe-cabecera), footer:not(.informe-pie-fijo), .vital-navbar-botones { 
+        display: none !important; 
     }
 
-    /* Cabecera repetitiva en cada hoja */
+    /* Contenedor principal de impresión */
+    .informe-print {
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    /* Estilo limpio para la cabecera en cada página */
     .informe-cabecera {
-        position: running(header); /* Mantiene la cabecera en el flujo de la página nativa de impresión */
         display: block !important;
         width: 100%;
         background: #ffffff !important;
-        margin-bottom: 15px !important;
-        border-bottom: 1px solid #ddd;
-        padding-bottom: 5px;
+        margin-bottom: 10px !important;
+        padding-bottom: 4px !important;
+        border-bottom: 1px solid #cbd5e1;
+        page-break-after: avoid;
     }
 
-    /* Ajustes visuales de la cabecera al imprimir */
-    .informe-cabecera .informe-logo { width: 50px !important; height: 50px !important; }
-    .informe-cabecera h1 { font-size: 14px !important; letter-spacing: 1px !important; }
-    .informe-cabecera p { font-size: 7.5px !important; }
-    .informe-cabecera .informe-qr { width: 45px !important; height: 45px !important; }
+    .informe-cabecera .informe-logo { width: 52px !important; height: 52px !important; }
+    .informe-cabecera h1 { font-size: 15px !important; letter-spacing: 1.5px !important; }
+    .informe-cabecera p { font-size: 8px !important; }
+    .informe-cabecera .informe-qr { width: 48px !important; height: 48px !important; }
 
-    /* Contenedor principal de resultados para evitar solapamientos */
-    .informe-print {
-        display: block !important;
-        position: relative !important;
-        margin-top: 0 !important;
-        padding-top: 0 !important;
-    }
-
-    /* Evitar que las tablas de exámenes se corten feo a la mitad de una fila */
-    table, tr, td, th, .card, .resultado-seccion {
+    /* Evitar que las tablas o bloques se partan de forma incorrecta */
+    table, tr, td, th, .card, .resultado-seccion, .informe-seccion-final {
         page-break-inside: avoid !important;
         break-inside: avoid !important;
     }
 
-    /* Forzar que cada examen o bloque comience limpio si es necesario o mantenga su espacio */
-    .examen-bloque {
-        page-break-inside: avoid !important;
-        break-inside: avoid !important;
-        margin-bottom: 15px;
-    }
-
-    /* Pie de página fijo al final de la hoja */
+    /* Pie de página estandarizado y seguro para PDF */
     .informe-pie-fijo {
-        position: running(footer);
         display: block !important;
-        width: 100%;
+        width: 100% !important;
+        position: static !important;
+        margin-top: 15px !important;
         background: #ffffff !important;
     }
 }
