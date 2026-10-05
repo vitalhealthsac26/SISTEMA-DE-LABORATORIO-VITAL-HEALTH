@@ -1365,20 +1365,52 @@ function restaurarRespaldo(archivo) {
     };
     lector.readAsText(archivo);
 }
-
+// ------------------------------------------
+// PERSISTENCIA Y VISUALIZACIÓN DE COTIZACIONES
+// ------------------------------------------
+window.guardarCotizacionSistema = function(cotizacion) {
+    if (!cotizacion.id) cotizacion.id = `cot_${Date.now()}`;
+    window.cotizacionesGuardadas.push(cotizacion);
+    persistirDatos();
+    if (typeof window.nubeGuardarCotizacion === "function") {
+        window.nubeGuardarCotizacion(cotizacion);
+    }
+    if (typeof cargarCotizaciones === "function") cargarCotizaciones();
+};
 // ==========================================
 // INICIALIZACIÓN Y NAVEGACIÓN (BOTONES DEL SIDEBAR)
 // ==========================================
-document.addEventListener("DOMContentLoaded", () => {
-    cargarDatosGuardados();
-    ["logo.png", "firma-biologa.png"].forEach(src => {
-        const imagen = new Image();
-        imagen.src = src;
+  function crearBotonesNavegacionFlotantes() {
+    if (document.getElementById("navFlotanteVital")) return;
+    const navDiv = document.createElement("div");
+    navDiv.id = "navFlotanteVital";
+    navDiv.style.cssText = "position:fixed; bottom:20px; right:20px; z-index:9999; display:flex; gap:8px; background:rgba(255,255,255,0.9); padding:10px; border-radius:12px; box-shadow:0 4px 12px rgba(0,0,0,0.15);";
+    
+    const botones = [
+        { texto: "🏠 Inicio", accion: () => window.location.href = "index.html" },
+        { texto: "🧪 Órdenes", accion: () => { const seccion = document.getElementById("seccionOrdenes") || document.getElementById("ordenes"); if(seccion) seccion.scrollIntoView({behavior: 'smooth'}); } },
+        { texto: "👥 Pacientes", accion: () => { const seccion = document.getElementById("seccionPacientes") || document.getElementById("pacientes"); if(seccion) seccion.scrollIntoView({behavior: 'smooth'}); } },
+        { texto: "💰 Caja", accion: () => { const seccion = document.getElementById("seccionCaja") || document.getElementById("caja"); if(seccion) seccion.scrollIntoView({behavior: 'smooth'}); } },
+        { texto: "📄 Cotizaciones", accion: () => { const seccion = document.getElementById("seccionCotizaciones") || document.getElementById("cotizaciones"); if(seccion) seccion.scrollIntoView({behavior: 'smooth'}); } }
+    ];
+
+    botones.forEach(b => {
+        const btn = document.createElement("button");
+        btn.textContent = b.texto;
+        btn.className = "btn btn-sm btn-outline-primary shadow-sm";
+        btn.style.fontWeight = "bold";
+        btn.onclick = b.accion;
+        navDiv.appendChild(btn);
     });
-    actualizarFechaActual();
-    renderizarTablaCatalogo();
-    cargarOrdenes();
-    actualizarTotalesCaja();
+
+    document.body.appendChild(navDiv);
+}
+document.addEventListener("DOMContentLoaded", () => {
+    crearBotonesNavegacionFlotantes();
+    if (typeof cargarOrdenes === "function") cargarOrdenes();
+    if (typeof cargarPacientes === "function") cargarPacientes();
+    if (typeof cargarCotizaciones === "function") cargarCotizaciones();
+    if (typeof actualizarTotalesCaja === "function") actualizarTotalesCaja();
     window.nubeIniciar?.();
 });
 
