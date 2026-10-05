@@ -1,8 +1,5 @@
 // ============================================================
 // SINCRONIZACIÓN EN LA NUBE (FIREBASE FIRESTORE + AUTH)
-// Permite usar el mismo sistema desde varias laptops.
-// Si firebase-config.js sigue con "PEGAR_AQUI", este módulo
-// se desactiva y el sistema trabaja con guardado local.
 // ============================================================
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import {
@@ -79,9 +76,6 @@ async function sincronizarTodo() {
     aplicandoRemoto = true;
     try {
         const snapOrd = await getDocs(collection(db, "ordenes"));
-        const remotasOrd = {};
-        snapOrd.forEach(d => { remotasOrd[d.id] = d.data(); });
-
         snapOrd.forEach(d => {
             const remota = d.data();
             const local = ordenesRegistradas.find(o => o.nroOrden === d.id);
@@ -91,8 +85,6 @@ async function sincronizarTodo() {
         ordenesRegistradas.sort((a, b) => (b.en || 0) - (a.en || 0));
 
         const snapCat = await getDocs(collection(db, "catalogo"));
-        const remotasCat = {};
-        snapCat.forEach(d => { remotasCat[d.id] = d.data(); });
         snapCat.forEach(d => {
             const remoto = d.data();
             const idx = examenesCatalogo.findIndex(e => e.codigo === d.id);
@@ -101,38 +93,24 @@ async function sincronizarTodo() {
         });
 
         const snapCaja = await getDocs(collection(db, "caja"));
-        const remotasCaja = {};
-        snapCaja.forEach(d => { remotasCaja[d.id] = d.data(); });
         snapCaja.forEach(d => {
             if (!cajaMovimientos.some(m => m.id === d.id)) cajaMovimientos.push(d.data());
         });
         cajaMovimientos.sort((a, b) => (b.en || 0) - (a.en || 0));
 
-        for (const ord of ordenesRegistradas) {
-            if (!ord.en) ord.en = Date.now();
-            const remota = remotasOrd[ord.nroOrden];
-            if (!remota || (remota.en || 0) < ord.en) {
-                await setDoc(doc(db, "ordenes", ord.nroOrden), limpiar(ord));
+        const snapPac = await getDocs(collection(db, "pacientes"));
+        snapPac.forEach(d => {
+            const remota = d.data();
+            if (window.pacientesRegistrados && !window.pacientesRegistrados.some(p => p.dni === remota.dni || p.id === d.id)) {
+                window.pacientesRegistrados.push(remota);
             }
-        }
-        for (const ex of examenesCatalogo) {
-            if (!ex.en) ex.en = Date.now();
-            const remoto = remotasCat[ex.codigo];
-            if (!remoto || (remoto.en || 0) < ex.en) {
-                await setDoc(doc(db, "catalogo", ex.codigo), limpiar(ex));
-            }
-        }
-        for (const mov of cajaMovimientos) {
-            if (!mov.id) mov.id = `${mov.en || Date.now()}-${mov.nroOrden}`;
-            if (!remotasCaja[mov.id]) {
-                await setDoc(doc(db, "caja", mov.id), limpiar(mov));
-            }
-        }
+        });
 
         persistirDatos();
-        cargarOrdenes();
-        renderizarTablaCatalogo();
-        actualizarTotalesCaja();
+        if (typeof cargarOrdenes === "function") cargarOrdenes();
+        if (typeof renderizarTablaCatalogo === "function") renderizarTablaCatalogo();
+        if (typeof actualizarTotalesCaja === "function") actualizarTotalesCaja();
+        if (typeof cargarPacientes === "function") cargarPacientes();
         suscribirCambios();
     } catch (error) {
         console.error("No se pudo sincronizar con la nube:", error);
@@ -166,7 +144,7 @@ function suscribirCambios() {
         if (cambio) {
             ordenesRegistradas.sort((a, b) => (b.en || 0) - (a.en || 0));
             persistirDatos();
-            cargarOrdenes();
+            if (typeof cargarOrdenes === "function") cargarOrdenes();
         }
     });
 }
@@ -187,6 +165,20 @@ window.nubeGuardarExamen = function (examen) {
     if (!db || !auth || !auth.currentUser) return;
     setDoc(doc(db, "catalogo", examen.codigo), limpiar(examen))
         .catch(error => console.error("No se pudo subir el examen a la nube:", error));
+};
+
+window.nubeGuardarPaciente = function (paciente) {
+    if (!db || !auth || !auth.currentUser) return;
+    const idDoc = paciente.dni || paciente.id || `pac_${Date.now()}`;
+    setDoc(doc(db, "pacientes", idDoc), limpiar(paciente))
+        .catch(error => console.error("No se pudo subir el paciente a la nube:", error));
+};
+
+window.nubeGuardarCotizacion = function (cotizacion) {
+    if (!db || !auth || !auth.currentUser) return;
+    const idDoc = cotizacion.id || `cot_${Date.now()}`;
+    setDoc(doc(db, "cotizaciones", idDoc), limpiar(cotizacion))
+        .catch(error => console.error("No se pudo subir la cotización a la nube:", error));
 };
 
 window.nubeIniciar = nubeIniciar;
