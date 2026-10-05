@@ -237,25 +237,41 @@ body { background-color: var(--bg-light); font-family: 'Segoe UI', Tahoma, Genev
     .informe-cabecera p { font-size: 8px !important; }
     .informe-cabecera .informe-qr { width: 54px !important; height: 54px !important; }
     .informe-cabecera .informe-qr-texto { font-size: 6.5px !important; }
-    .informe-print { padding-top: 23mm; }
+    
+    /* Espaciado superior e inferior para evitar que el contenido choque con cabecera y pie fijos */
+    .informe-print { 
+        padding-top: 25mm !important; 
+        padding-bottom: 20mm !important;
+    }
+    
     .informe-titulo { margin-top: 0 !important; }
-    .informe-pie-fijo { position: fixed; }
-}
-/* Ajuste del tamaño de letra y diseño de la tabla del catálogo */
-#tabla-catalogo-body td, 
-#sec-catalogo .table th {
-    font-size: 11px !important; /* Reduce ligeramente el tamaño de la letra de los exámenes */
-    vertical-align: middle;
+
+    /* Pie de página fijo al final de cada hoja impresa */
+    .informe-pie-fijo { 
+        position: fixed !important; 
+        bottom: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        background: #ffffff !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
 }
 
-/* Forzar a que la columna de acciones (editar/eliminar) no se mueva ni se oculte */
-#sec-catalogo .table td:last-child, 
-#sec-catalogo .table th:last-child {
-    white-space: nowrap;
-    text-align: right;
-    width: 60px;
+/* ==========================================
+   SECCIÓN FINAL: FIRMA Y QR DE REDES SOCIALES
+   ========================================== */
+.informe-seccion-final {
+    page-break-inside: avoid;
+    margin-top: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
 }
-/* Ajuste del tamaño de letra y diseño de la tabla del catálogo */
+
+/* ==========================================
+   ESTILOS DE LA TABLA DEL CATÁLOGO
+   ========================================== */
 #tabla-catalogo-body td, 
 #sec-catalogo .table th {
     font-size: 11px !important; /* Reduce ligeramente el tamaño de la letra de los exámenes */
