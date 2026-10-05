@@ -1380,6 +1380,15 @@ function normalizarCotizacion(c) {
     };
 }
 
+// Agrega estas líneas al final de tu función guardarCotizacion():
+document.getElementById("dni").value = "";
+document.getElementById("nombres").value = "";
+document.getElementById("medico").value = "";
+document.getElementById("fechaNacimiento").value = "";
+document.getElementById("edad").value = "";
+document.getElementById("celular").value = "";
+examenesCotizacionActual = []; // Vacía el arreglo de exámenes seleccionados
+renderizarTablaCotizacion();  // Vuelve a pintar la tabla vacía
 // ==========================================
 // PERSISTENCIA AUTOMÁTICA (GUARDADO EN ESTE EQUIPO)
 // ==========================================
