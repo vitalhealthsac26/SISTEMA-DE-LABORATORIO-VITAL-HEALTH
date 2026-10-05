@@ -209,12 +209,12 @@ body { background-color: var(--bg-light); font-family: 'Segoe UI', Tahoma, Genev
 .informe-pie-fijo strong { color: #0f172a; font-size: 9px; }
 
 /* =========================================================
-   IMPRESIÓN PROFESIONAL DEL INFORME A4 (SOLUCIÓN DEFINITIVA)
+   IMPRESIÓN PROFESIONAL DEL INFORME A4 (DEFINITIVO)
    ========================================================= */
 
 @page {
     size: A4 portrait;
-    margin: 12mm 10mm 12mm 10mm; /* Margen estándar limpio para toda la hoja */
+    margin: 12mm 10mm 12mm 10mm;
 }
 
 @media print {
@@ -232,7 +232,7 @@ body { background-color: var(--bg-light); font-family: 'Segoe UI', Tahoma, Genev
         print-color-adjust: exact !important;
     }
 
-    /* Ocultar elementos de la interfaz que no van en el reporte */
+    /* Ocultar elementos de la interfaz de la aplicación */
     body.imprimiendo #wrapper,
     body.imprimiendo #sidebar-overlay,
     body.imprimiendo .modal,
@@ -243,7 +243,6 @@ body { background-color: var(--bg-light); font-family: 'Segoe UI', Tahoma, Genev
     .vital-navbar-botones {
         display: none !important;
     }
-
 
     /* =====================================================
        CONTENEDOR PRINCIPAL
@@ -257,9 +256,8 @@ body { background-color: var(--bg-light); font-family: 'Segoe UI', Tahoma, Genev
         background: #ffffff !important;
     }
 
-
     /* =====================================================
-       CABECERA (FLUJO NORMAL SEGURO)
+       CABECERA
        ===================================================== */
     .informe-cabecera {
         position: relative !important;
@@ -304,30 +302,25 @@ body { background-color: var(--bg-light); font-family: 'Segoe UI', Tahoma, Genev
         break-inside: avoid !important;
     }
 
-
     /* =====================================================
        CONTROL INTELIGENTE DE EXÁMENES Y TABLAS
-       (Evita que un examen se rompa a la mitad o deje el título solo)
+       (Evita que un título de examen quede solo o se rompa)
        ===================================================== */
+    .resultado-seccion,
+    .card {
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+        margin-bottom: 10px !important;
+    }
+
     .informe-tabla {
         width: 100% !important;
         border-collapse: collapse !important;
         margin-bottom: 10px !important;
-        page-break-inside: auto !important;
-        break-inside: auto !important;
     }
 
     .informe-tabla thead {
         display: table-header-group !important;
-    }
-
-    /* Cada bloque completo de examen (Título + Tabla) no se rompe por dentro */
-    .resultado-seccion,
-    .card,
-    .informe-examen-titulo,
-    table.informe-tabla {
-        page-break-inside: avoid !important;
-        break-inside: avoid !important;
     }
 
     .informe-tabla tr,
@@ -337,9 +330,8 @@ body { background-color: var(--bg-light); font-family: 'Segoe UI', Tahoma, Genev
         break-inside: avoid !important;
     }
 
-
     /* =====================================================
-       PIE DE PÁGINA (ESTÁTICO AL FINAL DE CADA BLOQUE DE HOJA)
+       PIE DE PÁGINA Y FIRMA
        ===================================================== */
     .informe-pie-fijo {
         position: relative !important;
@@ -359,10 +351,6 @@ body { background-color: var(--bg-light); font-family: 'Segoe UI', Tahoma, Genev
         color: #0f172a !important;
     }
 
-
-    /* =====================================================
-       SECCIÓN DE FIRMA (GARANTIZADA AL FINAL DE LA ÚLTIMA HOJA)
-       ===================================================== */
     .informe-seccion-final {
         display: flex !important;
         width: 100% !important;
@@ -372,7 +360,6 @@ body { background-color: var(--bg-light); font-family: 'Segoe UI', Tahoma, Genev
         margin-bottom: 10mm !important;
         page-break-inside: avoid !important;
         break-inside: avoid !important;
-        page-break-before: auto !important;
     }
 
     .informe-firma {
@@ -406,14 +393,11 @@ body { background-color: var(--bg-light); font-family: 'Segoe UI', Tahoma, Genev
         color: #475569 !important;
     }
 
-
-    /* Forzar colores exactos en impresión y PDF */
     * {
         -webkit-print-color-adjust: exact !important;
         print-color-adjust: exact !important;
     }
 }
-
 /* ==========================================
    ESTILOS DE LA TABLA DEL CATÁLOGO
    ========================================== */
