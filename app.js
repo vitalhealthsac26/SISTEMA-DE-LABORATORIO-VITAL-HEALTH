@@ -1251,6 +1251,40 @@ function persistirDatos() {
     localStorage.setItem("vital_pacientes", JSON.stringify(window.pacientesRegistrados));
     localStorage.setItem("vital_cotizaciones", JSON.stringify(window.cotizacionesGuardadas));
 
+  // ------------------------------------------
+// AUTOMATIZACIÓN: REGISTRO DE PACIENTE AL CREAR ORDEN
+// ------------------------------------------
+window.registrarPacienteDesdeOrden = function(orden) {
+    if (!orden || !orden.paciente) return;
+    const p = orden.paciente;
+    const dniKey = p.dni || p.documento || p.telefono;
+    if (!dniKey) return;
+
+    let existente = window.pacientesRegistrados.find(x => (x.dni === dniKey) || (x.documento === dniKey));
+    if (existente) {
+        existente.nombres = p.nombres || existente.nombres;
+        existente.edad = p.edad || existente.edad;
+        existente.sexo = p.sexo || existente.sexo;
+        existente.telefono = p.telefono || existente.telefono;
+        existente.ultimaAtencion = new Date().toISOString();
+    } else {
+        const nuevoPaciente = {
+            id: `pac_${Date.now()}`,
+            dni: dniKey,
+            nombres: p.nombres || "Sin Nombre",
+            edad: p.edad || "",
+            sexo: p.sexo || "",
+            telefono: p.telefono || "",
+            fechaRegistro: new Date().toISOString()
+        };
+        window.pacientesRegistrados.push(nuevoPaciente);
+        if (typeof window.nubeGuardarPaciente === "function") {
+            window.nubeGuardarPaciente(nuevoPaciente);
+        }
+    }
+    persistirDatos();
+    if (typeof cargarPacientes === "function") cargarPacientes();
+};
 // ==========================================
 // 1. NAVEGACIÓN FLUIDA ENTRE SECCIONES
 // ==========================================
