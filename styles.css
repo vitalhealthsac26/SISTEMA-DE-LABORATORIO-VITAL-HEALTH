@@ -113,15 +113,22 @@ body { background-color: var(--bg-light); font-family: 'Segoe UI', Tahoma, Genev
 }
 
 /* ==========================================
-   INFORME DE RESULTADOS (HOJA A4) - PANTALLA
+   INFORME DE RESULTADOS (HOJA A4)
    ========================================== */
 .informe-print {
     color: #1e293b;
     font-family: 'Segoe UI', Arial, Helvetica, sans-serif;
     font-size: 11.5px;
-    padding-bottom: 14mm;
+    width: 210mm;
+    margin: 0 auto;
+    background: #ffffff;
 }
-.informe-cabecera { position: relative; text-align: center; padding-bottom: 8px; margin-bottom: 2px; border-bottom: 1px solid #cbd5e1; }
+.informe-cabecera { 
+    text-align: center; 
+    padding-bottom: 8px; 
+    margin-bottom: 2px; 
+    border-bottom: 1px solid #cbd5e1; 
+}
 .informe-logo { display: block; width: 76px; height: 76px; object-fit: contain; margin: 0 auto 4px auto; }
 .informe-qr {
     display: block;
@@ -129,8 +136,6 @@ body { background-color: var(--bg-light); font-family: 'Segoe UI', Tahoma, Genev
     height: 84px;
     object-fit: contain;
 }
-.informe-qr-box { flex: 0 0 auto; text-align: center; }
-.informe-qr-texto { font-size: 7.5px; color: #475569; letter-spacing: .3px; margin-top: 1px; font-weight: 700; }
 .informe-cabecera h1 { font-size: 20px; margin: 0; letter-spacing: 2.5px; font-weight: 800; color: #0f172a; }
 .informe-cabecera p { margin: 1px 0; font-size: 10px; color: #475569; }
 .informe-titulo {
@@ -186,8 +191,8 @@ body { background-color: var(--bg-light); font-family: 'Segoe UI', Tahoma, Genev
 .res-bajo { color: #b45309; }
 
 /* Firma de la bióloga */
-.informe-firma { margin-top: 26px; text-align: center; page-break-inside: avoid; }
-.informe-firma-img { height: 130px; object-fit: contain; display: block; margin: 0 auto 2px auto; }
+.informe-firma { margin-top: 20px; text-align: center; page-break-inside: avoid; }
+.informe-firma-img { height: 110px; object-fit: contain; display: block; margin: 0 auto 2px auto; }
 .informe-firma-linea { width: 230px; border-top: 1.5px solid #0f172a; margin: 0 auto 3px auto; }
 .informe-firma-nombre { font-weight: 700; font-size: 11px; color: #0f172a; }
 .informe-firma-det { font-size: 9px; color: #475569; }
@@ -204,12 +209,12 @@ body { background-color: var(--bg-light); font-family: 'Segoe UI', Tahoma, Genev
 .informe-pie-fijo strong { color: #0f172a; font-size: 9px; }
 
 /* ==========================================
-   CONFIGURACIÓN UNIFICADA DE IMPRESIÓN Y PDF
+   CONFIGURACIÓN ESTRICTA DE IMPRESIÓN Y PDF
    ========================================== */
 @media print {
     @page {
         size: A4 portrait;
-        margin: 12mm 10mm 12mm 10mm;
+        margin: 10mm 10mm 10mm 10mm;
     }
 
     body {
@@ -220,47 +225,39 @@ body { background-color: var(--bg-light); font-family: 'Segoe UI', Tahoma, Genev
         print-color-adjust: exact;
     }
 
-    /* Ocultar elementos de la interfaz que no van en el reporte */
+    /* Ocultar elementos de la interfaz de la aplicación */
     .no-print, .btn, nav, header:not(.informe-cabecera), footer:not(.informe-pie-fijo), .vital-navbar-botones { 
         display: none !important; 
     }
 
-    /* Contenedor principal de impresión */
+    /* Forzar que el contenedor principal ocupe exactamente el ancho de impresión */
     .informe-print {
         width: 100% !important;
+        max-width: none !important;
         margin: 0 !important;
         padding: 0 !important;
     }
 
-    /* Estilo limpio para la cabecera en cada página */
-    .informe-cabecera {
-        display: block !important;
-        width: 100%;
-        background: #ffffff !important;
-        margin-bottom: 10px !important;
-        padding-bottom: 4px !important;
-        border-bottom: 1px solid #cbd5e1;
-        page-break-after: avoid;
-    }
-
-    .informe-cabecera .informe-logo { width: 52px !important; height: 52px !important; }
-    .informe-cabecera h1 { font-size: 15px !important; letter-spacing: 1.5px !important; }
-    .informe-cabecera p { font-size: 8px !important; }
-    .informe-cabecera .informe-qr { width: 48px !important; height: 48px !important; }
-
-    /* Evitar que las tablas o bloques se partan de forma incorrecta */
+    /* Evitar que cualquier tabla o bloque se corte de forma incorrecta */
     table, tr, td, th, .card, .resultado-seccion, .informe-seccion-final {
         page-break-inside: avoid !important;
         break-inside: avoid !important;
     }
 
-    /* Pie de página estandarizado y seguro para PDF */
+    /* Fijar la cabecera limpia por página */
+    .informe-cabecera {
+        display: block !important;
+        width: 100% !important;
+        margin-bottom: 8px !important;
+        page-break-after: avoid !important;
+    }
+
+    /* Pie de página estandarizado al final de la hoja impresa o exportada */
     .informe-pie-fijo {
         display: block !important;
         width: 100% !important;
-        position: static !important;
-        margin-top: 15px !important;
-        background: #ffffff !important;
+        position: running(footer) !important;
+        margin-top: 10px !important;
     }
 }
 
@@ -270,7 +267,7 @@ body { background-color: var(--bg-light); font-family: 'Segoe UI', Tahoma, Genev
 .informe-seccion-final {
     page-break-inside: avoid !important;
     break-inside: avoid !important;
-    margin-top: 25px;
+    margin-top: 15px;
     display: flex;
     justify-content: space-between;
     align-items: flex-end;
