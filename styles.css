@@ -217,53 +217,81 @@ body { background-color: var(--bg-light); font-family: 'Segoe UI', Tahoma, Genev
 .informe-pie-estatico strong { color: #0f172a; font-size: 9px; }
 
 /* ==========================================
-   CABECERA REPETIDA EN TODAS LAS HOJAS (IMPRESIÓN)
+   CONFIGURACIÓN DE IMPRESIÓN Y PDF
    ========================================== */
 @media print {
-    .informe-cabecera {
-        position: fixed !important;
-        top: 0 !important;
-        left: 0 !important;
-        right: 0 !important;
-        background: #ffffff !important;
-        z-index: 10;
-        margin: 0 !important;
-        padding-bottom: 4px !important;
-        -webkit-print-color-adjust: exact;
-        print-color-adjust: exact;
+    /* Configuración general de la página */
+    @page {
+        size: A4;
+        margin: 15mm 10mm 15mm 10mm; /* Márgenes superior, derecho, inferior, izquierdo */
     }
-    .informe-cabecera .informe-logo { width: 54px !important; height: 54px !important; margin: 0 8px 0 0 !important; }
-    .informe-cabecera h1 { font-size: 15px !important; letter-spacing: 1.5px !important; }
-    .informe-cabecera p { font-size: 8px !important; }
-    .informe-cabecera .informe-qr { width: 54px !important; height: 54px !important; }
-    .informe-cabecera .informe-qr-texto { font-size: 6.5px !important; }
-    
-    /* Espaciado superior e inferior para evitar que el contenido choque con cabecera y pie fijos */
-    .informe-print { 
-        padding-top: 25mm !important; 
-        padding-bottom: 20mm !important;
-    }
-    
-    .informe-titulo { margin-top: 0 !important; }
 
-    /* Pie de página fijo al final de cada hoja impresa */
-    .informe-pie-fijo { 
-        position: fixed !important; 
-        bottom: 0 !important;
-        left: 0 !important;
-        right: 0 !important;
-        background: #ffffff !important;
+    body {
+        margin: 0 !important;
+        padding: 0 !important;
         -webkit-print-color-adjust: exact;
         print-color-adjust: exact;
+    }
+
+    /* Ocultar elementos innecesarios al imprimir (botones, menús, etc.) */
+    .no-print, .btn, nav, header:not(.informe-cabecera), footer:not(.informe-pie-fijo) {
+        display: none !important;
+    }
+
+    /* Cabecera repetitiva en cada hoja */
+    .informe-cabecera {
+        position: running(header); /* Mantiene la cabecera en el flujo de la página nativa de impresión */
+        display: block !important;
+        width: 100%;
+        background: #ffffff !important;
+        margin-bottom: 15px !important;
+        border-bottom: 1px solid #ddd;
+        padding-bottom: 5px;
+    }
+
+    /* Ajustes visuales de la cabecera al imprimir */
+    .informe-cabecera .informe-logo { width: 50px !important; height: 50px !important; }
+    .informe-cabecera h1 { font-size: 14px !important; letter-spacing: 1px !important; }
+    .informe-cabecera p { font-size: 7.5px !important; }
+    .informe-cabecera .informe-qr { width: 45px !important; height: 45px !important; }
+
+    /* Contenedor principal de resultados para evitar solapamientos */
+    .informe-print {
+        display: block !important;
+        position: relative !important;
+        margin-top: 0 !important;
+        padding-top: 0 !important;
+    }
+
+    /* Evitar que las tablas de exámenes se corten feo a la mitad de una fila */
+    table, tr, td, th, .card, .resultado-seccion {
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+    }
+
+    /* Forzar que cada examen o bloque comience limpio si es necesario o mantenga su espacio */
+    .examen-bloque {
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+        margin-bottom: 15px;
+    }
+
+    /* Pie de página fijo al final de la hoja */
+    .informe-pie-fijo {
+        position: running(footer);
+        display: block !important;
+        width: 100%;
+        background: #ffffff !important;
     }
 }
 
 /* ==========================================
-   SECCIÓN FINAL: FIRMA Y QR DE REDES SOCIALES
+   ESTRUCTURA DE FIRMA Y QR AL FINAL
    ========================================== */
 .informe-seccion-final {
-    page-break-inside: avoid;
-    margin-top: 20px;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+    margin-top: 25px;
     display: flex;
     justify-content: space-between;
     align-items: flex-end;
