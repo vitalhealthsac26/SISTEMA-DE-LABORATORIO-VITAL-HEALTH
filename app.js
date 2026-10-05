@@ -3021,7 +3021,7 @@ function construirInformeHTML(orden) {
                 </div>
                 <div class="informe-qr-box">
                     <img src="qr-redes.png" alt="QR de redes sociales" class="informe-qr" style="width: 84px; height: 84px; object-fit: contain;" onerror="this.parentNode.style.display='none'">
-                    <div class="informe-qr-texto">ESCANÉANOS Y SÍGUENOS</div>
+                    <div class="informe-qr-texto">¡Síguenos aquí!</div>
                 </div>
             </div>
             <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 6px; font-size: 9.5px; color: #334155;">
