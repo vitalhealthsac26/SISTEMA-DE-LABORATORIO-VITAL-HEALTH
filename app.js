@@ -1906,13 +1906,23 @@ function cargarOrdenes() {
     });
 }
 
+// Reemplaza o ajusta tu función de borrado de órdenes así:
 function eliminarOrden(nroOrden) {
-    if (!confirm(`¿Estás seguro de que deseas eliminar la orden N° ${nroOrden}?`)) return;
-    ordenesRegistradas = (ordenesRegistradas || []).filter(o => o.nroOrden !== nroOrden);
-    cajaMovimientos = (cajaMovimientos || []).filter(m => m.nroOrden !== nroOrden);
-    persistirDatos();
-    cargarOrdenes();
-    actualizarTotalesCaja();
+    if (confirm("¿Estás seguro de eliminar esta orden por completo?")) {
+        // 1. Filtrar de la memoria local
+        ordenesRegistradas = ordenesRegistradas.filter(o => o.nroOrden !== nroOrden);
+        
+        // 2. Actualizar persistencia local para que no regrese al limpiar caché
+        persistirDatos(); 
+
+        // 3. Si usas la nube y existe la función de borrado en Firebase, invócala aquí
+        if (typeof nubeEliminarOrden === "function") {
+            nubeEliminarOrden(nroOrden);
+        }
+
+        // 4. Recargar la tabla
+        cargarOrdenes();
+    }
 }
 
 function abrirResultados(nroOrden) {
