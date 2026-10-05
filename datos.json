@@ -1,5 +1,7 @@
 {
   "ordenes": [],
   "catalogo": [],
-  "caja": []
+  "caja": [],
+  "pacientes": [],
+  "cotizaciones": []
 }
