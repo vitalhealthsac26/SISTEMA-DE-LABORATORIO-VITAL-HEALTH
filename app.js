@@ -2251,11 +2251,19 @@ function actualizarTotalesCaja() {
     const tbody = document.getElementById("caja-tabla-body");
     if (!tbody) return;
     tbody.innerHTML = "";
+    
     if (!cajaMovimientos || cajaMovimientos.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="5" class="text-center text-muted py-3">No hay movimientos registrados hoy.</td></tr>`;
+        // Nota: Se cambió colspan a 6 porque ahora tenemos 6 columnas en total
+        tbody.innerHTML = `<tr><td colspan="6" class="text-center text-muted py-3">No hay movimientos registrados hoy.</td></tr>`;
         return;
     }
+    
     cajaMovimientos.forEach(m => {
+        // Asegurar que cada movimiento tenga un ID único (si no lo tiene se le asigna uno temporal basado en tiempo/azar)
+        if (!m.id) {
+            m.id = 'mov_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
+        }
+
         const tr = document.createElement("tr");
         tr.innerHTML = `
             <td>${escapeHTML(m.hora)}</td>
@@ -2263,11 +2271,30 @@ function actualizarTotalesCaja() {
             <td>${escapeHTML(m.paciente)}</td>
             <td><span class="badge bg-info text-dark">${escapeHTML(m.metodoPago)}</span></td>
             <td class="fw-bold text-success">S/ ${Number(m.monto || 0).toFixed(2)}</td>
+            <td class="text-end">
+                <button class="btn btn-sm btn-outline-danger" onclick="eliminarMovimientoCaja('${m.id}')" title="Eliminar movimiento">
+                    <i class="bi bi-trash"></i>
+                </button>
+            </td>
         `;
         tbody.appendChild(tr);
     });
 }
 
+// Función complementaria para borrar el movimiento individualmente
+function eliminarMovimientoCaja(idMovimiento) {
+    if (confirm("¿Deseas eliminar este movimiento de caja?")) {
+        cajaMovimientos = cajaMovimientos.filter(m => m.id !== idMovimiento);
+        
+        // Guarda los cambios en tu almacenamiento local o función de persistencia
+        if (typeof persistirDatos === "function") {
+            persistirDatos();
+        }
+        
+        // Recarga la tabla y los totales de la caja
+        actualizarTotalesCaja();
+    }
+}
 // ==========================================
 // MÓDULO DE COTIZACIÓN (formulario + guardadas)
 // ==========================================
