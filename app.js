@@ -1240,12 +1240,16 @@ let examenesCatalogo = [
 ];
 
 let examenesSeleccionados = [];
-let ordenesRegistradas = [];
-let cajaMovimientos = [];
+let ordenesRegistradas = JSON.parse(localStorage.getItem("vital_ordenes") || "[]");
+let cajaMovimientos = JSON.parse(localStorage.getItem("vital_caja") || "[]");
+window.pacientesRegistrados = JSON.parse(localStorage.getItem("vital_pacientes") || "[]");
+window.cotizacionesGuardadas = JSON.parse(localStorage.getItem("vital_cotizaciones") || "[]");
 
-// Almacenamiento local para cotizaciones y órdenes
-let cotizacionesGuardadas = JSON.parse(localStorage.getItem('cotizacionesGuardadas')) || [];
-let ordenesLaboratorio = JSON.parse(localStorage.getItem('ordenesLaboratorio')) || [];
+function persistirDatos() {
+    localStorage.setItem("vital_ordenes", JSON.stringify(ordenesRegistradas));
+    localStorage.setItem("vital_caja", JSON.stringify(cajaMovimientos));
+    localStorage.setItem("vital_pacientes", JSON.stringify(window.pacientesRegistrados));
+    localStorage.setItem("vital_cotizaciones", JSON.stringify(window.cotizacionesGuardadas));
 
 // ==========================================
 // 1. NAVEGACIÓN FLUIDA ENTRE SECCIONES
