@@ -3054,8 +3054,9 @@ function construirInformeHTML(orden) {
         <div class="informe-firma" style="margin-top: 35px; text-align: center; page-break-inside: avoid;">
             <img src="firma-biologa.png" alt="Firma" class="informe-firma-img" style="height: 140px; object-fit: contain; display: block; margin: 0 auto 2px auto;" onerror="this.style.display='none'">
             <div class="informe-firma-linea" style="width: 300px; border-top: 1.5px solid #0f172a; margin: 0 auto 3px auto;"></div>
-            <div class="informe-firma-nombre" style="font-weight: 700; font-size: 11.5px; color: #0f172a;">FIRMA DE LA BIÓLOGA</div>
-            <div class="informe-firma-det" style="font-size: 9.5px; color: #475569;">Bióloga Responsable del Laboratorio &bull; Centro Médico Vital Health</div>
+            <div class="informe-firma-nombre" style="font-weight: 700; font-size: 11.5px; color: #0f172a;">Raysa Yadira Ursula Alberca Atarama</div>
+            <div class="informe-firma-det" style="font-size: 9.5px; color: #475569;">Bióloga</div>
+            <div class="informe-firma-det" style="font-size: 9.5px; color: #475569;">C.B.P.17763</div>
         </div>
 
         <div class="informe-pie-fijo" style="border-top: 1px solid #0072bc; margin-top: 20px; padding-top: 6px;">
