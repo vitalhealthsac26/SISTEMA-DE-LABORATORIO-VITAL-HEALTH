@@ -1429,7 +1429,6 @@ function cargarDatosGuardados() {
     ordenesRegistradas = ordenesFusionadas.filter(o => !window.ordenesEliminadas.includes(String(o.nroOrden)));
     
     ordenesRegistradas.sort((a, b) => (b.en || 0) - (a.en || 0));
-}
 
     // ---- CAJA ----
     let caja = cajaMovimientos.concat(leerJSON("vital_caja", []));
