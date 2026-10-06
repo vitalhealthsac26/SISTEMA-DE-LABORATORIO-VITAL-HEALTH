@@ -1915,7 +1915,7 @@ function cargarOrdenes() {
     });
 }
 
-// Reemplaza o ajusta tu función de borrado de órdenes así:
+// Reemplaza tu función eliminarOrden actual por esta:
 function eliminarOrden(nroOrden) {
     if (confirm("¿Estás seguro de eliminar esta orden por completo?")) {
         // 1. Filtrar de la memoria local
@@ -1924,13 +1924,22 @@ function eliminarOrden(nroOrden) {
         // 2. Actualizar persistencia local para que no regrese al limpiar caché
         persistirDatos(); 
 
-        // 3. Si usas la nube y existe la función de borrado en Firebase, invócala aquí
+        // 3. Eliminar permanentemente de la nube (Firebase)
+        // Verificamos si existe la función nativa o global de borrado en la nube
         if (typeof nubeEliminarOrden === "function") {
             nubeEliminarOrden(nroOrden);
+        } else if (typeof window.nubeEliminarOrden === "function") {
+            window.nubeEliminarOrden(nroOrden);
+        } else if (typeof db !== "undefined" && db) {
+            // Borrado directo por si usas Firebase Firestore estándar con la colección "ordenes"
+            db.collection("ordenes").doc(String(nroOrden)).delete().catch(err => console.error("Error al borrar en la nube:", err));
         }
 
-        // 4. Recargar la tabla
+        // 4. Recargar la tabla en pantalla
         cargarOrdenes();
+        
+        // 5. Actualizar caja o respaldos si corresponde
+        if (typeof actualizarTotalesCaja === "function") actualizarTotalesCaja();
     }
 }
 
