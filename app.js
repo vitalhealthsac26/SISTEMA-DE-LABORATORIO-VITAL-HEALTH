@@ -1409,18 +1409,27 @@ function persistirDatos() {
 // Recupera y fusiona TODA la información guardada, incluso la de claves antiguas,
 // para que no se pierda nada de lo que ya había registrado el usuario.
 function cargarDatosGuardados() {
+    // ---- ÓRDENES ELIMINADAS (Lista negra para evitar que revivan) ----
+    window.ordenesEliminadas = leerJSON("vital_ordenes_eliminadas", []);
+
     // ---- ÓRDENES ----
     let ordenes = [];
     ordenes = ordenes.concat(leerJSON("vital_ordenes", []));
     ordenes = ordenes.concat(leerJSON("vital_health_ordenes", []));
+    
     const datosV1 = leerJSON("vitalhealth_datos_v1", null);
     if (datosV1 && typeof datosV1 === "object") {
         if (Array.isArray(datosV1.ordenes)) ordenes = ordenes.concat(datosV1.ordenes);
         if (Array.isArray(datosV1.caja)) cajaMovimientos = cajaMovimientos.concat(datosV1.caja);
         if (Array.isArray(datosV1.catalogo) && datosV1.catalogo.length) examenesCatalogo = examenesCatalogo.concat(datosV1.catalogo);
     }
-    ordenesRegistradas = mergePorClave(ordenes, o => o.nroOrden || o.id);
+
+    // Fusionar y FILTRAR las que estén en la lista negra de eliminadas
+    let ordenesFusionadas = mergePorClave(ordenes, o => o.nroOrden || o.id);
+    ordenesRegistradas = ordenesFusionadas.filter(o => !window.ordenesEliminadas.includes(String(o.nroOrden)));
+    
     ordenesRegistradas.sort((a, b) => (b.en || 0) - (a.en || 0));
+}
 
     // ---- CAJA ----
     let caja = cajaMovimientos.concat(leerJSON("vital_caja", []));
