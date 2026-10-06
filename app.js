@@ -1928,31 +1928,39 @@ function cargarOrdenes() {
 // Reemplaza tu función eliminarOrden actual por esta:
 function eliminarOrden(nroOrden) {
     if (confirm("¿Estás seguro de eliminar esta orden por completo?")) {
-        // 1. Filtrar de la memoria local
-        ordenesRegistradas = ordenesRegistradas.filter(o => o.nroOrden !== nroOrden);
-        
-        // 2. Actualizar persistencia local para que no regrese al limpiar caché
-        persistirDatos(); 
+        const idOrden = String(nroOrden);
 
-        // 3. Eliminar permanentemente de la nube (Firebase)
-        // Verificamos si existe la función nativa o global de borrado en la nube
-        if (typeof nubeEliminarOrden === "function") {
-            nubeEliminarOrden(nroOrden);
-        } else if (typeof window.nubeEliminarOrden === "function") {
-            window.nubeEliminarOrden(nroOrden);
-        } else if (typeof db !== "undefined" && db) {
-            // Borrado directo por si usas Firebase Firestore estándar con la colección "ordenes"
-            db.collection("ordenes").doc(String(nroOrden)).delete().catch(err => console.error("Error al borrar en la nube:", err));
+        // 1. Registrar en la lista negra local para que nunca más reviva al actualizar
+        if (!window.ordenesEliminadas) {
+            window.ordenesEliminadas = leerJSON("vital_ordenes_eliminadas", []);
+        }
+        if (!window.ordenesEliminadas.includes(idOrden)) {
+            window.ordenesEliminadas.push(idOrden);
+            guardarJSON("vital_ordenes_eliminadas", window.ordenesEliminadas);
         }
 
-        // 4. Recargar la tabla en pantalla
+        // 2. Filtrar de la memoria actual
+        ordenesRegistradas = ordenesRegistradas.filter(o => String(o.nroOrden) !== idOrden);
+        
+        // 3. Actualizar persistencia local
+        persistirDatos(); 
+
+        // 4. Eliminar permanentemente de Firebase / Nube
+        if (typeof nubeEliminarOrden === "function") {
+            nubeEliminarOrden(idOrden);
+        } else if (typeof window.nubeEliminarOrden === "function") {
+            window.nubeEliminarOrden(idOrden);
+        } else if (typeof db !== "undefined" && db) {
+            // Intento directo en la colección de Firestore si está disponible
+            db.collection("ordenes").doc(idOrden).delete().catch(err => console.log("Nota en nube:", err));
+        }
+
+        // 5. Refrescar la tabla en pantalla
         cargarOrdenes();
         
-        // 5. Actualizar caja o respaldos si corresponde
         if (typeof actualizarTotalesCaja === "function") actualizarTotalesCaja();
     }
 }
-
 function abrirResultados(nroOrden) {
     const orden = (ordenesRegistradas || []).find(o => o.nroOrden === nroOrden);
     if (!orden) return;
