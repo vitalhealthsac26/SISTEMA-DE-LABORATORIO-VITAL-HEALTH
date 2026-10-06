@@ -1925,18 +1925,20 @@ function cargarOrdenes() {
     });
 }
 
-// Reemplaza tu función eliminarOrden actual por esta:
+// ==========================================
+// 2. ELIMINAR ORDEN (LOCAL Y NUBE + LISTA NEGRA)
+// ==========================================
 function eliminarOrden(nroOrden) {
     if (confirm("¿Estás seguro de eliminar esta orden por completo?")) {
         const idOrden = String(nroOrden);
 
         // 1. Registrar en la lista negra local para que nunca más reviva al actualizar
-        if (!window.ordenesEliminadas) {
-            window.ordenesEliminadas = leerJSON("vital_ordenes_eliminadas", []);
+        if (!window.ordenesEliminidas) {
+            window.ordenesEliminidas = leerJSON("vital_ordenes_eliminidas", []);
         }
-        if (!window.ordenesEliminadas.includes(idOrden)) {
-            window.ordenesEliminadas.push(idOrden);
-            guardarJSON("vital_ordenes_eliminadas", window.ordenesEliminadas);
+        if (!window.ordenesEliminidas.includes(idOrden)) {
+            window.ordenesEliminidas.push(idOrden);
+            guardarJSON("vital_ordenes_eliminadas", window.ordenesEliminidas);
         }
 
         // 2. Filtrar de la memoria actual
@@ -1951,14 +1953,15 @@ function eliminarOrden(nroOrden) {
         } else if (typeof window.nubeEliminarOrden === "function") {
             window.nubeEliminarOrden(idOrden);
         } else if (typeof db !== "undefined" && db) {
-            // Intento directo en la colección de Firestore si está disponible
             db.collection("ordenes").doc(idOrden).delete().catch(err => console.log("Nota en nube:", err));
         }
 
         // 5. Refrescar la tabla en pantalla
         cargarOrdenes();
         
-        if (typeof actualizarTotalesCaja === "function") actualizarTotalesCaja();
+        if (typeof actualizarTotalesCaja === "function") {
+            actualizarTotalesCaja();
+        }
     }
 }
 function abrirResultados(nroOrden) {
