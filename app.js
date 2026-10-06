@@ -30,6 +30,7 @@ const BASE_VALORES_REFERENCIALES = {
     { id: 'otros', nombre: 'Otros', referencia: '-' },
     
     // Muestras finales
+    { nombre: "Muestras", esSeccion: true },
     { id: 'muestra_1', nombre: 'MUESTRA I', referencia: '' },
     { id: 'muestra_2', nombre: 'MUESTRA II', referencia: '' },
     { id: 'muestra_3', nombre: 'MUESTRA III', referencia: '' }
