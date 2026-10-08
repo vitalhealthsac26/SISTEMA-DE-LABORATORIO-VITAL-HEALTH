@@ -105,11 +105,13 @@ async function sincronizarTodo() {
         const snapCaja = await getDocs(collection(db, "caja"));
         snapCaja.forEach(d => {
             const idMovStr = String(d.id);
-            // Evitar que resurjan si están eliminadas localmente
             if (window.cajaEliminados && window.cajaEliminados.includes(idMovStr)) return;
 
+            const remota = d.data();
+            if (!remota.id) remota.id = idMovStr; // Asegura que el ID de la nube coincida
+
             if (!cajaMovimientos.some(m => String(m.id) === idMovStr)) {
-                cajaMovimientos.push(d.data());
+                cajaMovimientos.push(remota);
             }
         });
         cajaMovimientos.sort((a, b) => (b.en || 0) - (a.en || 0));
