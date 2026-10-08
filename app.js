@@ -34,9 +34,11 @@ const BASE_VALORES_REFERENCIALES = {
   { nombre: "Recuento Diferencial Absoluto", esSeccion: true },
   { id: 'seg_absoluto', nombre: 'Segmentados', valor: '', unidad: 'Cél/uL', refMin: 1200.00, refMax: 5500.00 }
 ],
+  
   "GLUCOSA BASAL": [
   { id: 'glucosa', nombre: 'GLUCOSA BASAL', valor: '', unidad: 'mg/dL', refMin: 74, refMax: 106, referencia: 'Adultos: 74 - 106\nNiños: 60 - 100\nNeonatos: 50 - 80', metodo: 'Colorimétrico Enzimático o Espectrofotometría EC 9200' }
-    ],
+],
+  
   "PARASITOLOGICO SERIADO 3 MUESTRAS": [
     // Primera Sección
     { nombre: "Física", esSeccion: true },
@@ -60,6 +62,7 @@ const BASE_VALORES_REFERENCIALES = {
     { id: 'muestra_2', nombre: 'MUESTRA II', referencia: '' },
     { id: 'muestra_3', nombre: 'MUESTRA III', referencia: '' }
   ],
+  
   // ============ EXTENDIDA: PERFIL LIPIDICO (se agrega VLDL del PDF) ============
 "PERFIL LIPIDICO": [
   { id: 'col_tot', nombre: 'Colesterol Total', unidad: 'mg/dL', refMin: 0, refMax: 200, referencia: 'Normal < 200 | Moderadamente alto 200-239 | Elevado > 240' },
@@ -81,14 +84,6 @@ const BASE_VALORES_REFERENCIALES = {
   { id: 'tgp', nombre: 'TGP (ALAT)', unidad: 'U/L', refMin: 0, refMax: 41, referencia: 'M: <= 41.00 | F: <= 31.00' },
   { id: 'fal', nombre: 'Fosfatasa Alcalina (ALP)', unidad: 'U/L', refMin: 40, refMax: 300, referencia: 'Adultos: 40.0 - 300.0 | Niños y adolescentes: < 645.0' },
   { id: 'ggt', nombre: 'Gamma Glutamil Transpeptidasa (GGT)', unidad: 'U/L', refMin: 5, refMax: 40, referencia: '5.00 - 40.00' }
-],
-
-// ============ NUEVA: EXAMEN DE BIOQUIMICA (Perfil de Rutina) ============
-"EXAMEN DE BIOQUIMICA": [
-  { nombre: "Perfil de Rutina", esSeccion: true },
-  { id: 'glucosa', nombre: 'Glucosa', unidad: 'mg/dL', refMin: 70, refMax: 110, referencia: '70 - 110' },
-  { id: 'col_tot', nombre: 'Colesterol Total', unidad: 'mg/dL', refMin: 0, refMax: 200, referencia: '< 200' },
-  { id: 'trig', nombre: 'Triglicéridos', unidad: 'mg/dL', refMin: 0, refMax: 160, referencia: '0 - 160' }
 ],
 
 // ============ NUEVA: PERFIL RENAL ============
