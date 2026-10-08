@@ -72,7 +72,7 @@ window.nubeCerrarSesion = function () {
 };
 
 async function sincronizarTodo() {
-    if (aplicandoRemoto || !db) return;
+    if (aplicandoRemoto || window.bloquearSincronizacion || !db) return;
     aplicandoRemoto = true;
     try {
         // ---- ÓRDENES ----
@@ -103,18 +103,20 @@ async function sincronizarTodo() {
 
         // ---- CAJA ----
         const snapCaja = await getDocs(collection(db, "caja"));
+        let nuevaCaja = [];
         snapCaja.forEach(d => {
             const idMovStr = String(d.id);
-            // Bloqueo estricto por lista negra local
-            if (window.cajaEliminados && window.cajaEliminados.includes(idMovStr)) return;
+            // FILTRO ESTRICTO: Si está en la lista negra local, se ignora por completo de la nube
+            const eliminadosCaja = JSON.parse(localStorage.getItem("vital_caja_eliminados") || "[]");
+            if (eliminadosCaja.includes(idMovStr)) return;
 
             const remota = d.data();
-            if (!remota.id) remota.id = idMovStr;
-
-            if (!cajaMovimientos.some(m => String(m.id) === idMovStr)) {
-                cajaMovimientos.push(remota);
-            }
+            remota.id = idMovStr;
+            nuevaCaja.push(remota);
         });
+        // Sincronizar array local con los datos remotos filtrados
+        cajaMovimientos = mergePorClave(cajaMovimientos.concat(nuevaCaja), m => m.id);
+        cajaMovimientos = cajaMovimientos.filter(m => !JSON.parse(localStorage.getItem("vital_caja_eliminados") || "[]").includes(String(m.id)));
         cajaMovimientos.sort((a, b) => (b.en || 0) - (a.en || 0));
         
         // ---- PACIENTES ----
@@ -133,28 +135,25 @@ async function sincronizarTodo() {
 
         // ---- COTIZACIONES ----
         const snapCot = await getDocs(collection(db, "cotizaciones"));
+        let nuevasCot = [];
         snapCot.forEach(d => {
             const remota = d.data();
             const idCotStr = String(d.id);
-            // Bloqueo estricto por lista negra local
-            if (window.cotizacionesEliminadas && window.cotizacionesEliminadas.includes(idCotStr)) return;
+            // FILTRO ESTRICTO: Si está en la lista negra local, se ignora por completo de la nube
+            const eliminadosCot = JSON.parse(localStorage.getItem("vital_cotizaciones_eliminadas") || "[]");
+            if (eliminadosCot.includes(idCotStr)) return;
 
             if (!window.cotizacionesGuardadas) window.cotizacionesGuardadas = [];
             const norm = (typeof estandarizarCotizacion === "function") ? estandarizarCotizacion(remota) : remota;
-            if (!norm.id) norm.id = d.id;
-            
-            const idx = window.cotizacionesGuardadas.findIndex(c => String(c.id) === String(norm.id));
-            if (idx === -1) window.cotizacionesGuardadas.push(norm);
-            else window.cotizacionesGuardadas[idx] = norm;
+            norm.id = idCotStr;
+            nuevasCot.push(norm);
         });
+        window.cotizacionesGuardadas = mergePorClave((window.cotizacionesGuardadas || []).concat(nuevasCot), c => c.id);
+        window.cotizacionesGuardadas = window.cotizacionesGuardadas.filter(c => !JSON.parse(localStorage.getItem("vital_cotizaciones_eliminadas") || "[]").includes(String(c.id)));
 
         persistirDatos();
-        if (typeof cargarOrdenes === "function") cargarOrdenes();
-        if (typeof renderizarTablaCatalogo === "function") renderizarTablaCatalogo();
         if (typeof actualizarTotalesCaja === "function") actualizarTotalesCaja();
-        if (typeof cargarPacientes === "function") cargarPacientes();
         if (typeof cargarCotizaciones === "function") cargarCotizaciones();
-        suscribirCambios();
     } catch (error) {
         console.error("No se pudo sincronizar con la nube:", error);
     } finally {
