@@ -466,3 +466,8 @@ body { background-color: var(--bg-light); font-family: 'Segoe UI', Tahoma, Genev
 @media print {
     .vital-navbar-botones { display: none !important; }
 }
+.ref-multilinea {
+    white-space: pre-line;
+    display: inline-block;
+    text-align: left;
+}
