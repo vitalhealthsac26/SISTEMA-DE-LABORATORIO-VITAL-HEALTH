@@ -1440,9 +1440,12 @@ function cargarDatosGuardados() {
     cajaMovimientos = mergePorClave(caja, m => m.id);
     cajaMovimientos.sort((a, b) => (b.en || 0) - (a.en || 0));
 
-    // ---- CATÁLOGO ----
+    // ---- CATÁLOGO FILTRADO POR LA LISTA NEGRA ----
     let cat = examenesCatalogo.concat(leerJSON("vital_catalogo", [])).concat(leerJSON("examenesCatalogo", []));
-    examenesCatalogo = mergePorClave(cat, c => c.codigo);
+    let catFusionado = mergePorClave(cat, c => c.codigo);
+    
+    // FILTRO ESTRICTO: Si el código está en la lista negra, se descarta para siempre
+    examenesCatalogo = catFusionado.filter(e => !window.examenesEliminados.includes(String(e.codigo)));
 
     // ---- PACIENTES ----
     window.pacientesEliminados = leerJSON(KEY_PACIENTES_ELIMINADOS, [])
