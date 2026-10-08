@@ -2537,16 +2537,32 @@ function cargarCotizacion(id) {
 
 function eliminarCotizacion(id) {
     if (!confirm("¿Desea eliminar esta cotización guardada?")) return;
-    window.cotizacionesGuardadas = (window.cotizacionesGuardadas || []).filter(c => String(c.id) !== String(id));
-    if (String(currentCotizacionId) === String(id)) {
+    const idCotStr = String(id);
+    
+    if (!window.cotizacionesEliminadas) {
+        window.cotizacionesEliminadas = leerJSON("vital_cotizaciones_eliminadas", []);
+    }
+    if (!window.cotizacionesEliminadas.includes(idCotStr)) {
+        window.cotizacionesEliminadas.push(idCotStr);
+        localStorage.setItem("vital_cotizaciones_eliminadas", JSON.stringify(window.cotizacionesEliminadas));
+    }
+
+    window.cotizacionesGuardadas = (window.cotizacionesGuardadas || []).filter(c => String(c.id) !== idCotStr);
+    if (String(currentCotizacionId) === idCotStr) {
         currentCotizacionId = null;
         listaCotizacionInd = [];
         renderizarTablaCotizacion();
     }
     persistirDatos();
     cargarCotizaciones();
-}
 
+    // Borrar de la nube en Firebase
+    if (typeof nubeEliminarCotizacion === "function") {
+        nubeEliminarCotizacion(idCotStr);
+    } else if (typeof window.nubeEliminarCotizacion === "function") {
+        window.nubeEliminarCotizacion(idCotStr);
+    }
+}
 function imprimirCotizacionGuardada(id) {
     const c = buscarCotizacionPorId(id);
     if (!c) { alert("No se encontró la cotización."); return; }
