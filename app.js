@@ -17,6 +17,7 @@ const BASE_VALORES_REFERENCIALES = {
   { id: 'vpm', nombre: 'Vol. plaquetario medio - VPM', valor: '', unidad: 'fL', min: 7.60, max: 10.80 },
 
   // --- SECCIÓN: RECUENTO DIFERENCIAL PORCENTUAL ---
+  { nombre: "Recuento Diferencial Porcentual", esSeccion: true },
   { id: 'seccion_dif_porc', nombre: 'Recuento Diferencial Porcentual %', esTitulo: true },
   { id: 'neutrofilos_seg', nombre: 'Neutrófilos Segmentados', valor: '', unidad: '%', min: 31.00, max: 51.00 },
   { id: 'neutrofilos_aba', nombre: 'Neutrófilos Abastonados', valor: '', unidad: '%', min: 0.00, max: 5.00 },
@@ -31,6 +32,7 @@ const BASE_VALORES_REFERENCIALES = {
   { id: 'suma_diferencial', nombre: 'Suma de recuento diferencial', valor: '100.00', unidad: '%', min: '', max: '' },
 
   // --- SECCIÓN: RECUENTO DIFERENCIAL ABSOLUTO ---
+  { nombre: "Recuento Diferencial Absoluto", esSeccion: true }
   { id: 'seccion_dif_abs', nombre: 'Recuento Diferencial Absoluto', esTitulo: true },
   { id: 'seg_absoluto', nombre: 'Segmentados', valor: '', unidad: 'Cél/uL', min: 1200.00, max: 5500.00 }
 ],
