@@ -2263,10 +2263,33 @@ function editarExamenCatalogo(codigo) {
 
 function eliminarExamenCatalogo(codigo) {
     if (!confirm(`¿Estás seguro de eliminar el examen con código ${codigo} del catálogo?`)) return;
-    examenesCatalogo = examenesCatalogo.filter(e => e.codigo !== codigo);
-    renderizarTablaCatalogo();
+    
+    const idCodStr = String(codigo);
+
+    // 1. Guardar en la lista negra local persistente
+    if (!window.examenesEliminados) {
+        window.examenesEliminados = leerJSON("vital_examenes_eliminados", []);
+    }
+    if (!window.examenesEliminados.includes(idCodStr)) {
+        window.examenesEliminados.push(idCodStr);
+        localStorage.setItem("vital_examenes_eliminados", JSON.stringify(window.examenesEliminados));
+    }
+
+    // 2. Quitar de la memoria local actual
+    examenesCatalogo = examenesCatalogo.filter(e => String(e.codigo) !== idCodStr);
+    
+    // 3. Guardar cambios locales
     persistirDatos();
-    alert("Examen eliminado del catálogo correctamente.");
+    renderizarTablaCatalogo();
+
+    // 4. Eliminar físicamente de la nube de Firebase de inmediato
+    if (typeof nubeEliminarExamen === "function") {
+        nubeEliminarExamen(idCodStr);
+    } else if (typeof db !== "undefined" && db) {
+        deleteDoc(doc(db, "catalogo", idCodStr)).catch(err => console.log("Nota en nube:", err));
+    }
+
+    alert("Examen eliminado del catálogo correctamente y no volverá a aparecer.");
 }
 
 // ==========================================
