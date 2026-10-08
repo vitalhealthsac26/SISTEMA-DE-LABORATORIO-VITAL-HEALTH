@@ -34,6 +34,9 @@ const BASE_VALORES_REFERENCIALES = {
   { nombre: "Recuento Diferencial Absoluto", esSeccion: true },
   { id: 'seg_absoluto', nombre: 'Segmentados', valor: '', unidad: 'Cél/uL', refMin: 1200.00, refMax: 5500.00 }
 ],
+  "GLUCOSA BASAL": [
+  { id: 'glucosa', nombre: 'GLUCOSA BASAL', valor: '', unidad: 'mg/dL', refMin: 74, refMax: 106, referencia: 'Adultos: 74 - 106\nNiños: 60 - 100\nNeonatos: 50 - 80', metodo: 'Colorimétrico Enzimático o Espectrofotometría EC 9200' }
+    ],
   "PARASITOLOGICO SERIADO 3 MUESTRAS": [
     // Primera Sección
     { nombre: "Física", esSeccion: true },
