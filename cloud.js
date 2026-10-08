@@ -105,10 +105,11 @@ async function sincronizarTodo() {
         const snapCaja = await getDocs(collection(db, "caja"));
         snapCaja.forEach(d => {
             const idMovStr = String(d.id);
+            // Bloqueo estricto por lista negra local
             if (window.cajaEliminados && window.cajaEliminados.includes(idMovStr)) return;
 
             const remota = d.data();
-            if (!remota.id) remota.id = idMovStr; // Asegura que el ID de la nube coincida
+            if (!remota.id) remota.id = idMovStr;
 
             if (!cajaMovimientos.some(m => String(m.id) === idMovStr)) {
                 cajaMovimientos.push(remota);
@@ -135,12 +136,13 @@ async function sincronizarTodo() {
         snapCot.forEach(d => {
             const remota = d.data();
             const idCotStr = String(d.id);
-            // Evitar que resurjan si están eliminadas localmente
+            // Bloqueo estricto por lista negra local
             if (window.cotizacionesEliminadas && window.cotizacionesEliminadas.includes(idCotStr)) return;
 
             if (!window.cotizacionesGuardadas) window.cotizacionesGuardadas = [];
             const norm = (typeof estandarizarCotizacion === "function") ? estandarizarCotizacion(remota) : remota;
             if (!norm.id) norm.id = d.id;
+            
             const idx = window.cotizacionesGuardadas.findIndex(c => String(c.id) === String(norm.id));
             if (idx === -1) window.cotizacionesGuardadas.push(norm);
             else window.cotizacionesGuardadas[idx] = norm;
