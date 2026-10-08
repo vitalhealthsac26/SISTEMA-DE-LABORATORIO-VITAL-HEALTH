@@ -3,15 +3,37 @@
 // ==========================================
 const BASE_VALORES_REFERENCIALES = {
   "HEMOGRAMA COMPLETO AUTOMATIZADO": [
-    { id: 'leucocitos', nombre: 'Leucocitos', unidad: 'Cél/uL', refMin: 4500, refMax: 11000, referencia: '4,500 - 11,000 /uL' },
-    { id: 'hematies', nombre: 'Hematíes (Glóbulos Rojos)', unidad: 'M/uL', refMin: 4.2, refMax: 5.8, referencia: 'V: 4.5-5.8 | M: 4.2-5.2 M/uL' },
-    { id: 'hemoglobina', nombre: 'Hemoglobina', unidad: 'g/dL', refMin: 12.0, refMax: 16.5, referencia: 'V: 13.5-16.5 | M: 12.0-15.0 g/dL' },
-    { id: 'hematocrito', nombre: 'Hematocrito', unidad: '%', refMin: 37, refMax: 50, referencia: 'V: 40-50% | M: 37-47%' },
-    { id: 'vcm', nombre: 'VCM', unidad: 'fL', refMin: 80, refMax: 98, referencia: '80.0 - 98.0 fL' },
-    { id: 'hcm', nombre: 'HCM', unidad: 'pg', refMin: 27, refMax: 33, referencia: '27.0 - 33.0 pg' },
-    { id: 'chcm', nombre: 'CHCM', unidad: 'g/dL', refMin: 32, refMax: 36, referencia: '32.0 - 36.0 g/dL' },
-    { id: 'plaquetas', nombre: 'Plaquetas', unidad: 'Cél/uL', refMin: 150000, refMax: 450000, referencia: '150,000 - 450,000 /uL' }
-  ],
+  // --- SERIE ROJA Y BLANCA PRINCIPAL ---
+  { id: 'leucocitos', nombre: 'Leucocitos', valor: '', unidad: 'Cél/uL', min: 4500.00, max: 13500.00, metodo: 'Citometría de flujo o impedancia eléctrica (Método Coulter)' },
+  { id: 'hematies', nombre: 'Glóbulos Rojos (hematíes)', valor: '', unidad: 'Cél/uL', min: 4000000.00, max: 5200000.00 },
+  { id: 'hemoglobina', nombre: 'Hemoglobina', valor: '', unidad: 'g/dL', min: 11.50, max: 15.50 },
+  { id: 'hematocrito', nombre: 'Hematocrito', valor: '', unidad: '%', min: 35.00, max: 45.00 },
+  { id: 'vcm', nombre: 'Volumen Corpuscular medio VCM', valor: '', unidad: 'fL', min: 77.00, max: 95.00 },
+  { id: 'hcm', nombre: 'Hemoglobina Corpuscular media - HCM', valor: '', unidad: 'pg', min: 25.00, max: 33.00 },
+  { id: 'chcm', nombre: 'Concentración de Hemoglobina Corpuscular media - CHCM', valor: '', unidad: 'g/dL', min: 30.00, max: 36.00 },
+  { id: 'plaquetas', nombre: 'Recuento Plaquetario', valor: '', unidad: 'Cél/uL', min: 150000.00, max: 475000.00 },
+  { id: 'rdw_sd', nombre: 'RDW-SD', valor: '', unidad: 'fL', min: 37.00, max: 54.00 },
+  { id: 'rdw_cv', nombre: 'RDW-CV', valor: '', unidad: '%', min: 11.50, max: 15.60 },
+  { id: 'vpm', nombre: 'Vol. plaquetario medio - VPM', valor: '', unidad: 'fL', min: 7.60, max: 10.80 },
+
+  // --- SECCIÓN: RECUENTO DIFERENCIAL PORCENTUAL ---
+  { id: 'seccion_dif_porc', nombre: 'Recuento Diferencial Porcentual %', esTitulo: true },
+  { id: 'neutrofilos_seg', nombre: 'Neutrófilos Segmentados', valor: '', unidad: '%', min: 31.00, max: 51.00 },
+  { id: 'neutrofilos_aba', nombre: 'Neutrófilos Abastonados', valor: '', unidad: '%', min: 0.00, max: 5.00 },
+  { id: 'linfocitos', nombre: 'Linfocitos', valor: '', unidad: '%', min: 4.00, max: 28.00 },
+  { id: 'monocitos', nombre: 'Monocitos', valor: '', unidad: '%', min: 0.00, max: 10.00 },
+  { id: 'eosinofilos', nombre: 'Eosinófilos', valor: '', unidad: '%', min: 0.00, max: 2.50 },
+  { id: 'basofilos', nombre: 'Basófilo', valor: '', unidad: '%', min: 0.00, max: 2.00 },
+  { id: 'metamielocitos', nombre: 'Metamielocitos', valor: '', unidad: '%', min: 0, max: 0 },
+  { id: 'mielocitos', nombre: 'Mielocitos', valor: '', unidad: '%', min: 0, max: 0 },
+  { id: 'promielocitos', nombre: 'Promielocitos', valor: '', unidad: '%', min: 0, max: 0 },
+  { id: 'blastos', nombre: 'Blastos', valor: '', unidad: '%', min: 0, max: 0 },
+  { id: 'suma_diferencial', nombre: 'Suma de recuento diferencial', valor: '100.00', unidad: '%', min: '', max: '' },
+
+  // --- SECCIÓN: RECUENTO DIFERENCIAL ABSOLUTO ---
+  { id: 'seccion_dif_abs', nombre: 'Recuento Diferencial Absoluto', esTitulo: true },
+  { id: 'seg_absoluto', nombre: 'Segmentados', valor: '', unidad: 'Cél/uL', min: 1200.00, max: 5500.00 }
+],
   "PARASITOLOGICO SERIADO 3 MUESTRAS": [
     // Primera Sección
     { nombre: "Física", esSeccion: true },
