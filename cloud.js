@@ -97,15 +97,18 @@ async function sincronizarTodo() {
 
         // ---- CATÁLOGO ----
         const snapCat = await getDocs(collection(db, "catalogo"));
-        snapCat.forEach(d => {
-            const remoto = d.data();
-            const idCodStr = String(d.id);
-            if (window.examenesEliminados && window.examenesEliminados.includes(idCodStr)) return;
+snapCat.forEach(d => {
+    const remoto = d.data();
+    const idCodStr = String(d.id);
+    
+    // FILTRO ESTRICTO EN NUBE: Si está en la lista negra local, se ignora
+    const eliminadosExamenes = JSON.parse(localStorage.getItem("vital_examenes_eliminados") || "[]");
+    if (eliminadosExamenes.includes(idCodStr)) return;
 
-            const idx = examenesCatalogo.findIndex(e => String(e.codigo) === idCodStr);
-            if (idx === -1) examenesCatalogo.push(remoto);
-            else if ((remoto.en || 0) > (examenesCatalogo[idx].en || 0)) examenesCatalogo[idx] = remoto;
-        });
+    const idx = examenesCatalogo.findIndex(e => String(e.codigo) === idCodStr);
+    if (idx === -1) examenesCatalogo.push(remoto);
+    else if ((remoto.en || 0) > (examenesCatalogo[idx].en || 0)) examenesCatalogo[idx] = remoto;
+});
 
         // ---- CAJA ----
         const snapCaja = await getDocs(collection(db, "caja"));
