@@ -2802,22 +2802,55 @@ function eliminarPaciente(dni) {
         return;
     }
     const pac = normalizarPaciente(lista[indice]);
-    const ordenesVinculadas = (ordenesRegistradas || []).filter(o => String(o.dni) === String(pac.dni)).length;
+    const ordenesVinculadas = (ordenesRegistradas || []).filter(o => String(o.dni) === String(pac.dni));
 
     let mensaje = `¿Está seguro de ELIMINAR al paciente?\n\n${pac.nombre}\nDNI: ${pac.dni}`;
-    if (ordenesVinculadas > 0) {
-        mensaje += `\n\nTiene ${ordenesVinculadas} orden(es) de trabajo. Las órdenes y el arqueo de caja NO se eliminan, solo el registro del paciente.`;
+    if (ordenesVinculadas.length > 0) {
+        mensaje += `\n\nTiene ${ordenesVinculadas.length} orden(es) de trabajo y registros de caja asociados. ¡TODO SE ELIMINARÁ PERMANENTEMENTE!`;
     }
     if (!confirm(mensaje + "\n\nEsta acción no se puede deshacer.")) return;
 
+    // 1. Eliminar órdenes y movimientos de caja asociados (local, nube y listas negras)
+    ordenesVinculadas.forEach(ord => {
+        const nroOrd = String(ord.nroOrden);
+        if (!window.ordenesEliminadas) window.ordenesEliminadas = leerJSON("vital_ordenes_eliminidas", []);
+        if (!window.ordenesEliminadas.includes(nroOrd)) {
+            window.ordenesEliminadas.push(nroOrd);
+            localStorage.setItem("vital_ordenes_eliminadas", JSON.stringify(window.ordenesEliminadas));
+        }
+        if (typeof nubeEliminarOrden === "function") nubeEliminarOrden(nroOrd);
+
+        // Caja asociada a esta orden
+        const movsAsociados = cajaMovimientos.filter(m => String(m.nroOrden) === nroOrd);
+        movsAsociados.forEach(m => {
+            const idMov = String(m.id);
+            if (!window.cajaEliminados) window.cajaEliminados = leerJSON("vital_caja_eliminados", []);
+            if (!window.cajaEliminados.includes(idMov)) {
+                window.cajaEliminados.push(idMov);
+                localStorage.setItem("vital_caja_eliminados", JSON.stringify(window.cajaEliminados));
+            }
+            if (typeof nubeEliminarMovimiento === "function") nubeEliminarMovimiento(idMov);
+        });
+        cajaMovimientos = cajaMovimientos.filter(m => String(m.nroOrden) !== nroOrd);
+    });
+
+    const nrosOrdenesABorrar = ordenesVinculadas.map(o => String(o.nroOrden));
+    ordenesRegistradas = ordenesRegistradas.filter(o => !nrosOrdenesABorrar.includes(String(o.nroOrden)));
+
+    // 2. Eliminar al paciente
     lista.splice(indice, 1);
     window.pacientesRegistrados = lista;
     marcarPacienteEliminado(pac.dni);
-    window.nubeEliminarPaciente?.(pac);
+    if (typeof window.nubeEliminarPaciente === "function") {
+        window.nubeEliminarPaciente(pac);
+    }
+
     persistirDatos();
     cargarPacientes();
+    cargarOrdenes();
+    actualizarTotalesCaja();
+    alert("Paciente, órdenes y movimientos de caja relacionados eliminados correctamente.");
 }
-window.eliminarPaciente = eliminarPaciente;
 
 // ==========================================
 // TICKET DE VENTA (TICKETERA TÉRMICA 58mm)
