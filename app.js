@@ -2551,10 +2551,7 @@ function eliminarCotizacion(id) {
     if (!confirm("¿Desea eliminar esta cotización guardada?")) return;
     const idCotStr = String(id);
     
-    // Bloquear sincronización momentáneamente
-    window.bloquearSincronizacion = true;
-
-    // 1. Registrar en lista negra persistente
+    // 1. Guardar en lista negra local persistente
     let eliminados = JSON.parse(localStorage.getItem("vital_cotizaciones_eliminadas") || "[]");
     if (!eliminados.includes(idCotStr)) {
         eliminados.push(idCotStr);
@@ -2563,24 +2560,20 @@ function eliminarCotizacion(id) {
 
     // 2. Quitar de memoria local
     window.cotizacionesGuardadas = (window.cotizacionesGuardadas || []).filter(c => String(c.id) !== idCotStr);
-    if (String(currentCotizacionId) === idCotStr) {
+    if (typeof currentCotizacionId !== "undefined" && String(currentCotizacionId) === idCotStr) {
         currentCotizacionId = null;
-        listaCotizacionInd = [];
-        renderizarTablaCotizacion();
+        if (typeof listaCotizacionInd !== "undefined") listaCotizacionInd = [];
     }
     
     persistirDatos();
-    cargarCotizaciones();
+    if (typeof cargarCotizaciones === "function") cargarCotizaciones();
 
-    // 3. Borrar físicamente de la nube de Firebase
+    // 3. Borrar físicamente de la nube de Firebase de inmediato
     if (typeof nubeEliminarCotizacion === "function") {
         nubeEliminarCotizacion(idCotStr);
     } else if (typeof db !== "undefined" && db) {
-        db.collection("cotizaciones").doc(idCotStr).delete().catch(err => console.log(err));
+        deleteDoc(doc(db, "cotizaciones", idCotStr)).catch(err => console.log(err));
     }
-
-    // Quitar el bloqueo después de 1 segundo
-    setTimeout(() => { window.bloquearSincronizacion = false; }, 1000);
 }
 function imprimirCotizacionGuardada(id) {
     const c = buscarCotizacionPorId(id);
