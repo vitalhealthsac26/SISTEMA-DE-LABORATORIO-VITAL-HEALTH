@@ -18,7 +18,6 @@ const BASE_VALORES_REFERENCIALES = {
 
   // --- SECCIÓN: RECUENTO DIFERENCIAL PORCENTUAL ---
   { nombre: "Recuento Diferencial Porcentual", esSeccion: true },
-  { id: 'seccion_dif_porc', nombre: 'Recuento Diferencial Porcentual %', esTitulo: true },
   { id: 'neutrofilos_seg', nombre: 'Neutrófilos Segmentados', valor: '', unidad: '%', min: 31.00, max: 51.00 },
   { id: 'neutrofilos_aba', nombre: 'Neutrófilos Abastonados', valor: '', unidad: '%', min: 0.00, max: 5.00 },
   { id: 'linfocitos', nombre: 'Linfocitos', valor: '', unidad: '%', min: 4.00, max: 28.00 },
@@ -33,7 +32,6 @@ const BASE_VALORES_REFERENCIALES = {
 
   // --- SECCIÓN: RECUENTO DIFERENCIAL ABSOLUTO ---
   { nombre: "Recuento Diferencial Absoluto", esSeccion: true }
-  { id: 'seccion_dif_abs', nombre: 'Recuento Diferencial Absoluto', esTitulo: true },
   { id: 'seg_absoluto', nombre: 'Segmentados', valor: '', unidad: 'Cél/uL', min: 1200.00, max: 5500.00 }
 ],
   "PARASITOLOGICO SERIADO 3 MUESTRAS": [
