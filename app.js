@@ -1415,6 +1415,7 @@ function cargarDatosGuardados() {
     window.ordenesEliminadas = leerJSON("vital_ordenes_eliminadas", []);
     window.cajaEliminados = leerJSON("vital_caja_eliminados", []);
     window.cotizacionesEliminadas = leerJSON("vital_cotizaciones_eliminadas", []);;
+    window.examenesEliminados = leerJSON("vital_examenes_eliminados", []); // <--- NUEVO PARA EL CATÁLOGO
 
     // ---- ÓRDENES ----
     let ordenes = [];
