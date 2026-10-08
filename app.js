@@ -34,11 +34,30 @@ const BASE_VALORES_REFERENCIALES = {
   { nombre: "Recuento Diferencial Absoluto", esSeccion: true },
   { id: 'seg_absoluto', nombre: 'Segmentados', valor: '', unidad: 'Cél/uL', refMin: 1200.00, refMax: 5500.00 }
 ],
-  
   "GLUCOSA BASAL": [
   { id: 'glucosa', nombre: 'GLUCOSA BASAL', valor: '', unidad: 'mg/dL', refMin: 74, refMax: 106, referencia: 'Adultos: 74 - 106 | Niños: 60 - 100 | Neonatos: 50 - 80', metodo: 'Colorimétrico Enzimático o Espectrofotometría EC 9200' }
 ],
-  
+  "ACIDO URICO": [
+  { id: 'acido_urico', nombre: 'ACIDO URICO', valor: '', unidad: 'mg/dL', refMin: 1.10, refMax: 5.40, referencia: '1.10 - 5.40', metodo: 'Colorimétrico Enzimático o Espectrofotometría EC 9200' }
+],
+ "UREA": [
+  { id: 'urea', nombre: 'UREA', valor: '', unidad: 'mg/dL', refMin: 10.00, refMax: 50.00, referencia: '10.00 - 50.00', metodo: 'Colorimétrico enzimático o Espectrofotometría EC9200' }
+],
+  "CREATININA SERICA": [
+  { id: 'creatinina_serica', nombre: 'CREATININA SERICA', valor: '', unidad: 'mg/dL', refMin: 0.6, refMax: 1.3, referencia: 'M: 0.7 - 1.3 | F: 0.6 - 1.1', metodo: 'Colorimétrico enzimático o Espectrofotometría EC9200' }
+],
+  "T4 LIBRE": [
+  { id: 't4_libre', nombre: 'T4 LIBRE', valor: '', unidad: 'ng/dL', refMin: 0.90, refMax: 1.70, referencia: 'Adultos: 0.90 - 1.70 | Niños: 4 a 30 días: 0.83-3.09 | 1-12 meses: 0.48-2.34 | 1-6 años: 0.65-1.75 | 7-11 años: 0.90-1.67 | 12-19 años: 0.93-1.60', metodo: 'Ensayo de electroquimioluminiscencia (ECLIA)' }
+],
+  "TSH ULTRASENSIBLE": [
+  { id: 'tsh_ultrasensible', nombre: 'TSH ULTRASENSIBLE', valor: '', unidad: 'uUI / mL', refMin: 0.27, refMax: 4.2, referencia: 'Adultos: 0.27 - 4.2 | Niños: 4 a 30 días: 0.43-16.0 | 1-12 meses: 0.62-8.0 | 1-6 años: 0.54-4.5 | 7-11 años: 0.66-4.14 | 12-19 años: 0.53-3.59', metodo: 'Ensayo de electroquimioluminiscencia (ECLIA)' }
+],
+  "VIH 1-2 (AC - AG 3º/4º Generación)-VIH": [
+  { id: 'vih', nombre: 'VIH 1-2 (AC - AG 3º/4º Generación)-VIH', valor: '', unidad: 'S/U', refMin: '', refMax: '', referencia: 'No Reactivo (-)', metodo: 'Inmunocromatografía' }
+],
+  "HEPATITIS B CORE ANITCUERPOS IGM": [
+  { id: 'hep_b', nombre: 'HEPATITIS B CORE ANITCUERPOS IGM', valor: '', unidad: 'S/U', refMin: '', refMax: '', referencia: 'No Reactivo (-)', metodo: 'Inmunocromatografía' }
+],
   "PARASITOLOGICO SERIADO 3 MUESTRAS": [
     // Primera Sección
     { nombre: "Física", esSeccion: true },
