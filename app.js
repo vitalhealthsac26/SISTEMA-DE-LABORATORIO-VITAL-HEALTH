@@ -2315,14 +2315,10 @@ function actualizarTotalesCaja() {
 }
 
 function eliminarMovimientoCaja(idMovimiento) {
-    function eliminarMovimientoCaja(idMovimiento) {
     if (confirm("¿Deseas eliminar este movimiento de caja?")) {
         const idMovStr = String(idMovimiento);
         
-        // Bloquear sincronización momentáneamente
-        window.bloquearSincronizacion = true;
-
-        // 1. Registrar en lista negra persistente
+        // 1. Guardar en lista negra local persistente
         let eliminados = JSON.parse(localStorage.getItem("vital_caja_eliminados") || "[]");
         if (!eliminados.includes(idMovStr)) {
             eliminados.push(idMovStr);
@@ -2334,15 +2330,12 @@ function eliminarMovimientoCaja(idMovimiento) {
         persistirDatos();
         actualizarTotalesCaja();
 
-        // 3. Borrar físicamente de la nube de Firebase
+        // 3. Borrar físicamente de la nube de Firebase de inmediato
         if (typeof nubeEliminarMovimiento === "function") {
             nubeEliminarMovimiento(idMovStr);
         } else if (typeof db !== "undefined" && db) {
-            db.collection("caja").doc(idMovStr).delete().catch(err => console.log(err));
+            deleteDoc(doc(db, "caja", idMovStr)).catch(err => console.log(err));
         }
-
-        // Quitar el bloqueo después de 1 segundo
-        setTimeout(() => { window.bloquearSincronizacion = false; }, 1000);
     }
 }
 // ==========================================
