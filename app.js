@@ -983,7 +983,7 @@ let examenesCatalogo = [
 { codigo: "864", nombre: "PERFIL HEPATICO", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 85.00 },
 { codigo: "865", nombre: "PERFIL HORMONAL FEMENINO I :ESTRADIOL, F.S.H., L.H", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 110.00 },
 { codigo: "866", nombre: "PERFIL HORMONAL FEMENINO II : TIROXINA (T4), ESTRADIOL, TSH ULTRASENSIBLE, F.S.H., L.H.", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 168.00 },
-{ codigo: "869", nombre: "PERFIL LIPIDICO: Colesterol Total, Triglicéridos, HDL - LDL - VLDL", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 50.00 },
+{ codigo: "869", nombre: "PERFIL LIPIDICO", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 50.00 },
 { codigo: "870", nombre: "PERFIL PRE NATAL I - GESTANTE: HEMOGRAMA, GLUCOSA, UREA, CREATININA, EXAMEN DE ORINA COMPLETO(AUTOMATIZADO), GRUPO SANGUINEO Y RH, SEROLOGICAS CUALITATIVAS \"SIALIS\"", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 110.00 },
 { codigo: "871", nombre: "PERFIL PRE NATAL II - GESTANTE: HEMOGRAMA, GLUCOSA , UREA, CREATININA, EXAMEN DE ORINA COMPLETO (AUTOMATIZADO), GRUPO SANGUINEO Y RH SEROLOGICAS CUALITATIVAS \"SIALIS\", HIV 1-2(AC-AG 30/40 GENERACIÓN) HEPATITIS B, HBsAg (Ag Austr)\"", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 238.00 },
 { codigo: "872", nombre: "PERFIL PRE OPERATORIO QUIRURGICO: HIV 1-2(AC-AG 30/40 GENERACIÓN), HEPATITIS B, HBsA9 (Ag Austr) CREATININA, GLUCOSA, UREA , GRUPO SANGUINEO Y RH, SEROLOGICAS CUALITATIVAS \"SIFILIS\", COAGULACION Y SANGRIA, HEMOGRAMA COMPLETO, EXAMEN COMPLETO DE ORINA", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 205.00 },
