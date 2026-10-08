@@ -105,7 +105,7 @@ const BASE_VALORES_REFERENCIALES = {
 
 // ============ NUEVA: HEMOGLOBINA GLICOSILADA ============
 "HEMOGLOBINA GLICOSILADA": [
-  { id: 'hba1c', nombre: 'Hemoglobina Glicosilada (HbA1c)', unidad: '%', refMin:'', refMax:'', referencia: 'Normal: Menos del 5.7% \n Prediabetes: 5.7 - 6.4% \n Diabetes: 6.5% a más' }
+  { id: 'hba1c', nombre: 'Hemoglobina Glicosilada (HbA1c)', unidad: '%', refMin:'', refMax:'', referencia: 'Normal: Menos del 5.7%\nPrediabetes: 5.7 - 6.4%\nDiabetes: 6.5% a más' }
 ],
 
 // ============ NUEVA: EXAMEN COMPLETO DE ORINA ============
