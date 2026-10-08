@@ -36,7 +36,7 @@ const BASE_VALORES_REFERENCIALES = {
 ],
   
   "GLUCOSA BASAL": [
-  { id: 'glucosa', nombre: 'GLUCOSA BASAL', valor: '', unidad: 'mg/dL', refMin: 74, refMax: 106, referencia: 'Adultos: 74 - 106\nNiños: 60 - 100\nNeonatos: 50 - 80', metodo: 'Colorimétrico Enzimático o Espectrofotometría EC 9200' }
+  { id: 'glucosa', nombre: 'GLUCOSA BASAL', valor: '', unidad: 'mg/dL', refMin: 74, refMax: 106, referencia: 'Adultos: 74 - 106 | Niños: 60 - 100 | Neonatos: 50 - 80', metodo: 'Colorimétrico Enzimático o Espectrofotometría EC 9200' }
 ],
   
   "PARASITOLOGICO SERIADO 3 MUESTRAS": [
