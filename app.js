@@ -2317,6 +2317,7 @@ function eliminarMovimientoCaja(idMovimiento) {
     if (confirm("¿Deseas eliminar este movimiento de caja?")) {
         const idMovStr = String(idMovimiento);
         
+        // 1. Guardar en lista negra local para evitar que resurja al sincronizar
         if (!window.cajaEliminados) {
             window.cajaEliminados = leerJSON("vital_caja_eliminados", []);
         }
@@ -2325,6 +2326,7 @@ function eliminarMovimientoCaja(idMovimiento) {
             localStorage.setItem("vital_caja_eliminados", JSON.stringify(window.cajaEliminados));
         }
 
+        // 2. Filtrar de la memoria local
         cajaMovimientos = cajaMovimientos.filter(m => String(m.id) !== idMovStr);
         
         if (typeof persistirDatos === "function") {
@@ -2332,11 +2334,13 @@ function eliminarMovimientoCaja(idMovimiento) {
         }
         actualizarTotalesCaja();
 
-        // Borrar de la nube en Firebase
+        // 3. Borrar permanentemente de Firebase / Nube de inmediato
         if (typeof nubeEliminarMovimiento === "function") {
             nubeEliminarMovimiento(idMovStr);
         } else if (typeof window.nubeEliminarMovimiento === "function") {
             window.nubeEliminarMovimiento(idMovStr);
+        } else if (typeof db !== "undefined" && db) {
+            db.collection("caja").doc(idMovStr).delete().catch(err => console.log("Nota en nube:", err));
         }
     }
 }
