@@ -980,7 +980,7 @@ let examenesCatalogo = [
 { codigo: "859", nombre: "PERFIL DE ESTUDIO GENETICO: ALFA FETOPROTEINAS(AFP), BETA HCG SUBUNIDAD CUANTITATIVO ESTRADIOL LIBRE(IM)", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 224.00 },
 { codigo: "861", nombre: "PERFIL DE PRECLANCIA", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 80.00 },
 { codigo: "862", nombre: "PERFIL DROGAS DE ABUSO: BENZODIAZEPINAS (ORINA), COCAINNPBC CUANTITATIVO(M), MARIHUANA-THC(ORINA SIMPLE) CUANTITATIVO", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 198.00 },
-{ codigo: "864", nombre: "PERFIL HEPATICO: BILIRRUBINAS FRACCIONADAS, FOSFATASA ALCALINA, GAMMA-GLUTAMIL TRANSPEPTIDASA, PROTEINAS TOTALES Y FRACCIONADAS, TRANSAMINASA OXALACETICA, TRANSAMINASA PIRUVICA", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 85.00 },
+{ codigo: "864", nombre: "PERFIL HEPATICO", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 85.00 },
 { codigo: "865", nombre: "PERFIL HORMONAL FEMENINO I :ESTRADIOL, F.S.H., L.H", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 110.00 },
 { codigo: "866", nombre: "PERFIL HORMONAL FEMENINO II : TIROXINA (T4), ESTRADIOL, TSH ULTRASENSIBLE, F.S.H., L.H.", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 168.00 },
 { codigo: "869", nombre: "PERFIL LIPIDICO: Colesterol Total, Triglicéridos, HDL - LDL - VLDL", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 50.00 },
