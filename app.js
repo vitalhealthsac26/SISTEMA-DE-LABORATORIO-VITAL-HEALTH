@@ -31,7 +31,7 @@ const BASE_VALORES_REFERENCIALES = {
   { id: 'suma_diferencial', nombre: 'Suma de recuento diferencial', valor: '100.00', unidad: '%', min: '', max: '' },
 
   // --- SECCIÓN: RECUENTO DIFERENCIAL ABSOLUTO ---
-  { nombre: "Recuento Diferencial Absoluto", esSeccion: true }
+  { nombre: "Recuento Diferencial Absoluto", esSeccion: true },
   { id: 'seg_absoluto', nombre: 'Segmentados', valor: '', unidad: 'Cél/uL', min: 1200.00, max: 5500.00 }
 ],
   "PARASITOLOGICO SERIADO 3 MUESTRAS": [
