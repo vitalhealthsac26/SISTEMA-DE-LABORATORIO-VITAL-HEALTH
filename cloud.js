@@ -236,11 +236,15 @@ window.nubeEliminarOrden = function (nroOrden) {
         .catch(error => console.error("No se pudo eliminar la orden de la nube:", error));
 };
 
-window.nubeEliminarMovimiento = function (idMovimiento) {
+window.nubeEliminarMovimiento = async function (idMovimiento) {
     if (!db || !auth || !auth.currentUser) return;
     const idStr = String(idMovimiento);
-    deleteDoc(doc(db, "caja", idStr))
-        .catch(error => console.error("No se pudo eliminar el movimiento de caja de la nube:", error));
+    try {
+        await deleteDoc(doc(db, "caja", idStr));
+        console.log("Movimiento de caja eliminado de la nube con éxito:", idStr);
+    } catch (error) {
+        console.error("Error al eliminar movimiento de caja en la nube (revisa tus reglas de Firebase):", error);
+    }
 };
 
 window.nubeEliminarExamen = function (codigoExamen) {
@@ -257,10 +261,15 @@ window.nubeEliminarPaciente = function (paciente) {
         .catch(error => console.error("No se pudo eliminar el paciente de la nube:", error));
 };
 
-window.nubeEliminarCotizacion = function (idCotizacion) {
+window.nubeEliminarCotizacion = async function (idCotizacion) {
     if (!db || !auth || !auth.currentUser) return;
-    deleteDoc(doc(db, "cotizaciones", String(idCotizacion)))
-        .catch(error => console.error("No se pudo eliminar la cotización de la nube:", error));
+    const idStr = String(idCotizacion);
+    try {
+        await deleteDoc(doc(db, "cotizaciones", idStr));
+        console.log("Cotización eliminada de la nube con éxito:", idStr);
+    } catch (error) {
+        console.error("Error al eliminar cotización en la nube (revisa tus reglas de Firebase):", error);
+    }
 };
 
 window.nubeIniciar = nubeIniciar;
