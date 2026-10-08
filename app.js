@@ -2556,16 +2556,17 @@ function eliminarCotizacion(id) {
     if (!confirm("¿Desea eliminar esta cotización guardada?")) return;
     const idCotStr = String(id);
     
-    // 1. Guardar en lista negra local de forma persistente
-    if (!window.cotizacionesEliminadas) {
-        window.cotizacionesEliminadas = leerJSON("vital_cotizaciones_eliminadas", []);
-    }
-    if (!window.cotizacionesEliminadas.includes(idCotStr)) {
-        window.cotizacionesEliminadas.push(idCotStr);
-        localStorage.setItem("vital_cotizaciones_eliminadas", JSON.stringify(window.cotizacionesEliminadas));
+    // Bloquear sincronización momentáneamente
+    window.bloquearSincronizacion = true;
+
+    // 1. Registrar en lista negra persistente
+    let eliminados = JSON.parse(localStorage.getItem("vital_cotizaciones_eliminadas") || "[]");
+    if (!eliminados.includes(idCotStr)) {
+        eliminados.push(idCotStr);
+        localStorage.setItem("vital_cotizaciones_eliminadas", JSON.stringify(eliminados));
     }
 
-    // 2. Quitar de la memoria actual
+    // 2. Quitar de memoria local
     window.cotizacionesGuardadas = (window.cotizacionesGuardadas || []).filter(c => String(c.id) !== idCotStr);
     if (String(currentCotizacionId) === idCotStr) {
         currentCotizacionId = null;
@@ -2576,10 +2577,15 @@ function eliminarCotizacion(id) {
     persistirDatos();
     cargarCotizaciones();
 
-    // 3. Borrar de la nube
+    // 3. Borrar físicamente de la nube de Firebase
     if (typeof nubeEliminarCotizacion === "function") {
         nubeEliminarCotizacion(idCotStr);
+    } else if (typeof db !== "undefined" && db) {
+        db.collection("cotizaciones").doc(idCotStr).delete().catch(err => console.log(err));
     }
+
+    // Quitar el bloqueo después de 1 segundo
+    setTimeout(() => { window.bloquearSincronizacion = false; }, 1000);
 }
 function imprimirCotizacionGuardada(id) {
     const c = buscarCotizacionPorId(id);
