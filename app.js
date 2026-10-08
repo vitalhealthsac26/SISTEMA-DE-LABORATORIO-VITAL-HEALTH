@@ -1934,12 +1934,12 @@ function eliminarOrden(nroOrden) {
         const idOrden = String(nroOrden);
 
         // 1. Registrar en la lista negra local para que nunca más reviva al actualizar
-        if (!window.ordenesEliminidas) {
-            window.ordenesEliminidas = leerJSON("vital_ordenes_eliminidas", []);
+        if (!window.ordenesEliminadas) {
+            window.ordenesEliminadas = leerJSON("vital_ordenes_eliminadas", []);
         }
-        if (!window.ordenesEliminidas.includes(idOrden)) {
-            window.ordenesEliminidas.push(idOrden);
-            guardarJSON("vital_ordenes_eliminadas", window.ordenesEliminidas);
+        if (!window.ordenesEliminadas.includes(idOrden)) {
+            window.ordenesEliminadas.push(idOrden);
+            localStorage.setItem("vital_ordenes_eliminadas", JSON.stringify(window.ordenesEliminadas));
         }
 
         // 2. Filtrar de la memoria actual
@@ -1948,7 +1948,7 @@ function eliminarOrden(nroOrden) {
         // 3. Actualizar persistencia local
         persistirDatos(); 
 
-        // 4. Eliminar permanentemente de Firebase / Nube
+        // 4. Eliminar permanentemente de Firebase / Nube de inmediato
         if (typeof nubeEliminarOrden === "function") {
             nubeEliminarOrden(idOrden);
         } else if (typeof window.nubeEliminarOrden === "function") {
