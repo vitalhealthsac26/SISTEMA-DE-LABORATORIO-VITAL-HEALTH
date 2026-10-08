@@ -105,6 +105,7 @@ async function sincronizarTodo() {
         const snapCaja = await getDocs(collection(db, "caja"));
         snapCaja.forEach(d => {
             const idMovStr = String(d.id);
+            // Evitar que resurjan si están eliminadas localmente
             if (window.cajaEliminados && window.cajaEliminados.includes(idMovStr)) return;
 
             if (!cajaMovimientos.some(m => String(m.id) === idMovStr)) {
@@ -112,7 +113,7 @@ async function sincronizarTodo() {
             }
         });
         cajaMovimientos.sort((a, b) => (b.en || 0) - (a.en || 0));
-
+        
         // ---- PACIENTES ----
         const snapPac = await getDocs(collection(db, "pacientes"));
         snapPac.forEach(d => {
@@ -132,6 +133,7 @@ async function sincronizarTodo() {
         snapCot.forEach(d => {
             const remota = d.data();
             const idCotStr = String(d.id);
+            // Evitar que resurjan si están eliminadas localmente
             if (window.cotizacionesEliminadas && window.cotizacionesEliminadas.includes(idCotStr)) return;
 
             if (!window.cotizacionesGuardadas) window.cotizacionesGuardadas = [];
