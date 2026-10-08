@@ -2315,15 +2315,29 @@ function actualizarTotalesCaja() {
 // Función complementaria para borrar el movimiento individualmente
 function eliminarMovimientoCaja(idMovimiento) {
     if (confirm("¿Deseas eliminar este movimiento de caja?")) {
-        cajaMovimientos = cajaMovimientos.filter(m => m.id !== idMovimiento);
+        const idMovStr = String(idMovimiento);
         
-        // Guarda los cambios en tu almacenamiento local o función de persistencia
+        if (!window.cajaEliminados) {
+            window.cajaEliminados = leerJSON("vital_caja_eliminados", []);
+        }
+        if (!window.cajaEliminados.includes(idMovStr)) {
+            window.cajaEliminados.push(idMovStr);
+            localStorage.setItem("vital_caja_eliminados", JSON.stringify(window.cajaEliminados));
+        }
+
+        cajaMovimientos = cajaMovimientos.filter(m => String(m.id) !== idMovStr);
+        
         if (typeof persistirDatos === "function") {
             persistirDatos();
         }
-        
-        // Recarga la tabla y los totales de la caja
         actualizarTotalesCaja();
+
+        // Borrar de la nube en Firebase
+        if (typeof nubeEliminarMovimiento === "function") {
+            nubeEliminarMovimiento(idMovStr);
+        } else if (typeof window.nubeEliminarMovimiento === "function") {
+            window.nubeEliminarMovimiento(idMovStr);
+        }
     }
 }
 // ==========================================
