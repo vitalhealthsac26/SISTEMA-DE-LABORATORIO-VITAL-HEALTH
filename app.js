@@ -3408,3 +3408,4 @@ document.addEventListener("DOMContentLoaded", () => {
 
 // Guardado automático al cerrar o recargar la página
 window.addEventListener("beforeunload", persistirDatos);
+}
