@@ -1411,6 +1411,8 @@ function persistirDatos() {
 function cargarDatosGuardados() {
     // ---- ÓRDENES ELIMINADAS (Lista negra para evitar que revivan) ----
     window.ordenesEliminadas = leerJSON("vital_ordenes_eliminadas", []);
+    window.cajaEliminados = leerJSON("vital_caja_eliminados", []);
+    window.cotizacionesEliminadas = leerJSON("vital_cotizaciones_eliminadas", []);;
 
     // ---- ÓRDENES ----
     let ordenes = [];
