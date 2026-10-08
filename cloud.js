@@ -238,7 +238,8 @@ window.nubeEliminarOrden = function (nroOrden) {
 
 window.nubeEliminarMovimiento = function (idMovimiento) {
     if (!db || !auth || !auth.currentUser) return;
-    deleteDoc(doc(db, "caja", String(idMovimiento)))
+    const idStr = String(idMovimiento);
+    deleteDoc(doc(db, "caja", idStr))
         .catch(error => console.error("No se pudo eliminar el movimiento de caja de la nube:", error));
 };
 
