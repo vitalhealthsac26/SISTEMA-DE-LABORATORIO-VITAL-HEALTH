@@ -1389,7 +1389,9 @@ document.getElementById("fechaNacimiento").value = "";
 document.getElementById("edad").value = "";
 document.getElementById("celular").value = "";
 examenesCotizacionActual = []; // Vacía el arreglo de exámenes seleccionados
-renderizarTablaCotizacion();  // Vuelve a pintar la tabla vacía
+if (typeof renderizarTablaCotizacion === "function") {
+        renderizarTablaCotizacion(); // Vuelve a pintar la tabla vacía de forma segura
+    }
 // ==========================================
 // PERSISTENCIA AUTOMÁTICA (GUARDADO EN ESTE EQUIPO)
 // ==========================================
