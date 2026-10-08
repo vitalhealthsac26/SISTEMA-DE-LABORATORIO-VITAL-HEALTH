@@ -105,20 +105,6 @@ const BASE_VALORES_REFERENCIALES = {
   { id: 'ggt', nombre: 'Gamma Glutamil Transpeptidasa (GGT)', unidad: 'U/L', refMin: 5, refMax: 40, referencia: '5.00 - 40.00' }
 ],
 
-// ============ NUEVA: PERFIL RENAL ============
-"PERFIL RENAL": [
-  { nombre: "Perfil de Rutina", esSeccion: true },
-  { id: 'acido_urico', nombre: 'Ácido Úrico', unidad: 'mg/dL', refMin: 2.5, refMax: 7.0, referencia: '2.5 - 7.0' },
-  { id: 'creatinina', nombre: 'Creatinina', unidad: 'mg/dL', refMin: 0.5, refMax: 1.3, referencia: 'H: 0.6 - 1.1 | M: 0.5 - 1.1' },
-  { id: 'urea', nombre: 'Urea', unidad: 'mg/dL', refMin: 10, refMax: 50, referencia: '10 - 50' }
-],
-
-// ============ NUEVA: GRUPO SANGUINEO Y FACTOR RH ============
-"GRUPO SANGUINEO Y FACTOR RH": [
-  { nombre: "Sangre", esSeccion: true },
-  { id: 'grupo', nombre: 'Grupo Sanguíneo', unidad: '', refMin: '', refMax: '', referencia: 'A / B / AB / O' },
-  { id: 'rh', nombre: 'Factor Rh', unidad: '', refMin: '', refMax: '', referencia: 'Positivo / Negativo' }
-],
 
 // ============ NUEVA: HEMOGLOBINA GLICOSILADA ============
 "HEMOGLOBINA GLICOSILADA": [
@@ -205,14 +191,6 @@ const BASE_VALORES_REFERENCIALES = {
   { id: 'igg', nombre: 'Banda IgG', unidad: 'S/U', referencia: 'No Reactivo' },
   { id: 'igm', nombre: 'Banda IgM', unidad: 'S/U', referencia: 'No Reactivo' }
 ],
-
-// ============ NUEVA: SEROLOGIA (VIH / SIFILIS) ============
-"SEROLOGIA (VIH / SIFILIS)": [
-  { nombre: "Suero", esSeccion: true },
-  { id: 'hiv', nombre: 'HIV 1-2 (AC-AG 3°/4° Generación) - VIH', unidad: 'S/U', referencia: 'No Reactivo' },
-  { id: 'rpr', nombre: 'Serológica cualitativa (RPR) "Sífilis"', unidad: 'S/U', referencia: 'No Reactivo' }
-]
-};
 
 let examenesCatalogo = [
   { codigo: "5", nombre: "11 - DESOXICORTISOL (COMPUESTOS)", unidad: "ng/dL", refMin: 10, refMax: 138, referencia: "< 138 ng/dL", precio: 45.00 },
