@@ -75,6 +75,12 @@ async function sincronizarTodo() {
     if (aplicandoRemoto || window.bloquearSincronizacion || !db) return;
     aplicandoRemoto = true;
     try {
+        // Asegurar que la variable global exista antes de usarla
+        if (typeof window.ordenesRegistradas === "undefined") window.ordenesRegistradas = [];
+        if (typeof ordenesRegistradas === "undefined") {
+            var ordenesRegistradas = window.ordenesRegistradas;
+        }
+
         // ---- ÓRDENES ----
         const snapOrd = await getDocs(collection(db, "ordenes"));
         snapOrd.forEach(d => {
@@ -154,6 +160,7 @@ async function sincronizarTodo() {
         persistirDatos();
         if (typeof actualizarTotalesCaja === "function") actualizarTotalesCaja();
         if (typeof cargarCotizaciones === "function") cargarCotizaciones();
+        if (typeof cargarOrdenes === "function") cargarOrdenes();
     } catch (error) {
         console.error("No se pudo sincronizar con la nube:", error);
     } finally {
@@ -169,6 +176,7 @@ function suscribirCambios() {
         let cambio = false;
         snap.docChanges().forEach(ch => {
             const datos = ch.doc.data();
+            if (typeof ordenesRegistradas === "undefined") window.ordenesRegistradas = [];
             const idx = ordenesRegistradas.findIndex(o => String(o.nroOrden) === String(ch.doc.id));
             if (ch.type === "removed") {
                 if (idx >= 0) {
@@ -192,7 +200,6 @@ function suscribirCambios() {
         }
     });
 }
-
 // ============================================================
 // FUNCIONES DE GUARDADO EN LA NUBE
 // ============================================================
