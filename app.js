@@ -84,112 +84,112 @@ const BASE_VALORES_REFERENCIALES = {
   
   // ============ EXTENDIDA: PERFIL LIPIDICO (se agrega VLDL del PDF) ============
 "PERFIL LIPIDICO": [
-  { id: 'col_tot', nombre: 'Colesterol Total', unidad: 'mg/dL', refMin: 0, refMax: 200, referencia: 'Normal < 200 | Moderadamente alto 200-239 | Elevado > 240' },
-  { id: 'hdl', nombre: 'HDL - Colesterol', unidad: 'mg/dL', refMin: 40, refMax: 60, referencia: '40.00 - 60.00' },
-  { id: 'ldl', nombre: 'LDL - Colesterol', unidad: 'mg/dL', refMin: 0, refMax: 129, referencia: 'Riesgo bajo < 129 | Riesgo moderado 130-189 | Riesgo alto >= 190' },
-  { id: 'vldl', nombre: 'VLDL - Colesterol', unidad: 'mg/dL', refMin: 2, refMax: 30, referencia: '2.00 - 30.00' },
-  { id: 'trig', nombre: 'Triglicéridos', unidad: 'mg/dL', refMin: 0, refMax: 150, referencia: 'Normal < 150 | Moderado elevado 150-199 | Elevado 200-499 | Muy elevado > 500' }
+  { id: 'col_tot', nombre: 'Colesterol Total', valor: '', unidad: 'mg/dL', refMin: 0, refMax: 200, referencia: 'Normal < 200 | Moderadamente alto 200-239 | Elevado > 240' },
+  { id: 'hdl', nombre: 'HDL - Colesterol', valor: '', unidad: 'mg/dL', refMin: 40, refMax: 60, referencia: '40.00 - 60.00' },
+  { id: 'ldl', nombre: 'LDL - Colesterol', valor: '', unidad: 'mg/dL', refMin: 0, refMax: 129, referencia: 'Riesgo bajo < 129 | Riesgo moderado 130-189 | Riesgo alto >= 190' },
+  { id: 'vldl', nombre: 'VLDL - Colesterol', valor: '', unidad: 'mg/dL', refMin: 2, refMax: 30, referencia: '2.00 - 30.00' },
+  { id: 'trig', nombre: 'Triglicéridos', valor: '', unidad: 'mg/dL', refMin: 0, refMax: 150, referencia: 'Normal < 150 | Moderado elevado 150-199 | Elevado 200-499 | Muy elevado > 500' }
 ],
 
 // ============ EXTENDIDA: PERFIL HEPATICO (completa según PDF, 10 parámetros) ============
 "PERFIL HEPATICO": [
-  { id: 'bt', nombre: 'Bilirrubina Total', unidad: 'mg/dL', refMin: 0.0, refMax: 1.2, referencia: '0.00 - 1.20' },
-  { id: 'bd', nombre: 'Bilirrubina Directa', unidad: 'mg/dL', refMin: 0.0, refMax: 0.3, referencia: '0.00 - 0.30' },
-  { id: 'bi', nombre: 'Bilirrubina Indirecta', unidad: 'mg/dL', refMin: 0.0, refMax: 0.8, referencia: '0.00 - 0.80' },
-  { id: 'pt', nombre: 'Proteínas Totales', unidad: 'g/dL', refMin: 6.10, refMax: 7.90, referencia: '6.10 - 7.90' },
-  { id: 'alb', nombre: 'Albúmina', unidad: 'g/dL', refMin: 3.50, refMax: 4.80, referencia: '3.50 - 4.80' },
-  { id: 'glob', nombre: 'Globulinas', unidad: 'g/dL', refMin: 2.00, refMax: 3.50, referencia: '2.00 - 3.50' },
-  { id: 'tgo', nombre: 'TGO (ASAT)', unidad: 'U/L', refMin: 0, refMax: 38, referencia: 'M: <= 38.00 | F: <= 32.00' },
-  { id: 'tgp', nombre: 'TGP (ALAT)', unidad: 'U/L', refMin: 0, refMax: 41, referencia: 'M: <= 41.00 | F: <= 31.00' },
-  { id: 'fal', nombre: 'Fosfatasa Alcalina (ALP)', unidad: 'U/L', refMin: 40, refMax: 300, referencia: 'Adultos: 40.0 - 300.0 | Niños y adolescentes: < 645.0' },
-  { id: 'ggt', nombre: 'Gamma Glutamil Transpeptidasa (GGT)', unidad: 'U/L', refMin: 5, refMax: 40, referencia: '5.00 - 40.00' }
+  { id: 'bt', nombre: 'Bilirrubina Total', valor: '', unidad: 'mg/dL', refMin: 0.0, refMax: 1.2, referencia: '0.00 - 1.20' },
+  { id: 'bd', nombre: 'Bilirrubina Directa', valor: '', unidad: 'mg/dL', refMin: 0.0, refMax: 0.3, referencia: '0.00 - 0.30' },
+  { id: 'bi', nombre: 'Bilirrubina Indirecta', valor: '', unidad: 'mg/dL', refMin: 0.0, refMax: 0.8, referencia: '0.00 - 0.80' },
+  { id: 'pt', nombre: 'Proteínas Totales', valor: '', unidad: 'g/dL', refMin: 6.10, refMax: 7.90, referencia: '6.10 - 7.90' },
+  { id: 'alb', nombre: 'Albúmina', valor: '', unidad: 'g/dL', refMin: 3.50, refMax: 4.80, referencia: '3.50 - 4.80' },
+  { id: 'glob', nombre: 'Globulinas', valor: '', unidad: 'g/dL', refMin: 2.00, refMax: 3.50, referencia: '2.00 - 3.50' },
+  { id: 'tgo', nombre: 'TGO (ASAT)', valor: '', unidad: 'U/L', refMin: 0, refMax: 38, referencia: 'M: <= 38.00 | F: <= 32.00' },
+  { id: 'tgp', nombre: 'TGP (ALAT)', valor: '', unidad: 'U/L', refMin: 0, refMax: 41, referencia: 'M: <= 41.00 | F: <= 31.00' },
+  { id: 'fal', nombre: 'Fosfatasa Alcalina (ALP)', valor: '', unidad: 'U/L', refMin: 40, refMax: 300, referencia: 'Adultos: 40.0 - 300.0 | Niños y adolescentes: < 645.0' },
+  { id: 'ggt', nombre: 'Gamma Glutamil Transpeptidasa (GGT)', valor: '', unidad: 'U/L', refMin: 5, refMax: 40, referencia: '5.00 - 40.00' }
 ],
 
 
 // ============ NUEVA: HEMOGLOBINA GLICOSILADA ============
 "HEMOGLOBINA GLICOSILADA": [
-  { id: 'hba1c', nombre: 'Hemoglobina Glicosilada (HbA1c)', unidad: '%', refMin:'', refMax:'', referencia: 'Normal: Menos del 5.7% | Prediabetes: 5.7 - 6.4% | Diabetes: 6.5% a más' }
+  { id: 'hba1c', nombre: 'Hemoglobina Glicosilada (HbA1c)', valor: '', unidad: '%', refMin:'', refMax:'', referencia: 'Normal: Menos del 5.7% | Prediabetes: 5.7 - 6.4% | Diabetes: 6.5% a más' }
 ],
 
 // ============ NUEVA: EXAMEN COMPLETO DE ORINA ============
 "EXAMEN COMPLETO DE ORINA": [
   { nombre: "Física", esSeccion: true },
-  { id: 'color', nombre: 'Color', referencia: 'Translúcido - Amarillo' },
-  { id: 'aspecto', nombre: 'Aspecto', referencia: 'Ligeramente Turbio' },
+  { id: 'color', nombre: 'Color', valor: '', referencia: 'Translúcido - Amarillo' },
+  { id: 'aspecto', nombre: 'Aspecto', valor: '', referencia: 'Ligeramente Turbio' },
   { nombre: "Química", esSeccion: true },
-  { id: 'sangre', nombre: 'Sangre', unidad: 'mg/dL', referencia: 'Negativo' },
-  { id: 'urobilinogeno', nombre: 'Urobilinógeno', referencia: 'Normal' },
-  { id: 'bilirrubinas', nombre: 'Bilirrubinas', referencia: 'Negativo' },
-  { id: 'proteinas', nombre: 'Proteínas', unidad: 'mg/dL', referencia: 'Negativo' },
-  { id: 'nitritos', nombre: 'Nitritos', referencia: 'Negativo' },
-  { id: 'cetonas', nombre: 'Cetonas', unidad: 'mg/dL', referencia: 'Negativo' },
-  { id: 'acido_ascorbico', nombre: 'Ácido Ascórbico', unidad: 'mmol/L', referencia: 'Negativo' },
-  { id: 'glucosa', nombre: 'Glucosa', unidad: 'mg/dL', referencia: 'Negativo - Normal' },
-  { id: 'ph', nombre: 'pH', referencia: '5.0 - 8.0' },
-  { id: 'densidad', nombre: 'Densidad', referencia: '1.005 - 1.030' },
-  { id: 'leucocitos_q', nombre: 'Leucocitos', referencia: 'Negativo' },
+  { id: 'sangre', nombre: 'Sangre', valor: '', unidad: 'mg/dL', referencia: 'Negativo' },
+  { id: 'urobilinogeno', nombre: 'Urobilinógeno', valor: '', referencia: 'Normal' },
+  { id: 'bilirrubinas', nombre: 'Bilirrubinas', valor: '', referencia: 'Negativo' },
+  { id: 'proteinas', nombre: 'Proteínas', valor: '', unidad: 'mg/dL', referencia: 'Negativo' },
+  { id: 'nitritos', nombre: 'Nitritos', valor: '', referencia: 'Negativo' },
+  { id: 'cetonas', nombre: 'Cetonas', valor: '', unidad: 'mg/dL', referencia: 'Negativo' },
+  { id: 'acido_ascorbico', nombre: 'Ácido Ascórbico', valor: '', unidad: 'mmol/L', referencia: 'Negativo' },
+  { id: 'glucosa', nombre: 'Glucosa', valor: '', unidad: 'mg/dL', referencia: 'Negativo - Normal' },
+  { id: 'ph', nombre: 'pH', valor: '', referencia: '5.0 - 8.0' },
+  { id: 'densidad', nombre: 'Densidad', valor: '', referencia: '1.005 - 1.030' },
+  { id: 'leucocitos_q', nombre: 'Leucocitos', valor: '', referencia: 'Negativo' },
   { nombre: "Microscópico", esSeccion: true },
   { id: 'cel_epiteliales', nombre: 'Células epiteliales', unidad: 'cél/campo' },
-  { id: 'leucocitos_m', nombre: 'Leucocitos', unidad: 'cél/campo' },
-  { id: 'hematies', nombre: 'Hematíes', unidad: 'cél/campo' },
-  { id: 'piocitos', nombre: 'Piocitos', unidad: 'cél/campo' },
-  { id: 'cristales', nombre: 'Cristales', unidad: 'cr/campo' },
-  { id: 'filamento_mucoide', nombre: 'Filamento Mucoide', unidad: 'fm/campo' },
-  { id: 'bacterias', nombre: 'Bacterias', unidad: 'cél/campo' },
-  { id: 'levaduras', nombre: 'Levaduras', unidad: 'cél/campo' },
-  { id: 'otros', nombre: 'Otros', unidad: '/campo', referencia: 'Negativo' }
+  { id: 'leucocitos_m', nombre: 'Leucocitos', valor: '', unidad: 'cél/campo' },
+  { id: 'hematies', nombre: 'Hematíes', valor: '', unidad: 'cél/campo' },
+  { id: 'piocitos', nombre: 'Piocitos', valor: '', unidad: 'cél/campo' },
+  { id: 'cristales', nombre: 'Cristales', valor: '', unidad: 'cr/campo' },
+  { id: 'filamento_mucoide', nombre: 'Filamento Mucoide', valor: '', unidad: 'fm/campo' },
+  { id: 'bacterias', nombre: 'Bacterias', valor: '', unidad: 'cél/campo' },
+  { id: 'levaduras', nombre: 'Levaduras', valor: '', unidad: 'cél/campo' },
+  { id: 'otros', nombre: 'Otros', valor: '', unidad: '/campo', referencia: 'Negativo' }
 ],
 
 // ============ NUEVA: REACCION INFLAMATORIA EN HECES ============
 "REACCION INFLAMATORIA EN HECES": [
   { nombre: "Física", esSeccion: true },
-  { id: 'color', nombre: 'Color', referencia: 'Pardo' },
-  { id: 'olor', nombre: 'Olor', referencia: 'Fétida' },
-  { id: 'consistencia', nombre: 'Consistencia', referencia: '-' },
-  { id: 'sangre_macro', nombre: 'Sangre Macro', referencia: 'No se observa' },
-  { id: 'moco', nombre: 'Moco', referencia: 'Negativo' },
-  { nombre: "Microscópico", esSeccion: true },
-  { id: 'pmn', nombre: 'Leucocitos Polimorfonucleares', referencia: 'NEGATIVO' }
+  { id: 'color', nombre: 'Color', valor: '', referencia: 'Pardo' },
+  { id: 'olor', nombre: 'Olor', valor: '', referencia: 'Fétida' },
+  { id: 'consistencia', nombre: 'Consistencia', valor: '', referencia: '-' },
+  { id: 'sangre_macro', nombre: 'Sangre Macro', valor: '', referencia: 'No se observa' },
+  { id: 'moco', nombre: 'Moco', valor: '', referencia: 'Negativo' },
+  { nombre: "Microscópico", valor: '', esSeccion: true },
+  { id: 'pmn', nombre: 'Leucocitos Polimorfonucleares', valor: '', referencia: 'NEGATIVO' }
 ],
 
 // ============ NUEVA: UROCULTIVO Y ANTIBIOGRAMA ============
 "UROCULTIVO Y ANTIBIOGRAMA": [
   { nombre: "Física", esSeccion: true },
-  { id: 'color', nombre: 'Color', referencia: 'Amarillo' },
-  { id: 'aspecto', nombre: 'Aspecto', referencia: 'Transparente - Ligeramente Turbio' },
+  { id: 'color', nombre: 'Color', valor: '', referencia: 'Amarillo' },
+  { id: 'aspecto', nombre: 'Aspecto', valor: '', referencia: 'Transparente - Ligeramente Turbio' },
   { nombre: "Microscópico", esSeccion: true },
-  { id: 'cel_epiteliales', nombre: 'Células epiteliales', unidad: 'cél/campo', referencia: '0 - 6' },
-  { id: 'leucocitos', nombre: 'Leucocitos', unidad: 'cél/campo', referencia: '0 - 5' },
-  { id: 'hematies', nombre: 'Hematíes', unidad: 'cél/campo', referencia: '0 - 2' },
-  { id: 'piocitos', nombre: 'Piocitos', unidad: 'cél/campo', referencia: 'No se observan' },
-  { id: 'levaduras', nombre: 'Levaduras', unidad: 'cr/campo', referencia: 'No se observan' },
-  { id: 'germenes', nombre: 'Gérmenes', unidad: 'fm/campo', referencia: 'Escasos' },
-  { id: 'recuento', nombre: 'Recuento Bacteriano', unidad: 'UFC/ml', refMin: 0, refMax: 1000, referencia: 'Negativo: < 1000 (10³) UFC/ml | Positivo: > 100000 (10⁵) UFC/ml' },
-  { id: 'microorganismo', nombre: 'Microorganismo aislado', referencia: 'No se observó crecimiento a las 48 horas de incubación' }
+  { id: 'cel_epiteliales', nombre: 'Células epiteliales', valor: '', unidad: 'cél/campo', referencia: '0 - 6' },
+  { id: 'leucocitos', nombre: 'Leucocitos', valor: '', unidad: 'cél/campo', referencia: '0 - 5' },
+  { id: 'hematies', nombre: 'Hematíes', valor: '', unidad: 'cél/campo', referencia: '0 - 2' },
+  { id: 'piocitos', nombre: 'Piocitos', valor: '', unidad: 'cél/campo', referencia: 'No se observan' },
+  { id: 'levaduras', nombre: 'Levaduras', valor: '', unidad: 'cr/campo', referencia: 'No se observan' },
+  { id: 'germenes', nombre: 'Gérmenes', valor: '', unidad: 'fm/campo', referencia: 'Escasos' },
+  { id: 'recuento', nombre: 'Recuento Bacteriano', valor: '', unidad: 'UFC/ml', refMin: 0, refMax: 1000, referencia: 'Negativo: < 1000 (10³) UFC/ml | Positivo: > 100000 (10⁵) UFC/ml' },
+  { id: 'microorganismo', nombre: 'Microorganismo aislado', valor: '', referencia: 'No se observó crecimiento a las 48 horas de incubación' }
 ],
 
 // ============ NUEVA: INDICE DE PSA ============
 "INDICE DE PSA": [
   { nombre: "Suero", esSeccion: true },
-  { id: 'psa_libre', nombre: 'PSA Libre', unidad: 'ng/mL', refMin: 0.00, refMax: 0.40, referencia: '0.00 - 0.40' },
-  { id: 'psa_total', nombre: 'PSA Total', unidad: 'ng/mL', refMin: 0.00, refMax: 4.10, referencia: '0.00 - 4.10' }
+  { id: 'psa_libre', nombre: 'PSA Libre', valor: '', unidad: 'ng/mL', refMin: 0.00, refMax: 0.40, referencia: '0.00 - 0.40' },
+  { id: 'psa_total', nombre: 'PSA Total', valor: '', unidad: 'ng/mL', refMin: 0.00, refMax: 4.10, referencia: '0.00 - 4.10' }
 ],
 
 // ============ NUEVA: PROTEINA C REACTIVA ============
 "PROTEINA C REACTIVA": [
-  { id: 'pcr', nombre: 'Proteína C Reactiva - Cuantitativa', unidad: 'mg/dL', refMin: 0, refMax: 10, referencia: 'Normal: Menor 10 | Leve a Moderado: 10.0 - 40.0 | Moderado a Severo: 40.0 - 200.0 | Severo: > 200.0' }
+  { id: 'pcr', nombre: 'Proteína C Reactiva - Cuantitativa', valor: '', unidad: 'mg/dL', refMin: 0, refMax: 10, referencia: 'Normal: Menor 10 | Leve a Moderado: 10.0 - 40.0 | Moderado a Severo: 40.0 - 200.0 | Severo: > 200.0' }
 ],
 
 // ============ NUEVA: VELOCIDAD DE SEDIMENTACION GLOBULAR ============
 "VELOCIDAD DE SEDIMENTACION GLOBULAR": [
   { nombre: "Sangre", esSeccion: true },
-  { id: 'vsg', nombre: '(VSG) Velocidad de Sedimentación Globular', unidad: 'mm/h', refMin: 0, refMax: 30, referencia: '0 - 30 mm/h' }
+  { id: 'vsg', nombre: '(VSG) Velocidad de Sedimentación Globular', valor: '', unidad: 'mm/h', refMin: 0, refMax: 30, referencia: '0 - 30 mm/h' }
 ],
 
 // ============= NUEVA: DENGUE IGG / IGM =============
 "DENGUE IGG / IGM": [
-  { id: 'igg', nombre: 'Banda IgG', unidad: 'S/U', referencia: 'No Reactivo' },
-  { id: 'igm', nombre: 'Banda IgM', unidad: 'S/U', referencia: 'No Reactivo' }
+  { id: 'igg', nombre: 'Banda IgG', valor: '', unidad: 'S/U', referencia: 'No Reactivo' },
+  { id: 'igm', nombre: 'Banda IgM', valor: '', unidad: 'S/U', referencia: 'No Reactivo' }
 ]
 };
 
