@@ -186,7 +186,7 @@ const BASE_VALORES_REFERENCIALES = {
   { id: 'vsg', nombre: '(VSG) Velocidad de Sedimentación Globular', unidad: 'mm/h', refMin: 0, refMax: 30, referencia: '0 - 30 mm/h' }
 ],
 
-// ============ NUEVA: DENGUE IGG / IGM ============
+// ============= NUEVA: DENGUE IGG / IGM =============
 "DENGUE IGG / IGM": [
   { id: 'igg', nombre: 'Banda IgG', unidad: 'S/U', referencia: 'No Reactivo' },
   { id: 'igm', nombre: 'Banda IgM', unidad: 'S/U', referencia: 'No Reactivo' }
