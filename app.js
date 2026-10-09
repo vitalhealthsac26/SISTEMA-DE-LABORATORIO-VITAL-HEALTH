@@ -190,7 +190,8 @@ const BASE_VALORES_REFERENCIALES = {
 "DENGUE IGG / IGM": [
   { id: 'igg', nombre: 'Banda IgG', unidad: 'S/U', referencia: 'No Reactivo' },
   { id: 'igm', nombre: 'Banda IgM', unidad: 'S/U', referencia: 'No Reactivo' }
-],
+]
+};
 
 let examenesCatalogo = [
   { codigo: "5", nombre: "11 - DESOXICORTISOL (COMPUESTOS)", unidad: "ng/dL", refMin: 10, refMax: 138, referencia: "< 138 ng/dL", precio: 45.00 },
