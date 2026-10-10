@@ -3375,9 +3375,13 @@ function generarTablasResultadosHTML(orden) {
                 const valorObtenido = previo ? previo.resultado : '';
                 const unidadTexto = ind.unidad ? ` ${ind.unidad}` : '';
                 const referencia = ind.referencia || formatoRango(ind.refMin, ind.refMax) || '-';
+                
+                // NUEVO: Agrega subtítulo con el método si fue configurado
+                const textoMetodo = ind.metodo ? `<br><span style="font-size: 9px; color: #64748b; font-style: italic;">Método: ${escapeHTML(ind.metodo)}</span>` : '';
+
                 html += `
                     <tr style="border-bottom: 1px solid #e2e8f0;">
-                        <td style="padding: 4px; color: #334155; padding-left: 10px;">${escapeHTML(ind.nombre)}</td>
+                        <td style="padding: 4px; color: #334155; padding-left: 10px;">${escapeHTML(ind.nombre)}${textoMetodo}</td>
                         <td style="padding: 4px; font-weight: bold; color: #0f172a;">${escapeHTML(valorObtenido)}${escapeHTML(unidadTexto)}</td>
                         <td style="padding: 4px; color: #64748b;">${escapeHTML(referencia)}</td>
                     </tr>
