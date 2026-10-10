@@ -2317,22 +2317,13 @@ function renderizarTablaCatalogo(filtro = "") {
     });
 }
 
-// Definición global asegurada para el botón del catálogo
+// Función única y definitiva para editar el examen en el catálogo
 function editarExamenCatalogo(codigoExamen) {
-    if (typeof editarExamenEnCatalogo === 'function') {
-        editarExamenEnCatalogo(codigoExamen);
-    } else {
-        console.error("La función editarExamenEnCatalogo no está disponible.");
-    }
-}
-
-// Función principal que ya tienes
-function editarExamenEnCatalogo(codigoExamen) {
-    // 1. Buscar el examen en tu catálogo global (ej. examenesCatalogo)
+    // 1. Buscar el examen en tu catálogo global
     const examen = examenesCatalogo.find(ex => ex.codigo == codigoExamen);
     if (!examen) return;
 
-    // 2. Rellenar los campos básicos del formulario izquierdo de forma segura
+    // 2. Rellenar los campos básicos del formulario de forma segura
     const inputCodigo = document.getElementById('edit-codigo');
     if (inputCodigo) inputCodigo.value = examen.codigo || '';
 
@@ -2342,12 +2333,11 @@ function editarExamenEnCatalogo(codigoExamen) {
     const inputPrecio = document.getElementById('edit-precio');
     if (inputPrecio) inputPrecio.value = examen.precio || '';
     
-    // Si tienes inputs para muestra o método en tu HTML, llanalos también:
-    if(document.getElementById('edit-muestra')) document.getElementById('edit-muestra').value = examen.tipoMuestra || '';
-    if(document.getElementById('edit-metodo')) document.getElementById('edit-metodo').value = examen.metodo || '';
+    if (document.getElementById('edit-muestra')) document.getElementById('edit-muestra').value = examen.tipoMuestra || '';
+    if (document.getElementById('edit-metodo')) document.getElementById('edit-metodo').value = examen.metodo || '';
 
     // 3. CARGAR LOS INDICADORES / PARÁMETROS (Plantilla individual)
-    const contenedorIndicadores = document.getElementById('contenedor-indicadores'); // El contenedor donde agregas filas
+    const contenedorIndicadores = document.getElementById('contenedor-indicadores');
     if (contenedorIndicadores) {
         contenedorIndicadores.innerHTML = ''; // Limpiamos los indicadores anteriores
 
@@ -2356,7 +2346,7 @@ function editarExamenEnCatalogo(codigoExamen) {
 
         if (listaParametros.length > 0) {
             listaParametros.forEach(param => {
-                // Función que pinta una fila de indicador en tu interfaz (asociada a tu botón "+ Agregar indicador")
+                // Función que pinta una fila de indicador en tu interfaz
                 agregarFilaIndicadorEnPantalla(param);
             });
         }
