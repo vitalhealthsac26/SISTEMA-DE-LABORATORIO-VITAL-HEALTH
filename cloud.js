@@ -290,3 +290,58 @@ if (document.readyState === "loading") {
 } else {
     nubeIniciar();
 }
+// ==========================================
+// GESTIÓN DINÁMICA DE PLANTILLAS Y PARÁMETROS
+// ==========================================
+
+// 1. Obtener la plantilla (Revisa Firebase primero, si no está, busca en el app.js local)
+async function obtenerPlantillaCompleta(nombreOcodigo) {
+    if (!nombreOcodigo) return null;
+    const clave = String(nombreOcodigo).trim().toUpperCase();
+
+    // Intentar leer de Firestore (Plantillas editadas o creadas por la web)
+    if (typeof db !== 'undefined' && db) {
+        try {
+            const docRef = doc(db, "plantillas_examenes", clave);
+            const snap = await getDoc(docRef);
+            if (snap.exists()) {
+                console.log("Plantilla cargada desde Firebase Firestore para:", clave);
+                return snap.data().parametros; 
+            }
+        } catch (e) {
+            console.warn("No se pudo leer de Firestore, usando respaldo local:", e);
+        }
+    }
+
+    // Si no está en Firestore, buscar en el BASE_VALORES_REFERENCIALES estático del app.js
+    if (typeof BASE_VALORES_REFERENCIALES !== 'undefined' && BASE_VALORES_REFERENCIALES[clave]) {
+        console.log("Plantilla cargada desde el código local (app.js):", clave);
+        return BASE_VALORES_REFERENCIALES[clave];
+    }
+
+    return null; // Retorna nulo si el examen aún no tiene plantilla
+}
+
+// 2. Guardar o actualizar la plantilla directamente en Firestore desde la web
+async function guardarPlantillaEnNube(codigoOModulo, listaParametros) {
+    if (!db) {
+        alert("Error: Firebase no está inicializado.");
+        return false;
+    }
+    const clave = String(codigoOModulo).trim().toUpperCase();
+    try {
+        const docRef = doc(db, "plantillas_examenes", clave);
+        await setDoc(docRef, {
+            codigo: clave,
+            parametros: listaParametros,
+            actualizadoEn: new Date().toISOString()
+        }, { merge: true });
+        
+        alert("¡Plantilla guardada exitosamente en la nube!");
+        return true;
+    } catch (error) {
+        console.error("Error al guardar la plantilla en Firestore:", error);
+        alert("Hubo un error al guardar la plantilla en la nube.");
+        return false;
+    }
+}
