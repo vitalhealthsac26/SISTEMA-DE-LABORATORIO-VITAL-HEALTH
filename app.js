@@ -3338,7 +3338,7 @@ function generarTablasResultadosHTML(orden) {
     }
     let html = '';
     examenes.forEach(ex => {
-        const plantilla = obtenerPlantillaIndicadores(ex.nombre);
+        const plantilla = obtenerIndicadoresParaOrden(ex);
         const guardado = (orden.resultados || []).find(r => r.codigo === ex.codigo);
         html += `
             <div style="margin-bottom: 20px; page-break-inside: avoid;">
