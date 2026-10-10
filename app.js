@@ -2188,7 +2188,7 @@ function vaciarTodosLosIndicadores() {
     if (contenedor) contenedor.innerHTML = "";
 }
 
-function guardarExamenCatalogo() {
+async function guardarExamenCatalogo() {
     const codigo = val("cat-codigo");
     const nombre = val("cat-nombre");
     const precio = parseFloat(document.getElementById("cat-precio").value) || 0;
@@ -2201,19 +2201,43 @@ function guardarExamenCatalogo() {
         alert("Complete el código y nombre del examen.");
         return;
     }
+
+    // 1. Recolectar automáticamente los parámetros de la tabla de indicadores (si el usuario los llenó)
+    const filas = document.querySelectorAll(".indicador-row"); 
+    let nuevosParametros = [];
+
+    filas.forEach(fila => {
+        const inputs = fila.querySelectorAll("input");
+        if (inputs.length >= 3) {
+            nuevosParametros.push({
+                nombre: inputs[0].value.trim(),
+                unidad: inputs[1].value.trim(),
+                referencia: inputs[2].value.trim(),
+                esSeccion: false
+            });
+        }
+    });
+
+    // 2. Guardar datos generales en el catálogo local
     const nuevoEx = { codigo, nombre, precio, muestra, metodo, plantilla, refTexto, en: Date.now() };
     const index = examenesCatalogo.findIndex(e => e.codigo === codigo);
     if (index >= 0) {
-        // Conservar campos referenciales previos si el formulario no los trae
         const prev = examenesCatalogo[index];
         examenesCatalogo[index] = Object.assign({}, prev, nuevoEx);
     } else {
         examenesCatalogo.push(nuevoEx);
     }
+
     renderizarTablaCatalogo();
     persistirDatos();
     window.nubeGuardarExamen?.(nuevoEx);
-    alert("Examen guardado en el catálogo correctamente.");
+
+    // 3. Si hay parámetros en la tabla web, guardarlos también como plantilla en la nube
+    if (nuevosParametros.length > 0 && typeof guardarPlantillaEnNube === "function") {
+        await guardarPlantillaEnNube(codigo, nuevosParametros);
+    }
+
+    alert("Examen y plantilla guardados en el catálogo correctamente.");
     prepararNuevoExamen();
 }
 
