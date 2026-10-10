@@ -59,14 +59,11 @@ const BASE_VALORES_REFERENCIALES = {
   { id: 'hep_b', nombre: 'HEPATITIS B CORE ANITCUERPOS IGM', valor: '', unidad: 'S/U', refMin: '', refMax: '', referencia: 'No Reactivo (-)', metodo: 'Inmunocromatografía' }
 ],
   "PARASITOLOGICO SERIADO 3 MUESTRAS": [
-    // Primera Sección
     { nombre: "Física", esSeccion: true },
     { id: 'color', nombre: 'Color', referencia: '-' },
     { id: 'consistencia', nombre: 'Consistencia', referencia: '-' },
     { id: 'sangre_macro', nombre: 'Sangre Macro', referencia: '-' },
     { id: 'moco', nombre: 'Moco', referencia: '-' },
-    
-    // Segunda Sección
     { nombre: "Microscópico", esSeccion: true },
     { id: 'leucocitos', nombre: 'Leucocitos', referencia: '-' },
     { id: 'eritrocitos', nombre: 'Eritrocitos', referencia: '-' },
@@ -74,24 +71,18 @@ const BASE_VALORES_REFERENCIALES = {
     { id: 'levaduras', nombre: 'Levaduras', referencia: '-' },
     { id: 'trofozoitos', nombre: 'Trofozoitos', referencia: '-' },
     { id: 'otros', nombre: 'Otros', referencia: '-' },
-    
-    // Muestras finales
     { nombre: "Muestras", esSeccion: true },
     { id: 'muestra_1', nombre: 'MUESTRA I', referencia: '' },
     { id: 'muestra_2', nombre: 'MUESTRA II', referencia: '' },
     { id: 'muestra_3', nombre: 'MUESTRA III', referencia: '' }
   ],
-  
-  // ============ EXTENDIDA: PERFIL LIPIDICO (se agrega VLDL del PDF) ============
-"PERFIL LIPIDICO": [
+  "PERFIL LIPIDICO": [
   { id: 'col_tot', nombre: 'Colesterol Total', valor: '', unidad: 'mg/dL', refMin: 0, refMax: 200, referencia: 'Normal < 200 | Moderadamente alto 200-239 | Elevado > 240' },
   { id: 'hdl', nombre: 'HDL - Colesterol', valor: '', unidad: 'mg/dL', refMin: 40, refMax: 60, referencia: '40.00 - 60.00' },
   { id: 'ldl', nombre: 'LDL - Colesterol', valor: '', unidad: 'mg/dL', refMin: 0, refMax: 129, referencia: 'Riesgo bajo < 129 | Riesgo moderado 130-189 | Riesgo alto >= 190' },
   { id: 'vldl', nombre: 'VLDL - Colesterol', valor: '', unidad: 'mg/dL', refMin: 2, refMax: 30, referencia: '2.00 - 30.00' },
   { id: 'trig', nombre: 'Triglicéridos', valor: '', unidad: 'mg/dL', refMin: 0, refMax: 150, referencia: 'Normal < 150 | Moderado elevado 150-199 | Elevado 200-499 | Muy elevado > 500' }
 ],
-
-// ============ EXTENDIDA: PERFIL HEPATICO (completa según PDF, 10 parámetros) ============
 "PERFIL HEPATICO": [
   { id: 'bt', nombre: 'Bilirrubina Total', valor: '', unidad: 'mg/dL', refMin: 0.0, refMax: 1.2, referencia: '0.00 - 1.20' },
   { id: 'bd', nombre: 'Bilirrubina Directa', valor: '', unidad: 'mg/dL', refMin: 0.0, refMax: 0.3, referencia: '0.00 - 0.30' },
@@ -104,14 +95,9 @@ const BASE_VALORES_REFERENCIALES = {
   { id: 'fal', nombre: 'Fosfatasa Alcalina (ALP)', valor: '', unidad: 'U/L', refMin: 40, refMax: 300, referencia: 'Adultos: 40.0 - 300.0 | Niños y adolescentes: < 645.0' },
   { id: 'ggt', nombre: 'Gamma Glutamil Transpeptidasa (GGT)', valor: '', unidad: 'U/L', refMin: 5, refMax: 40, referencia: '5.00 - 40.00' }
 ],
-
-
-// ============ NUEVA: HEMOGLOBINA GLICOSILADA ============
 "HEMOGLOBINA GLICOSILADA": [
   { id: 'hba1c', nombre: 'Hemoglobina Glicosilada (HbA1c)', valor: '', unidad: '%', refMin:'', refMax:'', referencia: 'Normal: Menos del 5.7% | Prediabetes: 5.7 - 6.4% | Diabetes: 6.5% a más' }
 ],
-
-// ============ NUEVA: EXAMEN COMPLETO DE ORINA ============
 "EXAMEN COMPLETO DE ORINA": [
   { nombre: "Física", esSeccion: true },
   { id: 'color', nombre: 'Color', valor: '', referencia: 'Translúcido - Amarillo' },
@@ -139,8 +125,6 @@ const BASE_VALORES_REFERENCIALES = {
   { id: 'levaduras', nombre: 'Levaduras', valor: '', unidad: 'cél/campo' },
   { id: 'otros', nombre: 'Otros', valor: '', unidad: '/campo', referencia: 'Negativo' }
 ],
-
-// ============ NUEVA: REACCION INFLAMATORIA EN HECES ============
 "REACCION INFLAMATORIA EN HECES": [
   { nombre: "Física", esSeccion: true },
   { id: 'color', nombre: 'Color', valor: '', referencia: 'Pardo' },
@@ -151,8 +135,6 @@ const BASE_VALORES_REFERENCIALES = {
   { nombre: "Microscópico", valor: '', esSeccion: true },
   { id: 'pmn', nombre: 'Leucocitos Polimorfonucleares', valor: '', referencia: 'NEGATIVO' }
 ],
-
-// ============ NUEVA: UROCULTIVO Y ANTIBIOGRAMA ============
 "UROCULTIVO Y ANTIBIOGRAMA": [
   { nombre: "Física", esSeccion: true },
   { id: 'color', nombre: 'Color', valor: '', referencia: 'Amarillo' },
@@ -167,26 +149,18 @@ const BASE_VALORES_REFERENCIALES = {
   { id: 'recuento', nombre: 'Recuento Bacteriano', valor: '', unidad: 'UFC/ml', refMin: 0, refMax: 1000, referencia: 'Negativo: < 1000 (10³) UFC/ml | Positivo: > 100000 (10⁵) UFC/ml' },
   { id: 'microorganismo', nombre: 'Microorganismo aislado', valor: '', referencia: 'No se observó crecimiento a las 48 horas de incubación' }
 ],
-
-// ============ NUEVA: INDICE DE PSA ============
 "INDICE DE PSA": [
   { nombre: "Suero", esSeccion: true },
   { id: 'psa_libre', nombre: 'PSA Libre', valor: '', unidad: 'ng/mL', refMin: 0.00, refMax: 0.40, referencia: '0.00 - 0.40' },
   { id: 'psa_total', nombre: 'PSA Total', valor: '', unidad: 'ng/mL', refMin: 0.00, refMax: 4.10, referencia: '0.00 - 4.10' }
 ],
-
-// ============ NUEVA: PROTEINA C REACTIVA ============
 "PROTEINA C REACTIVA": [
   { id: 'pcr', nombre: 'Proteína C Reactiva - Cuantitativa', valor: '', unidad: 'mg/dL', refMin: 0, refMax: 10, referencia: 'Normal: Menor 10 | Leve a Moderado: 10.0 - 40.0 | Moderado a Severo: 40.0 - 200.0 | Severo: > 200.0' }
 ],
-
-// ============ NUEVA: VELOCIDAD DE SEDIMENTACION GLOBULAR ============
 "VELOCIDAD DE SEDIMENTACION GLOBULAR": [
   { nombre: "Sangre", esSeccion: true },
   { id: 'vsg', nombre: '(VSG) Velocidad de Sedimentación Globular', valor: '', unidad: 'mm/h', refMin: 0, refMax: 30, referencia: '0 - 30 mm/h' }
 ],
-
-// ============= NUEVA: DENGUE IGG / IGM =============
 "DENGUE IGG / IGM": [
   { id: 'igg', nombre: 'Banda IgG', valor: '', unidad: 'S/U', referencia: 'No Reactivo' },
   { id: 'igm', nombre: 'Banda IgM', valor: '', unidad: 'S/U', referencia: 'No Reactivo' }
