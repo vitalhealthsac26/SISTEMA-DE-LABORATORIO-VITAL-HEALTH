@@ -348,23 +348,39 @@ window.obtenerPlantillaCompleta = async function(nombreOcodigo) {
 
     if (db) {
         try {
+            // 1. Intentar buscar directamente por ID de documento (ej. "858")
             const docRef = doc(db, "plantillas_examenes", clave);
-            const snap = await getDoc(docRef);
+            let snap = await getDoc(docRef);
             if (snap.exists()) {
                 return snap.data().parametros; 
+            }
+
+            // 2. Si no existe por ID directo, buscar en el catálogo si es un nombre para extraer su código
+            if (typeof examenesCatalogo !== 'undefined' && Array.isArray(examenesCatalogo)) {
+                const examenEnCatalogo = examenesCatalogo.find(e => 
+                    String(e.nombre || "").trim().toUpperCase() === clave || 
+                    String(e.codigo || "").trim().toUpperCase() === clave
+                );
+                if (examenEnCatalogo && examenEnCatalogo.codigo) {
+                    const docRefCodigo = doc(db, "plantillas_examenes", String(examenEnCatalogo.codigo));
+                    const snapCodigo = await getDoc(docRefCodigo);
+                    if (snapCodigo.exists()) {
+                        return snapCodigo.data().parametros;
+                    }
+                }
             }
         } catch (e) {
             console.warn("No se pudo leer de Firestore, usando respaldo local:", e);
         }
     }
 
+    // 3. Si no está en Firestore, buscar en el respaldo local BASE_VALORES_REFERENCIALES
     if (typeof BASE_VALORES_REFERENCIALES !== 'undefined' && BASE_VALORES_REFERENCIALES[clave]) {
         return BASE_VALORES_REFERENCIALES[clave];
     }
 
     return null;
 };
-
 window.guardarPlantillaEnNube = async function(codigoOModulo, listaParametros) {
     if (!db) {
         alert("Error: Firebase no está inicializado.");
