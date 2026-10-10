@@ -3,7 +3,7 @@
 // ============================================================
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import {
-    getFirestore, collection, getDocs, doc, setDoc, deleteDoc, onSnapshot
+    getFirestore, collection, getDocs, getDoc, doc, setDoc, deleteDoc, onSnapshot
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import {
     getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut
