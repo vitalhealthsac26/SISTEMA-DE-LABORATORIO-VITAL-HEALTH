@@ -2317,7 +2317,12 @@ function renderizarTablaCatalogo(filtro = "") {
     });
 }
 
-// Función que se dispara al hacer clic en el botón de editar (lápiz) de la tabla del Catálogo
+// Puente o alias para evitar errores sin importar qué nombre busque el botón HTML
+function editarExamenCatalogo(codigoExamen) {
+    editarExamenEnCatalogo(codigoExamen);
+}
+
+// Función principal que ya tienes
 function editarExamenEnCatalogo(codigoExamen) {
     // 1. Buscar el examen en tu catálogo global (ej. examenesCatalogo)
     const examen = examenesCatalogo.find(ex => ex.codigo == codigoExamen);
