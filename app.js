@@ -2024,7 +2024,7 @@ function abrirResultados(nroOrden) {
             refMin: ex.refMin ?? "",
             refMax: ex.refMax ?? "",
             referencia: ex.referencia || "",
-            metodo: ex.metodo || "" // <-- Añadido aquí como respaldo
+            metodo: ex.metodo || ""
         }];
 
         let filas = "";
@@ -2043,11 +2043,10 @@ function abrirResultados(nroOrden) {
             const referencia = ind.referencia || formatoRango(ind.refMin, ind.refMax);
             const tieneUnidad = ind.unidad && ind.unidad.trim() !== "";
             
-            // <-- NUEVO: Prepara el texto del método si está configurado en el indicador
             const textoMetodo = ind.metodo ? `<br><small class="text-muted fst-italic" style="font-size: 10px;">Método: ${escapeHTML(ind.metodo)}</small>` : '';
 
             filas += `
-                <div class="row g-2 mb-2 align-items-center" data-ex="${exIdx}" data-ind="${indIdx}" data-nombre="${escapeHTML(ind.nombre)}" data-refmin="${escapeHTML(ind.refMin ?? "")}" data-refmax="${escapeHTML(ind.refMax ?? "")}">
+                <div class="row g-2 mb-2 align-items-center" data-ex="${exIdx}" data-ind="${indIdx}" data-nombre="${escapeHTML(ind.nombre)}" data-refmin="${escapeHTML(ind.refMin ?? "")}" data-refmax="${escapeHTML(ind.refMax ?? "")}" data-metodo="${escapeHTML(ind.metodo || "")}">
                     <div class="col-md-4">
                         <label class="form-label small mb-0 ps-3">${escapeHTML(ind.nombre)}${textoMetodo}</label>
                     </div>
