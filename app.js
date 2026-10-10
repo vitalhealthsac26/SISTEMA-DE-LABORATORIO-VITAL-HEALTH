@@ -2273,28 +2273,30 @@ function guardarExamenCatalogo() {
     const filas = document.querySelectorAll("#contenedor-indicadores .indicador-row");
     let plantillaPersonalizada = [];
 
-    ilas.forEach(fila => {
-    const idInput = fila.querySelector(".ind-id").value.trim();
-    const nombreParam = fila.querySelector(".ind-nombre").value.trim();
-    const unidad = fila.querySelector(".ind-unidad").value.trim();
-    const refMin = fila.querySelector(".ind-min").value;
-    const refMax = fila.querySelector(".ind-max").value;
-    const metodoParam = fila.querySelector(".ind-metodo").value.trim(); // <--- Captura correcta del método
+    // CORREGIDO: de "ilas" a "filas"
+    filas.forEach(fila => {
+        const idInput = fila.querySelector(".ind-id").value.trim();
+        const nombreParam = fila.querySelector(".ind-nombre").value.trim();
+        const unidad = fila.querySelector(".ind-unidad").value.trim();
+        const refMin = fila.querySelector(".ind-min").value;
+        const refMax = fila.querySelector(".ind-max").value;
+        const metodoParam = fila.querySelector(".ind-metodo").value.trim();
 
-    if (nombreParam) {
-        const idGenerado = idInput || nombreParam.toLowerCase().replace(/[^a-z0-9]/g, '_');
-        
-        plantillaPersonalizada.push({
-            id: idGenerado,
-            nombre: nombreParam,
-            valor: "",
-            unidad: unidad,
-            refMin: refMin !== "" ? parseFloat(refMin) : "",
-            refMax: refMax !== "" ? parseFloat(refMax) : "",
-            metodo: metodoParam // <--- Guardado en el objeto
-        });
-    }
-});
+        if (nombreParam) {
+            const idGenerado = idInput || nombreParam.toLowerCase().replace(/[^a-z0-9]/g, '_');
+            
+            plantillaPersonalizada.push({
+                id: idGenerado,
+                nombre: nombreParam,
+                valor: "",
+                unidad: unidad,
+                refMin: refMin !== "" ? parseFloat(refMin) : "",
+                refMax: refMax !== "" ? parseFloat(refMax) : "",
+                metodo: metodoParam // <--- Aquí se guarda correctamente
+            });
+        }
+    });
+
     const nuevoEx = { 
         codigo, 
         nombre, 
@@ -2303,7 +2305,7 @@ function guardarExamenCatalogo() {
         metodo, 
         plantilla, 
         refTexto, 
-        plantillaPersonalizada, // <--- Aquí se guarda el array estructurado exacto que requieres
+        plantillaPersonalizada, 
         en: Date.now() 
     };
 
