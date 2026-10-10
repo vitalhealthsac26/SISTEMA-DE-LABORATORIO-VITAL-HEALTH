@@ -2341,8 +2341,13 @@ function editarExamenCatalogo(codigoExamen) {
     if (contenedorIndicadores) {
         contenedorIndicadores.innerHTML = ''; // Limpiamos los indicadores anteriores
 
-        // Verificamos si el examen tiene una plantilla o indicadores guardados
+        // Verificamos y aseguramos que sea una lista válida antes de recorrerla
         let listaParametros = examen.plantilla || examen.indicadores || [];
+
+        // Blindaje: si por alguna razón no es un arreglo, lo convertimos a vacío
+        if (!Array.isArray(listaParametros)) {
+            listaParametros = [];
+        }
 
         if (listaParametros.length > 0) {
             listaParametros.forEach(param => {
