@@ -2023,7 +2023,8 @@ function abrirResultados(nroOrden) {
             unidad: ex.unidad || "",
             refMin: ex.refMin ?? "",
             refMax: ex.refMax ?? "",
-            referencia: ex.referencia || ""
+            referencia: ex.referencia || "",
+            metodo: ex.metodo || "" // <-- Añadido aquí como respaldo
         }];
 
         let filas = "";
@@ -2041,9 +2042,15 @@ function abrirResultados(nroOrden) {
             }
             const referencia = ind.referencia || formatoRango(ind.refMin, ind.refMax);
             const tieneUnidad = ind.unidad && ind.unidad.trim() !== "";
+            
+            // <-- NUEVO: Prepara el texto del método si está configurado en el indicador
+            const textoMetodo = ind.metodo ? `<br><small class="text-muted fst-italic" style="font-size: 10px;">Método: ${escapeHTML(ind.metodo)}</small>` : '';
+
             filas += `
                 <div class="row g-2 mb-2 align-items-center" data-ex="${exIdx}" data-ind="${indIdx}" data-nombre="${escapeHTML(ind.nombre)}" data-refmin="${escapeHTML(ind.refMin ?? "")}" data-refmax="${escapeHTML(ind.refMax ?? "")}">
-                    <div class="col-md-4"><label class="form-label small mb-0 ps-3">${escapeHTML(ind.nombre)}</label></div>
+                    <div class="col-md-4">
+                        <label class="form-label small mb-0 ps-3">${escapeHTML(ind.nombre)}${textoMetodo}</label>
+                    </div>
                     <div class="${tieneUnidad ? 'col-md-3' : 'col-md-4'}">
                         <input type="text" class="form-control form-control-sm" data-campo="resultado" placeholder="Valor obtenido" value="${escapeHTML(previo ? previo.resultado : "")}">
                     </div>
@@ -2069,7 +2076,6 @@ function abrirResultados(nroOrden) {
     html += `</div>`;
     editor.innerHTML = html;
 }
-
 function guardarResultados(nroOrden, silencioso = false) {
     const orden = (ordenesRegistradas || []).find(o => o.nroOrden === nroOrden);
     const editor = document.getElementById("resultados-editor");
@@ -2086,7 +2092,7 @@ function guardarResultados(nroOrden, silencioso = false) {
         if (esSeccion) {
             porExamen[exIdx].push({
                 nombre: fila.dataset.nombre || "", esSeccion: true,
-                resultado: "", unidad: "", refMin: "", refMax: "", referencia: ""
+                resultado: "", unidad: "", refMin: "", refMax: "", referencia: "", metodo: ""
             });
             return;
         }
@@ -2094,11 +2100,16 @@ function guardarResultados(nroOrden, silencioso = false) {
             const el = fila.querySelector(`[data-campo="${campo}"]`);
             return el ? el.value.trim() : "";
         };
+
+        // Extraer el método que viene guardado en el dataset del indicador en el DOM
+        const metodoParam = fila.dataset.metodo || "";
+
         porExamen[exIdx].push({
             nombre: fila.dataset.nombre || "Resultado", esSeccion: false,
             resultado: leer("resultado"), unidad: leer("unidad"),
             refMin: fila.dataset.refmin || "", refMax: fila.dataset.refmax || "",
-            referencia: leer("referencia")
+            referencia: leer("referencia"),
+            metodo: metodoParam // <--- Se guarda el método de cada indicador individual
         });
     });
 
