@@ -342,3 +342,48 @@ async function guardarPlantillaEnNube(codigoOModulo, listaParametros) {
         return false;
     }
 }
+window.obtenerPlantillaCompleta = async function(nombreOcodigo) {
+    if (!nombreOcodigo) return null;
+    const clave = String(nombreOcodigo).trim().toUpperCase();
+
+    if (db) {
+        try {
+            const docRef = doc(db, "plantillas_examenes", clave);
+            const snap = await getDoc(docRef);
+            if (snap.exists()) {
+                return snap.data().parametros; 
+            }
+        } catch (e) {
+            console.warn("No se pudo leer de Firestore, usando respaldo local:", e);
+        }
+    }
+
+    if (typeof BASE_VALORES_REFERENCIALES !== 'undefined' && BASE_VALORES_REFERENCIALES[clave]) {
+        return BASE_VALORES_REFERENCIALES[clave];
+    }
+
+    return null;
+};
+
+window.guardarPlantillaEnNube = async function(codigoOModulo, listaParametros) {
+    if (!db) {
+        alert("Error: Firebase no está inicializado.");
+        return false;
+    }
+    const clave = String(codigoOModulo).trim().toUpperCase();
+    try {
+        const docRef = doc(db, "plantillas_examenes", clave);
+        await setDoc(docRef, {
+            codigo: clave,
+            parametros: listaParametros,
+            actualizadoEn: new Date().toISOString()
+        }, { merge: true });
+        
+        alert("¡Plantilla guardada exitosamente en la nube!");
+        return true;
+    } catch (error) {
+        console.error("Error al guardar la plantilla en Firestore:", error);
+        alert("Hubo un error al guardar la plantilla en la nube.");
+        return false;
+    }
+};
