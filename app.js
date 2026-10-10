@@ -2243,8 +2243,8 @@ async function guardarExamenCatalogo() {
 
 async function guardarPlantillaEnNube(codigoExamen, parametros) {
     try {
-        const database = typeof db !== 'undefined' ? db : firebase.firestore();
-        await database.collection("plantillas_laboratorio").doc(codigoExamen).set({
+        const dbCloud = (typeof firebase !== 'undefined' && firebase.firestore) ? firebase.firestore() : db;
+        await dbCloud.collection("plantillas_laboratorio").doc(codigoExamen).set({
             parametros: parametros,
             actualizado: new Date()
         }, { merge: true });
@@ -2257,8 +2257,8 @@ async function guardarPlantillaEnNube(codigoExamen, parametros) {
 
 async function cargarPlantillaDeNube(codigoExamen) {
     try {
-        const database = typeof db !== 'undefined' ? db : firebase.firestore();
-        const docRef = await database.collection("plantillas_laboratorio").doc(codigoExamen).get();
+        const dbCloud = (typeof firebase !== 'undefined' && firebase.firestore) ? firebase.firestore() : db;
+        const docRef = await dbCloud.collection("plantillas_laboratorio").doc(codigoExamen).get();
         if (docRef.exists) {
             return docRef.data().parametros;
         }
