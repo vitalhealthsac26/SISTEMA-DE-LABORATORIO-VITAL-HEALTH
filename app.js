@@ -2094,17 +2094,19 @@ function guardarResultados(nroOrden, silencioso = false) {
 // ==========================================
 // CATÁLOGO Y PLANTILLAS
 // ==========================================
-async function obtenerPlantillaIndicadores(nombreExamen) {
-    if (!nombreExamen) return [];
+async function obtenerPlantillaIndicadores(nombreOcodigo) {
+    if (!nombreOcodigo) return [];
 
-    // 1. PRIMERO: Buscar si existe una plantilla personalizada guardada en Firebase
-    const plantillaNube = await obtenerPlantillaCompleta(nombreExamen);
+    const claveBusqueda = String(nombreOcodigo).trim().toUpperCase();
+
+    // 1. PRIMERO: Intentar buscar en Firebase usando la clave directa (puede ser el código o el nombre)
+    const plantillaNube = await window.obtenerPlantillaCompleta(claveBusqueda);
     if (plantillaNube && plantillaNube.length > 0) {
         return plantillaNube;
     }
 
-    // 2. SEGUNDO: Si no está en la nube, aplicar tu lógica local exacta
-    const normalizado = nombreExamen.toUpperCase()
+    // 2. SEGUNDO: Si no se encontró y la clave parece un nombre, aplicar la lógica local exacta
+    const normalizado = claveBusqueda
         .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
         .replace(/-/g, " ")
         .replace(/\s+/g, " ")
