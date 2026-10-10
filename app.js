@@ -2266,8 +2266,9 @@ function vaciarTodosLosIndicadores() {
 }
 
 function guardarExamenCatalogo() {
-    const codigo = val("cat-codigo");
-    const nombre = val("cat-nombre");
+    const codigo = val("cat-codigo").trim();
+    const codigoOriginal = val("cat-id-original").trim(); // Capturamos el código original por si fue modificado
+    const nombre = val("cat-nombre").trim();
     const precio = parseFloat(document.getElementById("cat-precio").value) || 0;
     const muestra = val("cat-muestra");
     const metodo = val("cat-metodo");
@@ -2283,7 +2284,6 @@ function guardarExamenCatalogo() {
     const filas = document.querySelectorAll("#contenedor-indicadores .indicador-row");
     let plantillaPersonalizada = [];
 
-    // CORREGIDO: de "ilas" a "filas"
     filas.forEach(fila => {
         const idInput = fila.querySelector(".ind-id").value.trim();
         const nombreParam = fila.querySelector(".ind-nombre").value.trim();
@@ -2302,7 +2302,7 @@ function guardarExamenCatalogo() {
                 unidad: unidad,
                 refMin: refMin !== "" ? parseFloat(refMin) : "",
                 refMax: refMax !== "" ? parseFloat(refMax) : "",
-                metodo: metodoParam // <--- Aquí se guarda correctamente
+                metodo: metodoParam
             });
         }
     });
@@ -2316,20 +2316,39 @@ function guardarExamenCatalogo() {
         plantilla, 
         refTexto, 
         plantillaPersonalizada, 
-        en: Date.now() 
+        en: Date.now() // Forzamos la marca de tiempo actual para la sincronización en la nube
     };
 
-    const index = examenesCatalogo.findIndex(e => e.codigo === codigo);
+    // CORRECCIÓN CLAVE: Verificamos tanto si cambió el código como si ya existe
+    let index = -1;
+    if (codigoOriginal && codigoOriginal !== codigo) {
+        // Si editó el código, buscamos el registro antiguo para reemplazarlo limpiamente
+        index = examenesCatalogo.findIndex(e => String(e.codigo) === String(codigoOriginal));
+        // Si cambió el código, eliminamos opcionalmente el registro viejo de la nube o lo actualizamos
+        if (typeof nubeEliminarExamen === "function") {
+            nubeEliminarExamen(codigoOriginal);
+        }
+    }
+    
+    if (index === -1) {
+        index = examenesCatalogo.findIndex(e => String(e.codigo) === String(codigo));
+    }
+
     if (index >= 0) {
-        const prev = examenesCatalogo[index];
-        examenesCatalogo[index] = Object.assign({}, prev, nuevoEx);
+        // Actualizamos el elemento existente asegurando que tome el nuevo nombre y datos limpios
+        examenesCatalogo[index] = nuevoEx;
     } else {
+        // Si es totalmente nuevo, lo agregamos
         examenesCatalogo.push(nuevoEx);
     }
+
+    // Limpiamos el campo oculto del ID original para evitar conflictos futuros
+    setVal("cat-id-original", "");
 
     renderizarTablaCatalogo();
     persistirDatos();
     window.nubeGuardarExamen?.(nuevoEx);
+    
     alert("Examen y plantilla avanzada guardados en el catálogo correctamente.");
     prepararNuevoExamen();
 }
@@ -2370,10 +2389,10 @@ function renderizarTablaCatalogo(filtro = "") {
 }
 
 function editarExamenCatalogo(codigo) {
-    const ex = examenesCatalogo.find(e => e.codigo === codigo);
+    const ex = examenesCatalogo.find(e => String(e.codigo) === String(codigo));
     if (!ex) return;
     setVal("cat-codigo", ex.codigo);
-    setVal("cat-id-original", ex.codigo);
+    setVal("cat-id-original", ex.codigo); // Aquí registramos de forma segura el código actual antes de modificarlo
     setVal("cat-nombre", ex.nombre);
     setVal("cat-precio", ex.precio || 0);
     setVal("cat-muestra", ex.muestra || "");
@@ -2387,7 +2406,6 @@ function editarExamenCatalogo(codigo) {
     // Cargar los indicadores avanzados al formulario visual
     vaciarTodosLosIndicadores();
     
-    // Si el examen tiene la plantilla avanzada guardada, la cargamos fila por fila
     if (Array.isArray(ex.plantillaPersonalizada) && ex.plantillaPersonalizada.length > 0) {
         ex.plantillaPersonalizada.forEach(ind => {
             agregarIndicadorResultado({
@@ -2400,11 +2418,10 @@ function editarExamenCatalogo(codigo) {
             });
         });
     } else {
-        // Como respaldo, si no tiene avanzada pero sí usa una del diccionario predefinido, la cargamos para que se pueda editar
         const plantillaBase = obtenerPlantillaIndicadores(ex.nombre, ex.codigo);
         if (Array.isArray(plantillaBase)) {
             plantillaBase.forEach(ind => {
-                if (!ind.esSeccion) { // Omitir títulos de sección puros si los hay
+                if (!ind.esSeccion) {
                     agregarIndicadorResultado({
                         id: ind.id || "",
                         nombre: ind.nombre || "",
@@ -2445,7 +2462,6 @@ function eliminarExamenCatalogo(codigo) {
 
     alert("Examen eliminado del catálogo correctamente y no volverá a aparecer.");
 }
-
 // ==========================================
 // CONTROL DE CAJA
 // ==========================================
