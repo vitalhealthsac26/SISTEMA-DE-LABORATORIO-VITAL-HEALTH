@@ -3376,7 +3376,7 @@ function generarTablasResultadosHTML(orden) {
         html += `
             <div style="margin-bottom: 20px; page-break-inside: avoid;">
                 <h3 style="background-color: #f1f5f9; padding: 6px 10px; font-size: 14px; color: #1e293b; border-left: 4px solid #2563eb; margin-bottom: 8px;">
-                    ${escapeHTML(ex.nombre)} <span style="font-weight: normal; color: #64748b; font-size: 11px;">(${escapeHTML(ex.codigo)})</span>
+                    ${escapeHTML(ex.nombre)}
                 </h3>
                 <table style="width: 100%; border-collapse: collapse; font-size: 11px; margin-bottom: 6px;">
                     <tr style="background-color: #f8fafc; border-bottom: 1px solid #cbd5e1;">
@@ -3403,7 +3403,6 @@ function generarTablasResultadosHTML(orden) {
                 const unidadTexto = ind.unidad ? ` ${ind.unidad}` : '';
                 const referencia = ind.referencia || formatoRango(ind.refMin, ind.refMax) || '-';
                 
-                // Extrae el método asignado al indicador de forma individual
                 const textoMetodo = ind.metodo ? escapeHTML(ind.metodo) : '-';
 
                 html += `
@@ -3429,7 +3428,6 @@ function generarTablasResultadosHTML(orden) {
     });
     return html;
 }
-
 function imprimirInforme(nroOrden) {
     const orden = (ordenesRegistradas || []).find(o => o.nroOrden === nroOrden);
     if (!orden) return;
