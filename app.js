@@ -1,0 +1,3444 @@
+// ==========================================
+// DICCIONARIOS Y BASE DE DATOS INICIAL
+// ==========================================
+const BASE_VALORES_REFERENCIALES = {
+  "HEMOGRAMA COMPLETO AUTOMATIZADO": [
+  // --- SERIE ROJA Y BLANCA PRINCIPAL ---
+  { id: 'leucocitos', nombre: 'Leucocitos', valor: '', unidad: 'Cél/uL', refMin: 4500.00, refMax: 13500.00, metodo: 'Citometría de flujo o impedancia eléctrica (Método Coulter)' },
+  { id: 'hematies', nombre: 'Glóbulos Rojos (hematíes)', valor: '', unidad: 'Cél/uL', refMin: 4000000.00, refMax: 5200000.00 },
+  { id: 'hemoglobina', nombre: 'Hemoglobina', valor: '', unidad: 'g/dL', refMin: 11.50, refMax: 15.50 },
+  { id: 'hematocrito', nombre: 'Hematocrito', valor: '', unidad: '%', refMin: 35.00, refMax: 45.00 },
+  { id: 'vcm', nombre: 'Volumen Corpuscular medio VCM', valor: '', unidad: 'fL', refMin: 77.00, refMax: 95.00 },
+  { id: 'hcm', nombre: 'Hemoglobina Corpuscular media - HCM', valor: '', unidad: 'pg', refMin: 25.00, refMax: 33.00 },
+  { id: 'chcm', nombre: 'Concentración de Hemoglobina Corpuscular media - CHCM', valor: '', unidad: 'g/dL', refMin: 30.00, refMax: 36.00 },
+  { id: 'plaquetas', nombre: 'Recuento Plaquetario', valor: '', unidad: 'Cél/uL', refMin: 150000.00, refMax: 475000.00 },
+  { id: 'rdw_sd', nombre: 'RDW-SD', valor: '', unidad: 'fL', refMin: 37.00, refMax: 54.00 },
+  { id: 'rdw_cv', nombre: 'RDW-CV', valor: '', unidad: '%', refMin: 11.50, refMax: 15.60 },
+  { id: 'vpm', nombre: 'Vol. plaquetario medio - VPM', valor: '', unidad: 'fL', refMin: 7.60, refMax: 10.80 },
+
+  // --- SECCIÓN: RECUENTO DIFERENCIAL PORCENTUAL ---
+  { nombre: "Recuento Diferencial Porcentual", esSeccion: true },
+  { id: 'neutrofilos_seg', nombre: 'Neutrófilos Segmentados', valor: '', unidad: '%', refMin: 31.00, refMax: 51.00 },
+  { id: 'neutrofilos_aba', nombre: 'Neutrófilos Abastonados', valor: '', unidad: '%', refMin: 0.00, refMax: 5.00 },
+  { id: 'linfocitos', nombre: 'Linfocitos', valor: '', unidad: '%', refMin: 4.00, refMax: 28.00 },
+  { id: 'monocitos', nombre: 'Monocitos', valor: '', unidad: '%', refMin: 0.00, refMax: 10.00 },
+  { id: 'eosinofilos', nombre: 'Eosinófilos', valor: '', unidad: '%', refMin: 0.00, refMax: 2.50 },
+  { id: 'basofilos', nombre: 'Basófilo', valor: '', unidad: '%', refMin: 0.00, refMax: 2.00 },
+  { id: 'metamielocitos', nombre: 'Metamielocitos', valor: '', unidad: '%', refMin: 0, refMax: 0 },
+  { id: 'mielocitos', nombre: 'Mielocitos', valor: '', unidad: '%', refMin: 0, refMax: 0 },
+  { id: 'promielocitos', nombre: 'Promielocitos', valor: '', unidad: '%', refMin: 0, refMax: 0 },
+  { id: 'blastos', nombre: 'Blastos', valor: '', unidad: '%', refMin: 0, refMax: 0 },
+  { id: 'suma_diferencial', nombre: 'Suma de recuento diferencial', valor: '100.00', unidad: '%', refMin: '', refMax: '' },
+
+  // --- SECCIÓN: RECUENTO DIFERENCIAL ABSOLUTO ---
+  { nombre: "Recuento Diferencial Absoluto", esSeccion: true },
+  { id: 'seg_absoluto', nombre: 'Segmentados', valor: '', unidad: 'Cél/uL', refMin: 1200.00, refMax: 5500.00 }
+],
+  "GLUCOSA BASAL": [
+  { id: 'glucosa', nombre: 'GLUCOSA BASAL', valor: '', unidad: 'mg/dL', refMin: 74, refMax: 106, referencia: 'Adultos: 74 - 106 | Niños: 60 - 100 | Neonatos: 50 - 80', metodo: 'Colorimétrico Enzimático o Espectrofotometría EC 9200' }
+],
+  "ACIDO URICO": [
+  { id: 'acido_urico', nombre: 'ACIDO URICO', valor: '', unidad: 'mg/dL', refMin: 1.10, refMax: 5.40, referencia: '1.10 - 5.40', metodo: 'Colorimétrico Enzimático o Espectrofotometría EC 9200' }
+],
+ "UREA": [
+  { id: 'urea', nombre: 'UREA', valor: '', unidad: 'mg/dL', refMin: 10.00, refMax: 50.00, referencia: '10.00 - 50.00', metodo: 'Colorimétrico enzimático o Espectrofotometría EC9200' }
+],
+  "CREATININA SERICA": [
+  { id: 'creatinina_serica', nombre: 'CREATININA SERICA', valor: '', unidad: 'mg/dL', refMin: 0.6, refMax: 1.3, referencia: 'M: 0.7 - 1.3 | F: 0.6 - 1.1', metodo: 'Colorimétrico enzimático o Espectrofotometría EC9200' }
+],
+  "T4 LIBRE": [
+  { id: 't4_libre', nombre: 'T4 LIBRE', valor: '', unidad: 'ng/dL', refMin: 0.90, refMax: 1.70, referencia: 'Adultos: 0.90 - 1.70 | Niños: 4 a 30 días: 0.83-3.09 | 1-12 meses: 0.48-2.34 | 1-6 años: 0.65-1.75 | 7-11 años: 0.90-1.67 | 12-19 años: 0.93-1.60', metodo: 'Ensayo de electroquimioluminiscencia (ECLIA)' }
+],
+  "TSH ULTRASENSIBLE": [
+  { id: 'tsh_ultrasensible', nombre: 'TSH ULTRASENSIBLE', valor: '', unidad: 'uUI / mL', refMin: 0.27, refMax: 4.2, referencia: 'Adultos: 0.27 - 4.2 | Niños: 4 a 30 días: 0.43-16.0 | 1-12 meses: 0.62-8.0 | 1-6 años: 0.54-4.5 | 7-11 años: 0.66-4.14 | 12-19 años: 0.53-3.59', metodo: 'Ensayo de electroquimioluminiscencia (ECLIA)' }
+],
+  "VIH 1-2 (AC - AG 3º/4º Generación)-VIH": [
+  { id: 'vih', nombre: 'VIH 1-2 (AC - AG 3º/4º Generación)-VIH', valor: '', unidad: 'S/U', refMin: '', refMax: '', referencia: 'No Reactivo (-)', metodo: 'Inmunocromatografía' }
+],
+  "HEPATITIS B CORE ANITCUERPOS IGM": [
+  { id: 'hep_b', nombre: 'HEPATITIS B CORE ANITCUERPOS IGM', valor: '', unidad: 'S/U', refMin: '', refMax: '', referencia: 'No Reactivo (-)', metodo: 'Inmunocromatografía' }
+],
+  "PARASITOLOGICO SERIADO 3 MUESTRAS": [
+    // Primera Sección
+    { nombre: "Física", esSeccion: true },
+    { id: 'color', nombre: 'Color', referencia: '-' },
+    { id: 'consistencia', nombre: 'Consistencia', referencia: '-' },
+    { id: 'sangre_macro', nombre: 'Sangre Macro', referencia: '-' },
+    { id: 'moco', nombre: 'Moco', referencia: '-' },
+    
+    // Segunda Sección
+    { nombre: "Microscópico", esSeccion: true },
+    { id: 'leucocitos', nombre: 'Leucocitos', referencia: '-' },
+    { id: 'eritrocitos', nombre: 'Eritrocitos', referencia: '-' },
+    { id: 'cristales', nombre: 'Cristales', referencia: '-' },
+    { id: 'levaduras', nombre: 'Levaduras', referencia: '-' },
+    { id: 'trofozoitos', nombre: 'Trofozoitos', referencia: '-' },
+    { id: 'otros', nombre: 'Otros', referencia: '-' },
+    
+    // Muestras finales
+    { nombre: "Muestras", esSeccion: true },
+    { id: 'muestra_1', nombre: 'MUESTRA I', referencia: '' },
+    { id: 'muestra_2', nombre: 'MUESTRA II', referencia: '' },
+    { id: 'muestra_3', nombre: 'MUESTRA III', referencia: '' }
+  ],
+  
+  // ============ EXTENDIDA: PERFIL LIPIDICO (se agrega VLDL del PDF) ============
+"PERFIL LIPIDICO": [
+  { id: 'col_tot', nombre: 'Colesterol Total', valor: '', unidad: 'mg/dL', refMin: 0, refMax: 200, referencia: 'Normal < 200 | Moderadamente alto 200-239 | Elevado > 240' },
+  { id: 'hdl', nombre: 'HDL - Colesterol', valor: '', unidad: 'mg/dL', refMin: 40, refMax: 60, referencia: '40.00 - 60.00' },
+  { id: 'ldl', nombre: 'LDL - Colesterol', valor: '', unidad: 'mg/dL', refMin: 0, refMax: 129, referencia: 'Riesgo bajo < 129 | Riesgo moderado 130-189 | Riesgo alto >= 190' },
+  { id: 'vldl', nombre: 'VLDL - Colesterol', valor: '', unidad: 'mg/dL', refMin: 2, refMax: 30, referencia: '2.00 - 30.00' },
+  { id: 'trig', nombre: 'Triglicéridos', valor: '', unidad: 'mg/dL', refMin: 0, refMax: 150, referencia: 'Normal < 150 | Moderado elevado 150-199 | Elevado 200-499 | Muy elevado > 500' }
+],
+
+// ============ EXTENDIDA: PERFIL HEPATICO (completa según PDF, 10 parámetros) ============
+"PERFIL HEPATICO": [
+  { id: 'bt', nombre: 'Bilirrubina Total', valor: '', unidad: 'mg/dL', refMin: 0.0, refMax: 1.2, referencia: '0.00 - 1.20' },
+  { id: 'bd', nombre: 'Bilirrubina Directa', valor: '', unidad: 'mg/dL', refMin: 0.0, refMax: 0.3, referencia: '0.00 - 0.30' },
+  { id: 'bi', nombre: 'Bilirrubina Indirecta', valor: '', unidad: 'mg/dL', refMin: 0.0, refMax: 0.8, referencia: '0.00 - 0.80' },
+  { id: 'pt', nombre: 'Proteínas Totales', valor: '', unidad: 'g/dL', refMin: 6.10, refMax: 7.90, referencia: '6.10 - 7.90' },
+  { id: 'alb', nombre: 'Albúmina', valor: '', unidad: 'g/dL', refMin: 3.50, refMax: 4.80, referencia: '3.50 - 4.80' },
+  { id: 'glob', nombre: 'Globulinas', valor: '', unidad: 'g/dL', refMin: 2.00, refMax: 3.50, referencia: '2.00 - 3.50' },
+  { id: 'tgo', nombre: 'TGO (ASAT)', valor: '', unidad: 'U/L', refMin: 0, refMax: 38, referencia: 'M: <= 38.00 | F: <= 32.00' },
+  { id: 'tgp', nombre: 'TGP (ALAT)', valor: '', unidad: 'U/L', refMin: 0, refMax: 41, referencia: 'M: <= 41.00 | F: <= 31.00' },
+  { id: 'fal', nombre: 'Fosfatasa Alcalina (ALP)', valor: '', unidad: 'U/L', refMin: 40, refMax: 300, referencia: 'Adultos: 40.0 - 300.0 | Niños y adolescentes: < 645.0' },
+  { id: 'ggt', nombre: 'Gamma Glutamil Transpeptidasa (GGT)', valor: '', unidad: 'U/L', refMin: 5, refMax: 40, referencia: '5.00 - 40.00' }
+],
+
+
+// ============ NUEVA: HEMOGLOBINA GLICOSILADA ============
+"HEMOGLOBINA GLICOSILADA": [
+  { id: 'hba1c', nombre: 'Hemoglobina Glicosilada (HbA1c)', valor: '', unidad: '%', refMin:'', refMax:'', referencia: 'Normal: Menos del 5.7% | Prediabetes: 5.7 - 6.4% | Diabetes: 6.5% a más' }
+],
+
+// ============ NUEVA: EXAMEN COMPLETO DE ORINA ============
+"EXAMEN COMPLETO DE ORINA": [
+  { nombre: "Física", esSeccion: true },
+  { id: 'color', nombre: 'Color', valor: '', referencia: 'Translúcido - Amarillo' },
+  { id: 'aspecto', nombre: 'Aspecto', valor: '', referencia: 'Ligeramente Turbio' },
+  { nombre: "Química", esSeccion: true },
+  { id: 'sangre', nombre: 'Sangre', valor: '', unidad: 'mg/dL', referencia: 'Negativo' },
+  { id: 'urobilinogeno', nombre: 'Urobilinógeno', valor: '', referencia: 'Normal' },
+  { id: 'bilirrubinas', nombre: 'Bilirrubinas', valor: '', referencia: 'Negativo' },
+  { id: 'proteinas', nombre: 'Proteínas', valor: '', unidad: 'mg/dL', referencia: 'Negativo' },
+  { id: 'nitritos', nombre: 'Nitritos', valor: '', referencia: 'Negativo' },
+  { id: 'cetonas', nombre: 'Cetonas', valor: '', unidad: 'mg/dL', referencia: 'Negativo' },
+  { id: 'acido_ascorbico', nombre: 'Ácido Ascórbico', valor: '', unidad: 'mmol/L', referencia: 'Negativo' },
+  { id: 'glucosa', nombre: 'Glucosa', valor: '', unidad: 'mg/dL', referencia: 'Negativo - Normal' },
+  { id: 'ph', nombre: 'pH', valor: '', referencia: '5.0 - 8.0' },
+  { id: 'densidad', nombre: 'Densidad', valor: '', referencia: '1.005 - 1.030' },
+  { id: 'leucocitos_q', nombre: 'Leucocitos', valor: '', referencia: 'Negativo' },
+  { nombre: "Microscópico", esSeccion: true },
+  { id: 'cel_epiteliales', nombre: 'Células epiteliales', unidad: 'cél/campo' },
+  { id: 'leucocitos_m', nombre: 'Leucocitos', valor: '', unidad: 'cél/campo' },
+  { id: 'hematies', nombre: 'Hematíes', valor: '', unidad: 'cél/campo' },
+  { id: 'piocitos', nombre: 'Piocitos', valor: '', unidad: 'cél/campo' },
+  { id: 'cristales', nombre: 'Cristales', valor: '', unidad: 'cr/campo' },
+  { id: 'filamento_mucoide', nombre: 'Filamento Mucoide', valor: '', unidad: 'fm/campo' },
+  { id: 'bacterias', nombre: 'Bacterias', valor: '', unidad: 'cél/campo' },
+  { id: 'levaduras', nombre: 'Levaduras', valor: '', unidad: 'cél/campo' },
+  { id: 'otros', nombre: 'Otros', valor: '', unidad: '/campo', referencia: 'Negativo' }
+],
+
+// ============ NUEVA: REACCION INFLAMATORIA EN HECES ============
+"REACCION INFLAMATORIA EN HECES": [
+  { nombre: "Física", esSeccion: true },
+  { id: 'color', nombre: 'Color', valor: '', referencia: 'Pardo' },
+  { id: 'olor', nombre: 'Olor', valor: '', referencia: 'Fétida' },
+  { id: 'consistencia', nombre: 'Consistencia', valor: '', referencia: '-' },
+  { id: 'sangre_macro', nombre: 'Sangre Macro', valor: '', referencia: 'No se observa' },
+  { id: 'moco', nombre: 'Moco', valor: '', referencia: 'Negativo' },
+  { nombre: "Microscópico", valor: '', esSeccion: true },
+  { id: 'pmn', nombre: 'Leucocitos Polimorfonucleares', valor: '', referencia: 'NEGATIVO' }
+],
+
+// ============ NUEVA: UROCULTIVO Y ANTIBIOGRAMA ============
+"UROCULTIVO Y ANTIBIOGRAMA": [
+  { nombre: "Física", esSeccion: true },
+  { id: 'color', nombre: 'Color', valor: '', referencia: 'Amarillo' },
+  { id: 'aspecto', nombre: 'Aspecto', valor: '', referencia: 'Transparente - Ligeramente Turbio' },
+  { nombre: "Microscópico", esSeccion: true },
+  { id: 'cel_epiteliales', nombre: 'Células epiteliales', valor: '', unidad: 'cél/campo', referencia: '0 - 6' },
+  { id: 'leucocitos', nombre: 'Leucocitos', valor: '', unidad: 'cél/campo', referencia: '0 - 5' },
+  { id: 'hematies', nombre: 'Hematíes', valor: '', unidad: 'cél/campo', referencia: '0 - 2' },
+  { id: 'piocitos', nombre: 'Piocitos', valor: '', unidad: 'cél/campo', referencia: 'No se observan' },
+  { id: 'levaduras', nombre: 'Levaduras', valor: '', unidad: 'cr/campo', referencia: 'No se observan' },
+  { id: 'germenes', nombre: 'Gérmenes', valor: '', unidad: 'fm/campo', referencia: 'Escasos' },
+  { id: 'recuento', nombre: 'Recuento Bacteriano', valor: '', unidad: 'UFC/ml', refMin: 0, refMax: 1000, referencia: 'Negativo: < 1000 (10³) UFC/ml | Positivo: > 100000 (10⁵) UFC/ml' },
+  { id: 'microorganismo', nombre: 'Microorganismo aislado', valor: '', referencia: 'No se observó crecimiento a las 48 horas de incubación' }
+],
+
+// ============ NUEVA: INDICE DE PSA ============
+"INDICE DE PSA": [
+  { nombre: "Suero", esSeccion: true },
+  { id: 'psa_libre', nombre: 'PSA Libre', valor: '', unidad: 'ng/mL', refMin: 0.00, refMax: 0.40, referencia: '0.00 - 0.40' },
+  { id: 'psa_total', nombre: 'PSA Total', valor: '', unidad: 'ng/mL', refMin: 0.00, refMax: 4.10, referencia: '0.00 - 4.10' }
+],
+
+// ============ NUEVA: PROTEINA C REACTIVA ============
+"PROTEINA C REACTIVA": [
+  { id: 'pcr', nombre: 'Proteína C Reactiva - Cuantitativa', valor: '', unidad: 'mg/dL', refMin: 0, refMax: 10, referencia: 'Normal: Menor 10 | Leve a Moderado: 10.0 - 40.0 | Moderado a Severo: 40.0 - 200.0 | Severo: > 200.0' }
+],
+
+// ============ NUEVA: VELOCIDAD DE SEDIMENTACION GLOBULAR ============
+"VELOCIDAD DE SEDIMENTACION GLOBULAR": [
+  { nombre: "Sangre", esSeccion: true },
+  { id: 'vsg', nombre: '(VSG) Velocidad de Sedimentación Globular', valor: '', unidad: 'mm/h', refMin: 0, refMax: 30, referencia: '0 - 30 mm/h' }
+],
+
+// ============= NUEVA: DENGUE IGG / IGM =============
+"DENGUE IGG / IGM": [
+  { id: 'igg', nombre: 'Banda IgG', valor: '', unidad: 'S/U', referencia: 'No Reactivo' },
+  { id: 'igm', nombre: 'Banda IgM', valor: '', unidad: 'S/U', referencia: 'No Reactivo' }
+]
+};
+
+let examenesCatalogo = [
+  { codigo: "5", nombre: "11 - DESOXICORTISOL (COMPUESTOS)", unidad: "ng/dL", refMin: 10, refMax: 138, referencia: "< 138 ng/dL", precio: 45.00 },
+  { codigo: "6", nombre: "17 - HIDROXICORTICOIDES (ORINA 24H)", unidad: "mg/24h", refMin: 3.0, refMax: 12.0, referencia: "3.0 - 12.0 mg/24h", precio: 100.00 },
+  { codigo: "7", nombre: "17 KETOESTEROIDES (ORINA 24 HRS.)", unidad: "mg/24h", refMin: 6.0, refMax: 20.0, referencia: "6.0 - 20.0 mg/24h", precio: 134.00 },
+  { codigo: "8", nombre: "17 OH PROGESTERONA BASAL, 30 Y 60 POST ESTIMULACIÓN CON ACTH", unidad: "ng/mL", refMin: 0.2, refMax: 3.0, referencia: "Según fase / estimulación", precio: 105.00 },
+  { codigo: "9", nombre: "17- OH PROGESTERONA SERICA", unidad: "ng/mL", refMin: 0.2, refMax: 2.3, referencia: "0.2 - 2.3 ng/mL", precio: 91.00 },
+  { codigo: "10", nombre: "5-HIDROXIINDOLACETICO (5-HIAA) (ORINA 24H)", unidad: "mg/24h", refMin: 2.0, refMax: 9.0, referencia: "< 9 mg/24h", precio: 136.00 },
+  { codigo: "11", nombre: "5-NUCLEOTIDASA", unidad: "U/L", refMin: 0, refMax: 15, referencia: "< 15 U/L", precio: 117.00 },
+  { codigo: "12", nombre: "6 DROGAS DE ABUSO PRUEBA URINARIA CUALITATIVA", unidad: "", refMin: "", refMax: "", referencia: "NEGATIVO", precio: 300.00 },
+  { codigo: "13", nombre: "7-DEHIDROCOLESTEROL, SUERO", unidad: "µg/mL", refMin: 0.1, refMax: 3.0, referencia: "< 3.0 µg/mL", precio: 1747.00 },
+  { codigo: "14", nombre: "A.N.C.A. ANTI-NEUTROFILOS (ANCA) (IM)", unidad: "", refMin: "", refMax: "", referencia: "NEGATIVO (< 1:20)", precio: 90.00 },
+  { codigo: "15", nombre: "ACARO TEST", unidad: "", refMin: "", refMax: "", referencia: "NO SE OBSERVAN ÁCAROS", precio: 30.00 },
+  { codigo: "16", nombre: "ACETAMINOPHEN - PARACETAMOL", unidad: "µg/mL", refMin: 10, refMax: 30, referencia: "10 - 30 µg/mL (Terapéutico)", precio: 173.00 },
+  { codigo: "17", nombre: "ACETIL COLINA", unidad: "nmol/L", refMin: 0, refMax: 0.5, referencia: "< 0.5 nmol/L", precio: 350.00 },
+  { codigo: "18", nombre: "ACETIL COLINA RECEPTOR, ANTICUERPOS", unidad: "nmol/L", refMin: 0, refMax: 0.4, referencia: "Negativo: ≤ 0.4 nmol/L", precio: 1127.00 },
+  { codigo: "19", nombre: "ACETIL COLINA, ANTICUERPOS", unidad: "nmol/L", refMin: 0, refMax: 0.4, referencia: "Negativo: ≤ 0.4 nmol/L", precio: 400.00 },
+  { codigo: "20", nombre: "ACETONA SERICA", unidad: "mg/dL", refMin: 0, refMax: 2.0, referencia: "< 2.0 mg/dL", precio: 74.00 },
+  { codigo: "21", nombre: "ACETONA URINARIA", unidad: "", refMin: "", refMax: "", referencia: "NEGATIVO", precio: 66.00 },
+  { codigo: "22", nombre: "ACIDO FOLICO (VITAMINA B9)", unidad: "ng/mL", refMin: 3.1, refMax: 17.5, referencia: "3.1 - 17.5 ng/mL", precio: 70.00 },
+  { codigo: "23", nombre: "ACIDO FOLICO INTRAERITROCITARIO", unidad: "ng/mL", refMin: 140, refMax: 628, referencia: "140 - 628 ng/mL", precio: 169.00 },
+  { codigo: "24", nombre: "ACIDO HIALURONICO", unidad: "ng/mL", refMin: 0, refMax: 75, referencia: "< 75 ng/mL", precio: 660.00 },
+  { codigo: "25", nombre: "ACIDO HIPURICO EN ORINA", unidad: "g/g Creatinina", refMin: 0, refMax: 1.6, referencia: "< 1.6 g/g Creatinina", precio: 170.00 },
+  { codigo: "26", nombre: "ACIDO HOMOVALINICO ORINA 24 HRS", unidad: "mg/24h", refMin: 1.4, refMax: 8.8, referencia: "< 8.8 mg/24h", precio: 295.00 },
+  { codigo: "27", nombre: "ACIDO LACTICO (LACTATO)", unidad: "mmol/L", refMin: 0.5, refMax: 2.2, referencia: "0.5 - 2.2 mmol/L", precio: 75.00 },
+  { codigo: "28", nombre: "ACIDO LACTICO EN LCR (HN)", unidad: "mg/dL", refMin: 10, refMax: 22, referencia: "10 - 22 mg/dL", precio: 42.00 },
+  { codigo: "29", nombre: "ACIDO METILHIPURICO EN ORINA", unidad: "g/g Creatinina", refMin: 0, refMax: 1.5, referencia: "< 1.5 g/g Creatinina", precio: 264.00 },
+  { codigo: "30", nombre: "ACIDO METILMALONICO", unidad: "µmol/L", refMin: 0.0, refMax: 0.4, referencia: "0.00 - 0.40 µmol/L", precio: 314.00 },
+  { codigo: "31", nombre: "ACIDO METILMALONICO (ORINA SIMPLE)", unidad: "mg/g Creatinina", refMin: 0, refMax: 3.6, referencia: "< 3.6 mg/g Creatinina", precio: 314.00 },
+  { codigo: "32", nombre: "ACIDO PIRUVICO (PIRUVATO)", unidad: "mmol/L", refMin: 0.03, refMax: 0.08, referencia: "0.03 - 0.08 mmol/L", precio: 236.00 },
+  { codigo: "33", nombre: "ACIDO SALICILICO (SALICILATO)", unidad: "mg/dL", refMin: 2.0, refMax: 20.0, referencia: "2.0 - 20.0 mg/dL (Terapéutico)", precio: 135.00 },
+  { codigo: "34", nombre: "ACIDO URICO", unidad: "mg/dL", refMin: 3.0, refMax: 7.0, referencia: "3.0 - 7.0 mg/dL", precio: 15.00 },
+  { codigo: "35", nombre: "ACIDO URICO EN LIQUIDO ASCITICO", unidad: "mg/dL", refMin: 3.0, refMax: 7.0, referencia: "Similar a suero", precio: 20.00 },
+  { codigo: "36", nombre: "ACIDO URICO EN ORINA DE 24 HORAS", unidad: "mg/24h", refMin: 250, refMax: 750, referencia: "250 - 750 mg/24h", precio: 35.00 },
+  { codigo: "37", nombre: "ACIDO URICO EN ORINA SIMPLE", unidad: "mg/dL", refMin: 20, refMax: 80, referencia: "20 - 80 mg/dL", precio: 15.00 },
+  { codigo: "38", nombre: "ACIDO VALPROICO", unidad: "µg/mL", refMin: 50.0, refMax: 100.0, referencia: "50 - 100 µg/mL", precio: 100.00 },
+  { codigo: "39", nombre: "ACIDO VANILMANDELICO (ORINA 24 HORAS)", unidad: "mg/24h", refMin: 2.0, refMax: 7.0, referencia: "< 7.0 mg/24h", precio: 150.00 },
+  { codigo: "40", nombre: "ACIDOS BILIARES", unidad: "µmol/L", refMin: 0.0, refMax: 10.0, referencia: "< 10 µmol/L", precio: 120.00 },
+  { codigo: "1", nombre: "ACIDOS BILIARES TOTALES (HM)", unidad: "µmol/L", refMin: 0.0, refMax: 10.0, referencia: "< 10.0 µmol/L", precio: 110.00 },
+  { codigo: "41", nombre: "ACIDOS ORGANICOS - SCREENING CORTA Y MEDIA EN ORINA", unidad: "", refMin: "", refMax: "", referencia: "PATRÓN NORMAL", precio: 756.00 },
+  { codigo: "42", nombre: "ACILCARNITINA", unidad: "µmol/L", refMin: 10, refMax: 60, referencia: "Dentro de límites normales", precio: 1669.00 },
+  { codigo: "43", nombre: "ADA LCR (ADENOSIN DEAMINASA)", unidad: "U/L", refMin: 0, refMax: 9, referencia: "< 9.0 U/L", precio: 70.00 },
+  { codigo: "44", nombre: "ADA LIQUIDO ASCITICO (PERITONEAL)", unidad: "U/L", refMin: 0, refMax: 30, referencia: "< 30 U/L", precio: 70.00 },
+  { codigo: "45", nombre: "ADA LIQUIDO PERICARDIO", unidad: "U/L", refMin: 0, refMax: 40, referencia: "< 40 U/L", precio: 42.00 },
+  { codigo: "46", nombre: "ADA LIQUIDO PLEURAL", unidad: "U/L", refMin: 0, refMax: 40, referencia: "< 40 U/L", precio: 70.00 },
+  { codigo: "47", nombre: "ADA LIQUIDO SINOVIAL", unidad: "U/L", refMin: 0, refMax: 30, referencia: "< 30 U/L", precio: 42.00 },
+  { codigo: "48", nombre: "ADA LIQUIDOS BIOLOGICOS", unidad: "U/L", refMin: 0, refMax: 30, referencia: "< 30 U/L", precio: 42.00 },
+  { codigo: "49", nombre: "ADA SUERO", unidad: "U/L", refMin: 0, refMax: 20, referencia: "< 20 U/L", precio: 42.00 },
+  { codigo: "50", nombre: "ADDIS PRUEBA", unidad: "elem/min", refMin: 0, refMax: 2000, referencia: "Hematíes < 2000/min, Leucocitos < 4000/min", precio: 204.00 },
+  { codigo: "51", nombre: "ADENOVIRUS ADN X PCR", unidad: "", refMin: "", refMax: "", referencia: "NO DETECTADO", precio: 1689.00 },
+  { codigo: "52", nombre: "ADENOVIRUS ANTICUERPOS IGG", unidad: "U/mL", refMin: 0, refMax: 11, referencia: "Negativo: < 9 U/mL", precio: 266.00 },
+  { codigo: "53", nombre: "ADENOVIRUS ANTICUERPOS IGM", unidad: "U/mL", refMin: 0, refMax: 11, referencia: "Negativo: < 9 U/mL", precio: 266.00 },
+  { codigo: "54", nombre: "ADRENALES AUTOANTICUERPOS", unidad: "", refMin: "", refMax: "", referencia: "NEGATIVO", precio: 586.00 },
+  { codigo: "56", nombre: "AGA Y ELECTROLITOS", unidad: "", refMin: "", refMax: "", referencia: "pH: 7.35-7.45, pCO2: 35-45 mmHg, pO2: 80-100 mmHg", precio: 150.00 },
+  { codigo: "57", nombre: "AGLUTINACIONES", unidad: "", refMin: "", refMax: "", referencia: "NO REACTIVO", precio: 30.00 },
+  { codigo: "58", nombre: "AGLUTINACIONES 2-MERCAPTO ETANOL", unidad: "", refMin: "", refMax: "", referencia: "NEGATIVO (< 1:20)", precio: 75.00 },
+  { codigo: "59", nombre: "AGLUTINACIONES EN LAMINA", unidad: "", refMin: "", refMax: "", referencia: "NO REACTIVO", precio: 15.00 },
+  { codigo: "60", nombre: "AGLUTINACIONES EN TUBO (BRUCELAS)", unidad: "", refMin: "", refMax: "", referencia: "NEGATIVO (< 1:40)", precio: 35.00 },
+  { codigo: "61", nombre: "AGLUTINACIONES EN TUBO (SALMONELOSIS)", unidad: "", refMin: "", refMax: "", referencia: "NEGATIVO (< 1:80)", precio: 62.00 },
+  { codigo: "62", nombre: "AGLUTINACIONES FENOMENO ZONA", unidad: "", refMin: "", refMax: "", referencia: "NO OBSERVADO", precio: 25.00 },
+  { codigo: "63", nombre: "ALBUMINA EN ORINA", unidad: "mg/dL", refMin: 0, refMax: 20, referencia: "< 20 mg/dL", precio: 15.00 },
+  { codigo: "64", nombre: "ALBUMINA SÉRICA", unidad: "g/dL", refMin: 3.2, refMax: 5.2, referencia: "3.2 - 5.2 g/dL", precio: 20.00 },
+  { codigo: "65", nombre: "ALCOHOL ETILICO EN ORINA (HN)", unidad: "mg/dL", refMin: 0, refMax: 0, referencia: "NEGATIVO (0 mg/dL)", precio: 138.00 },
+  { codigo: "66", nombre: "ALCOHOL ETILICO EN SANGRE (HN)", unidad: "g/L", refMin: 0, refMax: 0, referencia: "NEGATIVO (0.0 g/L)", precio: 120.00 },
+  { codigo: "67", nombre: "ALDOLASA", unidad: "U/L", refMin: 0, refMax: 6, referencia: "0 - 6 U/L", precio: 122.00 },
+  { codigo: "68", nombre: "ALDOSTERONA", unidad: "pg/mL", refMin: 30, refMax: 160, referencia: "30 - 160 pg/mL (Posición de pie)", precio: 128.00 },
+  { codigo: "69", nombre: "ALDOSTERONA EN ORINA 24 HRS", unidad: "µg/24h", refMin: 2.0, refMax: 20.0, referencia: "2.0 - 20.0 µg/24h", precio: 209.00 },
+  { codigo: "70", nombre: "ALFA 1 ANTITRIPSINA FECAL", unidad: "mg/g Heces", refMin: 0, refMax: 0.54, referencia: "< 0.54 mg/g Heces", precio: 174.00 },
+  { codigo: "71", nombre: "ALFA FETO PROTEINA (AFP)", unidad: "ng/mL", refMin: 0, refMax: 10, referencia: "< 10 ng/mL", precio: 60.00 },
+  { codigo: "72", nombre: "ALFA-1 ANTITRIPSINA", unidad: "mg/dL", refMin: 190, refMax: 260, referencia: "190 - 260 mg/dL", precio: 112.00 },
+  { codigo: "73", nombre: "ALFA-2 ANTIPLASMINA", unidad: "%", refMin: 80, refMax: 120, referencia: "80 - 120 %", precio: 477.00 },
+  { codigo: "74", nombre: "ALUMINIO SERICO", unidad: "µg/L", refMin: 0, refMax: 10, referencia: "< 10 µg/L", precio: 227.00 },
+  { codigo: "75", nombre: "AMEBAS HISTOLITICA, ANTICUERPOS TOTALES", unidad: "", refMin: "", refMax: "", referencia: "NEGATIVO", precio: 128.00 },
+  { codigo: "76", nombre: "AMILASA EN ORINA DE 24 HORAS (HN)", unidad: "U/24h", refMin: 1, refMax: 17, referencia: "1 - 17 U/24h", precio: 19.00 },
+  { codigo: "77", nombre: "AMILASA ISOENZIMAS", unidad: "%", refMin: 35, refMax: 65, referencia: "P-Isoenzima: 35-65%", precio: 371.00 },
+  { codigo: "78", nombre: "AMILASA PANCREATICA", unidad: "U/L", refMin: 13, refMax: 53, referencia: "13 - 53 U/L", precio: 0.00 },
+  { codigo: "79", nombre: "AMILASA SERICA", unidad: "U/L", refMin: 35, refMax: 115, referencia: "35 - 115 U/L", precio: 35.00 },
+  { codigo: "80", nombre: "AMIODARONA SERICA - DOSAJE", unidad: "µg/mL", refMin: 1.0, refMax: 2.5, referencia: "1.0 - 2.5 µg/mL", precio: 613.00 },
+  { codigo: "81", nombre: "ANCA (ANTICITOPLASMA DEL NEUTROFILO)", unidad: "", refMin: "", refMax: "", referencia: "NEGATIVO", precio: 80.00 },
+  { codigo: "82", nombre: "ANCA ANTICUERPOS ANTI-NEUTROFILOS, SUERO", unidad: "", refMin: "", refMax: "", referencia: "NEGATIVO", precio: 120.00 },
+  { codigo: "83", nombre: "ANDROSTANDIOL GLUCURONIDO (3-ALFA-DIOL)", unidad: "ng/mL", refMin: 0.5, refMax: 6.0, referencia: "Según edad y sexo", precio: 347.00 },
+  { codigo: "84", nombre: "ANDROSTENEDIONA", unidad: "ng/mL", refMin: 0.6, refMax: 3.1, referencia: "0.6 - 3.1 ng/mL", precio: 90.00 },
+  { codigo: "85", nombre: "ANFETAMINAS (DROGAS) CUALITATIVO en orina", unidad: "", refMin: "", refMax: "", referencia: "NEGATIVO", precio: 75.00 },
+  { codigo: "86", nombre: "ANFETAMINAS Y METANFETAMINAS CUANTITATIVO", unidad: "ng/mL", refMin: 0, refMax: 500, referencia: "< 500 ng/mL", precio: 380.00 },
+  { codigo: "87", nombre: "ANGIOTENSINA II", unidad: "pg/mL", refMin: 10, refMax: 45, referencia: "10 - 45 pg/mL", precio: 765.00 },
+  { codigo: "88", nombre: "ANTI ACUAPORINA 4 IGG (NMO AQP4 IGG)", unidad: "", refMin: "", refMax: "", referencia: "NEGATIVO", precio: 2164.00 },
+  { codigo: "89", nombre: "ANTI ATG - ANTI TIROGLOBULINA", unidad: "IU/mL", refMin: 0, refMax: 115, referencia: "< 115 IU/mL", precio: 50.00 },
+  { codigo: "90", nombre: "ANTI CARDIOLIPINA IGA", unidad: "APL", refMin: 0, refMax: 12, referencia: "Negativo: < 12 APL", precio: 144.00 },
+  { codigo: "91", nombre: "ANTI CARDIOLIPINA IGG (IM)", unidad: "GPL", refMin: 0, refMax: 10, referencia: "Negativo: < 10 GPL", precio: 75.00 },
+  { codigo: "92", nombre: "ANTI CARDIOLIPINA IGM", unidad: "MPL", refMin: 0, refMax: 10, referencia: "Negativo: < 10 MPL", precio: 65.00 },
+  { codigo: "93", nombre: "ANTI CCP (PEPTIDO CICLICO CITRULINADO) IGG (IM)", unidad: "U/mL", refMin: 0, refMax: 20, referencia: "Negativo: < 20 U/mL", precio: 120.00 },
+  { codigo: "94", nombre: "ANTI DNA-DS NATIVO Ó DOBLE CADENA (IM)", unidad: "IU/mL", refMin: 0, refMax: 10, referencia: "Negativo: < 10 IU/mL", precio: 60.00 },
+  { codigo: "95", nombre: "ANTI DNA-SS AUTO ANTICUERPO (CADENA SIMPLE)", unidad: "U/mL", refMin: 0, refMax: 25, referencia: "Negativo: < 25 U/mL", precio: 89.00 },
+  { codigo: "96", nombre: "ANTI ESTREPTOLISINA - ASO (CUANTITATIVO)", unidad: "IU/mL", refMin: 0, refMax: 200, referencia: "< 200 IU/mL", precio: 70.00 },
+  { codigo: "97", nombre: "ANTI ESTREPTOLISINA - ASO (SEMICUANTITATIVO)", unidad: "", refMin: "", refMax: "", referencia: "NEGATIVO (< 200 IU/mL)", precio: 30.00 },
+  { codigo: "98", nombre: "ANTI HU - ANTICUERPOS NEURONAL NUCLEAR (ANNA-1)", unidad: "", refMin: "", refMax: "", referencia: "NEGATIVO", precio: 439.00 },
+  { codigo: "99", nombre: "ANTI JO", unidad: "U/mL", refMin: 0, refMax: 15, referencia: "Negativo: < 15 U/mL", precio: 142.00 },
+  { codigo: "100", nombre: "ANTI LKM1 (LIVER / KIDNEY MICROSOMAS- ANTI HIGADO/ RIÑON) (IM)", unidad: "U/mL", refMin: 0, refMax: 20, referencia: "Negativo: < 20 U/mL", precio: 281.00 },
+  { codigo: "101", nombre: "ANTI MITOCONDRIALES (AMA) (IM)", unidad: "", refMin: "", refMax: "", referencia: "NEGATIVO (< 1:20)", precio: 65.00 },
+  { codigo: "102", nombre: "ANTI MUSCULO LISO (ASMA) (IM)", unidad: "", refMin: "", refMax: "", referencia: "NEGATIVO (< 1:20)", precio: 65.00 },
+  { codigo: "103", nombre: "ANTI MUSK (MIASTENIA)", unidad: "nmol/L", refMin: 0, refMax: 0.05, referencia: "Negativo: < 0.05 nmol/L", precio: 3642.00 },
+  { codigo: "104", nombre: "ANTI RNP-N (IM)", unidad: "U/mL", refMin: 0, refMax: 20, referencia: "Negativo: < 20 U/mL", precio: 74.00 },
+  { codigo: "105", nombre: "ANTI SCL 70 , AUTOANTICUERPOS (IM)", unidad: "U/mL", refMin: 0, refMax: 15, referencia: "Negativo: < 15 U/mL", precio: 84.00 },
+  { codigo: "106", nombre: "ANTI TIROGLOBULINA – ANTI ATG", unidad: "IU/mL", refMin: 0, refMax: 115, referencia: "< 115 IU/mL", precio: 50.00 },
+  { codigo: "107", nombre: "ANTI TIROPEROXIDASA (ATPO-MICROSOMAL)", unidad: "IU/mL", refMin: 0, refMax: 34, referencia: "< 34 IU/mL", precio: 60.00 },
+  { codigo: "108", nombre: "ANTI TIROPEROXIDASA (ATPO-MICROSOMAL) ANTI TPO", unidad: "IU/mL", refMin: 0, refMax: 34, referencia: "< 34 IU/mL", precio: 50.00 },
+  { codigo: "109", nombre: "ANTI YO ANTICUERPOS (PURKINJE CELL CYTOPASMIC ANTIBODIES)", unidad: "", refMin: "", refMax: "", referencia: "NEGATIVO", precio: 902.00 },
+  { codigo: "110", nombre: "ANTI-CCP (PEPTIDO CICLICO CITRULINADO) IGG (IM)", unidad: "U/mL", refMin: 0, refMax: 20, referencia: "Negativo: < 20 U/mL", precio: 180.00 },
+  { codigo: "115", nombre: "ANTI-DNA NATIVO (DS-DOBLE CADENA)", unidad: "IU/mL", refMin: 0, refMax: 10, referencia: "Negativo: < 10 IU/mL", precio: 70.00 },
+  { codigo: "122", nombre: "ANTI-LMA (MEMBRANA HEPATICA, AUTO ANTICUERPOS)", unidad: "", refMin: "", refMax: "", referencia: "NEGATIVO", precio: 506.00 },
+  { codigo: "128", nombre: "ANTI-P53 (AUTOANTICUERPOS P53)", unidad: "U/mL", refMin: 0, refMax: 12, referencia: "Negativo: < 12 U/mL", precio: 371.00 },
+  { codigo: "111", nombre: "ANTICOAGULANTE LUPICO", unidad: "segundos", refMin: 30, refMax: 45, referencia: "NO DETECTADO", precio: 85.00 },
+  { codigo: "112", nombre: "ANTICUERPOS ANTIMITOCONDRIALES (AMA)", unidad: "", refMin: "", refMax: "", referencia: "NEGATIVO (< 1:20)", precio: 80.00 },
+  { codigo: "113", nombre: "ANTICUERPOS ANTINUCLEARES (ANA) (IM)", unidad: "", refMin: "", refMax: "", referencia: "NEGATIVO (< 1:160)", precio: 60.00 },
+  { codigo: "114", nombre: "ANTICUERPOS ANTITIROIDES", unidad: "IU/mL", refMin: 0, refMax: 34, referencia: "< 34 IU/mL", precio: 122.00 },
+  { codigo: "117", nombre: "ANTIFOSFOLIPIDOS (PANEL COMPLETO) IGG+IGM", unidad: "U/mL", refMin: 0, refMax: 10, referencia: "Negativo: < 10 U/mL", precio: 500.00 },
+  { codigo: "119", nombre: "ANTIGENO CARCINOEMBRIOGENICO - CEA", unidad: "ng/mL", refMin: 0, refMax: 5, referencia: "< 5 ng/mL (no fumadores)", precio: 60.00 },
+  { codigo: "121", nombre: "ANTIGENO POLIPEPTIDO TISULAR -TPA", unidad: "U/L", refMin: 0, refMax: 75, referencia: "< 75 U/L", precio: 421.00 },
+  { codigo: "123", nombre: "ANTINUCLEARES, ANTICUERPOS (ANA)", unidad: "", refMin: "", refMax: "", referencia: "NEGATIVO (< 1:160)", precio: 45.00 },
+  { codigo: "124", nombre: "ANTIOXIDANTES TOTALES", unidad: "mmol/L", refMin: 1.15, refMax: 1.70, referencia: "1.15 - 1.70 mmol/L", precio: 319.00 },
+  { codigo: "125", nombre: "ANTIOXIDANTES: GLUTATHIONE PEROXI", unidad: "U/g Hb", refMin: 27, refMax: 67, referencia: "27 - 67 U/g Hb", precio: 343.00 },
+  { codigo: "126", nombre: "ANTIOXIDANTES: GLUTATHIONE REDUCT", unidad: "U/g Hb", refMin: 4.8, refMax: 10.5, referencia: "4.8 - 10.5 U/g Hb", precio: 343.00 },
+  { codigo: "127", nombre: "ANTIOXIDANTES: SOD (SUPEROXIDO-DISMUT)", unidad: "U/g Hb", refMin: 1102, refMax: 1601, referencia: "1102 - 1601 U/g Hb", precio: 343.00 },
+  { codigo: "129", nombre: "ANTITROMBINA III FUNCIONAL", unidad: "%", refMin: 80, refMax: 120, referencia: "80 - 120 %", precio: 107.00 },
+  { codigo: "130", nombre: "APOLIPOPROTEINA A1", unidad: "mg/dL", refMin: 110, refMax: 205, referencia: "110 - 205 mg/dL", precio: 96.00 },
+  { codigo: "131", nombre: "APOLIPOPROTEINA B", unidad: "mg/dL", refMin: 55, refMax: 130, referencia: "55 - 130 mg/dL", precio: 99.00 },
+  { codigo: "132", nombre: "ARBOVIRUS ANTICUERPOS IGM", unidad: "", refMin: "", refMax: "", referencia: "NEGATIVO", precio: 618.00 },
+  { codigo: "133", nombre: "ARSENICO (ORINA 24 HORAS)", unidad: "µg/24h", refMin: 0, refMax: 50, referencia: "< 50 µg/24h", precio: 176.00 },
+  { codigo: "134", nombre: "ARSENICO EN ORINA", unidad: "µg/L", refMin: 0, refMax: 35, referencia: "< 35 µg/L", precio: 179.00 },
+  { codigo: "135", nombre: "ARSENICO SANGRE TOTAL", unidad: "µg/L", refMin: 0, refMax: 13, referencia: "< 13 µg/L", precio: 202.00 },
+  { codigo: "136", nombre: "ASCA (ANTI-SACCHAROMYCES CEREVISIAE), IGA", unidad: "U/mL", refMin: 0, refMax: 10, referencia: "Negativo: < 10 U/mL", precio: 298.00 },
+  { codigo: "137", nombre: "ASCA (ANTI-SACCHAROMYCES CEREVISIAE), IGG", unidad: "U/mL", refMin: 0, refMax: 10, referencia: "Negativo: < 10 U/mL", precio: 256.00 },
+  { codigo: "138", nombre: "ASPERGILLUS ANTICUERPOS", unidad: "", refMin: "", refMax: "", referencia: "NEGATIVO", precio: 160.00 },
+  { codigo: "139", nombre: "AUTO ANTICUERPOS MEMBRANA BASAL GLOMERULAR", unidad: "RU/mL", refMin: 0, refMax: 20, referencia: "Negativo: < 20 RU/mL", precio: 224.00 },
+  { codigo: "140", nombre: "BANDAS OLIGOCLONALES EN LCR IGG", unidad: "", refMin: "", refMax: "", referencia: "AUSENTES", precio: 603.00 },
+  { codigo: "141", nombre: "BANDAS OLIGOCLONALES EN LCR IGM", unidad: "", refMin: "", refMax: "", referencia: "AUSENTES", precio: 3717.00 },
+  { codigo: "142", nombre: "BANDAS OLIGOCLONALES IGG, LÍQUIDO CEFALORRAQUÍDEO", unidad: "", refMin: "", refMax: "", referencia: "AUSENTES", precio: 1400.00 },
+  { codigo: "143", nombre: "BARBITURATOS EN ORINA", unidad: "ng/mL", refMin: 0, refMax: 200, referencia: "Negativo: < 200 ng/mL", precio: 287.00 },
+  { codigo: "144", nombre: "BARTONELLA HENSELAE IGG", unidad: "", refMin: "", refMax: "", referencia: "Negativo: < 1:64", precio: 535.00 },
+  { codigo: "145", nombre: "BARTONELLA HENSELAE IGM", unidad: "", refMin: "", refMax: "", referencia: "Negativo: < 1:20", precio: 535.00 },
+  { codigo: "146", nombre: "BCR/ABL T (9;22) (P190), DETECCION X PCR", unidad: "", refMin: "", refMax: "", referencia: "NO DETECTADO", precio: 2398.00 },
+  { codigo: "147", nombre: "BCR/ABL T(9;22) (P210) CUANTIFICACION X PCR", unidad: "% IS", refMin: 0, refMax: 0.1, referencia: "Respuesta Molecular Mayor ≤ 0.1%", precio: 744.00 },
+  { codigo: "148", nombre: "BENCENO EN ORINA", unidad: "µg/L", refMin: 0, refMax: 25, referencia: "< 25 µg/L", precio: 493.00 },
+  { codigo: "149", nombre: "BENZODIAZEPINAS (DROGAS) CUALITATIVO EN ORINA", unidad: "", refMin: "", refMax: "", referencia: "NEGATIVO", precio: 70.00 },
+  { codigo: "150", nombre: "BENZODIAZEPINAS CUANTITATIVO EN ORINA", unidad: "ng/mL", refMin: 0, refMax: 200, referencia: "< 200 ng/mL", precio: 216.00 },
+  { codigo: "151", nombre: "BETA 2 GLICOPROTEINA I IGG (IM)", unidad: "U/mL", refMin: 0, refMax: 20, referencia: "Negativo: < 20 U/mL", precio: 187.00 },
+  { codigo: "152", nombre: "BETA 2 GLICOPROTEINA I IGM (IM)", unidad: "U/mL", refMin: 0, refMax: 20, referencia: "Negativo: < 20 U/mL", precio: 187.00 },
+  { codigo: "153", nombre: "BETA 2 MICROGLOBULINA ORINA 24 HRS", unidad: "µg/24h", refMin: 0, refMax: 300, referencia: "< 300 µg/24h", precio: 120.00 },
+  { codigo: "154", nombre: "BETA 2 MICROGLOBULINA ORINA SIMPLE", unidad: "µg/L", refMin: 0, refMax: 200, referencia: "< 200 µg/L", precio: 105.00 },
+  { codigo: "155", nombre: "BETA 2 MICROGLOBULINA SERICA", unidad: "mg/L", refMin: 1.2, refMax: 2.7, referencia: "1.2 - 2.7 mg/L", precio: 50.00 },
+  { codigo: "158", nombre: "BETA-HCG LIBRE", unidad: "mIU/mL", refMin: 0, refMax: 5, referencia: "Según semanas de gestación / No gestante < 5 mIU/mL", precio: 200.00 },
+  { codigo: "159", nombre: "BICARBONATO SERICO CO2 (HN)", unidad: "mmol/L", refMin: 22, refMax: 29, referencia: "22 - 29 mmol/L", precio: 63.00 },
+  { codigo: "160", nombre: "BILIRRUBINA DIRECTA", unidad: "mg/dL", refMin: 0, refMax: 0.4, referencia: "< 0.4 mg/dL", precio: 20.00 },
+  { codigo: "161", nombre: "BILIRRUBINA INDIRECTA", unidad: "mg/dL", refMin: 0.2, refMax: 0.8, referencia: "0.2 - 0.8 mg/dL", precio: 20.00 },
+  { codigo: "162", nombre: "BILIRRUBINAS FRACCIONADAS", unidad: "mg/dL", refMin: 0.2, refMax: 1.2, referencia: "Directa < 0.4 mg/dL, Total < 1.2 mg/dL", precio: 25.00 },
+  { codigo: "163", nombre: "BILIRRUBINAS TOTALES Y FRACCIONADAS (79, 79A Y 79B)", unidad: "mg/dL", refMin: 0.2, refMax: 1.2, referencia: "Total: 0.2 - 1.2 mg/dL", precio: 20.00 },
+  { codigo: "164", nombre: "BIOPSIA CERVIX", unidad: "", refMin: "", refMax: "", referencia: "INFORME HISTOPATOLÓGICO", precio: 130.00 },
+  { codigo: "165", nombre: "BIOPSIA DE MAMA", unidad: "", refMin: "", refMax: "", referencia: "INFORME HISTOPATOLÓGICO", precio: 150.00 },
+  { codigo: "166", nombre: "BIOPSIA DE PIEL/HISTOQUÍMICA", unidad: "", refMin: "", refMax: "", referencia: "INFORME HISTOPATOLÓGICO", precio: 150.00 },
+  { codigo: "167", nombre: "BIOPSIA DE PROSTATA", unidad: "", refMin: "", refMax: "", referencia: "INFORME HISTOPATOLÓGICO", precio: 290.00 },
+  { codigo: "168", nombre: "BIOPSIA DE PROSTATA ESTUDIO ANATOMOPATOLOGICO", unidad: "", refMin: "", refMax: "", referencia: "INFORME HISTOPATOLÓGICO", precio: 580.00 },
+  { codigo: "169", nombre: "BIOPSIA MENTON", unidad: "", refMin: "", refMax: "", referencia: "INFORME HISTOPATOLÓGICO", precio: 150.00 },
+  { codigo: "173", nombre: "BIOPSIA PIEZA OPERATORIA <=5 MM", unidad: "", refMin: "", refMax: "", referencia: "INFORME HISTOPATOLÓGICO", precio: 90.00 },
+  { codigo: "171", nombre: "BIOPSIA PIEZA OPERATORIA CHICA >5 MM <= 2CM", unidad: "", refMin: "", refMax: "", referencia: "INFORME HISTOPATOLÓGICO", precio: 110.00 },
+  { codigo: "170", nombre: "BIOPSIA PIEZA OPERATORIA EXTRA GRANDE >10CM", unidad: "", refMin: "", refMax: "", referencia: "INFORME HISTOPATOLÓGICO", precio: 420.00 },
+  { codigo: "174", nombre: "BIOPSIA PIEZA OPERATORIA GRANDE >5 CM Y <=10 CM", unidad: "", refMin: "", refMax: "", referencia: "INFORME HISTOPATOLÓGICO", precio: 260.00 },
+  { codigo: "172", nombre: "BIOPSIA PIEZA OPERATORIA MEDIANA >2 MM <= 5CM", unidad: "", refMin: "", refMax: "", referencia: "INFORME HISTOPATOLÓGICO", precio: 125.00 },
+  { codigo: "175", nombre: "BIOPSIA POR ASPIRACION (BAAF)", unidad: "", refMin: "", refMax: "", referencia: "INFORME CITOPATOLÓGICO", precio: 116.00 },
+  { codigo: "176", nombre: "BK (ORINA 24 HORAS)", unidad: "", refMin: "", refMax: "", referencia: "NEGATIVO", precio: 24.00 },
+  { codigo: "177", nombre: "BK CULTIVO (ED)", unidad: "", refMin: "", refMax: "", referencia: "SIN DESARROLLO DE M. TUBERCULOSIS", precio: 70.00 },
+  { codigo: "178", nombre: "BK CULTIVO EN ESPUTO", unidad: "", refMin: "", refMax: "", referencia: "SIN DESARROLLO DE M. TUBERCULOSIS", precio: 55.00 },
+  { codigo: "179", nombre: "BK CULTIVO EN ESPUTO MX 01", unidad: "", refMin: "", refMax: "", referencia: "SIN DESARROLLO DE M. TUBERCULOSIS", precio: 55.00 },
+  { codigo: "180", nombre: "BK CULTIVO EN ESPUTO MX 02", unidad: "", refMin: "", refMax: "", referencia: "SIN DESARROLLO DE M. TUBERCULOSIS", precio: 55.00 },
+  { codigo: "181", nombre: "BK CULTIVO EN ESPUTO MX 03", unidad: "", refMin: "", refMax: "", referencia: "SIN DESARROLLO DE M. TUBERCULOSIS", precio: 55.00 },
+  { codigo: "182", nombre: "BK DIRECTO", unidad: "", refMin: "", refMax: "", referencia: "NEGATIVO PARA B.A.A.R.", precio: 45.00 },
+  { codigo: "184", nombre: "BK DIRECTO - LCR", unidad: "", refMin: "", refMax: "", referencia: "NEGATIVO PARA B.A.A.R.", precio: 60.00 },
+  { codigo: "185", nombre: "BK DIRECTO EN ESPUTO (PRIMERA MUESTRA)", unidad: "", refMin: "", refMax: "", referencia: "NEGATIVO PARA B.A.A.R.", precio: 15.00 },
+  { codigo: "186", nombre: "BK DIRECTO EN ESPUTO (SEGUNDA MUESTRA)", unidad: "", refMin: "", refMax: "", referencia: "NEGATIVO PARA B.A.A.R.", precio: 15.00 },
+  { codigo: "187", nombre: "BK DIRECTO EN ESPUTO (TERCERA MUESTRA)", unidad: "", refMin: "", refMax: "", referencia: "NEGATIVO PARA B.A.A.R.", precio: 15.00 },
+  { codigo: "188", nombre: "BK DIRECTO- LCR", unidad: "", refMin: "", refMax: "", referencia: "NEGATIVO PARA B.A.A.R.", precio: 24.00 },
+  { codigo: "189", nombre: "BK DIRECTO-LIQUIDO PLEURAL", unidad: "", refMin: "", refMax: "", referencia: "NEGATIVO PARA B.A.A.R.", precio: 30.00 },
+  { codigo: "191", nombre: "BK DIRECTO-LIQUIDO SINOVIAL", unidad: "", refMin: "", refMax: "", referencia: "NEGATIVO PARA B.A.A.R.", precio: 24.00 },
+  { codigo: "193", nombre: "BK ESPUTO (3 MUESTRAS)", unidad: "", refMin: "", refMax: "", referencia: "NEGATIVO PARA B.A.A.R.", precio: 80.00 },
+  { codigo: "194", nombre: "BK VIRUS POR PCR EN TIEMPO REAL", unidad: "copias/mL", refMin: 0, refMax: 500, referencia: "< 500 copias/mL", precio: 1813.00 },
+  { codigo: "195", nombre: "BLASTOMYCES ANTICUERPOS", unidad: "", refMin: "", refMax: "", referencia: "NEGATIVO", precio: 313.00 },
+  { codigo: "196", nombre: "BLOCK CELL - BIOPSIA", unidad: "", refMin: "", refMax: "", referencia: "INFORME HISTOPATOLÓGICO", precio: 177.00 },
+  { codigo: "197", nombre: "BLOCK CELL- BIOPSIA", unidad: "", refMin: "", refMax: "", referencia: "INFORME HISTOPATOLÓGICO", precio: 145.00 },
+  { codigo: "198", nombre: "BORDETELLA PERTUSIS (COQUELUCHE) IGG", unidad: "U/mL", refMin: 0, refMax: 40, referencia: "Negativo: < 40 U/mL", precio: 311.00 },
+  { codigo: "199", nombre: "BORDETELLA PERTUSIS (COQUELUCHE) IGM", unidad: "", refMin: "", refMax: "", referencia: "NEGATIVO", precio: 315.00 },
+  { codigo: "200", nombre: "BORRELIA BURGDORFERI IGG", unidad: "RU/mL", refMin: 0, refMax: 16, referencia: "Negativo: < 16 RU/mL", precio: 298.00 },
+  { codigo: "201", nombre: "BORRELIA BURGDORFERI IGM", unidad: "RU/mL", refMin: 0, refMax: 16, referencia: "Negativo: < 16 RU/mL", precio: 298.00 },
+  { codigo: "202", nombre: "BRUCELA SP. X PCR EN TIEMPO REAL", unidad: "", refMin: "", refMax: "", referencia: "NO DETECTADO", precio: 1242.00 },
+  { codigo: "203", nombre: "BRUCELLA ANTIC. IG-G (IM)", unidad: "", refMin: "", refMax: "", referencia: "NEGATIVO", precio: 177.00 },
+  { codigo: "204", nombre: "BRUCELLA ANTIC. IG-M (IM)", unidad: "", refMin: "", refMax: "", referencia: "NEGATIVO", precio: 177.00 },
+  { codigo: "205", nombre: "BRUCELLA ANTICUERPOS BLOQUEADORES", unidad: "", refMin: "", refMax: "", referencia: "NEGATIVO", precio: 50.00 },
+  { codigo: "206", nombre: "BTA EN ORINA (MARCADOR TUMORAL VEJIGA)", unidad: "U/mL", refMin: 0, refMax: 14, referencia: "Negativo: < 14 U/mL", precio: 1813.00 },
+  { codigo: "207", nombre: "C1 INHIBIDOR DE LA ESTERASA", unidad: "mg/dL", refMin: 21, refMax: 39, referencia: "21 - 39 mg/dL", precio: 158.00 },
+  { codigo: "208", nombre: "CA 125 (OVARIO)", unidad: "U/mL", refMin: 0, refMax: 35, referencia: "< 35 U/mL", precio: 70.00 },
+  { codigo: "209", nombre: "CA 15-3 (MAMA)", unidad: "U/mL", refMin: 0, refMax: 30, referencia: "< 30 U/mL", precio: 55.00 },
+  { codigo: "210", nombre: "CA 27-29 (MARCADOR MAMA)", unidad: "U/mL", refMin: 0, refMax: 38, referencia: "< 38 U/mL", precio: 511.00 },
+  { codigo: "211", nombre: "CA 549 (MARCADOR MAMA)", unidad: "U/mL", refMin: 0, refMax: 12, referencia: "< 12 U/mL", precio: 260.00 },
+  { codigo: "212", nombre: "CA 72-4 (ESTOMAGO)", unidad: "U/mL", refMin: 0, refMax: 6.9, referencia: "< 6.9 U/mL", precio: 50.00 },
+  { codigo: "213", nombre: "CA19-9 (PANCREAS)", unidad: "U/mL", refMin: 0, refMax: 37, referencia: "< 37 U/mL", precio: 60.00 },
+  { codigo: "214", nombre: "CADENAS LIGERAS KAPPA LIBRES EN ORINA", unidad: "mg/L", refMin: 1.35, refMax: 24.2, referencia: "1.35 - 24.2 mg/L", precio: 681.00 },
+  { codigo: "215", nombre: "CADENAS LIGERAS KAPPA LIBRES EN SUERO", unidad: "mg/L", refMin: 3.3, refMax: 19.4, referencia: "3.3 - 19.4 mg/L", precio: 828.00 },
+  { codigo: "216", nombre: "CADENAS LIGERAS LAMBDA LIBRES EN ORINA", unidad: "mg/L", refMin: 0.24, refMax: 6.67, referencia: "0.24 - 6.67 mg/L", precio: 365.00 },
+  { codigo: "217", nombre: "CADENAS LIGERAS LAMBDA LIBRES SUERO", unidad: "mg/L", refMin: 5.7, refMax: 26.3, referencia: "5.7 - 26.3 mg/L", precio: 652.00 },
+  { codigo: "218", nombre: "CADMIO (ORINA 24 HRS.)", unidad: "µg/24h", refMin: 0, refMax: 2.0, referencia: "< 2.0 µg/24h", precio: 202.00 },
+  { codigo: "219", nombre: "CADMIO EN SANGRE TOTAL", unidad: "µg/L", refMin: 0, refMax: 5.0, referencia: "< 5.0 µg/L", precio: 202.00 },
+  { codigo: "220", nombre: "CALCIO EN ORINA DE 24 HORAS", unidad: "mg/24h", refMin: 100, refMax: 300, referencia: "100 - 300 mg/24h", precio: 40.00 },
+  { codigo: "221", nombre: "CALCIO EN ORINA SIMPLE", unidad: "mg/dL", refMin: 2.5, refMax: 20.0, referencia: "Según concentración urinaria", precio: 30.00 },
+  { codigo: "222", nombre: "CALCIO IONICO", unidad: "mg/dL", refMin: 4.5, refMax: 5.3, referencia: "4.5 - 5.3 mg/dL", precio: 40.00 },
+  { codigo: "223", nombre: "CALCIO SERICO", unidad: "mg/dL", refMin: 8.5, refMax: 10.5, referencia: "8.5 - 10.5 mg/dL", precio: 30.00 },
+  { codigo: "224", nombre: "CALCITONINA", unidad: "pg/mL", refMin: 0, refMax: 10, referencia: "< 10 pg/mL", precio: 90.00 },
+  { codigo: "226", nombre: "CALCULO BILIAR", unidad: "", refMin: "", refMax: "", referencia: "ANÁLISIS FISICOQUÍMICO", precio: 45.00 },
+  { codigo: "227", nombre: "CALCULO URINARIO ANALISIS ( RENAL / VESICAL )", unidad: "", refMin: "", refMax: "", referencia: "ANÁLISIS FISICOQUÍMICO", precio: 102.00 },
+  { codigo: "228", nombre: "CALPROTECTINA FECAL", unidad: "µg/g", refMin: 0, refMax: 50, referencia: "Normal: < 50 µg/g", precio: 479.00 },
+  { codigo: "229", nombre: "CAMPYLOBACTER (HECES)", unidad: "", refMin: "", refMax: "", referencia: "NO SE AISLA CAMPYLOBACTER", precio: 40.00 },
+  { codigo: "230", nombre: "CANDIDA ALBICANS,ANTICUERPOS (IGG)", unidad: "AU/mL", refMin: 0, refMax: 10, referencia: "Negativo: < 10 AU/mL", precio: 174.00 },
+  { codigo: "232", nombre: "CARBAMATOS EN ORINA", unidad: "", refMin: "", refMax: "", referencia: "NEGATIVO", precio: 200.00 },
+  { codigo: "233", nombre: "CARBAMATOS EN ORINA AL SIMPLE CUALITATIVO", unidad: "", refMin: "", refMax: "", referencia: "NEGATIVO", precio: 200.00 },
+  { codigo: "234", nombre: "CARBAMAZEPINA (TEGRETOL)", unidad: "µg/mL", refMin: 4.0, refMax: 12.0, referencia: "4 - 12 µg/mL", precio: 80.00 },
+  { codigo: "235", nombre: "CARBOXIHEMOGLOBINA \"COHB\" (HN)", unidad: "%", refMin: 0, refMax: 2.0, referencia: "0 - 2 % (no fumadores)", precio: 107.00 },
+  { codigo: "236", nombre: "CARIOTIPO MEDULA OSEA (ESTUDIO CROMOSOMICO)", unidad: "", refMin: "", refMax: "", referencia: "46,XX / 46,XY (Cariotipo normal)", precio: 2431.00 },
+  { codigo: "237", nombre: "CARIOTIPO SANGRE PERIFERICA (ESTUDIO CROMOSOMICO)", unidad: "", refMin: "", refMax: "", referencia: "46,XX / 46,XY (Cariotipo normal)", precio: 2337.00 },
+  { codigo: "238", nombre: "CARNITINA TOTAL", unidad: "µmol/L", refMin: 34, refMax: 78, referencia: "34 - 78 µmol/L", precio: 389.00 },
+  { codigo: "239", nombre: "CAROTENO SERICO", unidad: "µg/dL", refMin: 50, refMax: 250, referencia: "50 - 250 µg/dL", precio: 75.00 },
+  { codigo: "240", nombre: "CATECOLAMINAS FRACCIONADAS (ORINA 24H)", unidad: "µg/24h", refMin: 0, refMax: 100, referencia: "Epinefrina < 20, Norepinefrina < 100", precio: 354.00 },
+  { codigo: "241", nombre: "CATECOLAMINAS PLASMATICAS FRACCIONADAS", unidad: "pg/mL", refMin: 0, refMax: 500, referencia: "Epinefrina < 84, Norepinefrina < 420", precio: 620.00 },
+  { codigo: "242", nombre: "CD34 - STEM CELL (SC)", unidad: "células/µL", refMin: 20, refMax: 100, referencia: "Según protocolo de aféresis", precio: 687.00 },
+  { codigo: "243", nombre: "CELULAS DEL ISLOTE LANGERHANS. AUTOANTICUERPOS", unidad: "", refMin: "", refMax: "", referencia: "NEGATIVO", precio: 229.00 },
+  { codigo: "244", nombre: "CELULAS NK NATURAL KILLER (CD56), SANGRE TOTAL", unidad: "%", refMin: 5, refMax: 20, referencia: "5 - 20 % de linfocitos", precio: 661.00 },
+  { codigo: "245", nombre: "CELULAS PARIETALES ,AUTO ANTIC.", unidad: "", refMin: "", refMax: "", referencia: "NEGATIVO (< 1:20)", precio: 236.00 },
+  { codigo: "246", nombre: "CENTROMERO , AUTOANTICUERPOS (IM)", unidad: "", refMin: "", refMax: "", referencia: "NEGATIVO", precio: 159.00 },
+  { codigo: "247", nombre: "CERULOPLASMINA", unidad: "mg/dL", refMin: 27, refMax: 48, referencia: "27 - 48 mg/dL", precio: 140.00 },
+  { codigo: "248", nombre: "CH 50 COMPLEMENTO", unidad: "U/mL", refMin: 60, refMax: 140, referencia: "60 - 140 U/mL", precio: 236.00 },
+  { codigo: "250", nombre: "CHAGAS (TRIPANOZOMA CRUZI) ANTICUERPOS", unidad: "", refMin: "", refMax: "", referencia: "NO REACTIVO", precio: 174.00 },
+  { codigo: "249", nombre: "CHAGAS - HEMOAGLUTINACIÓN (HAI)", unidad: "", refMin: "", refMax: "", referencia: "NEGATIVO (< 1:8)", precio: 147.00 },
+  { codigo: "251", nombre: "CHLAMYDIA PNEUMONIAE (IGG)", unidad: "RU/mL", refMin: 0, refMax: 16, referencia: "Negativo: < 16 RU/mL", precio: 156.00 },
+  { codigo: "252", nombre: "CHLAMYDIA PNEUMONIAE (IGM)", unidad: "RU/mL", refMin: 0, refMax: 16, referencia: "Negativo: < 16 RU/mL", precio: 164.00 },
+  { codigo: "253", nombre: "CHLAMYDIA PSITACCI IGG", unidad: "", refMin: "", refMax: "", referencia: "Negativo: < 1:64", precio: 162.00 },
+  { codigo: "254", nombre: "CHLAMYDIA PSITACCI IGM", unidad: "", refMin: "", refMax: "", referencia: "Negativo: < 1:10", precio: 162.00 },
+  { codigo: "255", nombre: "CHLAMYDIA TRACHOMATIS , ADN X PCR", unidad: "", refMin: "", refMax: "", referencia: "NO DETECTADO", precio: 1112.00 },
+  { codigo: "257", nombre: "CHLAMYDIA TRACHOMATIS IGG (IM)", unidad: "U/mL", refMin: 0, refMax: 10, referencia: "Negativo: < 10 U/mL", precio: 60.00 },
+  { codigo: "258", nombre: "CHLAMYDIA TRACHOMATIS IGM (IM)", unidad: "U/mL", refMin: 0, refMax: 10, referencia: "Negativo: < 10 U/mL", precio: 60.00 },
+  { codigo: "259", nombre: "CICLOSPORA (HECES)", unidad: "", refMin: "", refMax: "", referencia: "NO SE OBSERVAN OOCISTES", precio: 29.00 },
+  { codigo: "260", nombre: "CICLOSPORINA A", unidad: "ng/mL", refMin: 100, refMax: 400, referencia: "100 - 400 ng/mL (según trasplante)", precio: 236.00 },
+  { codigo: "261", nombre: "CISTATINA C", unidad: "mg/L", refMin: 0.5, refMax: 1.5, referencia: "0.5 - 1.5 mg/L", precio: 540.00 },
+  { codigo: "262", nombre: "CISTICERCOS ANTIC.TOTALES ELISA", unidad: "", refMin: "", refMax: "", referencia: "NO REACTIVO", precio: 132.00 },
+  { codigo: "263", nombre: "CISTICERCOSIS (WESTER BLOT) SUERO", unidad: "", refMin: "", refMax: "", referencia: "NEGATIVO", precio: 445.00 },
+  { codigo: "264", nombre: "CISTICERCUS (WESTER BLOT) L.C.R", unidad: "", refMin: "", refMax: "", referencia: "NEGATIVO", precio: 479.00 },
+  { codigo: "265", nombre: "CISTICERCUS LCR EIA", unidad: "", refMin: "", refMax: "", referencia: "NO REACTIVO", precio: 240.00 },
+  { codigo: "266", nombre: "CISTICERCUS WESTERN BLOT", unidad: "", refMin: "", refMax: "", referencia: "NEGATIVO", precio: 240.00 },
+  { codigo: "267", nombre: "CISTINA ORINA 24 HORAS", unidad: "mg/24h", refMin: 0, refMax: 60, referencia: "< 60 mg/24h", precio: 187.00 },
+  { codigo: "268", nombre: "CITOBIOQUIMICO", unidad: "", refMin: "", refMax: "", referencia: "SEÚN TIPO DE LÍQUIDO BIOLÓGICO", precio: 50.00 },
+  { codigo: "269", nombre: "CITOMEGALOVIRUS ANTICUERPOS IGG, LCR", unidad: "", refMin: "", refMax: "", referencia: "NEGATIVO", precio: 120.00 },
+  { codigo: "270", nombre: "CITOMEGALOVIRUS ANTICUERPOS IGM, LCR", unidad: "", refMin: "", refMax: "", referencia: "NEGATIVO", precio: 80.00 },
+  { codigo: "271", nombre: "CITOMEGALOVIRUS CARGA VIRAL (CUANTITATIVO)", unidad: "copias/mL", refMin: 0, refMax: 200, referencia: "< 200 copias/mL", precio: 1390.00 },
+  { codigo: "272", nombre: "CITOMEGALOVIRUS DNA DETECTOR (CUALITATIVO)", unidad: "", refMin: "", refMax: "", referencia: "NO DETECTADO", precio: 911.00 },
+  { codigo: "273", nombre: "CITOMELOGAVIRUS IGG", unidad: "U/mL", refMin: 0, refMax: 6, referencia: "Negativo: < 6 U/mL", precio: 90.00 },
+  { codigo: "274", nombre: "CITOMELOGAVIRUS IGM", unidad: "Index", refMin: 0, refMax: 0.9, referencia: "Negativo: < 0.9 Index", precio: 90.00 },
+  { codigo: "275", nombre: "CITOMETRIA DE FLUJO", unidad: "", refMin: "", refMax: "", referencia: "INFORME DE INMUNOFENOTIPO", precio: 2596.00 },
+  { codigo: "276", nombre: "CITOQUIMICO - LCR", unidad: "", refMin: "", refMax: "", referencia: "Proteínas 15-45 mg/dL, Glucosa 50-80 mg/dL", precio: 60.00 },
+  { codigo: "277", nombre: "CITRATO (ORINA 24HRS)(ACIDO CITRICO)", unidad: "mg/24h", refMin: 320, refMax: 1240, referencia: "> 320 mg/24h", precio: 250.00 },
+  { codigo: "279", nombre: "CLOBAZAM, NORCLOBAZAM Y RATIO, SUERO", unidad: "ng/mL", refMin: 30, refMax: 300, referencia: "30 - 300 ng/mL", precio: 320.00 },
+  { codigo: "280", nombre: "CLONAZEPAM (RIVOTRIL)", unidad: "ng/mL", refMin: 20, refMax: 70, referencia: "20 - 70 ng/mL", precio: 360.00 },
+  { codigo: "281", nombre: "CLORO EN SUERO", unidad: "mmol/L", refMin: 96, refMax: 109, referencia: "96 - 109 mmol/L", precio: 28.00 },
+  { codigo: "282", nombre: "CLOSTRIDIUM DIFFICILE TOXINA A/B", unidad: "", refMin: "", refMax: "", referencia: "NEGATIVO", precio: 191.00 },
+  { codigo: "283", nombre: "COAGLUTINACION, ANTIGENOS BACTERIANOS LCR", unidad: "", refMin: "", refMax: "", referencia: "NEGATIVO", precio: 348.00 },
+  { codigo: "284", nombre: "COBRE (ORINA 24 HORAS)", unidad: "µg/24h", refMin: 15, refMax: 60, referencia: "15 - 60 µg/24h", precio: 174.00 },
+  { codigo: "285", nombre: "COBRE SERICO", unidad: "µg/dL", refMin: 70, refMax: 155, referencia: "70 - 155 µg/dL", precio: 174.00 },
+  { codigo: "286", nombre: "COCAÍNA EN ORINA", unidad: "ng/mL", refMin: 0, refMax: 300, referencia: "Negativo: < 300 ng/mL", precio: 45.00 },
+  { codigo: "287", nombre: "COCAINA PBC (ORINA SIMPLE) - AUTOMATIZADO (HN)", unidad: "", refMin: "", refMax: "", referencia: "NEGATIVO", precio: 40.00 },
+  { codigo: "288", nombre: "COCAINA PBC (ORINA SIMPLE) - CCF CONFIRMATORIO CUALITOXICOLOGICO", unidad: "", refMin: "", refMax: "", referencia: "NEGATIVO", precio: 281.00 },
+  { codigo: "289", nombre: "COCAINA PBC (ORINA SIMPLE) - CUALITATIVO", unidad: "", refMin: "", refMax: "", referencia: "NEGATIVO", precio: 30.00 },
+  { codigo: "290", nombre: "COCAINA PBC (ORINA SIMPLE) - HPLC CONFIRMATORIO CON CROMATOGRAMA", unidad: "ng/mL", refMin: 0, refMax: 150, referencia: "Negativo: < 150 ng/mL", precio: 1416.00 },
+  { codigo: "291", nombre: "COCAINA PBC (ORINA SIMPLE) - HPLC CONFIRMATORIO SIN CROMATOGRAMA", unidad: "ng/mL", refMin: 0, refMax: 150, referencia: "Negativo: < 150 ng/mL", precio: 705.00 },
+  { codigo: "292", nombre: "COCCIDIOSIS , ANTICUERPOS (COCCIDIOMICOSIS)", unidad: "", refMin: "", refMax: "", referencia: "NEGATIVO", precio: 664.00 },
+  { codigo: "293", nombre: "COCIENTE SFLT-1/PIGF (PREDICCIÓN DEL RIESGO DE PREECLAMPSIA)", unidad: "Ratio", refMin: 0, refMax: 38, referencia: "< 38 (Bajo riesgo)", precio: 2242.00 },
+  { codigo: "294", nombre: "COFACTOR DE LA RISTOCETINA (VWF)", unidad: "%", refMin: 50, refMax: 150, referencia: "50 - 150 %", precio: 607.00 },
+  { codigo: "295", nombre: "COLESTEROL - HDL", unidad: "mg/dL", refMin: 40, refMax: 60, referencia: "> 40 mg/dL (Varones), > 50 mg/dL (Mujeres)", precio: 20.00 },
+  { codigo: "296", nombre: "COLESTEROL LDL", unidad: "mg/dL", refMin: 0, refMax: 100, referencia: "< 100 mg/dL (Deseable)", precio: 15.00 },
+  { codigo: "297", nombre: "COLESTEROL TOTAL", unidad: "mg/dL", refMin: 0, refMax: 200, referencia: "< 200 mg/dL (Deseable)", precio: 15.00 },
+  { codigo: "298", nombre: "COLESTEROL VLDL", unidad: "mg/dL", refMin: 2, refMax: 30, referencia: "< 30 mg/dL", precio: 20.00 },
+  { codigo: "299", nombre: "COLESTEROL-ESTERES", unidad: "%", refMin: 60, refMax: 75, referencia: "60 - 75 % del Colesterol Total", precio: 68.00 },
+  { codigo: "300", nombre: "COLINESTERASA ERITROCITARIA", unidad: "U/g Hb", refMin: 29, refMax: 44, referencia: "29 - 44 U/g Hb", precio: 114.00 },
+  { codigo: "301", nombre: "COLORACION ALCIAN BLUE PARA BIOPSIA", unidad: "", refMin: "", refMax: "", referencia: "VER INFORME HISTOQUÍMICO", precio: 177.00 },
+  { codigo: "302", nombre: "COLORACION BK FITE FARACO PARA BIOPSIA", unidad: "", refMin: "", refMax: "", referencia: "VER INFORME HISTOQUÍMICO", precio: 177.00 },
+  { codigo: "303", nombre: "COLORACION GIEMSA PARA BIOPSIA", unidad: "", refMin: "", refMax: "", referencia: "VER INFORME HISTOQUÍMICO", precio: 177.00 },
+  { codigo: "304", nombre: "COLORACION GRAM PARA BIOPSIA", unidad: "", refMin: "", refMax: "", referencia: "VER INFORME HISTOQUÍMICO", precio: 177.00 },
+  { codigo: "305", nombre: "COLORACION GROCOT PARA BIOPSIA", unidad: "", refMin: "", refMax: "", referencia: "VER INFORME HISTOQUÍMICO", precio: 177.00 },
+  { codigo: "306", nombre: "COLORACION HIERRO COLOIDAL PARA BIOPSIA", unidad: "", refMin: "", refMax: "", referencia: "VER INFORME HISTOQUÍMICO", precio: 177.00 },
+  { codigo: "307", nombre: "COLORACION MALLORY PARA BIOPSIA", unidad: "", refMin: "", refMax: "", referencia: "VER INFORME HISTOQUÍMICO", precio: 177.00 },
+  { codigo: "308", nombre: "COLORACION MASSON FONTANA PARA BIOPSIA", unidad: "", refMin: "", refMax: "", referencia: "VER INFORME HISTOQUÍMICO", precio: 177.00 },
+  { codigo: "309", nombre: "COLORACION PAS ALCIAN BLUE PARA BIOPSIA", unidad: "", refMin: "", refMax: "", referencia: "VER INFORME HISTOQUÍMICO", precio: 177.00 },
+  { codigo: "310", nombre: "COLORACION PAS DIASTASA PARA BIOPSIA", unidad: "", refMin: "", refMax: "", referencia: "VER INFORME HISTOQUÍMICO", precio: 177.00 },
+  { codigo: "311", nombre: "COLORACION PAS PARA BIOPSIA", unidad: "", refMin: "", refMax: "", referencia: "VER INFORME HISTOQUÍMICO", precio: 177.00 },
+  { codigo: "312", nombre: "COLORACION PERLS PARA BIOPSIA", unidad: "", refMin: "", refMax: "", referencia: "VER INFORME HISTOQUÍMICO", precio: 177.00 },
+  { codigo: "313", nombre: "COLORACION PLATA METALAMINE PARA BIOPSIA", unidad: "", refMin: "", refMax: "", referencia: "VER INFORME HISTOQUÍMICO", precio: 177.00 },
+  { codigo: "314", nombre: "COLORACION RETICULINA PARA BIOPSIA", unidad: "", refMin: "", refMax: "", referencia: "VER INFORME HISTOQUÍMICO", precio: 177.00 },
+  { codigo: "315", nombre: "COLORACION ROJO CONGO PARA BIOPSIA", unidad: "", refMin: "", refMax: "", referencia: "VER INFORME HISTOQUÍMICO", precio: 177.00 },
+  { codigo: "316", nombre: "COLORACION VERHOFF - FIBRAS ELÁSTICAS PARA BIOPSIA", unidad: "", refMin: "", refMax: "", referencia: "VER INFORME HISTOQUÍMICO", precio: 177.00 },
+  { codigo: "317", nombre: "COLORACION VON KOSSA PARA BIOPSIA", unidad: "", refMin: "", refMax: "", referencia: "VER INFORME HISTOQUÍMICO", precio: 177.00 },
+  { codigo: "318", nombre: "COMPLEMENTO C1", unidad: "mg/dL", refMin: 15, refMax: 25, referencia: "15 - 25 mg/dL", precio: 511.00 },
+  { codigo: "319", nombre: "COMPLEMENTO C1Q", unidad: "mg/dL", refMin: 10, refMax: 25, referencia: "10 - 25 mg/dL", precio: 177.00 },
+  { codigo: "320", nombre: "COMPLEMENTO C2", unidad: "mg/dL", refMin: 1.5, refMax: 4.0, referencia: "1.5 - 4.0 mg/dL", precio: 307.00 },
+  { codigo: "321", nombre: "COMPLEMENTO C3", unidad: "mg/dL", refMin: 90, refMax: 180, referencia: "90 - 180 mg/dL", precio: 50.00 },
+  { codigo: "323", nombre: "COMPLEMENTO C4", unidad: "mg/dL", refMin: 10, refMax: 40, referencia: "10 - 40 mg/dL", precio: 50.00 },
+  { codigo: "325", nombre: "COMPLEMENTO C5", unidad: "mg/dL", refMin: 8, refMax: 15, referencia: "8 - 15 mg/dL", precio: 402.00 },
+  { codigo: "326", nombre: "COMPLEMENTO C8", unidad: "mg/dL", refMin: 1.3, refMax: 3.5, referencia: "1.3 - 3.5 mg/dL", precio: 744.00 },
+  { codigo: "327", nombre: "CONSTANTES CORPUSCULARES", unidad: "", refMin: "", refMax: "", referencia: "VCM: 83-97 fL, HCM: 27-32 pg, CCMH: 32-36 g/dL", precio: 20.00 },
+  { codigo: "1163", nombre: "CONSULTA ESPECIALIDAD METABOLISMO", unidad: "", refMin: "", refMax: "", referencia: "EVALUACIÓN MÉDICA", precio: 150.00 },
+  { codigo: "1161", nombre: "CONSULTA MEDICO GENERAL", unidad: "", refMin: "", refMax: "", referencia: "EVALUACIÓN MÉDICA", precio: 50.00 },
+  { codigo: "328", nombre: "COPROCULTIVO", unidad: "", refMin: "", refMax: "", referencia: "NO SE AISLAN ENTEROPATÓGENOS", precio: 40.00 },
+  { codigo: "329", nombre: "COPROLOGICO FUNCIONAL", unidad: "", refMin: "", refMax: "", referencia: "pH 6.0-8.0, Reacción neutra, Grasas/Almidón/Levaduras: Negativo", precio: 40.00 },
+  { codigo: "330", nombre: "CORONAVIRUS SARS COV-2", unidad: "", refMin: "", refMax: "", referencia: "NO DETECTADO / NEGATIVO", precio: 60.00 },
+  { codigo: "332", nombre: "CORTISOL AM", unidad: "µg/dL", refMin: 6.2, refMax: 19.4, referencia: "6.2 - 19.4 µg/dL (8:00 AM)", precio: 50.00 },
+  { codigo: "333", nombre: "CORTISOL LIBRE (ORINA 24 HORAS)", unidad: "µg/24h", refMin: 10, refMax: 100, referencia: "10 - 100 µg/24h", precio: 105.00 },
+  { codigo: "334", nombre: "CORTISOL P.M.", unidad: "µg/dL", refMin: 2.3, refMax: 11.9, referencia: "2.3 - 11.9 µg/dL (4:00 PM)", precio: 40.00 },
+  { codigo: "335", nombre: "CORTISOL SALIVA A.M.", unidad: "ng/mL", refMin: 1.0, refMax: 8.0, referencia: "1.0 - 8.0 ng/mL", precio: 127.00 },
+  { codigo: "336", nombre: "CORTISOL SALIVA P.M.", unidad: "ng/mL", refMin: 0.1, refMax: 1.5, referencia: "< 1.5 ng/mL", precio: 127.00 },
+  { codigo: "337", nombre: "COTININA EN ORINA SIMPLE (NICOTINA)", unidad: "ng/mL", refMin: 0, refMax: 200, referencia: "No fumador: < 200 ng/mL", precio: 62.00 },
+  { codigo: "338", nombre: "COTININA EN SANGRE", unidad: "ng/mL", refMin: 0, refMax: 15, referencia: "No fumador: < 15 ng/mL", precio: 229.00 },
+  { codigo: "339", nombre: "COVID- PRUEBA RAPIDA", unidad: "", refMin: "", refMax: "", referencia: "NO REACTIVO", precio: 50.00 },
+  { codigo: "340", nombre: "COVID-19 MOLECULAR PCR (PROCESAMIENTO)", unidad: "", refMin: "", refMax: "", referencia: "NO DETECTADO", precio: 156.00 },
+  { codigo: "341", nombre: "COXSACKIE A VIRUS, ANTICUERPO", unidad: "", refMin: "", refMax: "", referencia: "Negativo: < 1:10", precio: 671.00 },
+  { codigo: "342", nombre: "COXSACKIE B (1-6) ANTICUERPOS IGG SUERO", unidad: "", refMin: "", refMax: "", referencia: "Negativo: < 1:10", precio: 439.00 },
+  { codigo: "343", nombre: "COXSACKIE B ANTICUERPOS IGM", unidad: "", refMin: "", refMax: "", referencia: "NEGATIVO", precio: 327.00 },
+  { codigo: "344", nombre: "CPK MB (CREATIN FOSOFOKINASA-MB)", unidad: "U/L", refMin: 0, refMax: 25, referencia: "< 25 U/L (< 6% de CPK Total)", precio: 60.00 },
+  { codigo: "345", nombre: "CPK TOTAL (CREATIN FOSFOKINASA TOTAL)", unidad: "U/L", refMin: 45, refMax: 170, referencia: "45 - 170 U/L (Hombre), 45 - 135 U/L (Mujer)", precio: 50.00 },
+  { codigo: "346", nombre: "CREATINFOSFOQUINASA (CPK TOTAL) (HN)", unidad: "U/L", refMin: 45, refMax: 170, referencia: "45 - 170 U/L", precio: 80.00 },
+  { codigo: "349", nombre: "CREATININA (ORINA SIMPLE)", unidad: "mg/dL", refMin: 20, refMax: 320, referencia: "20 - 320 mg/dL", precio: 30.00 },
+  { codigo: "347", nombre: "CREATININA - DEPURACION ORINA 12 HRS", unidad: "mL/min", refMin: 90, refMax: 140, referencia: "90 - 140 mL/min/1.73m²", precio: 45.00 },
+  { codigo: "1158", nombre: "CREATININA - DEPURACION ORINA 24 HRS", unidad: "mL/min", refMin: 90, refMax: 140, referencia: "90 - 140 mL/min/1.73m²", precio: 45.00 },
+  { codigo: "348", nombre: "CREATININA - ORINA 24 HRS", unidad: "g/24h", refMin: 0.8, refMax: 2.0, referencia: "0.8 - 2.0 g/24h", precio: 30.00 },
+  { codigo: "350", nombre: "CREATININA POST", unidad: "mg/dL", refMin: 0.6, refMax: 1.3, referencia: "0.6 - 1.3 mg/dL", precio: 15.00 },
+  { codigo: "351", nombre: "CREATININA SERICA", unidad: "mg/dL", refMin: 0.6, refMax: 1.3, referencia: "0.6 - 1.3 mg/dL (Hombre), 0.6 - 1.1 mg/dL (Mujer)", precio: 15.00 },
+  { codigo: "352", nombre: "CRIOAGLUTININAS", unidad: "", refMin: "", refMax: "", referencia: "NEGATIVO (< 1:32)", precio: 69.00 },
+  { codigo: "353", nombre: "CRIOGLOBULINAS", unidad: "mg/dL", refMin: 0, refMax: 2, referencia: "NEGATIVO (< 2 mg/dL)", precio: 75.00 },
+  { codigo: "354", nombre: "CRYPTOSPORIDIUM (HECES)", unidad: "", refMin: "", refMax: "", referencia: "NO SE OBSERVAN OOCISTES", precio: 43.00 },
+  { codigo: "355", nombre: "CROMO EN ORINA 24 HORAS", unidad: "µg/24h", refMin: 0, refMax: 2.0, referencia: "< 2.0 µg/24h", precio: 164.00 },
+  { codigo: "356", nombre: "CROMO SANGRE TOTAL", unidad: "µg/L", refMin: 0, refMax: 1.4, referencia: "< 1.4 µg/L", precio: 202.00 },
+  { codigo: "357", nombre: "CROMOGRANINA A", unidad: "ng/mL", refMin: 0, refMax: 100, referencia: "< 100 ng/mL", precio: 608.00 },
+  { codigo: "358", nombre: "CRYPTOCOCCUS ANTICUERPOS", unidad: "", refMin: "", refMax: "", referencia: "NEGATIVO", precio: 300.00 },
+  { codigo: "359", nombre: "CRYPTOCOCCUS ANTIGENO (LATEX)", unidad: "", refMin: "", refMax: "", referencia: "NEGATIVO", precio: 170.00 },
+  { codigo: "360", nombre: "CRYPTOCOCCUS ANTIGENO LATEX (EN SUERO)", unidad: "", refMin: "", refMax: "", referencia: "NEGATIVO", precio: 196.00 },
+  { codigo: "361", nombre: "CRYPTOCOCCUS, ANTIGENO LATEX (EN LCR)", unidad: "", refMin: "", refMax: "", referencia: "NEGATIVO", precio: 298.00 },
+  { codigo: "362", nombre: "CTX BETA CROSSLAPS (BETA C-TELOPEPTIDO)", unidad: "ng/mL", refMin: 0.1, refMax: 0.7, referencia: "Según estado menopáusico / edad", precio: 206.00 },
+  { codigo: "363", nombre: "CULTIVO (GERMENES COMUNES)", unidad: "", refMin: "", refMax: "", referencia: "SIN DESARROLLO BACTERIANO", precio: 70.00 },
+  { codigo: "364", nombre: "CULTIVO DE BK", unidad: "", refMin: "", refMax: "", referencia: "SIN DESARROLLO DE M. TUBERCULOSIS", precio: 95.00 },
+  { codigo: "366", nombre: "CULTIVO DE ESPUTO", unidad: "", refMin: "", refMax: "", referencia: "DESARROLLO DE FLORA DE BOCA", precio: 60.00 },
+  { codigo: "365", nombre: "CULTIVO DE ESPUTO ( GERMENES COMUNES )", unidad: "", refMin: "", refMax: "", referencia: "DESARROLLO DE FLORA HABITUAL", precio: 50.00 },
+  { codigo: "367", nombre: "CULTIVO DE HONGOS", unidad: "", refMin: "", refMax: "", referencia: "SIN DESARROLLO MICÓTICO", precio: 50.00 },
+  { codigo: "368", nombre: "CULTIVO DE LCR", unidad: "", refMin: "", refMax: "", referencia: "ESTÉRIL", precio: 42.00 },
+  { codigo: "369", nombre: "CULTIVO DE LIQUIDO ASCITICO", unidad: "", refMin: "", refMax: "", referencia: "ESTÉRIL", precio: 70.00 },
+  { codigo: "370", nombre: "CULTIVO DE SECRECIÓN CON MIC", unidad: "", refMin: "", refMax: "", referencia: "SIN DESARROLLO BACTERIANO PATóGENO", precio: 110.00 },
+  { codigo: "371", nombre: "CULTIVO DE SECRECION CONJUNTIVAL", unidad: "", refMin: "", refMax: "", referencia: "SIN DESARROLLO PATÓGENO", precio: 40.00 },
+  { codigo: "372", nombre: "CULTIVO DE SECRECION FARINGEA", unidad: "", refMin: "", refMax: "", referencia: "FLORA HABITUAL DE FARINGE", precio: 60.00 },
+  { codigo: "373", nombre: "CULTIVO DE SECRECION OTICA", unidad: "", refMin: "", refMax: "", referencia: "SIN DESARROLLO PATÓGENO", precio: 50.00 },
+  { codigo: "374", nombre: "CULTIVO DE SECRECION PARANASAL", unidad: "", refMin: "", refMax: "", referencia: "SIN DESARROLLO PATÓGENO", precio: 42.00 },
+  { codigo: "375", nombre: "CULTIVO DE SECRECION URETRAL", unidad: "", refMin: "", refMax: "", referencia: "SIN DESARROLLO PATÓGENO", precio: 42.00 },
+  { codigo: "377", nombre: "CULTIVO DE SECRECION VAGINAL", unidad: "", refMin: "", refMax: "", referencia: "FLORA HABITUAL VAGINAL", precio: 60.00 },
+  { codigo: "378", nombre: "CULTIVO DE SEMEN (ESPERMA) (ED + ATB)", unidad: "", refMin: "", refMax: "", referencia: "ESTÉRIL", precio: 100.00 },
+  { codigo: "379", nombre: "CULTIVO LCR", unidad: "", refMin: "", refMax: "", referencia: "ESTÉRIL", precio: 60.00 },
+  { codigo: "380", nombre: "CULTIVO LIQUIDO PLEURAL", unidad: "", refMin: "", refMax: "", referencia: "ESTÉRIL", precio: 42.00 },
+  { codigo: "381", nombre: "CULTIVO LIQUIDO SINOVIAL", unidad: "", refMin: "", refMax: "", referencia: "ESTÉRIL", precio: 42.00 },
+  { codigo: "382", nombre: "CULTIVO OTROS", unidad: "", refMin: "", refMax: "", referencia: "SIN DESARROLLO PATÓGENO", precio: 60.00 },
+  { codigo: "383", nombre: "CULTIVOS (OTROS)", unidad: "", refMin: "", refMax: "", referencia: "SIN DESARROLLO PATÓGENO", precio: 42.00 },
+  { codigo: "384", nombre: "CULTIVOS DE GERMENES COMUNES", unidad: "", refMin: "", refMax: "", referencia: "SIN DESARROLLO BACTERIANO", precio: 70.00 },
+  { codigo: "385", nombre: "CYFRA 21-1 (CK19)", unidad: "ng/mL", refMin: 0, refMax: 3.3, referencia: "< 3.3 ng/mL", precio: 130.00 },
+  { codigo: "386", nombre: "DEMODEX FOLICULORUM", unidad: "", refMin: "", refMax: "", referencia: "NEGATIVO", precio: 29.00 },
+  { codigo: "387", nombre: "DENGUE ANTIGENO NS1 CUALITATIVO", unidad: "", refMin: "", refMax: "", referencia: "NO REACTIVO", precio: 40.00 },
+  { codigo: "388", nombre: "DENGUE VIRUS ANTICUERPOS IGG + IGM CUALITATIVO (IM)", unidad: "", refMin: "", refMax: "", referencia: "NO REACTIVO", precio: 80.00 },
+  { codigo: "389", nombre: "DENGUE VIRUS ANTICUERPOS IGG CUANTITATIVO (IM)", unidad: "Index", refMin: 0, refMax: 0.9, referencia: "Negativo: < 0.9", precio: 147.00 },
+  { codigo: "390", nombre: "DENGUE VIRUS ANTICUERPOS IGM CUANTITATIVO (IM)", unidad: "Index", refMin: 0, refMax: 0.9, referencia: "Negativo: < 0.9", precio: 112.00 },
+  { codigo: "391", nombre: "DENSIDAD URINARIA", unidad: "", refMin: 1.005, refMax: 1.030, referencia: "1.005 - 1.030", precio: 48.00 },
+  { codigo: "392", nombre: "DEOXYPIRIDINOLINA D-PYR (ORINA 24H)", unidad: "nM BCE/mM Creat", refMin: 2.3, refMax: 7.4, referencia: "2.3 - 7.4 nM BCE/mM Creatinina", precio: 691.00 },
+  { codigo: "394", nombre: "DEPURACION DE CREATININA", unidad: "mL/min", refMin: 90, refMax: 140, referencia: "90 - 140 mL/min/1.73m²", precio: 45.00 },
+  { codigo: "393", nombre: "DEPURACION DE CREATININA ENDOGENA", unidad: "mL/min", refMin: 90, refMax: 140, referencia: "90 - 140 mL/min/1.73m²", precio: 40.00 },
+  { codigo: "395", nombre: "DEPURACIONDECREATININA -ORINA24HORAS", unidad: "mL/min", refMin: 90, refMax: 140, referencia: "90 - 140 mL/min/1.73m²", precio: 45.00 },
+  { codigo: "396", nombre: "DESHIDROGENASA LACTICA (LDH) DHL", unidad: "U/L", refMin: 135, refMax: 225, referencia: "135 - 225 U/L", precio: 40.00 },
+  { codigo: "397", nombre: "DESPISTAJE ALERGICO AMPLIADO (295 ALERGENOS)", unidad: "", refMin: "", refMax: "", referencia: "CLASE 0 (NO DETECTABLE)", precio: 1793.00 },
+  { codigo: "398", nombre: "DESPISTAJE ALERGICO BASICO (32 ALERGENOS)", unidad: "", refMin: "", refMax: "", referencia: "CLASE 0 (NO DETECTABLE)", precio: 250.00 },
+  { codigo: "399", nombre: "DESPISTAJE ALERGICO BASICO (36 ALERGENOS) (IM)", unidad: "", refMin: "", refMax: "", referencia: "CLASE 0 (NO DETECTABLE)", precio: 280.00 },
+  { codigo: "400", nombre: "DESPISTAJE ALERGICO BASICO (36 ALERGENOS) PANEL PERUANO (IM)", unidad: "", refMin: "", refMax: "", referencia: "CLASE 0 (NO DETECTABLE)", precio: 250.00 },
+  { codigo: "2", nombre: "DESPISTAJE ALERGICO BASICO (44 ALERGENOS) PANEL PERUANO (IM)", unidad: "", refMin: "", refMax: "", referencia: "CLASE 0 (NO DETECTABLE)", precio: 350.00 },
+  { codigo: "401", nombre: "DHEA-S (SULFATO DE DESHIDROEPIANDROSTERONA)", unidad: "µg/dL", refMin: 80, refMax: 560, referencia: "Según edad y sexo", precio: 60.00 },
+  { codigo: "402", nombre: "DHL- ISOENZIMAS", unidad: "%", refMin: 14, refMax: 37, referencia: "LDH-1: 14-26%, LDH-2: 29-37%", precio: 440.00 },
+  { codigo: "403", nombre: "DIAZEPAN", unidad: "ng/mL", refMin: 200, refMax: 1000, referencia: "200 - 1000 ng/mL", precio: 313.00 },
+  { codigo: "404", nombre: "DIFENIL HIDANTOINA (FENITOINA)(EPAMIN, DILANTIN)", unidad: "µg/mL", refMin: 10.0, refMax: 20.0, referencia: "10 - 20 µg/mL", precio: 75.00 },
+  { codigo: "405", nombre: "DIFENIL HIDANTOINA LIBRE", unidad: "µg/mL", refMin: 1.0, refMax: 2.0, referencia: "1 - 2 µg/mL", precio: 262.00 },
+  { codigo: "406", nombre: "DIGOXINA", unidad: "ng/mL", refMin: 0.8, refMax: 2.0, referencia: "0.8 - 2.0 ng/mL", precio: 108.00 },
+  { codigo: "407", nombre: "DIHIDROTESTOSTERONA DHT", unidad: "pg/mL", refMin: 250, refMax: 990, referencia: "250 - 990 pg/mL (Varones)", precio: 162.00 },
+  { codigo: "408", nombre: "DIMERO D", unidad: "ng/mL FEU", refMin: 0, refMax: 500, referencia: "< 500 ng/mL FEU", precio: 80.00 },
+  { codigo: "410", nombre: "DOSAJE DE ACTH", unidad: "pg/mL", refMin: 7.2, refMax: 63.3, referencia: "7.2 - 63.3 pg/mL (8:00 AM)", precio: 80.00 },
+  { codigo: "411", nombre: "DOSAJE DE AMIKACINA", unidad: "µg/mL", refMin: 15, refMax: 30, referencia: "Pico: 15 - 30 µg/mL", precio: 520.00 },
+  { codigo: "412", nombre: "DOSAJE DE EVEROLIMUS (CDX)", unidad: "ng/mL", refMin: 3.0, refMax: 8.0, referencia: "3 - 8 ng/mL", precio: 697.00 },
+  { codigo: "413", nombre: "DOSAJE DE INMUNOGLOBULINAS A,G Y M", unidad: "mg/dL", refMin: 60, refMax: 1800, referencia: "IgA: 90-400, IgG: 800-1800, IgM: 60-250", precio: 110.00 },
+  { codigo: "414", nombre: "ECHOVIRUS, ANTC. (4, 9, 11, 30)", unidad: "", refMin: "", refMax: "", referencia: "Negativo: < 1:10", precio: 534.00 },
+  { codigo: "415", nombre: "ECOGRAFÍA ABDOMINAL", unidad: "", refMin: "", refMax: "", referencia: "INFORME ECOGRÁFICO", precio: 130.00 },
+  { codigo: "416", nombre: "ECOGRAFÍA OBSTETRICA/GINECO", unidad: "", refMin: "", refMax: "", referencia: "INFORME ECOGRÁFICO", precio: 100.00 },
+  { codigo: "417", nombre: "ECOGRAFÍA PARTES BLANDAS", unidad: "", refMin: "", refMax: "", referencia: "INFORME ECOGRÁFICO", precio: 100.00 },
+  { codigo: "418", nombre: "ECOGRAFÍA PELVICA", unidad: "", refMin: "", refMax: "", referencia: "INFORME ECOGRÁFICO", precio: 100.00 },
+  { codigo: "419", nombre: "ECOGRAFÍA PROSTATICA (ABD)", unidad: "", refMin: "", refMax: "", referencia: "INFORME ECOGRÁFICO", precio: 90.00 },
+  { codigo: "420", nombre: "ECOGRAFÍA PROSTATICA (TR)", unidad: "", refMin: "", refMax: "", referencia: "INFORME ECOGRÁFICO", precio: 110.00 },
+  { codigo: "421", nombre: "ECOGRAFÍA RENO-VISECAL", unidad: "", refMin: "", refMax: "", referencia: "INFORME ECOGRÁFICO", precio: 100.00 },
+  { codigo: "422", nombre: "EDN FECAL (NEUROTOXINA DERIVADA DE EOSINOFILOS)", unidad: "ng/mL", refMin: 0, refMax: 360, referencia: "< 360 ng/mL", precio: 1039.00 },
+  { codigo: "423", nombre: "ELASTASA PANCREATICA FECAL (ESPECIAL)", unidad: "µg/g", refMin: 200, refMax: 500, referencia: "> 200 µg/g Heces", precio: 223.00 },
+  { codigo: "424", nombre: "ELECTROFORESIS DE HEMOGLOBINA", unidad: "%", refMin: 95, refMax: 98, referencia: "HbA: 95-98%, HbA2: 1.5-3.5%, HbF: < 2%", precio: 149.00 },
+  { codigo: "425", nombre: "ELECTROLITOS (NA,K,CL)", unidad: "mmol/L", refMin: 3.5, refMax: 145, referencia: "Na: 135-145, K: 3.5-5.0, Cl: 96-109", precio: 90.00 },
+  { codigo: "426", nombre: "ELECTROLITOS (ORINA 24 HORAS)", unidad: "mmol/24h", refMin: 25, refMax: 220, referencia: "Na: 40-220, K: 25-125, Cl: 110-250", precio: 35.00 },
+  { codigo: "427", nombre: "ELECTROLITOS ORINA SIMPLE", unidad: "mmol/L", refMin: 10, refMax: 100, referencia: "Depende del estado de hidratación", precio: 40.00 },
+  { codigo: "428", nombre: "ENA - PERFIL AUTOINMUNE (IM)", unidad: "", refMin: "", refMax: "", referencia: "PANEL NEGATIVO", precio: 325.00 },
+  { codigo: "429", nombre: "ENDOMISIO, AUTOANTIC. (EMA) AC TOTALES", unidad: "", refMin: "", refMax: "", referencia: "NEGATIVO (< 1:10)", precio: 343.00 },
+  { codigo: "430", nombre: "EOSINOFILOS EN SECRECION (OTROS)", unidad: "%", refMin: 0, refMax: 5, referencia: "0 - 5 %", precio: 59.00 },
+  { codigo: "431", nombre: "EOSINOFILOS EN SECRECION NASAL", unidad: "%", refMin: 0, refMax: 1, referencia: "< 1 %", precio: 30.00 },
+  { codigo: "432", nombre: "EPSTEIN BAR VIRUS EBNA IGG (IM)", unidad: "U/mL", refMin: 0, refMax: 5, referencia: "Negativo: < 5 U/mL", precio: 75.00 },
+  { codigo: "433", nombre: "EPSTEIN BAR VIRUS EBNA IGM", unidad: "U/mL", refMin: 0, refMax: 5, referencia: "Negativo: < 5 U/mL", precio: 75.00 },
+  { codigo: "434", nombre: "EPSTEIN BAR VIRUS VCA IGG (IM)", unidad: "U/mL", refMin: 0, refMax: 20, referencia: "Negativo: < 20 U/mL", precio: 70.00 },
+  { codigo: "435", nombre: "EPSTEIN BAR VIRUS VCA IGM (IM)", unidad: "U/mL", refMin: 0, refMax: 20, referencia: "Negativo: < 20 U/mL", precio: 60.00 },
+  { codigo: "436", nombre: "EPSTEIN BARR (EBNA) IGG", unidad: "U/mL", refMin: 0, refMax: 5, referencia: "Negativo: < 5 U/mL", precio: 80.00 },
+  { codigo: "437", nombre: "EPSTEIN BARR (EBNA) IGG - IGM", unidad: "U/mL", refMin: 0, refMax: 20, referencia: "Negativo: < 20 U/mL", precio: 150.00 },
+  { codigo: "438", nombre: "EPSTEIN BARR (EBNA) IGM", unidad: "U/mL", refMin: 0, refMax: 5, referencia: "Negativo: < 5 U/mL", precio: 90.00 },
+  { codigo: "439", nombre: "EPSTEIN BARR VIRUS, CARGA VIRAL", unidad: "copias/mL", refMin: 0, refMax: 200, referencia: "< 200 copias/mL", precio: 1242.00 },
+  { codigo: "440", nombre: "EPSTEIN BARR VIRUS, EARLY ANTIGEN (EA) (IM)", unidad: "U/mL", refMin: 0, refMax: 10, referencia: "Negativo: < 10 U/mL", precio: 256.00 },
+  { codigo: "441", nombre: "ERITROPOYETINA", unidad: "mU/mL", refMin: 4.3, refMax: 29.0, referencia: "4.3 - 29.0 mU/mL", precio: 110.00 },
+  { codigo: "442", nombre: "ERITROPOYETINA SERICA", unidad: "mU/mL", refMin: 4.3, refMax: 29.0, referencia: "4.3 - 29.0 mU/mL", precio: 124.00 },
+  { codigo: "443", nombre: "ESPECIALES", unidad: "", refMin: "", refMax: "", referencia: "SEGÚN PRUEBA SOLICITADA", precio: 100.00 },
+  { codigo: "444", nombre: "ESPERMATOGRAMA", unidad: "mill/mL", refMin: 15, refMax: 200, referencia: "Volumen ≥ 1.5 mL, Conc ≥ 15 mill/mL, Movilidad Progresiva ≥ 32%", precio: 100.00 },
+  { codigo: "446", nombre: "ESPERMATOZOIDES , AC (SEMEN)", unidad: "%", refMin: 0, refMax: 20, referencia: "< 20 %", precio: 174.00 },
+  { codigo: "447", nombre: "ESPERMATOZOIDES , AC. SUERO", unidad: "U/mL", refMin: 0, refMax: 60, referencia: "Negativo: < 60 U/mL", precio: 131.00 },
+  { codigo: "448", nombre: "ESTEATOCRITO (ACIDO)", unidad: "%", refMin: 0, refMax: 2, referencia: "< 2 %", precio: 128.00 },
+  { codigo: "449", nombre: "ESTRADIOL", unidad: "pg/mL", refMin: 15, refMax: 350, referencia: "Según fase menstrual / Varones: 10-50 pg/mL", precio: 55.00 },
+  { codigo: "451", nombre: "ESTRADIOL LIBRE", unidad: "pg/mL", refMin: 0.2, refMax: 5.0, referencia: "Según fase ciclo menstrual", precio: 70.00 },
+  { codigo: "1162", nombre: "ESTRADIOL LIBRE (L2)", unidad: "pg/mL", refMin: 0.2, refMax: 5.0, referencia: "Según fase ciclo menstrual", precio: 225.00 },
+  { codigo: "453", nombre: "ESTREPTOCOCO ß-HEMOLITICO GRUPO A (PYOGENES)", unidad: "", refMin: "", refMax: "", referencia: "NO DETECTADO / NEGATIVO", precio: 128.00 },
+  { codigo: "454", nombre: "ESTRIOL LIBRE", unidad: "ng/mL", refMin: 0.2, refMax: 30, referencia: "Según semanas de gestación", precio: 85.00 },
+  { codigo: "455", nombre: "ESTRIOL TOTAL", unidad: "ng/mL", refMin: 0.2, refMax: 30, referencia: "Según semanas de gestación", precio: 88.00 },
+  { codigo: "456", nombre: "ESTRONA SULFATO", unidad: "ng/dL", refMin: 15, refMax: 350, referencia: "Según edad y estado gonadal", precio: 450.00 },
+  { codigo: "457", nombre: "ESTUDIO DE COCCIDIOS (HECES)", unidad: "", refMin: "", refMax: "", referencia: "NO SE OBSERVAN OOCISTES", precio: 158.00 },
+  { codigo: "458", nombre: "ESTUDIO MOLECULAR HLA-DRB1 (BAJA RESOLUCION)", unidad: "", refMin: "", refMax: "", referencia: "INFORME GENOTÍPICO", precio: 2290.00 },
+  { codigo: "459", nombre: "EXAMEN COMPLETO DE ORINA", unidad: "", refMin: "", refMax: "", referencia: "Densidad 1.005-1.030, pH 5.0-8.0, Leucocitos 0-5/campo, Hematíes 0-2/campo", precio: 15.00 },
+  { codigo: "460", nombre: "EXAMEN DE ORINA COMPLETO", unidad: "", refMin: "", refMax: "", referencia: "Densidad 1.005-1.030, pH 5.0-8.0, Leucocitos 0-5/campo, Hematíes 0-2/campo", precio: 15.00 },
+  { codigo: "461", nombre: "EXAMEN DIRECTO (HONGO KOH)", unidad: "", refMin: "", refMax: "", referencia: "NO SE OBSERVAN ELEMENTOS MICÓTICOS", precio: 30.00 },
+  { codigo: "463", nombre: "EXAMEN DIRECTO DE SECRECION VAGINAL (TRICHOMONA)", unidad: "", refMin: "", refMax: "", referencia: "NO SE OBSERVAN TRICHOMONAS NI LEVADURAS", precio: 16.00 },
+  { codigo: "464", nombre: "EXTASIS CUALITATIVO (ORINA SIMPLE)", unidad: "", refMin: "", refMax: "", referencia: "NEGATIVO", precio: 75.00 },
+  { codigo: "466", nombre: "F-ACTINA, AUTOANTICUERPOS IGG", unidad: "Units", refMin: 0, refMax: 20, referencia: "Negativo: < 20 Units", precio: 666.00 },
+  { codigo: "467", nombre: "FACTOR INTRINSECO , ANTICUERPOS", unidad: "AU/mL", refMin: 0, refMax: 1.2, referencia: "Negativo: < 1.2 AU/mL", precio: 149.00 },
+  { codigo: "468", nombre: "FACTOR IX", unidad: "%", refMin: 60, refMax: 140, referencia: "60 - 140 %", precio: 276.00 },
+  { codigo: "469", nombre: "FACTOR REMATOIDEO ( LATEX )", unidad: "IU/mL", refMin: 0, refMax: 20, referencia: "Negativo: < 20 IU/mL", precio: 25.00 },
+  { codigo: "471", nombre: "FACTOR REUMATOIDEO CUALITATIVO (LATEX)", unidad: "", refMin: "", refMax: "", referencia: "NO REACTIVO", precio: 25.00 },
+  { codigo: "472", nombre: "FACTOR REUMATOIDEO CUANTITATIVO", unidad: "IU/mL", refMin: 0, refMax: 20, referencia: "Negativo: < 20 IU/mL", precio: 25.00 },
+  { codigo: "473", nombre: "FACTOR V", unidad: "%", refMin: 70, refMax: 120, referencia: "70 - 120 %", precio: 219.00 },
+  { codigo: "474", nombre: "FACTOR V DE LEIDEN, MUTACION X PCR EN", unidad: "", refMin: "", refMax: "", referencia: "GENOTIPO NORMAL (SIN MUTACIÓN G1691A)", precio: 693.00 },
+  { codigo: "475", nombre: "FACTOR VII", unidad: "%", refMin: 60, refMax: 140, referencia: "60 - 140 %", precio: 228.00 },
+  { codigo: "476", nombre: "FACTOR VIII", unidad: "%", refMin: 50, refMax: 150, referencia: "50 - 150 %", precio: 216.00 },
+  { codigo: "477", nombre: "FACTOR VIII INHIBIDORES CIRCULANTES", unidad: "UB", refMin: 0, refMax: 0.6, referencia: "Negativo: < 0.6 Unidades Bethesda", precio: 354.00 },
+  { codigo: "478", nombre: "FACTOR XII", unidad: "%", refMin: 60, refMax: 140, referencia: "60 - 140 %", precio: 262.00 },
+  { codigo: "479", nombre: "FASCIOLA HEPATICA, ANTICUERPOS", unidad: "", refMin: "", refMax: "", referencia: "NO REACTIVO", precio: 263.00 },
+  { codigo: "480", nombre: "FENCICLIDINA (PCP) (ORINA)", unidad: "ng/mL", refMin: 0, refMax: 25, referencia: "Negativo: < 25 ng/mL", precio: 107.00 },
+  { codigo: "481", nombre: "FENILALANINA SERICA", unidad: "mg/dL", refMin: 0.8, refMax: 2.0, referencia: "0.8 - 2.0 mg/dL", precio: 371.00 },
+  { codigo: "482", nombre: "FENILCETONURIA PKU (CLORURO FERRICO)", unidad: "", refMin: "", refMax: "", referencia: "NEGATIVO", precio: 217.00 },
+  { codigo: "483", nombre: "FENITOINA", unidad: "µg/mL", refMin: 10.0, refMax: 20.0, referencia: "10 - 20 µg/mL", precio: 80.00 },
+  { codigo: "484", nombre: "FENITOINA (DIFENILHIDANTOINA DPH)", unidad: "µg/mL", refMin: 10.0, refMax: 20.0, referencia: "10 - 20 µg/mL", precio: 90.00 },
+  { codigo: "485", nombre: "FENOBARBITAL", unidad: "µg/mL", refMin: 15.0, refMax: 40.0, referencia: "15 - 40 µg/mL", precio: 80.00 },
+  { codigo: "487", nombre: "FENOL ORINA", unidad: "mg/L", refMin: 0, refMax: 20, referencia: "< 20 mg/L", precio: 231.00 },
+  { codigo: "488", nombre: "FENOMENO LE", unidad: "", refMin: "", refMax: "", referencia: "NO SE OBSERVAN CÉLULAS L.E.", precio: 40.00 },
+  { codigo: "490", nombre: "FERRITINA SERICA", unidad: "ng/mL", refMin: 10, refMax: 375, referencia: "40 - 375 ng/mL (Hombre), 10 - 280 ng/mL (Mujer)", precio: 45.00 },
+  { codigo: "491", nombre: "FIBRINOGENO", unidad: "mg/dL", refMin: 150, refMax: 350, referencia: "150 - 350 mg/dL", precio: 30.00 },
+  { codigo: "493", nombre: "FIBROMAX", unidad: "", refMin: "", refMax: "", referencia: "INFORME EVALUACIÓN DE FIBROSIS Y ESTEATOSIS", precio: 3018.00 },
+  { codigo: "494", nombre: "FILARIA IGM & IGG", unidad: "", refMin: "", refMax: "", referencia: "NEGATIVO", precio: 1041.00 },
+  { codigo: "495", nombre: "FOSFATASA ACIDA PROSTATICA (HN)", unidad: "U/L", refMin: 0, refMax: 3.5, referencia: "< 3.5 U/L", precio: 35.00 },
+  { codigo: "496", nombre: "FOSFATASA ACIDA TOTAL (HN)", unidad: "U/L", refMin: 0, refMax: 6.5, referencia: "< 6.5 U/L", precio: 30.00 },
+  { codigo: "497", nombre: "FOSFATASA ALCALINA", unidad: "U/L", refMin: 45, refMax: 115, referencia: "45 - 115 U/L", precio: 20.00 },
+  { codigo: "499", nombre: "FOSFATASA ALCALINA (ISOENZIMAS)", unidad: "%", refMin: 20, refMax: 85, referencia: "Fracción Hepática 20-70%, Ósea 25-85%", precio: 297.00 },
+  { codigo: "500", nombre: "FOSFATASA ALCALINA LEUCOCITARIA", unidad: "Puntos", refMin: 20, refMax: 100, referencia: "20 - 100 Puntos FAL", precio: 197.00 },
+  { codigo: "501", nombre: "FOSFATIDILSERINA ANTIC. IGG", unidad: "U/mL", refMin: 0, refMax: 10, referencia: "Negativo: < 10 U/mL", precio: 184.00 },
+  { codigo: "502", nombre: "FOSFATIDILSERINA ANTIC. IGM", unidad: "U/mL", refMin: 0, refMax: 10, referencia: "Negativo: < 10 U/mL", precio: 184.00 },
+  { codigo: "503", nombre: "FOSFATOS ORINA 24 HORAS", unidad: "g/24h", refMin: 0.4, refMax: 1.3, referencia: "0.4 - 1.3 g/24h", precio: 78.00 },
+  { codigo: "504", nombre: "FOSFORO (ORINA 24HRS) (HN)", unidad: "g/24h", refMin: 0.4, refMax: 1.3, referencia: "0.4 - 1.3 g/24h", precio: 15.00 },
+  { codigo: "505", nombre: "FOSFORO ORINA SIMPLE (HN)", unidad: "mg/dL", refMin: 30, refMax: 100, referencia: "30 - 100 mg/dL", precio: 17.00 },
+  { codigo: "506", nombre: "FOSFORO SERICO", unidad: "mg/dL", refMin: 2.5, refMax: 4.5, referencia: "2.5 - 4.5 mg/dL", precio: 20.00 },
+  { codigo: "508", nombre: "FRACCION EXC. SODIO FILTRADO (FENA)", unidad: "%", refMin: 1.0, refMax: 2.0, referencia: "< 1% (Prerrenal), > 2% (Parenquimatoso/NTA)", precio: 154.00 },
+  { codigo: "509", nombre: "FRAGILIDAD CAPILAR", unidad: "Petequias", refMin: 0, refMax: 10, referencia: "< 10 petequias (Prueba de Rumpel-Leede)", precio: 20.00 },
+  { codigo: "510", nombre: "FRAGILIDAD GLOBULAR", unidad: "% NaCl", refMin: 0.35, refMax: 0.50, referencia: "Inicio hemólisis: 0.45-0.50%, Total: 0.30-0.35%", precio: 50.00 },
+  { codigo: "511", nombre: "FRAGILIDAD ERITROCITARIA", unidad: "% NaCl", refMin: 0.35, refMax: 0.50, referencia: "Inicio hemólisis: 0.45-0.50%, Total: 0.30-0.35%", precio: 295.00 },
+  { codigo: "512", nombre: "FRAGMENTACIÓN DE ADN ESPERMÁTICO", unidad: "% DFI", refMin: 0, refMax: 15, referencia: "Normal: < 15% DFI", precio: 533.00 },
+  { codigo: "513", nombre: "FROTIS DIRECTO (GERMENES)", unidad: "", refMin: "", refMax: "", referencia: "NO SE OBSERVAN BACTERIAS", precio: 30.00 },
+  { codigo: "515", nombre: "FRUCTOSAMINA", unidad: "µmol/L", refMin: 200, refMax: 285, referencia: "< 285 µmol/L", precio: 65.00 },
+  { codigo: "516", nombre: "FSH HORMONA FOLICULOESTIMULANTE", unidad: "mIU/mL", refMin: 1.5, refMax: 12.4, referencia: "Según fase menstrual / Varones: 1.5-12.4 mIU/mL", precio: 60.00 },
+  { codigo: "517", nombre: "FTA ABS", unidad: "", refMin: "", refMax: "", referencia: "NO REACTIVO", precio: 80.00 },
+  { codigo: "518", nombre: "FTA ABS (IM)", unidad: "", refMin: "", refMax: "", referencia: "NO REACTIVO", precio: 55.00 },
+  { codigo: "519", nombre: "FTA ABS IGM", unidad: "", refMin: "", refMax: "", referencia: "NO REACTIVO", precio: 130.00 },
+  { codigo: "520", nombre: "GABAPENTIN (NEURONTIN), DOSAJE", unidad: "µg/mL", refMin: 2.0, refMax: 20.0, referencia: "2 - 20 µg/mL", precio: 992.00 },
+  { codigo: "521", nombre: "GAD, AUTOANTIC (GLUTAMIC ACID DESCARBOXILASE)", unidad: "IU/mL", refMin: 0, refMax: 5.0, referencia: "Negativo: < 5.0 IU/mL", precio: 465.00 },
+  { codigo: "522", nombre: "GAG EN ORINA", unidad: "mg/mmol Creat", refMin: 0, refMax: 12, referencia: "Mucopolisacáridos según edad", precio: 2301.00 },
+  { codigo: "523", nombre: "GALACTOMANANO (IM)", unidad: "Index", refMin: 0, refMax: 0.5, referencia: "Negativo: < 0.5 Index", precio: 603.00 },
+  { codigo: "524", nombre: "GALACTOSA 1 FOSFATO URIDILTRANSFERASA (GALT)", unidad: "U/g Hb", refMin: 18.5, refMax: 28.5, referencia: "18.5 - 28.5 U/g Hb", precio: 2268.00 },
+  { codigo: "525", nombre: "GAMMA GLOBULINA, DOSAJE", unidad: "g/dL", refMin: 0.7, refMax: 1.4, referencia: "0.7 - 1.4 g/dL", precio: 57.00 },
+  { codigo: "526", nombre: "GAMMA GLUTAMIL TRANSPEPTIDASA", unidad: "U/L", refMin: 0, refMax: 40, referencia: "≤ 40 U/L (Hombre), ≤ 28 U/L (Mujer)", precio: 45.00 },
+  { codigo: "530", nombre: "GASES ARTERIALES", unidad: "", refMin: "", refMax: "", referencia: "pH: 7.35-7.45, pCO2: 35-45, pO2: 80-100", precio: 190.00 },
+  { codigo: "529", nombre: "GASES ARTERIALES (AGA) Y ELECTROLITOS", unidad: "", refMin: "", refMax: "", referencia: "pH: 7.35-7.45, Na: 135-145, K: 3.5-5.0", precio: 190.00 },
+  { codigo: "531", nombre: "GASTRINA", unidad: "pg/mL", refMin: 13, refMax: 115, referencia: "< 115 pg/mL", precio: 144.00 },
+  { codigo: "532", nombre: "GeneXpert", unidad: "", refMin: "", refMax: "", referencia: "M. TUBERCULOSIS NO DETECTADO", precio: 750.00 },
+  { codigo: "533", nombre: "GERMENES COMUNES (OTROS)", unidad: "", refMin: "", refMax: "", referencia: "SIN DESARROLLO BACTERIANO", precio: 70.00 },
+  { codigo: "534", nombre: "GIARDIA LAMBLIA ANTICUERPOS IGG", unidad: "U/mL", refMin: 0, refMax: 10, referencia: "Negativo: < 10 U/mL", precio: 243.00 },
+  { codigo: "535", nombre: "GIARDIA LAMBLIA ANTICUERPOS IGM", unidad: "U/mL", refMin: 0, refMax: 10, referencia: "Negativo: < 10 U/mL", precio: 288.00 },
+  { codigo: "536", nombre: "GIARDIA LAMBLIA ANTIGENO FECALES", unidad: "", refMin: "", refMax: "", referencia: "NEGATIVO", precio: 236.00 },
+  { codigo: "537", nombre: "GIARDIA LAMBLIA, ANTICUERPOS IGG & IGM", unidad: "U/mL", refMin: 0, refMax: 10, referencia: "Negativo: < 10 U/mL", precio: 511.00 },
+  { codigo: "538", nombre: "GLIADINA ANTICUERPOS IGA (IM)", unidad: "U/mL", refMin: 0, refMax: 12, referencia: "Negativo: < 12 U/mL", precio: 162.00 },
+  { codigo: "539", nombre: "GLOBULINAS", unidad: "g/dL", refMin: 1.9, refMax: 2.7, referencia: "1.9 - 2.7 g/dL", precio: 0.00 },
+  { codigo: "540", nombre: "GLUCAGON", unidad: "pg/mL", refMin: 50, refMax: 150, referencia: "50 - 150 pg/mL", precio: 194.00 },
+  { codigo: "541", nombre: "GLUCAGON 30 MINUTOS", unidad: "pg/mL", refMin: 50, refMax: 150, referencia: "Según curva metabólica", precio: 196.00 },
+  { codigo: "542", nombre: "GLUCAGON 60 MINUTOS", unidad: "pg/mL", refMin: 50, refMax: 150, referencia: "Según curva metabólica", precio: 255.00 },
+  { codigo: "544", nombre: "GLUCOSA 120´ POST-PRANDIAL (GLUCOSA ANHIDRA)", unidad: "mg/dL", refMin: 70, refMax: 140, referencia: "< 140 mg/dL", precio: 18.00 },
+  { codigo: "543", nombre: "GLUCOSA 120' POST-PRANDIAL (C / DESAYUNO)", unidad: "mg/dL", refMin: 70, refMax: 140, referencia: "< 140 mg/dL", precio: 16.00 },
+  { codigo: "547", nombre: "GLUCOSA 6-FOSFATO DEHIDROGENASA", unidad: "U/g Hb", refMin: 7.0, refMax: 20.5, referencia: "7.0 - 20.5 U/g Hb", precio: 144.00 },
+  { codigo: "546", nombre: "GLUCOSA 60’ (GLUCOSA ANHIDRA)", unidad: "mg/dL", refMin: 70, refMax: 180, referencia: "< 180 mg/dL", precio: 18.00 },
+  { codigo: "545", nombre: "GLUCOSA 60' POST-PRANDIAL(C/DESAYUNO)", unidad: "mg/dL", refMin: 70, refMax: 180, referencia: "< 180 mg/dL", precio: 16.00 },
+  { codigo: "548", nombre: "GLUCOSA BASAL", unidad: "mg/dL", refMin: 80, refMax: 110, referencia: "80 - 110 mg/dL", precio: 15.00 },
+  { codigo: "550", nombre: "GLUCOSA EN LIQUIDO", unidad: "mg/dL", refMin: 50, refMax: 80, referencia: "60-80% de la glucemia plasmática", precio: 13.00 },
+  { codigo: "551", nombre: "GLUCOSA EN ORINA DE 24 HORAS", unidad: "g/24h", refMin: 0, refMax: 0.5, referencia: "< 0.5 g/24h", precio: 13.00 },
+  { codigo: "552", nombre: "GLUCOSA EN ORINA SIMPLE", unidad: "", refMin: "", refMax: "", referencia: "NEGATIVO", precio: 13.00 },
+  { codigo: "553", nombre: "GLUCOSA POST PRANDIAL", unidad: "mg/dL", refMin: 70, refMax: 140, referencia: "< 140 mg/dL", precio: 15.00 },
+  { codigo: "1165", nombre: "GLUCOSA+EXAMEN DE ORINA", unidad: "", refMin: "", refMax: "", referencia: "Glucosa: 80-110 mg/dL, Orina: Negativo a elementos patológicos", precio: 10.00 },
+  { codigo: "554", nombre: "GOTA GRUESA (PALUDISMO)", unidad: "", refMin: "", refMax: "", referencia: "NO SE OBSERVAN PARÁSITOS (PLASMODIUM SPP)", precio: 25.00 },
+  { codigo: "555", nombre: "GRAM EN ORINA SIN CENTRIFUGAR", unidad: "", refMin: "", refMax: "", referencia: "NO SE OBSERVAN GERMENES", precio: 20.00 },
+  { codigo: "557", nombre: "GRUPO Y FACTOR", unidad: "", refMin: "", refMax: "", referencia: "A / B / AB / O ; Rh Positivo / Negativo", precio: 15.00 },
+  { codigo: "558", nombre: "HAM TEST", unidad: "", refMin: "", refMax: "", referencia: "NEGATIVO (Sin hemólisis)", precio: 20.00 },
+  { codigo: "559", nombre: "HAPTOGLOBINA", unidad: "mg/dL", refMin: 40, refMax: 270, referencia: "40 - 270 mg/dL", precio: 81.00 },
+  { codigo: "560", nombre: "HCG CADENAS LIBRES", unidad: "mIU/mL", refMin: 0, refMax: 2, referencia: "< 2 mIU/mL (no gestante)", precio: 292.00 },
+  { codigo: "564", nombre: "HE4 / WFDC2 / PROTEINA EPIDIDIMAL HUMANA", unidad: "pmol/L", refMin: 0, refMax: 140, referencia: "Premenopáusicas < 70, Posmenopáusicas < 140", precio: 0.00 },
+  { codigo: "565", nombre: "HECES SIMPLE", unidad: "", refMin: "", refMax: "", referencia: "No se observan parásitos", precio: 10.00 },
+  { codigo: "566", nombre: "HELICOBACTER PILORI IGG (IM)", unidad: "U/mL", refMin: 0, refMax: 0.9, referencia: "Negativo: < 0.9 Index", precio: 45.00 },
+  { codigo: "567", nombre: "HELICOBACTER PILORI IGM (IM)", unidad: "U/mL", refMin: 0, refMax: 0.9, referencia: "Negativo: < 0.9 Index", precio: 45.00 },
+  { codigo: "568", nombre: "HELICOBACTER PYLORI", unidad: "", refMin: "", refMax: "", referencia: "NEGATIVO", precio: 70.00 },
+  { codigo: "569", nombre: "HELICOBACTER PYLORI IGA (IM)", unidad: "U/mL", refMin: 0, refMax: 0.9, referencia: "Negativo: < 0.9 Index", precio: 162.00 },
+  { codigo: "570", nombre: "HELICOBACTER PYLORI, TEST DE ALIENTO - CARBONO 13 \"TEST UREASA\"", unidad: "DOB", refMin: 0, refMax: 4.0, referencia: "Negativo: < 4.0 DOB", precio: 230.00 },
+  { codigo: "571", nombre: "HEMATIES, PIRUVATO-KINASA", unidad: "U/g Hb", refMin: 11.0, refMax: 17.0, referencia: "11.0 - 17.0 U/g Hb", precio: 475.00 },
+  { codigo: "572", nombre: "HEMATOCRITO", unidad: "%", refMin: 37, refMax: 52, referencia: "47 ± 5% (Varón), 42 ± 5% (Mujer)", precio: 10.00 },
+  { codigo: "573", nombre: "HEMATOLOGIA", unidad: "", refMin: "", refMax: "", referencia: "Dentro de límites normales", precio: 25.00 },
+  { codigo: "575", nombre: "HEMOAGLUTINACION ANTICUERPOS ANTITREPONEMA PALLIDUM (MHATP )", unidad: "", refMin: "", refMax: "", referencia: "NO REACTIVO", precio: 124.00 },
+  { codigo: "576", nombre: "HEMOCROMATOSIS, MUTACIONES (ADN)", unidad: "", refMin: "", refMax: "", referencia: "SIN MUTACIÓN C282Y / H63D", precio: 2490.00 },
+  { codigo: "577", nombre: "HEMOCULTIVO", unidad: "", refMin: "", refMax: "", referencia: "ESTÉRIL A LOS 7 DÍAS", precio: 150.00 },
+  { codigo: "581", nombre: "HEMOCULTIVO AUTOMATIZADO CON MIC (HN)", unidad: "", refMin: "", refMax: "", referencia: "ESTÉRIL", precio: 150.00 },
+  { codigo: "582", nombre: "HEMOGLOBINA", unidad: "g/dL", refMin: 12.0, refMax: 18.0, referencia: "16 ± 2 g/dL (Varón), 14 ± 2 g/dL (Mujer)", precio: 15.00 },
+  { codigo: "584", nombre: "HEMOGLOBINA + HEMATOCRITO", unidad: "", refMin: "", refMax: "", referencia: "Hb: 12-18 g/dL, Hcto: 37-52%", precio: 20.00 },
+  { codigo: "583", nombre: "HEMOGLOBINA - HEMATOCRITO (POCT CAPILAR)", unidad: "", refMin: "", refMax: "", referencia: "Hb: 12-18 g/dL, Hcto: 37-52%", precio: 41.00 },
+  { codigo: "585", nombre: "HEMOGLOBINA A2 - CUANTITATIVA", unidad: "%", refMin: 1.5, refMax: 3.5, referencia: "1.5 - 3.5 %", precio: 298.00 },
+  { codigo: "586", nombre: "HEMOGLOBINA FETAL CUANTITATIVA", unidad: "%", refMin: 0, refMax: 2.0, referencia: "< 2.0 %", precio: 391.00 },
+  { codigo: "587", nombre: "HEMOGLOBINA GLICOSILADA", unidad: "%", refMin: 4.0, refMax: 5.7, referencia: "Normal: 4.0 - 5.7 %, Diabetes: ≥ 6.5 %", precio: 50.00 },
+  { codigo: "588", nombre: "HEMOGLOBINA GLICOSILADA HbA1c", unidad: "%", refMin: 4.0, refMax: 5.7, referencia: "Normal: 4.0 - 5.7 %, Diabetes: ≥ 6.5 %", precio: 60.00 },
+  { codigo: "589", nombre: "HEMOGLOBINA S DOSAJE", unidad: "%", refMin: 0, refMax: 0, referencia: "0 % (AUSENCIA DE HbS)", precio: 731.00 },
+  { codigo: "590", nombre: "HEMOGLOBINA-HEMATOCRITO", unidad: "", refMin: "", refMax: "", referencia: "Hb: 12-18 g/dL, Hcto: 37-52%", precio: 15.00 },
+  { codigo: "591", nombre: "HEMOGLOBINOPATIAS ESTUDIO COMPLETO", unidad: "", refMin: "", refMax: "", referencia: "PATRÓN ELECTROFORÉTICO NORMAL (HbA1 > 95%)", precio: 680.00 },
+  { codigo: "592", nombre: "HEMOGLOBINURIA PAROXISTICA NOCTURNA (HPN)", unidad: "", refMin: "", refMax: "", referencia: "EXPRESIÓN NORMAL DE CD55 Y CD59", precio: 1044.00 },
+  { codigo: "593", nombre: "HEMOGRAMA COMPLETO AUTOMATIZADO", unidad: "", refMin: "", refMax: "", referencia: "Leucocitos: 6000-10000/µL, Hematíes: 4.8-5.5x10¹²/L, Plaquetas: 150-350k/µL", precio: 25.00 },
+  { codigo: "595", nombre: "HEMOSIDERINA EN ORINA SIMPLE", unidad: "", refMin: "", refMax: "", referencia: "NEGATIVO", precio: 76.00 },
+  { codigo: "596", nombre: "HEPATITIS A ANTICUERPOS IGM", unidad: "", refMin: "", refMax: "", referencia: "NO REACTIVO", precio: 50.00 },
+  { codigo: "597", nombre: "HEPATITIS A ANTICUERPOS TOTALES", unidad: "", refMin: "", refMax: "", referencia: "NO REACTIVO", precio: 70.00 },
+  { codigo: "598", nombre: "HEPATITIS A, AC. TOTALES", unidad: "", refMin: "", refMax: "", referencia: "NO REACTIVO", precio: 84.00 },
+  { codigo: "599", nombre: "HEPATITIS A, ANTICUERPO IGG", unidad: "", refMin: "", refMax: "", referencia: "NO REACTIVO", precio: 70.00 },
+  { codigo: "600", nombre: "HEPATITIS A, ANTICUERPO IGM", unidad: "", refMin: "", refMax: "", referencia: "NO REACTIVO", precio: 70.00 },
+  { codigo: "601", nombre: "HEPATITIS B CORE ANTICUERPOS IGM", unidad: "", refMin: "", refMax: "", referencia: "NO REACTIVO", precio: 40.00 },
+  { codigo: "602", nombre: "HEPATITIS B CORE ANTICUERPOS TOTALES", unidad: "", refMin: "", refMax: "", referencia: "NO REACTIVO", precio: 60.00 },
+  { codigo: "603", nombre: "HEPATITIS B DNA (CARGA VIRAL)", unidad: "IU/mL", refMin: 0, refMax: 20, referencia: "< 20 IU/mL (Incalculable / No detectado)", precio: 950.00 },
+  { codigo: "604", nombre: "HEPATITIS B VIRUS X PCR (CUALITATIVO)", unidad: "", refMin: "", refMax: "", referencia: "NO DETECTADO", precio: 1145.00 },
+  { codigo: "605", nombre: "HEPATITIS B, ANTI HBEAG ANTICUERPO E", unidad: "", refMin: "", refMax: "", referencia: "NO REACTIVO", precio: 80.00 },
+  { codigo: "606", nombre: "HEPATITIS B, ANTI-HBCAG CORE TOTAL", unidad: "", refMin: "", refMax: "", referencia: "NO REACTIVO", precio: 60.00 },
+  { codigo: "607", nombre: "HEPATITIS B, ANTI-HBCAG IGM (CORE IGM)", unidad: "", refMin: "", refMax: "", referencia: "NO REACTIVO", precio: 60.00 },
+  { codigo: "608", nombre: "HEPATITIS B, ANTI-HBSAG ANTICUERPO HBS (POST- VACUNA)", unidad: "mIU/mL", refMin: 10, refMax: 1000, referencia: "Protegido: ≥ 10 mIU/mL", precio: 40.00 },
+  { codigo: "609", nombre: "HEPATITIS B, DNA POLIMERASA (CUALITATIVO)", unidad: "", refMin: "", refMax: "", referencia: "NO DETECTADO", precio: 718.00 },
+  { codigo: "610", nombre: "HEPATITIS B, GENOTIPO (RESISTENCIA A DROGAS)", unidad: "", refMin: "", refMax: "", referencia: "INFORME DE SECUENCIACIÓN", precio: 2870.00 },
+  { codigo: "611", nombre: "HEPATITIS B, HBEAG ANTIGENO E", unidad: "", refMin: "", refMax: "", referencia: "NO REACTIVO", precio: 55.00 },
+  { codigo: "612", nombre: "HEPATITIS B, HBSAG (AG AUSTR)", unidad: "", refMin: "", refMax: "", referencia: "NO REACTIVO", precio: 50.00 },
+  { codigo: "614", nombre: "HEPATITIS C , (CARGA VIRAL)", unidad: "IU/mL", refMin: 0, refMax: 15, referencia: "< 15 IU/mL (No detectado)", precio: 1050.00 },
+  { codigo: "615", nombre: "HEPATITIS C ANTIC. X RIBA 3 (CONFIRMATORIO)", unidad: "", refMin: "", refMax: "", referencia: "NO REACTIVO", precio: 1102.00 },
+  { codigo: "616", nombre: "HEPATITIS C GENOTIPIFICACION, ESTUDIO X PCR", unidad: "", refMin: "", refMax: "", referencia: "INFORME DE GENOTIPO (1a, 1b, 2, 3, etc)", precio: 2161.00 },
+  { codigo: "617", nombre: "HEPATITIS C X PCR (CUALITATIVO)", unidad: "", refMin: "", refMax: "", referencia: "NO DETECTADO", precio: 1454.00 },
+  { codigo: "618", nombre: "HEPATITIS C, ANTI HCV AC TOTALES", unidad: "", refMin: "", refMax: "", referencia: "NO REACTIVO", precio: 80.00 },
+  { codigo: "620", nombre: "HEPATITIS D, ANTI HDV ANTICUERPO IGG", unidad: "", refMin: "", refMax: "", referencia: "NO REACTIVO", precio: 578.00 },
+  { codigo: "621", nombre: "HEPATITIS D, ANTI HDV ANTICUERPO IGM", unidad: "", refMin: "", refMax: "", referencia: "NO REACTIVO", precio: 578.00 },
+  { codigo: "622", nombre: "HEPATITIS DELTA (D) ANTIGENO", unidad: "", refMin: "", refMax: "", referencia: "NO REACTIVO", precio: 438.00 },
+  { codigo: "623", nombre: "HEPATITIS E, ANTI HEV ANTICUERPO IGG", unidad: "", refMin: "", refMax: "", referencia: "NO REACTIVO", precio: 224.00 },
+  { codigo: "624", nombre: "HEPATITIS E, ANTI HEV ANTICUERPO IGM", unidad: "", refMin: "", refMax: "", referencia: "NO REACTIVO", precio: 248.00 },
+  { codigo: "625", nombre: "HEPATITIS G VIRUS ARN X PCR", unidad: "", refMin: "", refMax: "", referencia: "NO DETECTADO", precio: 1943.00 },
+  { codigo: "626", nombre: "HERPES I ANTICUERPOS IGG", unidad: "Index", refMin: 0, refMax: 0.9, referencia: "Negativo: < 0.9", precio: 60.00 },
+  { codigo: "627", nombre: "HERPES I ANTICUERPOS IGM", unidad: "Index", refMin: 0, refMax: 0.9, referencia: "Negativo: < 0.9", precio: 70.00 },
+  { codigo: "630", nombre: "HERPES II ANTICUERPOS IGG", unidad: "Index", refMin: 0, refMax: 0.9, referencia: "Negativo: < 0.9", precio: 60.00 },
+  { codigo: "631", nombre: "HERPES II ANTICUERPOS IGM", unidad: "Index", refMin: 0, refMax: 0.9, referencia: "Negativo: < 0.9", precio: 70.00 },
+  { codigo: "634", nombre: "HERPES SIMPLE I ANTICUERPOS IgG, LCR", unidad: "", refMin: "", refMax: "", referencia: "NEGATIVO", precio: 120.00 },
+  { codigo: "635", nombre: "HERPES SIMPLE I ANTICUERPOS IgM, LCR", unidad: "", refMin: "", refMax: "", referencia: "NEGATIVO", precio: 120.00 },
+  { codigo: "636", nombre: "HERPES SIMPLE II ANTICUERPOS IgG, LCR", unidad: "", refMin: "", refMax: "", referencia: "NEGATIVO", precio: 120.00 },
+  { codigo: "637", nombre: "HERPES SIMPLE II ANTICUERPOS IgM, LCR", unidad: "", refMin: "", refMax: "", referencia: "NEGATIVO", precio: 120.00 },
+  { codigo: "638", nombre: "HERPES SIMPLEX VIRUS I Y II X PCR", unidad: "", refMin: "", refMax: "", referencia: "NO DETECTADO", precio: 876.00 },
+  { codigo: "639", nombre: "HERPES SIMPLEX VIRUS I Y II X PCR EN LCR", unidad: "", refMin: "", refMax: "", referencia: "NO DETECTADO", precio: 985.00 },
+  { codigo: "640", nombre: "HERPES VIRUS HUMANO 6 (HHV-6) ANTICUERPOS IGG", unidad: "", refMin: "", refMax: "", referencia: "Negativo: < 1:10", precio: 931.00 },
+  { codigo: "641", nombre: "HERPES VIRUS HUMANO TIPO 6 (HVH-6) ANTICUERPOS IgG", unidad: "", refMin: "", refMax: "", referencia: "Negativo: < 1:10", precio: 280.00 },
+  { codigo: "642", nombre: "HERPES VIRUS HUMANO TIPO 6 (HVH-6) ANTICUERPOS IgG/IgM", unidad: "", refMin: "", refMax: "", referencia: "NEGATIVO", precio: 500.00 },
+  { codigo: "643", nombre: "HERPES VIRUS HUMANO TIPO 6 (HVH-6) ANTICUERPOS IgM", unidad: "", refMin: "", refMax: "", referencia: "NEGATIVO", precio: 130.00 },
+  { codigo: "645", nombre: "HIDATIDOSIS IGG EQUINOCOSIS - ELISA (IM)", unidad: "U/mL", refMin: 0, refMax: 10, referencia: "Negativo: < 10 U/mL", precio: 70.00 },
+  { codigo: "646", nombre: "HIDATIDOSIS WESTERN BLOT", unidad: "", refMin: "", refMax: "", referencia: "NEGATIVO", precio: 240.00 },
+  { codigo: "647", nombre: "HIDATIDOSIS, EQUINOCOCOSIS - WESTERN BLOT (IM)", unidad: "", refMin: "", refMax: "", referencia: "NEGATIVO", precio: 190.00 },
+  { codigo: "648", nombre: "HIDROXIPROLINA EN PLASMA", unidad: "µg/mL", refMin: 0.8, refMax: 5.0, referencia: "0.8 - 5.0 µg/mL", precio: 330.00 },
+  { codigo: "649", nombre: "HIERRO SERICO", unidad: "µg/dL", refMin: 37, refMax: 158, referencia: "59-158 µg/dL (Varón), 37-145 µg/dL (Mujer)", precio: 35.00 },
+  { codigo: "651", nombre: "HISTONA AUTOANTICUERPOS", unidad: "U/mL", refMin: 0, refMax: 20, referencia: "Negativo: < 20 U/mL", precio: 162.00 },
+  { codigo: "652", nombre: "HISTOPLASMA ANTICUERPOS TOTALES", unidad: "", refMin: "", refMax: "", referencia: "NO REACTIVO", precio: 176.00 },
+  { codigo: "653", nombre: "HISTOPLASMA ANTIGENO ORINA", unidad: "ng/mL", refMin: 0, refMax: 0.5, referencia: "Negativo: < 0.5 ng/mL", precio: 792.00 },
+  { codigo: "654", nombre: "HIV ( TEST ELISA )", unidad: "", refMin: "", refMax: "", referencia: "NO REACTIVO", precio: 40.00 },
+  { codigo: "655", nombre: "HIV 1 Y 2 ANTIC.(WESTERN BLOT) (IM) - VIH", unidad: "", refMin: "", refMax: "", referencia: "NEGATIVO", precio: 320.00 },
+  { codigo: "656", nombre: "HIV 1-2 (AC-AG 3°/4° GENERACION) - VIH", unidad: "S/CO", refMin: 0, refMax: 0.9, referencia: "NO REACTIVO (< 0.9 S/CO)", precio: 40.00 },
+  { codigo: "657", nombre: "HIV P24 (ANTIGENO) - VIH", unidad: "pg/mL", refMin: 0, refMax: 2.0, referencia: "NO REACTIVO (< 2.0 pg/mL)", precio: 284.00 },
+  { codigo: "658", nombre: "HIV-1 CARGA VIRAL ARN X PCR - VIH", unidad: "copias/mL", refMin: 0, refMax: 20, referencia: "< 20 copias/mL (No detectado)", precio: 1025.00 },
+  { codigo: "659", nombre: "HLA (ENFERMEDAD CELIACA)", unidad: "", refMin: "", refMax: "", referencia: "DQ2 / DQ8 NEGATIVO", precio: 1885.00 },
+  { codigo: "660", nombre: "HLA B-27", unidad: "", refMin: "", refMax: "", referencia: "NEGATIVO", precio: 409.00 },
+  { codigo: "661", nombre: "HOMOCISTEINA", unidad: "µmol/L", refMin: 5, refMax: 15, referencia: "< 15 µmol/L", precio: 313.00 },
+  { codigo: "662", nombre: "HORMONA ADENOCORTICOTROPA ACTH", unidad: "pg/mL", refMin: 7.2, refMax: 63.3, referencia: "7.2 - 63.3 pg/mL", precio: 75.00 },
+  { codigo: "663", nombre: "HORMONA ANTI MULLERIANA (AMH / MIS), SUERO", unidad: "ng/mL", refMin: 1.0, refMax: 4.0, referencia: "1.0 - 4.0 ng/mL (según reserva ovárica)", precio: 250.00 },
+  { codigo: "665", nombre: "HORMONA ANTIDIURETICA (ADH-VASOPRESINA)", unidad: "pg/mL", refMin: 1.0, refMax: 5.0, referencia: "1.0 - 5.0 pg/mL", precio: 402.00 },
+  { codigo: "666", nombre: "HORMONA DE CREC. TOLERANCIA (B. 60, 120)", unidad: "ng/mL", refMin: 0, refMax: 10, referencia: "Pico de estimulación > 10 ng/mL", precio: 144.00 },
+  { codigo: "667", nombre: "HORMONA DE CRECIMIENTO HUMANO BASAL (HGH)", unidad: "ng/mL", refMin: 0.05, refMax: 3.0, referencia: "< 3.0 ng/mL", precio: 50.00 },
+  { codigo: "668", nombre: "HORMONA DEL CRECIMIENTO (POST CLONID) 120'", unidad: "ng/mL", refMin: 5, refMax: 20, referencia: "Respuesta normal: > 7-10 ng/mL", precio: 61.00 },
+  { codigo: "669", nombre: "HORMONA DEL CRECIMIENTO (POST CLONID) 30'", unidad: "ng/mL", refMin: 5, refMax: 20, referencia: "Respuesta normal: > 7-10 ng/mL", precio: 61.00 },
+  { codigo: "70", nombre: "HORMONA DEL CRECIMIENTO (POST CLONID) 60'", unidad: "ng/mL", refMin: 5, refMax: 20, referencia: "Respuesta normal: > 7-10 ng/mL", precio: 174.00 },
+  { codigo: "671", nombre: "HORMONA DEL CRECIMIENTO (POST CLONID) 90'", unidad: "ng/mL", refMin: 5, refMax: 20, referencia: "Respuesta normal: > 7-10 ng/mL", precio: 61.00 },
+  { codigo: "672", nombre: "HORMONA DEL CRECIMIENTO (POST EJER) 30'", unidad: "ng/mL", refMin: 5, refMax: 20, referencia: "Respuesta normal: > 7-10 ng/mL", precio: 61.00 },
+  { codigo: "673", nombre: "HORMONA DEL CRECIMIENTO POST ESTIMULO", unidad: "ng/mL", refMin: 7, refMax: 20, referencia: "Pico > 7 ng/mL", precio: 61.00 },
+  { codigo: "674", nombre: "HTLV 1 Y 2 (WESTERN BLOT)", unidad: "", refMin: "", refMax: "", referencia: "NEGATIVO", precio: 470.00 },
+  { codigo: "675", nombre: "HTLV I - II ANTICUERPOS", unidad: "", refMin: "", refMax: "", referencia: "NO REACTIVO", precio: 70.00 },
+  { codigo: "676", nombre: "IFI VIRAL EN HISOPADO NASAL-FARINGEO", unidad: "", refMin: "", refMax: "", referencia: "NEGATIVO PARA VIRUS RESPIRATORIOS", precio: 530.00 },
+  { codigo: "677", nombre: "IGF BP-3 (BINDING PROTEIN)", unidad: "µg/mL", refMin: 2.0, refMax: 6.0, referencia: "Según edad y sexo", precio: 127.00 },
+  { codigo: "678", nombre: "INDICE ALBUMINA/CREATININA EN ORINA (IPC)", unidad: "mg/g", refMin: 0, refMax: 30, referencia: "Normal: < 30 mg/g", precio: 50.00 },
+  { codigo: "679", nombre: "INDICE DE T4 LIBRE", unidad: "Index", refMin: 1.2, refMax: 4.8, referencia: "1.2 - 4.8", precio: 109.00 },
+  { codigo: "680", nombre: "INDICE PROTEINA / CREATININA (IPC) EN ORINA SIMPLE", unidad: "mg/g", refMin: 0, refMax: 200, referencia: "< 200 mg/g Creatinina", precio: 40.00 },
+  { codigo: "681", nombre: "INFLUENZA", unidad: "", refMin: "", refMax: "", referencia: "NEGATIVO", precio: 90.00 },
+  { codigo: "682", nombre: "INFLUENZA POR PCR EN SECRECION RHINOFARINGEA", unidad: "", refMin: "", refMax: "", referencia: "NO DETECTADO", precio: 830.00 },
+  { codigo: "3", nombre: "INFLUENZA TIPO A - CUALITATIVA (PRUEBA RÁPIDA)", unidad: "", refMin: "", refMax: "", referencia: "NEGATIVO", precio: 70.00 },
+  { codigo: "683", nombre: "INFLUENZA TIPO A, ANTICUERPOS IGM", unidad: "", refMin: "", refMax: "", referencia: "NEGATIVO", precio: 226.00 },
+  { codigo: "4", nombre: "INFLUENZA TIPO B - CUALITATIVA (PRUEBA RÁPIDA)", unidad: "", refMin: "", refMax: "", referencia: "NEGATIVO", precio: 70.00 },
+  { codigo: "684", nombre: "INFLUENZA TIPO B, ANTICUERPOS IGM", unidad: "", refMin: "", refMax: "", referencia: "NEGATIVO", precio: 226.00 },
+  { codigo: "685", nombre: "INHIBIDOR ACTIVADOR DEL PLASMINOGENO (PAI-1)", unidad: "ng/mL", refMin: 4, refMax: 43, referencia: "4 - 43 ng/mL", precio: 997.00 },
+  { codigo: "686", nombre: "INHIBINA A", unidad: "pg/mL", refMin: 0, refMax: 2.0, referencia: "Según estado menstrual/embarazo", precio: 248.00 },
+  { codigo: "687", nombre: "INHIBINA B", unidad: "pg/mL", refMin: 25, refMax: 325, referencia: "Según sexo y edad", precio: 549.00 },
+  { codigo: "688", nombre: "INMUNOFIJACION \"SUERO\"", unidad: "", refMin: "", refMax: "", referencia: "NO SE OBSERVA BANDA MONOCLONAL", precio: 200.00 },
+  { codigo: "689", nombre: "INMUNOFIJACION (ORINA 24 HORAS)", unidad: "", refMin: "", refMax: "", referencia: "NO SE OBSERVA CADENA LIGERA MONOCLONAL", precio: 323.00 },
+  { codigo: "690", nombre: "INMUNOFIJACION EN ORINA", unidad: "", refMin: "", refMax: "", referencia: "NO SE OBSERVA BANDA MONOCLONAL", precio: 180.00 },
+  { codigo: "691", nombre: "INMUNOFIJACION EN SUERO", unidad: "", refMin: "", refMax: "", referencia: "NO SE OBSERVA BANDA MONOCLONAL", precio: 180.00 },
+  { codigo: "693", nombre: "INMUNOGLOBULINA A (LCR)", unidad: "mg/dL", refMin: 0, refMax: 0.6, referencia: "< 0.6 mg/dL", precio: 205.00 },
+  { codigo: "692", nombre: "INMUNOGLOBULINA A - IGA", unidad: "mg/dL", refMin: 90, refMax: 400, referencia: "90 - 400 mg/dL", precio: 45.00 },
+  { codigo: "694", nombre: "INMUNOGLOBULINA A,G Y M (HN)", unidad: "mg/dL", refMin: 60, refMax: 1800, referencia: "IgA: 90-400, IgG: 800-1800, IgM: 60-250", precio: 140.00 },
+  { codigo: "695", nombre: "INMUNOGLOBULINA D, DOSAJE", unidad: "mg/dL", refMin: 0.3, refMax: 4.0, referencia: "0.3 - 4.0 mg/dL", precio: 438.00 },
+  { codigo: "696", nombre: "INMUNOGLOBULINA E", unidad: "IU/mL", refMin: 0, refMax: 100, referencia: "< 100 IU/mL", precio: 50.00 },
+  { codigo: "699", nombre: "INMUNOGLOBULINA G (LCR)", unidad: "mg/dL", refMin: 0.8, refMax: 4.0, referencia: "0.8 - 4.0 mg/dL", precio: 70.00 },
+  { codigo: "698", nombre: "INMUNOGLOBULINA G - IGG", unidad: "mg/dL", refMin: 800, refMax: 1800, referencia: "800 - 1800 mg/dL", precio: 45.00 },
+  { codigo: "700", nombre: "INMUNOGLOBULINA G, SUBCLASES IGG1,IGG2, IGG3, IGG4", unidad: "mg/dL", refMin: 382, refMax: 929, referencia: "IgG1: 382-929, IgG2: 241-700, IgG3: 22-178, IgG4: 4-86", precio: 389.00 },
+  { codigo: "701", nombre: "INMUNOGLOBULINA IgG", unidad: "mg/dL", refMin: 800, refMax: 1800, referencia: "800 - 1800 mg/dL", precio: 70.00 },
+  { codigo: "703", nombre: "INMUNOGLOBULINA M (LCR)", unidad: "mg/dL", refMin: 0, refMax: 0.2, referencia: "< 0.2 mg/dL", precio: 210.00 },
+  { codigo: "702", nombre: "INMUNOGLOBULINA M - IGM", unidad: "mg/dL", refMin: 60, refMax: 250, referencia: "60 - 250 mg/dL", precio: 45.00 },
+  { codigo: "704", nombre: "INMUNOGLOBULINAS IGG, IGA, IGM (LCR)", unidad: "mg/dL", refMin: 0, refMax: 4.0, referencia: "IgG: 0.8-4.0, IgA: <0.6, IgM: <0.2", precio: 346.00 },
+  { codigo: "705", nombre: "INMUNOHISTOQUÍMICA - 4", unidad: "", refMin: "", refMax: "", referencia: "INFORME DE MARCADORES (4 ANTICUERPOS)", precio: 1300.00 },
+  { codigo: "706", nombre: "INSULINA 120'", unidad: "µIU/mL", refMin: 15, refMax: 60, referencia: "< 60 µIU/mL", precio: 47.00 },
+  { codigo: "707", nombre: "INSULINA 120' (GLUCOSA ANHIDRA)", unidad: "µIU/mL", refMin: 15, refMax: 60, referencia: "< 60 µIU/mL", precio: 57.00 },
+  { codigo: "708", nombre: "INSULINA 120' POST PRANDIAL (C/DESAYUNO)", unidad: "µIU/mL", refMin: 15, refMax: 60, referencia: "< 60 µIU/mL", precio: 42.00 },
+  { codigo: "709", nombre: "INSULINA 180'", unidad: "µIU/mL", refMin: 2.6, refMax: 24.9, referencia: "Retorno a niveles basales", precio: 47.00 },
+  { codigo: "710", nombre: "INSULINA 30'", unidad: "µIU/mL", refMin: 30, refMax: 100, referencia: "Pico postestímulo", precio: 47.00 },
+  { codigo: "711", nombre: "INSULINA 60'", unidad: "µIU/mL", refMin: 30, refMax: 90, referencia: "Respuesta postestímulo", precio: 47.00 },
+  { codigo: "712", nombre: "INSULINA 90'", unidad: "µIU/mL", refMin: 20, refMax: 70, referencia: "Curva descendente", precio: 47.00 },
+  { codigo: "713", nombre: "INSULINA ANTICUERPOS", unidad: "%", refMin: 0, refMax: 8.2, referencia: "< 8.2 %", precio: 323.00 },
+  { codigo: "714", nombre: "INSULINA BASAL", unidad: "µIU/mL", refMin: 2.6, refMax: 24.9, referencia: "2.6 - 24.9 µIU/mL", precio: 50.00 },
+  { codigo: "716", nombre: "INSULINA POST PRANDIAL ( 120 MINUTOS)", unidad: "µIU/mL", refMin: 15, refMax: 60, referencia: "< 60 µIU/mL", precio: 60.00 },
+  { codigo: "717", nombre: "INTERLEUKIN-6 (IL-6)", unidad: "pg/mL", refMin: 0, refMax: 7.0, referencia: "< 7.0 pg/mL", precio: 253.00 },
+  { codigo: "718", nombre: "INYECTABLES", unidad: "", refMin: "", refMax: "", referencia: "PROCEDIMIENTO ENFERMERÍA", precio: 15.00 },
+  { codigo: "719", nombre: "ISOSPORA BELLI (HECES)", unidad: "", refMin: "", refMax: "", referencia: "NO SE OBSERVAN OOCISTES", precio: 64.00 },
+  { codigo: "720", nombre: "JC VIRUS- ADN, PCR", unidad: "copias/mL", refMin: 0, refMax: 500, referencia: "< 500 copias/mL", precio: 1910.00 },
+  { codigo: "721", nombre: "KIT ADICIONAL TEST DE ALIENTO C13", unidad: "", refMin: "", refMax: "", referencia: "CONSUMIBLE PRUEBA", precio: 199.00 },
+  { codigo: "722", nombre: "L.H. (H. LUTEINIZANTE LH)", unidad: "mIU/mL", refMin: 1.7, refMax: 8.6, referencia: "Según fase menstrual / Varones: 1.7-8.6 mIU/mL", precio: 40.00 },
+  { codigo: "723", nombre: "LACTOGENO PLACENTARIO HUMANO", unidad: "µg/mL", refMin: 0.5, refMax: 11.0, referencia: "Según semanas de gestación", precio: 335.00 },
+  { codigo: "724", nombre: "LAMINA PERIFERICA", unidad: "", refMin: "", refMax: "", referencia: "Morfología eritrocitaria, leucocitaria y plaquetaria normal", precio: 40.00 },
+  { codigo: "726", nombre: "LAMOTRIGINE", unidad: "µg/mL", refMin: 2.5, refMax: 15.0, referencia: "2.5 - 15.0 µg/mL", precio: 300.00 },
+  { codigo: "727", nombre: "LAMOTRIGINE (LAMICTAL)", unidad: "µg/mL", refMin: 2.5, refMax: 15.0, referencia: "2.5 - 15.0 µg/mL", precio: 438.00 },
+  { codigo: "728", nombre: "LDL OXIDADO ANTICUERPOS, LIPOPROTEINA BAJA DENSIDAD OXIDADA", unidad: "U/L", refMin: 0, refMax: 50, referencia: "< 50 U/L", precio: 353.00 },
+  { codigo: "729", nombre: "LEGIONELLA PNEUMOPHILA IGM", unidad: "", refMin: "", refMax: "", referencia: "NEGATIVO", precio: 204.00 },
+{ codigo: "730", nombre: "LEGIONELLA SP, ANTIGENO EN ORINA", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 385.00 },
+{ codigo: "731", nombre: "LEISHMANIA , ANTICUERPOS IGG", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 349.00 },
+{ codigo: "732", nombre: "LEPTINA", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 236.00 },
+{ codigo: "733", nombre: "LEPTOSPIRA ANTICUERPOS IGG", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 213.00 },
+{ codigo: "734", nombre: "LEPTOSPIRA ANTICUERPOS IGM", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 213.00 },
+{ codigo: "735", nombre: "LEUCOCITOS EN HECES REACCION INFLAMATORIA (PMN)", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 25.00 },
+{ codigo: "737", nombre: "LEVETIRACETAM (KEPPRA) - SUERO", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 705.00 },
+{ codigo: "738", nombre: "LEVETIRACETAM (KEPPRA), SUERO", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 390.00 },
+{ codigo: "739", nombre: "LH HORMONA LUTEINIZANTE", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 60.00 },
+{ codigo: "740", nombre: "LINFOCITOS ESTUDIO COMPLETO", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 1650.00 },
+{ codigo: "741", nombre: "LINFOCITOS T CD3 (CD4+ Y CD8+)", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 420.00 },
+{ codigo: "742", nombre: "LINFOCITOS T-B", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 335.00 },
+{ codigo: "743", nombre: "LIPASA SERICA", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 30.00 },
+{ codigo: "744", nombre: "LIPASA SERICA (HN)", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 20.00 },
+{ codigo: "745", nombre: "LIPIDOGRAMA", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 105.00 },
+{ codigo: "746", nombre: "LIPIDOS TOTALES", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 30.00 },
+{ codigo: "747", nombre: "LIPOPROTEINA A (LP-A)", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 118.00 },
+{ codigo: "748", nombre: "LIQUIDO ASCITICO CITOQUIMICO", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 54.00 },
+{ codigo: "749", nombre: "LIQUIDO CEFALORAQUIDEO CITOQUIMICO ( LCR )", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 60.00 },
+{ codigo: "750", nombre: "LIQUIDO PERITONEAL CITOQUIMICO", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 54.00 },
+{ codigo: "751", nombre: "LIQUIDO PLEURAL CITOQUIMICO", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 70.00 },
+{ codigo: "752", nombre: "LIQUIDO SINOVIAL (CRISTALES)", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 71.00 },
+{ codigo: "753", nombre: "LIQUIDO SINOVIAL CITOQUIMICO", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 60.00 },
+{ codigo: "754", nombre: "LISTERIA MONOCYTOGENES, AC TOTALES", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 169.00 },
+{ codigo: "755", nombre: "LITIO", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 55.00 },
+{ codigo: "756", nombre: "LITIO, TASA DE TRANSPORTE", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 272.00 },
+{ codigo: "757", nombre: "LORAZEPAM - SUERO", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 568.00 },
+{ codigo: "758", nombre: "LYME ENFERMEDAD IGG (BORRELIA BURGDORFERI)", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 157.00 },
+{ codigo: "759", nombre: "LYME ENFERMEDAD IGM (BORRELIA BURGDORFERI)", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 584.00 },
+{ codigo: "760", nombre: "M. TUBERCULOSIS, MDR (RIF/ISO)", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 1578.00 },
+{ codigo: "762", nombre: "MAGNESIO (ORINA 24H) (HN)", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 30.00 },
+{ codigo: "763", nombre: "MAGNESIO EN ORINA SIMPLE (HN)", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 30.00 },
+{ codigo: "764", nombre: "MAGNESIO SERICO (HN)", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 30.00 },
+{ codigo: "765", nombre: "MALARIA ANTICUERPOS IGG", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 427.00 },
+{ codigo: "766", nombre: "MALARIA ANTICUERPOS IGM", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 426.00 },
+{ codigo: "767", nombre: "MALARIA, ADN X PCR EN SANGRE", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 2325.00 },
+{ codigo: "768", nombre: "MANGANESO EN SANGRE", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 191.00 },
+{ codigo: "773", nombre: "MARIHUANA -THC (ORINA SIMPLE) CUALITATIVO", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 50.00 },
+{ codigo: "769", nombre: "MARIHUANA THC (ORINA SIMPLE) - AUTOMATIZADO (HN)", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 50.00 },
+{ codigo: "770", nombre: "MARIHUANA THC (ORINA SIMPLE) - CCF CONFIRMATORIO CUALITOXICOLOGICO", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 281.00 },
+{ codigo: "771", nombre: "MARIHUANA THC (ORINA SIMPLE) - CUALITATIVO", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 30.00 },
+{ codigo: "772", nombre: "MARIHUANA THC (ORINA SIMPLE) - HPLC CONFIRMATORIO SIN CROMATOGRAMA", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 1055.00 },
+{ codigo: "774", nombre: "MERCURIO DOSAJE", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 176.00 },
+{ codigo: "775", nombre: "MERCURIO EN ORINA 24 HRS", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 176.00 },
+{ codigo: "776", nombre: "MERCURIO EN ORINA SIMPLE", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 176.00 },
+{ codigo: "777", nombre: "METAHEMOGLOBINA \"METHB\" (HN)", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 144.00 },
+{ codigo: "778", nombre: "METANEFRINA (ORINA 24 HORAS)", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 324.00 },
+{ codigo: "779", nombre: "METANEFRINAS FRACCIONADAS PLASMATICAS", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 851.00 },
+{ codigo: "780", nombre: "METHANFENTAMINAS CUANTITATIVO EN ORINA", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 250.00 },
+{ codigo: "781", nombre: "MI-2 AUTOANTICUERPOS", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 372.00 },
+{ codigo: "782", nombre: "MICOFENOLICO, ACIDO (MICOFENOLATO)", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 1107.00 },
+{ codigo: "784", nombre: "MICROALBUMINURIA (ORINA 24 HORAS)", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 55.00 },
+{ codigo: "785", nombre: "MICROALBUMINURIA (ORINA SIMPLE) ALB/CREA", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 50.00 },
+{ codigo: "783", nombre: "MICROALBUMINURIA - ORINA SIMPLE", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 70.00 },
+{ codigo: "786", nombre: "MICROALBUMINURIA 24 HORAS", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 50.00 },
+{ codigo: "787", nombre: "MIELINA PROTEINA BASICA LCR", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 1369.00 },
+{ codigo: "788", nombre: "MIELOCULTIVO-INCL.EXA.DIR.Y ANTIB (HN)", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 62.00 },
+{ codigo: "789", nombre: "MIOCARDIO, AUTOANTICUERPOS", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 228.00 },
+{ codigo: "790", nombre: "MIOGLOBINA (HN)", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 109.00 },
+{ codigo: "791", nombre: "MOLIBDENO EN ORINA SIMPLE", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 209.00 },
+{ codigo: "792", nombre: "MOLIBDENO SERICO", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 354.00 },
+{ codigo: "793", nombre: "MONOTEST- IM (ANTICUERPOS HETEROFILOS-PAUL BUNNELL)", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 35.00 },
+{ codigo: "794", nombre: "MTHFR MUTACION C677T Y A1298C", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 850.00 },
+{ codigo: "795", nombre: "MYCOBACTERIUM ATIPICO X PCR EN TIEMPO REAL", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 2042.00 },
+{ codigo: "796", nombre: "MYCOBACTERIUM TUBERCULOSIS POR PCR", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 1156.00 },
+{ codigo: "797", nombre: "MYCOBACTERIUM TUBERCULOSIS POR PCR (RESISTENCIA RIF + INH) \"CONOCIDO COMO GENEXPERT\"", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 1500.00 },
+{ codigo: "798", nombre: "MYCOBACTERIUM TUBERCULOSIS POR PCR (TEJIDOS Y BIOPSIAS)", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 1216.00 },
+{ codigo: "799", nombre: "MYCOPLASMA HOMINIS, ANTICUERPOS", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 250.00 },
+{ codigo: "800", nombre: "MYCOPLASMA PNEUMONIAE IGG", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 94.00 },
+{ codigo: "801", nombre: "MYCOPLASMA PNEUMONIAE IGM", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 94.00 },
+{ codigo: "802", nombre: "MYCOPLASMA PNEUMONIAE X PCR (ESPUTO/L.BRONQUIAL)", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 1920.00 },
+{ codigo: "803", nombre: "NEISSERIA GONORRHOEAE ANTIC. TOTALES", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 511.00 },
+{ codigo: "804", nombre: "NEISSERIA GONORRHOEAE, ANTICUERPOS", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 395.00 },
+{ codigo: "805", nombre: "NICOTINA (ORINA SIMPLE)", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 52.00 },
+{ codigo: "806", nombre: "NIQUEL ORINA SIMPLE", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 508.00 },
+{ codigo: "807", nombre: "NITROGENO UREICO (BUN)", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 20.00 },
+{ codigo: "808", nombre: "NITROGENO UREICO EN ORINA 24 HORAS", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 12.00 },
+{ codigo: "809", nombre: "NSE ENOLASA NEURONAL ESPECIFICA (ENE)", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 167.00 },
+{ codigo: "810", nombre: "NTX (N-TELOPEPTIDO EN ORINA)", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 180.00 },
+{ codigo: "811", nombre: "OPIACEOS CONFIRMACION, ORINA", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 285.00 },
+{ codigo: "812", nombre: "OPIACEOS EN ORINA", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 94.00 },
+{ codigo: "813", nombre: "OSMOLARIDAD ORINA 24 HORAS", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 112.00 },
+{ codigo: "814", nombre: "OSMOLARIDAD SERICO \"MOSM\" (HN)", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 89.00 },
+{ codigo: "815", nombre: "OSMOLARIDAD URINARIA", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 74.00 },
+{ codigo: "816", nombre: "OSTEOCALCINA", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 144.00 },
+{ codigo: "817", nombre: "OSTEOPONTINA", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 423.00 },
+{ codigo: "818", nombre: "OVARIOS, AUTOANTICUERPOS", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 730.00 },
+{ codigo: "820", nombre: "OXALATOS EN ORINA DE 24 HORAS", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 160.00 },
+{ codigo: "821", nombre: "OXCARBAMAZEPINA", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 456.00 },
+{ codigo: "822", nombre: "OXIUROS (TEST DE GRAHAM)", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 15.00 },
+{ codigo: "823", nombre: "OXOPLASMA GONDII ANTICUERPOS IgG, LCR", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 70.00 },
+{ codigo: "824", nombre: "PANEL MENINGITIS/ENCEFALITIS X FILMARRAY", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 5092.00 },
+{ codigo: "825", nombre: "PANEL RESPIRATORIO X FILMARRAY", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 3993.00 },
+{ codigo: "826", nombre: "PAPANICOLAOU", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 30.00 },
+{ codigo: "827", nombre: "PAPANICOLAOU EN BASE LIQUIDA", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 272.00 },
+{ codigo: "828", nombre: "PAPANICOLAOU OTROS PAP", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 40.00 },
+{ codigo: "829", nombre: "PAPERAS IGG (PARAMIXOVIRUS Ó MUMPS)", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 112.00 },
+{ codigo: "830", nombre: "PAPERAS IGM (PARAMIXOVIRUS)", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 107.00 },
+{ codigo: "831", nombre: "PAPILOMAVIRUS ANTICUERPO", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 250.00 },
+{ codigo: "832", nombre: "PAPILOMAVIRUS GENOTIPIFICACION - HOMBRE (28 GENOTIPOS)", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 524.00 },
+{ codigo: "833", nombre: "PAPILOMAVIRUS GENOTIPIFICACION - MUJER (28 GENOTIPOS)", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 524.00 },
+{ codigo: "834", nombre: "PAPILOMAVIRUS SCREENING 14 GENOTIPOS - HOMBRE", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 324.00 },
+{ codigo: "835", nombre: "PAPILOMAVIRUS SCREENING 14 GENOTIPOS - MUJER", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 324.00 },
+{ codigo: "836", nombre: "PAPP A - PROTEINA PLASMATICA PLACENTARIA (ASOCIADA AL EMBARAZO)", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 180.00 },
+{ codigo: "837", nombre: "PARACOCCIDIOIDES BRASILIENSIS, ANTICUERPOS", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 204.00 },
+{ codigo: "839", nombre: "PARASITOLOGICO ESPECIAL -3 METODOS", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 30.00 },
+{ codigo: "840", nombre: "PARASITOLOGICO SERIADO 3 MUESTRAS", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 30.00 },
+{ codigo: "842", nombre: "PARASITOLOGICO SIMPLE X 1 MUESTRA", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 10.00 },
+{ codigo: "844", nombre: "PARATOHORMONA INTACTA (PTH-INTACTA)", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 60.00 },
+{ codigo: "845", nombre: "PAROXETINA (SEROXAT)", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 891.00 },
+{ codigo: "846", nombre: "PARVOVIRUS B19, ADN POR PCR CUANTITATIVO", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 1438.00 },
+{ codigo: "847", nombre: "PARVOVIRUS B19, IGG ANTICUERPOS", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 217.00 },
+{ codigo: "848", nombre: "PARVOVIRUS B19, IGM ANTICUERPOS", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 217.00 },
+{ codigo: "849", nombre: "PCR PARA BORDETELLA PERTUSIS", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 1218.00 },
+{ codigo: "850", nombre: "PDF (PRODUCTO DE DEGRADACION DE FIBRINOGENO)", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 130.00 },
+{ codigo: "851", nombre: "PEPSINÓGENO II", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 237.00 },
+{ codigo: "852", nombre: "PEPTIDO C", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 65.00 },
+{ codigo: "853", nombre: "PEPTIDO C POSTPANDRIAL 120'", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 75.00 },
+{ codigo: "854", nombre: "PEPTIDO VASO ACTIVO INTESTINAL (VIP)", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 321.00 },
+{ codigo: "855", nombre: "PERFIL DE ANEMIA: HIERRO SERICO, FERRITINA, B12 VITAMINA, ACIDO FOLICO, HEMOGRAMA", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 189.00 },
+{ codigo: "857", nombre: "PERFIL DE COAGULACIÓN: COAGULACIÓN Y SANGRÍA, TIEMPO DE TROMBINA, TIEMPO DE TROMBOPLASTINA PARCIAL, TIEMPO DE PROTOMBINA, FIBRINOGENO, GRUPO Y FACTOR, RECUENTO DE PLAQUETAS", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 130.00 },
+{ codigo: "858", nombre: "PERFIL DE DROGAS DE ABUSO 5 (CUALITATIVO)", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 50.00 },
+{ codigo: "859", nombre: "PERFIL DE ESTUDIO GENETICO: ALFA FETOPROTEINAS(AFP), BETA HCG SUBUNIDAD CUANTITATIVO ESTRADIOL LIBRE(IM)", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 224.00 },
+{ codigo: "861", nombre: "PERFIL DE PRECLANCIA", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 80.00 },
+{ codigo: "862", nombre: "PERFIL DROGAS DE ABUSO: BENZODIAZEPINAS (ORINA), COCAINNPBC CUANTITATIVO(M), MARIHUANA-THC(ORINA SIMPLE) CUANTITATIVO", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 198.00 },
+{ codigo: "864", nombre: "PERFIL HEPATICO", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 85.00 },
+{ codigo: "865", nombre: "PERFIL HORMONAL FEMENINO I :ESTRADIOL, F.S.H., L.H", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 110.00 },
+{ codigo: "866", nombre: "PERFIL HORMONAL FEMENINO II : TIROXINA (T4), ESTRADIOL, TSH ULTRASENSIBLE, F.S.H., L.H.", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 168.00 },
+{ codigo: "869", nombre: "PERFIL LIPIDICO", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 50.00 },
+{ codigo: "870", nombre: "PERFIL PRE NATAL I - GESTANTE: HEMOGRAMA, GLUCOSA, UREA, CREATININA, EXAMEN DE ORINA COMPLETO(AUTOMATIZADO), GRUPO SANGUINEO Y RH, SEROLOGICAS CUALITATIVAS \"SIALIS\"", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 110.00 },
+{ codigo: "871", nombre: "PERFIL PRE NATAL II - GESTANTE: HEMOGRAMA, GLUCOSA , UREA, CREATININA, EXAMEN DE ORINA COMPLETO (AUTOMATIZADO), GRUPO SANGUINEO Y RH SEROLOGICAS CUALITATIVAS \"SIALIS\", HIV 1-2(AC-AG 30/40 GENERACIÓN) HEPATITIS B, HBsAg (Ag Austr)\"", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 238.00 },
+{ codigo: "872", nombre: "PERFIL PRE OPERATORIO QUIRURGICO: HIV 1-2(AC-AG 30/40 GENERACIÓN), HEPATITIS B, HBsA9 (Ag Austr) CREATININA, GLUCOSA, UREA , GRUPO SANGUINEO Y RH, SEROLOGICAS CUALITATIVAS \"SIFILIS\", COAGULACION Y SANGRIA, HEMOGRAMA COMPLETO, EXAMEN COMPLETO DE ORINA", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 205.00 },
+{ codigo: "1159", nombre: "PERFIL RENAL 2 ( CREATININA, UREA, HEMOGRAMA, EXAMEN DE ORINA, ACIDO URICO, PROTEINAS EN ORINA ASSA)", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 95.00 },
+{ codigo: "873", nombre: "PERFIL RENAL: CREATININA, DEPURACIÓN DE CREATININA ENDOGENA, UREA, HEMOGRAMA, ALBUMINA - 24 HORAS, EXAMEN COMPLETO DE ORINA", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 95.00 },
+{ codigo: "874", nombre: "PERFIL REUMATOLÓGICO: ACIDO URICO, FENOMENO LE , ANTICUERPOS ANTINUCLEARES (ANA)(IM), FACTOR REUMATOidEO (LATEX) SEMI-CUANTITATIVO, PROTEINA C REACTIVA, VELOCIDAD DE SEDIMENTACIÓN (VSG), HEMOGRAMA", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 165.00 },
+{ codigo: "875", nombre: "PERFIL ROMA (PROBABILIDAD DEL RIESGO DEL CANCER DE OVARIO)", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 531.00 },
+{ codigo: "878", nombre: "PERFIL TIROIDEO LIBRE: TRIODOTlRONlNA(T3), TIROXINA(T4), TSH ULTRASENSIBLE, T3 LIBRE Y T4 LIBRE", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 130.00 },
+{ codigo: "876", nombre: "PERFIL TIROIDEO: T3, T4, TSH", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 130.00 },
+{ codigo: "879", nombre: "PERFIL TORCH", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 320.00 },
+{ codigo: "880", nombre: "PERFIL TORCH COMPLETO: RUBEOLA IGM-IGG, CITOMEGALOVIRUS IGM-IGG, TOXOPLASMA IGM-IGG, HERPES 1 IGM-IGG, HERPES 2 IGM-IGG", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 350.00 },
+{ codigo: "881", nombre: "PERFIL TORCH IgG: RUBEOLA IGG, CITOMEGALOVIRUS IGG, TOXOPLASMA IGG, HERPES 1 IGG, HERPES 2 IGG", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 292.00 },
+{ codigo: "882", nombre: "PERFIL TORCH IgM: RUBEOLA IGM, CITOMEGALOVIRUS IGM, TOXOPLASMA IGM, HERPES 1 IGM, HERPES 2 IGM", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 292.00 },
+{ codigo: "883", nombre: "PH EN LIQUIDO PLEURAL", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 14.00 },
+{ codigo: "884", nombre: "PIRIDINOLINA (CROSSLINKS) ORINA AL AZAR", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 161.00 },
+{ codigo: "885", nombre: "PLAQUETRIOS ANTICUERPOS (PLAQUETAS AC) IGG-IGM", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 579.00 },
+{ codigo: "886", nombre: "PLATA SERICA", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 949.00 },
+{ codigo: "887", nombre: "PLOMO EN SANGRE", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 110.00 },
+{ codigo: "888", nombre: "PLOMO ORINA 24 HRS", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 176.00 },
+{ codigo: "889", nombre: "PNEUMOCISTIS CARINII - EX DIRECTO", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 79.00 },
+{ codigo: "890", nombre: "POLIPEPTIDO PANCREATICO", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 933.00 },
+{ codigo: "891", nombre: "POTASIO (ORINA 24H)", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 20.00 },
+{ codigo: "892", nombre: "POTASIO EN SUERO", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 30.00 },
+{ codigo: "894", nombre: "PRO-BNP (PEPTIDO NATRIUREICO)", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 220.00 },
+{ codigo: "896", nombre: "PROCALCITONINA", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 130.00 },
+{ codigo: "897", nombre: "PROCALCITONINA (HN)", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 220.00 },
+{ codigo: "898", nombre: "PROGESTERONA", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 40.00 },
+{ codigo: "899", nombre: "PROLACTINA", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 60.00 },
+{ codigo: "901", nombre: "PROLACTINA POOL", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 65.00 },
+{ codigo: "902", nombre: "PROSTAGLANDINA E2, SERICA", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 2325.00 },
+{ codigo: "903", nombre: "PROTEINA 14-3-3 (LCR)", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 4887.00 },
+{ codigo: "904", nombre: "PROTEINA C FUNCIONAL / ACTIVIDAD", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 201.00 },
+{ codigo: "1157", nombre: "PROTEINA C REACTIVA (PCR)", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 50.00 },
+{ codigo: "907", nombre: "PROTEINA C REACTIVA ULTRASENSIBLE (HN) PCR US", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 35.00 },
+{ codigo: "908", nombre: "PROTEINA C REACTIVA(CUANTITATIVO)", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 50.00 },
+{ codigo: "909", nombre: "PROTEINA C-REACTIVA (PCR-LATEX)", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 50.00 },
+{ codigo: "910", nombre: "PROTEINA EN ORINA 24 HORAS", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 40.00 },
+{ codigo: "911", nombre: "PROTEINA EN ORINA SIMPLE", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 95.00 },
+{ codigo: "912", nombre: "PROTEINA S FUNCIONAL", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 216.00 },
+{ codigo: "913", nombre: "PROTEINA S FUNCIONAL DE LA COAGULACION, PLASMA", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 170.00 },
+{ codigo: "914", nombre: "PROTEINA SOLUBLE HEPATICA(LSP) AUTOANTICUERPOS (ANTI-CITOQUERATINA)", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 453.00 },
+{ codigo: "915", nombre: "PROTEINAS BENCE JONES -ORINA 24 H", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 140.00 },
+{ codigo: "916", nombre: "PROTEINAS CUALITATIVAS", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 10.00 },
+{ codigo: "917", nombre: "PROTEINAS CUANTITATIVAS Al AZAR", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 10.00 },
+{ codigo: "918", nombre: "PROTEINAS EN 24 HORAS", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 15.00 },
+{ codigo: "919", nombre: "PROTEINAS EN LIQUIDO", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 12.00 },
+{ codigo: "920", nombre: "PROTEINAS TOTALES Y FRACCION (ALBUMINA Y GLOBULINA)", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 15.00 },
+{ codigo: "921", nombre: "PROTEINAS TOTALES Y FRACCIONADAS", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 30.00 },
+{ codigo: "922", nombre: "PROTEINOGRAMA EN LCR", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 174.00 },
+{ codigo: "923", nombre: "PROTEINOGRAMA EN ORINA SIMPLE", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 224.00 },
+{ codigo: "924", nombre: "PROTEINOGRAMA ORINA 24H", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 122.00 },
+{ codigo: "925", nombre: "PROTEINOGRAMA SERICO (AU)", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 55.00 },
+{ codigo: "926", nombre: "PROTEINURIA ORINA 24 HORAS", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 35.00 },
+{ codigo: "927", nombre: "PROTEINURIA ORINA SIMPLE", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 35.00 },
+{ codigo: "928", nombre: "PROTOPORFIRINA ERITROCITARIO LIBRE (FEP)", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 312.00 },
+{ codigo: "929", nombre: "PROTOPORFIRINA ZINC P.P.Z. (/G HEMOGLOBINA)", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 333.00 },
+{ codigo: "930", nombre: "PROTROMBINA, MUTACION G20210A (FACTOR II)", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 803.00 },
+{ codigo: "931", nombre: "PRUEBA ANTIGENO COVID", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 35.00 },
+{ codigo: "932", nombre: "PRUEBA DE DENGUE", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 60.00 },
+{ codigo: "933", nombre: "PRUEBA DE MEZCLA (TTPA) (HN)", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 149.00 },
+{ codigo: "934", nombre: "PRUEBA DE PATERNIDAD INFORMATIVA", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 850.00 },
+{ codigo: "935", nombre: "PRUEBA DE PATERNIDAD LEGAL", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 1200.00 },
+{ codigo: "936", nombre: "PRUEBA SEROLOGICA COVID", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 120.00 },
+{ codigo: "937", nombre: "PRUEBA STAMEY MEARES", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 564.00 },
+{ codigo: "938", nombre: "PSA INDICE", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 90.00 },
+{ codigo: "940", nombre: "PSA LIBRE (ANTIGENO PROSTATICO LIBRE)", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 60.00 },
+{ codigo: "941", nombre: "PSA PANEL COMPLETO", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 120.00 },
+{ codigo: "942", nombre: "PSA TOTAL (ANTIGENO PROSTATICO ESPECIFICO)", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 50.00 },
+{ codigo: "943", nombre: "PSA TOTAL (ANTIGENO PROSTATICO TOTAL)", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 50.00 },
+{ codigo: "944", nombre: "PTH TERMINAL N", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 194.00 },
+{ codigo: "946", nombre: "PTH-TERMINAL C", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 240.00 },
+{ codigo: "945", nombre: "PTH. PROTEINA RELACIONADO A \"PTHRP\"", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 718.00 },
+{ codigo: "947", nombre: "QUANTIFERON-TB PRUEBA DE IGRA", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 1256.00 },
+{ codigo: "948", nombre: "RADIOGRAFÍA CRANEO COLUMNA PELVIS", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 170.00 },
+{ codigo: "949", nombre: "RADIOGRAFÍA DE PARTES DE EXTREMIDADES", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 150.00 },
+{ codigo: "950", nombre: "RADIOGRAFIA DE TORAX PA Y LATERAL", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 230.00 },
+{ codigo: "951", nombre: "REACCION INFLAMATORIA EN HECES", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 15.00 },
+{ codigo: "952", nombre: "REACCION INFLAMATORIA EN HECES (3 MUESTRAS )", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 35.00 },
+{ codigo: "953", nombre: "RECEPTOR ANDROGÉNICO INMUNOHISTOQUIMICA BIOPSIA", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 539.00 },
+{ codigo: "954", nombre: "RECUENTO DE PLAQUETAS", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 25.00 },
+{ codigo: "956", nombre: "RECUENTO LINFOCITARIO TBNK (P-INMG)", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 539.00 },
+{ codigo: "957", nombre: "RENINA PLASMATICA ACTIVIDAD", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 154.00 },
+{ codigo: "958", nombre: "RESERVA ALCALINA CO2", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 75.00 },
+{ codigo: "959", nombre: "RESISTENCIA A LA PROTEINA C ACTIVADA", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 462.00 },
+{ codigo: "960", nombre: "RETICULINA ANTIC, IGA", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 258.00 },
+{ codigo: "961", nombre: "RETICULOCITOS", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 35.00 },
+{ codigo: "964", nombre: "RETICULOCITOS + PARAMETROS RUO", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 29.00 },
+{ codigo: "965", nombre: "RETRACCION DE COAGULO", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 26.00 },
+{ codigo: "966", nombre: "RICKETTSIA RICKETTSIA IGG", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 394.00 },
+{ codigo: "967", nombre: "RICKETTSIA RICKETTSIA IGM", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 394.00 },
+{ codigo: "968", nombre: "RIESGO CORONARIO", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 60.00 },
+{ codigo: "969", nombre: "ROSA DE BENGALA - BRUCELLA", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 18.00 },
+{ codigo: "970", nombre: "ROSE WAALER", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 35.00 },
+{ codigo: "971", nombre: "ROTAVIRUS + ADENOVIRUS (HECES)", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 40.00 },
+{ codigo: "972", nombre: "RPR", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 20.00 },
+{ codigo: "973", nombre: "RUBEOLA IGG", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 65.00 },
+{ codigo: "975", nombre: "RUBEOLA IGM", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 65.00 },
+{ codigo: "977", nombre: "SALES BILIARES (COLILGLICINA)", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 587.00 },
+{ codigo: "978", nombre: "SARAMPION IGG (IM)", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 147.00 },
+{ codigo: "979", nombre: "SARAMPION IGM", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 89.00 },
+{ codigo: "981", nombre: "SATURACIÓN DE TRANSFERRINA", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 60.00 },
+{ codigo: "982", nombre: "SCHISTOSOMA MANSONI ANTICUERPOS IGG", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 714.00 },
+{ codigo: "983", nombre: "SEDIMENTO DE ORINA (AUTOMATIZADO)", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 15.00 },
+{ codigo: "984", nombre: "SELENIO EN ORINA 24 HRS", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 239.00 },
+{ codigo: "985", nombre: "SELENIO SERICO", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 202.00 },
+{ codigo: "986", nombre: "SEMEN, ALFA GLUCOSIDASA", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 181.00 },
+{ codigo: "987", nombre: "SEROLOGIA", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 30.00 },
+{ codigo: "988", nombre: "SEROLOGICAS CUALITATIVAS (RPR) \"SIFILIS\"", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 18.00 },
+{ codigo: "989", nombre: "SEROLOGICAS SEMI-CUANTITATIVAS (RPR) \"SIFILIS\"", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 20.00 },
+{ codigo: "990", nombre: "SEROTONINA (5-HIDROXITRIPTAMINA)", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 305.00 },
+{ codigo: "991", nombre: "SEX HORMONE BINDING GLOBULIN SHBG \"GLOB FIJ DE HORMONA SEX", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 169.00 },
+{ codigo: "992", nombre: "SLA LP (ANTIGENO SOLUBLE HEPATICO HIGADO - PANCREAS)", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 428.00 },
+{ codigo: "993", nombre: "SM (SMITH), AUTOANTICUERPOS (IM)", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 70.00 },
+{ codigo: "994", nombre: "SODIO EN SUERO", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 19.00 },
+{ codigo: "995", nombre: "SODIO ORINA 24 HORAS", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 19.00 },
+{ codigo: "996", nombre: "SODIO ORINA SIMPLE", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 19.00 },
+{ codigo: "997", nombre: "SOMATOMEDINA C (IGF-1) 120'(POST)", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 86.00 },
+{ codigo: "998", nombre: "SOMATOMEDINA C (IGF-1) 60' POST", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 86.00 },
+{ codigo: "999", nombre: "SOMATOMEDINA C (IGF-1) 90' POST", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 86.00 },
+{ codigo: "1000", nombre: "SOMATOMEDINA C (IGF-1) BASAL", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 100.00 },
+{ codigo: "1002", nombre: "SOMATOMEDINA C (IGF-1) POST-ESTIMULO", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 86.00 },
+{ codigo: "1003", nombre: "SS-A (ANTI-RO) AUTOANTICUERPO (IM)", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 84.00 },
+{ codigo: "1004", nombre: "SS-B (ANTI-LA) AUTOANTICUERPO (IM)", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 84.00 },
+{ codigo: "1005", nombre: "STRONGYLOIDES STERCOLARIS ,ANTICUERPOS IGG", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 885.00 },
+{ codigo: "1006", nombre: "SUB-UNIDAD HCG BETA CUALITATIVO", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 25.00 },
+{ codigo: "563", nombre: "SUB-UNIDAD HCG BETA CUANTITATIVO", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 70.00 },
+{ codigo: "1007", nombre: "SUDAN III (GRASAS NEUTRAS)", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 22.00 },
+{ codigo: "1008", nombre: "SUSTANCIAS REDUCTORAS", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 12.00 },
+{ codigo: "1010", nombre: "T3 LIBRE", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 50.00 },
+{ codigo: "1012", nombre: "T3 REVERSO (RT3)", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 160.00 },
+{ codigo: "1013", nombre: "T3 TOTAL", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 50.00 },
+{ codigo: "1014", nombre: "T3 UPTAKE", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 109.00 },
+{ codigo: "1016", nombre: "T4 LIBRE", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 50.00 },
+{ codigo: "1018", nombre: "T4 TOTAL", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 50.00 },
+{ codigo: "1019", nombre: "TACOS Y LAMINAS", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 40.00 },
+{ codigo: "1020", nombre: "TACROLIMUS (CDX)", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 608.00 },
+{ codigo: "1021", nombre: "TALIO SANGRE TOTAL", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 273.00 },
+{ codigo: "1022", nombre: "TAMIZAJE GENETICO PRENATAL - 1ER TRIMESTRE (SCREENING)", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 679.00 },
+{ codigo: "1023", nombre: "TAMIZAJE GENETICO PRENATAL - 2DO TRIMESTRE (CUADRUPLE)", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 643.00 },
+{ codigo: "1024", nombre: "TAMIZAJE GENETICO PRENATAL - 2DO TRIMESTRE (TRIPLE)", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 508.00 },
+{ codigo: "1025", nombre: "TAMIZAJE NEONATAL AMPLIADO", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 1431.00 },
+{ codigo: "1026", nombre: "TAMIZAJE NEONATAL BASICO", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 245.00 },
+{ codigo: "1027", nombre: "TASA DE FILTRACION GLOMERULAR ESTIMADA (TFGE)", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 161.00 },
+{ codigo: "1028", nombre: "TEOFILINA", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 142.00 },
+{ codigo: "1029", nombre: "TEST DE COOMBS DIRECTO", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 40.00 },
+{ codigo: "1031", nombre: "TEST DE COOMBS INDIRECTO", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 20.00 },
+{ codigo: "1032", nombre: "TEST DE GRAHAM", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 10.00 },
+{ codigo: "1033", nombre: "TESTOSTERONA LIBRE", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 60.00 },
+{ codigo: "1035", nombre: "TESTOSTERONA TOTAL", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 50.00 },
+{ codigo: "1037", nombre: "TETANO TOXOIDE ANTICUERPOS IGG", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 306.00 },
+{ codigo: "1038", nombre: "TGO (ASAT)", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 15.00 },
+{ codigo: "1039", nombre: "TGP (ALAT)", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 15.00 },
+{ codigo: "1040", nombre: "THEVENON (SANGRE OCULTA)", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 30.00 },
+{ codigo: "1041", nombre: "THEVENON (SANGRE OCULTA) INMUNOLOGICO", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 60.00 },
+{ codigo: "1043", nombre: "THEVENON 1 (SANGRE OCULTA) CONVENCIONAL", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 15.00 },
+{ codigo: "1044", nombre: "THEVENON 2 (SANGRE OCULTA) CONVENCIONAL", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 15.00 },
+{ codigo: "1045", nombre: "THEVENON 3 (SANGRE OCULTA) CONVENCIONAL", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 15.00 },
+{ codigo: "1046", nombre: "THYROID BINDING GLOBULIN (TBG)", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 349.00 },
+{ codigo: "1047", nombre: "TIEMPO DE COAGULACION Y SANGRIA", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 20.00 },
+{ codigo: "1049", nombre: "TIEMPO DE PROTOMBINA + INR", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 35.00 },
+{ codigo: "1050", nombre: "TIEMPO DE PROTROMBINA", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 25.00 },
+{ codigo: "1051", nombre: "TIEMPO DE TROMBINA", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 20.00 },
+{ codigo: "1052", nombre: "TIEMPO DE TROMBOPLASTINA", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 35.00 },
+{ codigo: "1053", nombre: "TIEMPO PARCIAL DE TROMBOPLASTINA", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 20.00 },
+{ codigo: "1054", nombre: "TINTA CHINA (CRYPTOCOCCUS)", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 15.00 },
+{ codigo: "1055", nombre: "TINTA CHINA (CRYPTOCOCOS)", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 40.00 },
+{ codigo: "1056", nombre: "TIRA REACTIVA (ORINA)", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 14.00 },
+{ codigo: "1057", nombre: "TIRAS DE GLUCOSA (ACCUCHECK)", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 12.00 },
+{ codigo: "1059", nombre: "TIROGLOBULINA (TG)", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 70.00 },
+{ codigo: "1060", nombre: "TNF-ALFA FACTOR NECROSIS TUMORAL", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 268.00 },
+{ codigo: "1073", nombre: "TOLERANCIA A LA GLUCOSA", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 80.00 },
+{ codigo: "1074", nombre: "TOLERANCIA A LA GLUCOSA (30, 60. 120 MIN)", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 50.00 },
+{ codigo: "1061", nombre: "TOLERANCIA A LA GLUCOSA (BASAL, 30, 60, 120)", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 48.00 },
+{ codigo: "1062", nombre: "TOLERANCIA A LA GLUCOSA (BASAL, 30, 60, 120, 180)", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 60.00 },
+{ codigo: "1063", nombre: "TOLERANCIA A LA GLUCOSA (BASAL, 30, 60, 90, 120)", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 67.00 },
+{ codigo: "1064", nombre: "TOLERANCIA A LA GLUCOSA (BASAL, 30, 60, 90, 120, 180)", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 83.00 },
+{ codigo: "1065", nombre: "TOLERANCIA A LA GLUCOSA (BASAL, 60, 120)", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 45.00 },
+{ codigo: "1066", nombre: "TOLERANCIA A LA GLUCOSA (BASAL, 60,120,180,240,300)", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 83.00 },
+{ codigo: "1067", nombre: "TOLERANCIA A LA INSULINA (BASAL, 30, 60, 120)", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 107.00 },
+{ codigo: "1068", nombre: "TOLERANCIA A LA INSULINA (BASAL, 30, 60, 120, 180)", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 118.00 },
+{ codigo: "1069", nombre: "TOLERANCIA A LA INSULINA (BASAL, 30, 60, 90, 120)", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 118.00 },
+{ codigo: "1070", nombre: "TOLERANCIA A LA INSULINA (BASAL, 30, 60, 90, 120, 180)", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 154.00 },
+{ codigo: "1071", nombre: "TOLERANCIA A LA INSULINA (BASAL, 60, 120)", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 59.00 },
+{ codigo: "1072", nombre: "TOLERANCIA A LA INSULINA (BASAL, 60, 120, 180, 240, 300)", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 154.00 },
+{ codigo: "1075", nombre: "TOLERANCIA A LA LACTOSA (B, 60 , 120)", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 64.00 },
+{ codigo: "1076", nombre: "TOLERANCIA A LA LACTOSA (B,30,60,120 ,180 MIN)", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 108.00 },
+{ codigo: "1077", nombre: "TOLUENO - ACIDO HIPURICO EN ORINA 24 HORAS", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 397.00 },
+{ codigo: "1078", nombre: "TORCH IGG", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 200.00 },
+{ codigo: "1079", nombre: "TORCH IGM", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 200.00 },
+{ codigo: "1080", nombre: "TOXIC SCREEN ORINA SIMPLE (10 DROGAS) CUALITATIVO", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 107.00 },
+{ codigo: "1081", nombre: "TOXIC SCREEN ORINA SIMPLE (2 DROGAS) CUALITATIVO (COC, THC)", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 83.00 },
+{ codigo: "1082", nombre: "TOXIC SCREEN ORINA SIMPLE (5 DROGAS) CUALITATIVO (COC,THC,AMP,MET,BZD)", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 120.00 },
+{ codigo: "1084", nombre: "TOXOCARA IGG", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 315.00 },
+{ codigo: "1085", nombre: "TOXOCARA IGM", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 499.00 },
+{ codigo: "1086", nombre: "TOXOPLASMA GONDII ANTICUERPOS IgM, LCR", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 60.00 },
+{ codigo: "1087", nombre: "TOXOPLASMA GONDII DNA X PCR", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 1302.00 },
+{ codigo: "1088", nombre: "TOXOPLASMA IGG", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 60.00 },
+{ codigo: "1090", nombre: "TOXOPLASMA IGM", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 60.00 },
+{ codigo: "1094", nombre: "TRANSAMINASAS", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 30.00 },
+{ codigo: "1095", nombre: "TRANSFERRINA", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 40.00 },
+{ codigo: "1097", nombre: "TRANSFERRINA DEFICITARIA EN CARBOHIDRATOS (CDT)", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 607.00 },
+{ codigo: "1098", nombre: "TRANSFERRINA RECEPTOR SOLUBLE", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 228.00 },
+{ codigo: "1099", nombre: "TRANSGLUTAMINASA TISULAR AUTO ANTI IGA (IM)", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 387.00 },
+{ codigo: "1100", nombre: "TRATAMIENTO", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 80.00 },
+{ codigo: "1101", nombre: "TRICHINELLA SPIRALIS, AC IGG", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 526.00 },
+{ codigo: "1102", nombre: "TRIGLICERIDOS", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 15.00 },
+{ codigo: "1104", nombre: "TROPONINA I", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 130.00 },
+{ codigo: "1106", nombre: "TROPONINA T", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 110.00 },
+{ codigo: "1108", nombre: "TSH ULTRASENSIBLE", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 50.00 },
+{ codigo: "1110", nombre: "TSH, AUTOANTICUERPOS ANTI RECEPTOR", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 439.00 },
+{ codigo: "1111", nombre: "TSI ESTIMULANTE DE TIROIDES", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 416.00 },
+{ codigo: "1112", nombre: "UREA", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 15.00 },
+{ codigo: "1114", nombre: "UREA (ORINA 24 HORAS)", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 12.00 },
+{ codigo: "1115", nombre: "UREA (ORINA SIMPLE)", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 12.00 },
+{ codigo: "1116", nombre: "UREA POST", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 12.00 },
+{ codigo: "1117", nombre: "UREAPLASMA UREALYTICUM, AC", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 345.00 },
+{ codigo: "1118", nombre: "UROCULTIVO", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 60.00 },
+{ codigo: "1119", nombre: "UROCULTIVO + ARD (CON REMOVEDOR DE ANTIBIOTICO)", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 160.00 },
+{ codigo: "1120", nombre: "UROCULTIVO + ATB (ANTIBIOGRAMANA)", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 60.00 },
+{ codigo: "1121", nombre: "UROCULTIVO AUTOMATIZADO CON MIC (HN)", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 107.00 },
+{ codigo: "1122", nombre: "UROCULTIVO CON REMOVEDOR DE ANTIBIOTICO (HN)", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 150.00 },
+{ codigo: "1123", nombre: "VARICELA ZOSTER IGG", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 94.00 },
+{ codigo: "1124", nombre: "VARICELA ZOSTER IGM", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 99.00 },
+{ codigo: "1160", nombre: "VDRL (SIFILIS) (SEROLOGIA CUANTITATIVA)", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 30.00 },
+{ codigo: "1127", nombre: "VDRL (SIFILIS) EN LCR", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 60.00 },
+{ codigo: "1126", nombre: "VDRL (SUERO) SIFILIS CUALITATIVO", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 30.00 },
+{ codigo: "1129", nombre: "VELOCIDAD DE SEDIMENTACION (VSG)", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 15.00 },
+{ codigo: "1130", nombre: "VELOCIDAD DE SEDIMENTACION/VSG", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 20.00 },
+{ codigo: "1131", nombre: "VIH", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 20.00 },
+{ codigo: "1132", nombre: "VIRUS RESPIRATORIO SINCICIAL IGM/IGG", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 487.00 },
+{ codigo: "1133", nombre: "VIRUS RESPIRATORIO SINCITIAL IGG", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 170.00 },
+{ codigo: "1134", nombre: "VIRUS RESPIRATORIO SINCITIAL IGM", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 243.00 },
+{ codigo: "1135", nombre: "VISCOSIDAD SERICA", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 53.00 },
+{ codigo: "1136", nombre: "VITAMINA A (RETINOL)", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 406.00 },
+{ codigo: "1137", nombre: "VITAMINA B1 (THIAMINA)", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 475.00 },
+{ codigo: "1138", nombre: "VITAMINA B12", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 50.00 },
+{ codigo: "1140", nombre: "VITAMINA B2 (RIBOFLAVINA)", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 460.00 },
+{ codigo: "1141", nombre: "VITAMINA B6 (FOSFATO PIRIDOXAL)", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 377.00 },
+{ codigo: "1142", nombre: "VITAMINA C (ACIDO ASCORBICO)", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 335.00 },
+{ codigo: "1143", nombre: "VITAMINA D ( 25 HIDROXI COLECALCIFEROL)", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 290.00 },
+{ codigo: "1144", nombre: "VITAMINA D 1.25 DIHIDROXIVITAMINA", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 305.00 },
+{ codigo: "1145", nombre: "VITAMINA D 25-HIDROXIVITAMINA TOTAL", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 180.00 },
+{ codigo: "1146", nombre: "VITAMINA D TOTAL 25-HIDROXIVITAMINA D", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 147.00 },
+{ codigo: "1147", nombre: "VITAMINA E (ALFA TOCOFEROL)", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 278.00 },
+{ codigo: "1148", nombre: "VITAMINA E (ALFA TOCOFEROL), SUERO", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 170.00 },
+{ codigo: "1149", nombre: "VON WILLEBRAND, ANTIGENO (VWFIAG)", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 623.00 },
+{ codigo: "1150", nombre: "WESTERN BLOT HIV", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 350.00 },
+{ codigo: "1151", nombre: "XILENO - ACIDO METILHIPURICO EN ORINA DE 24HRS", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 424.00 },
+{ codigo: "1152", nombre: "XILENO, SANGRE TOTAL", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 357.00 },
+{ codigo: "1153", nombre: "XILOSA, EXCRECION EN ORINA", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 104.00 },
+{ codigo: "1154", nombre: "YODO PROTEICO (PBI)", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 203.00 },
+{ codigo: "1155", nombre: "ZINC EN ORINA DE 24 HORAS", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 189.00 },
+{ codigo: "1156", nombre: "ZINC SERICO", unidad: "", refMin: 0, refMax: 0, referencia: "<", precio: 160.00 },
+];
+
+// ==========================================
+// ESTADO GLOBAL EN MEMORIA
+// ==========================================
+let examenesSeleccionados = [];          // Carrito de Recepción / Admisión
+let listaCotizacionInd = [];             // Carrito del módulo de Cotización
+let currentCotizacionId = null;          // Id de la cotización que se está editando
+
+let ordenesRegistradas = JSON.parse(localStorage.getItem("vital_ordenes") || "[]");
+let cajaMovimientos = JSON.parse(localStorage.getItem("vital_caja") || "[]");
+window.pacientesRegistrados = JSON.parse(localStorage.getItem("vital_pacientes") || "[]");
+window.cotizacionesGuardadas = JSON.parse(localStorage.getItem("vital_cotizaciones") || "[]");
+
+// ==========================================
+// CLAVES CANÓNICAS DE ALMACENAMIENTO
+// ==========================================
+const KEY_ORDENES = "vital_ordenes";
+const KEY_CAJA = "vital_caja";
+const KEY_CATALOGO = "vital_catalogo";
+const KEY_PACIENTES = "vital_pacientes";
+const KEY_COTIZACIONES = "vital_cotizaciones";
+const KEY_PACIENTES_ELIMINADOS = "vital_pacientes_eliminados";
+
+// ==========================================
+// UTILIDADES GENERALES
+// ==========================================
+function val(id) {
+    const el = document.getElementById(id);
+    return el ? String(el.value || "").trim() : "";
+}
+function setVal(id, valor) {
+    const el = document.getElementById(id);
+    if (el) el.value = valor == null ? "" : valor;
+}
+function leerJSON(clave, porDefecto) {
+    try {
+        const raw = localStorage.getItem(clave);
+        if (!raw) return porDefecto;
+        const v = JSON.parse(raw);
+        return (v == null) ? porDefecto : v;
+    } catch (e) {
+        return porDefecto;
+    }
+}
+function mergePorClave(lista, claveFn) {
+    const map = new Map();
+    (lista || []).forEach(it => {
+        if (!it || typeof it !== "object") return;
+        const k = claveFn(it);
+        const key = (k == null || k === "") ? "__sincave_" + Math.random().toString(36).slice(2) : String(k);
+        if (!map.has(key)) map.set(key, it);
+    });
+    return Array.from(map.values());
+}
+function escapeHTML(valor) {
+    return String(valor ?? "").replace(/[&<>"']/g, c => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+    }[c]));
+}
+function formatoRango(refMin, refMax) {
+    const tieneMin = refMin !== "" && refMin !== null && refMin !== undefined;
+    const tieneMax = refMax !== "" && refMax !== null && refMax !== undefined;
+    if (tieneMin && tieneMax) return `${refMin} - ${refMax}`;
+    if (tieneMax) return `< ${refMax}`;
+    if (tieneMin) return `> ${refMin}`;
+    return "";
+}
+function numeroTexto(v) {
+    return parseFloat(String(v ?? "0").replace("S/", "").replace(",", "").trim()) || 0;
+}
+
+// ==========================================
+// NORMALIZACIÓN DE PACIENTES Y COTIZACIONES
+// ==========================================
+function normalizarPaciente(p) {
+    p = p || {};
+    return {
+        id: p.id || ("pac_" + (p.dni || p.documento || Date.now())),
+        dni: String(p.dni || p.documento || ""),
+        nombre: p.nombre || p.nombres || p.name || "",
+        celular: p.celular || p.telefono || p.cell || "",
+        fnac: p.fnac || p.fechaNacimiento || p.fecha_nacimiento || "",
+        edad: p.edad || "",
+        sexo: p.sexo || "MASCULINO",
+        ultimaAtencion: p.ultimaAtencion || p.fechaRegistro || ""
+    };
+}
+function normalizarExamenCot(ex) {
+    ex = ex || {};
+    const precio = numeroTexto(ex.precioUnit != null ? ex.precioUnit : ex.precio);
+    const cantidad = parseFloat(ex.cantidad) || 1;
+    return {
+        codigo: ex.codigo || "",
+        nombre: ex.nombre || "",
+        cantidad,
+        precio,
+        importe: cantidad * precio
+    };
+}
+function estandarizarCotizacion(c) {
+    c = c || {};
+    const p = c.paciente || {};
+    let id = c.id != null ? String(c.id) : (c.nroCotizacion ? String(c.nroCotizacion) : "cot_" + Date.now() + "_" + Math.floor(Math.random() * 1000));
+    const examenes = (c.examenes || []).map(normalizarExamenCot);
+    const total = c.total != null ? numeroTexto(c.total) : examenes.reduce((a, e) => a + e.importe, 0);
+    return {
+        id,
+        nroCotizacion: c.nroCotizacion || ("COT-" + id.replace(/\D/g, "").slice(-4) || "0001"),
+        fechaHora: c.fechaHora || new Date().toLocaleString(),
+        convenio: c.convenio || c.tipoConvenio || "Particular",
+        paciente: {
+            dni: String(p.dni || c.dni || ""),
+            nombres: p.nombres || c.nombre || c.nombres || "",
+            medico: p.medico || c.doctor || c.medico || "",
+            fechaNacimiento: p.fechaNacimiento || c.fechaNacimiento || "",
+            edad: p.edad || c.edad || "",
+            celular: p.celular || c.celular || "",
+            sexo: p.sexo || c.sexo || "MASCULINO"
+        },
+        examenes,
+        total
+    };
+}
+// Devuelve una vista plana (para tablas y para pasar a recepción)
+function normalizarCotizacion(c) {
+    const s = estandarizarCotizacion(c);
+    return {
+        id: s.id,
+        nroCotizacion: s.nroCotizacion,
+        fechaHora: s.fechaHora,
+        convenio: s.convenio,
+        dni: s.paciente.dni,
+        nombre: s.paciente.nombres,
+        doctor: s.paciente.medico,
+        fechaNacimiento: s.paciente.fechaNacimiento,
+        edad: s.paciente.edad,
+        celular: s.paciente.celular,
+        sexo: s.paciente.sexo,
+        examenes: s.examenes,
+        total: s.total
+    };
+}
+
+// Agrega estas líneas al final de tu función guardarCotizacion():
+document.getElementById("dni").value = "";
+document.getElementById("nombres").value = "";
+document.getElementById("medico").value = "";
+document.getElementById("fechaNacimiento").value = "";
+document.getElementById("edad").value = "";
+document.getElementById("celular").value = "";
+examenesCotizacionActual = []; // Vacía el arreglo de exámenes seleccionados
+if (typeof renderizarTablaCotizacion === "function") {
+        renderizarTablaCotizacion(); // Vuelve a pintar la tabla vacía de forma segura
+    }
+// ==========================================
+// PERSISTENCIA AUTOMÁTICA (GUARDADO EN ESTE EQUIPO)
+// ==========================================
+function persistirDatos() {
+    try {
+        localStorage.setItem(KEY_ORDENES, JSON.stringify(ordenesRegistradas || []));
+        localStorage.setItem(KEY_CAJA, JSON.stringify(cajaMovimientos || []));
+        localStorage.setItem(KEY_CATALOGO, JSON.stringify(examenesCatalogo || []));
+        localStorage.setItem(KEY_PACIENTES, JSON.stringify(window.pacientesRegistrados || []));
+        localStorage.setItem(KEY_COTIZACIONES, JSON.stringify(window.cotizacionesGuardadas || []));
+        localStorage.setItem(KEY_PACIENTES_ELIMINADOS, JSON.stringify(window.pacientesEliminados || []));
+    } catch (error) {
+        console.error("No se pudo guardar la información en este equipo:", error);
+    }
+}
+
+// Recupera y fusiona TODA la información guardada, incluso la de claves antiguas,
+// para que no se pierda nada de lo que ya había registrado el usuario.
+function cargarDatosGuardados() {
+    // ---- ÓRDENES ELIMINADAS (Lista negra para evitar que revivan) ----
+    window.ordenesEliminadas = leerJSON("vital_ordenes_eliminadas", []);
+    window.cajaEliminados = leerJSON("vital_caja_eliminados", []);
+    window.cotizacionesEliminadas = leerJSON("vital_cotizaciones_eliminadas", []);;
+    window.examenesEliminados = leerJSON("vital_examenes_eliminados", []); // <--- NUEVO PARA EL CATÁLOGO
+
+    // ---- ÓRDENES ----
+    let ordenes = [];
+    ordenes = ordenes.concat(leerJSON("vital_ordenes", []));
+    ordenes = ordenes.concat(leerJSON("vital_health_ordenes", []));
+    
+    const datosV1 = leerJSON("vitalhealth_datos_v1", null);
+    if (datosV1 && typeof datosV1 === "object") {
+        if (Array.isArray(datosV1.ordenes)) ordenes = ordenes.concat(datosV1.ordenes);
+        if (Array.isArray(datosV1.caja)) cajaMovimientos = cajaMovimientos.concat(datosV1.caja);
+        if (Array.isArray(datosV1.catalogo) && datosV1.catalogo.length) examenesCatalogo = examenesCatalogo.concat(datosV1.catalogo);
+    }
+
+    // Fusionar y FILTRAR las que estén en la lista negra de eliminadas
+    let ordenesFusionadas = mergePorClave(ordenes, o => o.nroOrden || o.id);
+    ordenesRegistradas = ordenesFusionadas.filter(o => !window.ordenesEliminadas.includes(String(o.nroOrden)));
+    
+    ordenesRegistradas.sort((a, b) => (b.en || 0) - (a.en || 0));
+
+    // ---- CAJA ----
+    let caja = cajaMovimientos.concat(leerJSON("vital_caja", []));
+    cajaMovimientos = mergePorClave(caja, m => m.id);
+    cajaMovimientos.sort((a, b) => (b.en || 0) - (a.en || 0));
+
+    // ---- CATÁLOGO FILTRADO POR LA LISTA NEGRA ----
+    let cat = examenesCatalogo.concat(leerJSON("vital_catalogo", [])).concat(leerJSON("examenesCatalogo", []));
+    let catFusionado = mergePorClave(cat, c => c.codigo);
+    
+    // FILTRO ESTRICTO: Si el código está en la lista negra, se descarta para siempre
+    examenesCatalogo = catFusionado.filter(e => !window.examenesEliminados.includes(String(e.codigo)));
+
+    // ---- PACIENTES ----
+    window.pacientesEliminados = leerJSON(KEY_PACIENTES_ELIMINADOS, [])
+        .map(d => String(d).trim())
+        .filter(Boolean);
+    let pac = (window.pacientesRegistrados || [])
+        .concat(leerJSON("vital_pacientes", []))
+        .concat(leerJSON("vital_health_pacientes", []));
+    pac = pac.map(normalizarPaciente).filter(p => (p.dni || p.nombre) && !pacienteEliminado(p.dni));
+    window.pacientesRegistrados = mergePorClave(pac, p => p.dni || p.id);
+
+    // ---- COTIZACIONES ----
+    let cot = (window.cotizacionesGuardadas || [])
+        .concat(leerJSON("vital_cotizaciones", []))
+        .concat(leerJSON("vitalhealth_cotizaciones", []))
+        .concat(leerJSON("vital_health_cotizaciones", []));
+    cot = cot.map(estandarizarCotizacion);
+    window.cotizacionesGuardadas = mergePorClave(cot, c => c.id);
+}
+
+function respaldarDatos() {
+    const contenido = JSON.stringify({
+        ordenes: ordenesRegistradas,
+        caja: cajaMovimientos,
+        catalogo: examenesCatalogo,
+        pacientes: window.pacientesRegistrados || [],
+        pacientesEliminados: window.pacientesEliminados || [],
+        cotizaciones: window.cotizacionesGuardadas || []
+    }, null, 2);
+    const blob = new Blob([contenido], { type: "application/json" });
+    const enlace = document.createElement("a");
+    enlace.download = `Respaldo-VitalHealth-${new Date().toISOString().slice(0, 10)}.json`;
+    enlace.href = URL.createObjectURL(blob);
+    enlace.click();
+    URL.revokeObjectURL(enlace.href);
+}
+
+function restaurarRespaldo(archivo) {
+    const lector = new FileReader();
+    lector.onload = () => {
+        try {
+            const datos = JSON.parse(lector.result);
+            if (!datos || typeof datos !== "object" || !Array.isArray(datos.ordenes)) {
+                alert("El archivo no es un respaldo válido de Vital Health.");
+                return;
+            }
+            ordenesRegistradas = datos.ordenes;
+            cajaMovimientos = Array.isArray(datos.caja) ? datos.caja : [];
+            if (Array.isArray(datos.catalogo) && datos.catalogo.length) examenesCatalogo = datos.catalogo;
+            window.pacientesRegistrados = (Array.isArray(datos.pacientes) ? datos.pacientes : []).map(normalizarPaciente);
+            window.pacientesEliminados = Array.isArray(datos.pacientesEliminados) ? datos.pacientesEliminados.map(d => String(d).trim()).filter(Boolean) : [];
+            window.cotizacionesGuardadas = (Array.isArray(datos.cotizaciones) ? datos.cotizaciones : []).map(estandarizarCotizacion);
+            reconciliarPacientesDesdeOrdenes();
+            persistirDatos();
+            renderizarTablaCatalogo();
+            cargarOrdenes();
+            cargarPacientes();
+            cargarCotizaciones();
+            actualizarTotalesCaja();
+            alert("Respaldo restaurado correctamente.");
+        } catch (error) {
+            alert("El archivo no se pudo leer como respaldo válido.");
+        }
+    };
+    lector.readAsText(archivo);
+}
+
+// ==========================================
+// REGISTRO AUTOMÁTICO DE PACIENTES
+// ==========================================
+// Registro de DNI eliminados a propósito por el usuario, para que la
+// reconciliación automática con las órdenes no los vuelva a crear.
+function pacienteEliminado(dni) {
+    const d = String(dni || "").trim();
+    return !!d && (window.pacientesEliminados || []).indexOf(d) !== -1;
+}
+
+function marcarPacienteEliminado(dni) {
+    const d = String(dni || "").trim();
+    if (!d) return;
+    if (!window.pacientesEliminados) window.pacientesEliminados = [];
+    if (window.pacientesEliminados.indexOf(d) === -1) window.pacientesEliminados.push(d);
+}
+
+function desmarcarPacienteEliminado(dni) {
+    const d = String(dni || "").trim();
+    if (!d || !window.pacientesEliminados) return;
+    window.pacientesEliminados = window.pacientesEliminados.filter(x => String(x) !== d);
+}
+
+function upsertPaciente(datos) {
+    datos = datos || {};
+    const dni = String(datos.dni || "").trim();
+    if (!window.pacientesRegistrados) window.pacientesRegistrados = [];
+    if (dni) desmarcarPacienteEliminado(dni);
+    const existente = window.pacientesRegistrados.find(p => String(p.dni) === dni && dni !== "");
+    const registro = {
+        id: existente ? existente.id : ("pac_" + (dni || Date.now())),
+        dni: dni,
+        nombre: datos.nombre || (existente ? existente.nombre : "") || "",
+        celular: datos.celular || (existente ? existente.celular : "") || "",
+        fnac: datos.fnac || (existente ? existente.fnac : "") || "",
+        edad: datos.edad || (existente ? existente.edad : "") || "",
+        sexo: datos.sexo || (existente ? existente.sexo : "MASCULINO") || "MASCULINO",
+        ultimaAtencion: new Date().toISOString()
+    };
+    if (existente) {
+        Object.assign(existente, registro);
+        return existente;
+    }
+    window.pacientesRegistrados.push(registro);
+    return registro;
+}
+
+function registrarPacienteDesdeOrden(orden) {
+    if (!orden) return null;
+    const dni = String(orden.dni || "").trim();
+    if (!dni) return null;
+    const paciente = upsertPaciente({
+        dni,
+        nombre: orden.nombre || "",
+        celular: orden.celular || "",
+        fnac: orden.fechaNacimiento || orden.fnac || "",
+        edad: orden.edad || "",
+        sexo: orden.sexo || "MASCULINO"
+    });
+    window.nubeGuardarPaciente?.(paciente);
+    return paciente;
+}
+window.registrarPacienteDesdeOrden = registrarPacienteDesdeOrden;
+
+// Garantiza que todos los pacientes de las órdenes existentes aparezcan registrados
+function reconciliarPacientesDesdeOrdenes() {
+    (ordenesRegistradas || []).forEach(o => {
+        if (o && o.dni && !pacienteEliminado(o.dni)) {
+            upsertPaciente({
+                dni: o.dni,
+                nombre: o.nombre || "",
+                celular: o.celular || "",
+                fnac: o.fechaNacimiento || o.fnac || "",
+                edad: o.edad || "",
+                sexo: o.sexo || "MASCULINO"
+            });
+        }
+    });
+}
+
+// ==========================================
+// NAVEGACIÓN ENTRE SECCIONES
+// ==========================================
+function actualizarFechaActual() {
+    const fechaEl = document.getElementById("current-date");
+    if (fechaEl) {
+        const opciones = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+        fechaEl.textContent = new Date().toLocaleDateString('es-ES', opciones);
+    }
+}
+
+function toggleSidebar() {
+    const sidebar = document.getElementById("sidebar");
+    const overlay = document.getElementById("sidebar-overlay");
+    if (!sidebar) return;
+    sidebar.classList.toggle("active");
+    sidebar.classList.toggle("show");
+    if (overlay) {
+        overlay.classList.toggle("active");
+        overlay.classList.toggle("show");
+    }
+}
+
+function marcarNavActiva(sectionId) {
+    document.querySelectorAll('#sidebar .nav-link').forEach(link => {
+        const oc = link.getAttribute('onclick') || '';
+        link.classList.toggle('active', oc.indexOf("'" + sectionId + "'") !== -1);
+    });
+    document.querySelectorAll('.vital-navbtn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.section === sectionId);
+    });
+}
+
+function showSection(sectionId) {
+    document.querySelectorAll('.section-content').forEach(sec => {
+        sec.classList.add('d-none');
+        sec.style.display = 'none';
+    });
+    const target = document.getElementById(`sec-${sectionId}`);
+    if (target) {
+        target.classList.remove('d-none');
+        target.style.display = 'block';
+    }
+    marcarNavActiva(sectionId);
+    // Cerrar el sidebar en móviles
+    const sidebar = document.getElementById("sidebar");
+    const overlay = document.getElementById("sidebar-overlay");
+    if (sidebar) { sidebar.classList.remove('active'); sidebar.classList.remove('show'); }
+    if (overlay) { overlay.classList.remove('active'); overlay.classList.remove('show'); }
+}
+
+// Barra de botones de navegación (solicitud del usuario)
+function crearBarraNavegacion() {
+    if (document.getElementById("vital-navbar-botones")) return;
+    const main = document.getElementById("main-content");
+    if (!main) return;
+
+    const secciones = [
+        { id: 'cotizacion', texto: 'Cotización', icono: 'bi-calculator' },
+        { id: 'recepcion', texto: 'Recepción', icono: 'bi-person-plus-fill' },
+        { id: 'pacientes', texto: 'Pacientes', icono: 'bi-people-fill' },
+        { id: 'ordenes', texto: 'Órdenes', icono: 'bi-receipt' },
+        { id: 'resultados', texto: 'Resultados', icono: 'bi-file-earmark-medical-fill' },
+        { id: 'caja', texto: 'Caja', icono: 'bi-cash-stack' },
+        { id: 'catalogo', texto: 'Catálogo', icono: 'bi-journal-bookmark-fill' }
+    ];
+
+    const barra = document.createElement("div");
+    barra.id = "vital-navbar-botones";
+    barra.className = "vital-navbar-botones d-flex flex-wrap gap-2 mb-3 px-1 py-2";
+    secciones.forEach(s => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "vital-navbtn btn btn-sm btn-outline-primary";
+        btn.dataset.section = s.id;
+        btn.innerHTML = `<i class="bi ${s.icono} me-1"></i>${s.texto}`;
+        btn.onclick = () => showSection(s.id);
+        barra.appendChild(btn);
+    });
+
+    try {
+        // La barra va justo después del topbar (nav.navbar) y antes del contenedor de secciones.
+        const topbar = main.querySelector("nav.navbar");
+        if (topbar && topbar.parentNode === main) {
+            main.insertBefore(barra, topbar.nextSibling);
+        } else {
+            main.insertBefore(barra, main.firstChild);
+        }
+    } catch (e) {
+        console.error("No se pudo insertar la barra de navegación:", e);
+        main.appendChild(barra);
+    }
+
+    const visible = document.querySelector('.section-content:not(.d-none)');
+    if (visible) marcarNavActiva(visible.id.replace('sec-', ''));
+}
+
+// ==========================================
+// CÁLCULO DE EDAD (compartido por Recepción y Cotización)
+// ==========================================
+function calcularEdadDesde(fecha) {
+    if (!fecha) return "";
+    const nac = new Date(fecha);
+    if (isNaN(nac.getTime())) return "";
+    const hoy = new Date();
+    let edad = hoy.getFullYear() - nac.getFullYear();
+    const m = hoy.getMonth() - nac.getMonth();
+    if (m < 0 || (m === 0 && hoy.getDate() < nac.getDate())) edad--;
+    return (edad >= 0 ? edad : 0) + " AÑOS";
+}
+function calcularEdad() {
+    const pares = [["pac-fnac", "pac-edad"], ["fechaNacimiento", "edad"]];
+    pares.forEach(([idFecha, idEdad]) => {
+        const f = document.getElementById(idFecha);
+        const e = document.getElementById(idEdad);
+        if (!f || !e || !f.value) return;
+        const resultado = calcularEdadDesde(f.value);
+        if (resultado) e.value = resultado;
+    });
+}
+
+// ==========================================
+// RECEPCIÓN: BÚSQUEDA Y CARRITO DE EXÁMENES
+// ==========================================
+function buscarPaciente() {
+    const dni = val("pac-dni");
+    if (dni.length < 8) {
+        alert("Ingrese un DNI o documento válido de al menos 8 dígitos.");
+        return;
+    }
+    const lista = (window.pacientesRegistrados || []).concat(window.listaPacientesCache || []);
+    const pac = lista.map(normalizarPaciente).find(p => String(p.dni) === dni);
+    if (!pac) {
+        alert("No se encontró un paciente registrado con ese DNI. Complete los datos manualmente.");
+        return;
+    }
+    setVal("pac-nombre", pac.nombre);
+    setVal("pac-celular", pac.celular);
+    setVal("pac-fnac", pac.fnac);
+    setVal("pac-sexo", pac.sexo || "MASCULINO");
+    if (pac.fnac) {
+        const edad = calcularEdadDesde(pac.fnac);
+        setVal("pac-edad", edad || pac.edad);
+    } else {
+        setVal("pac-edad", pac.edad);
+    }
+}
+
+function filtrarExamenes(query) {
+    const contenedor = document.getElementById("sugerencias-examenes");
+    if (!contenedor) return;
+    contenedor.innerHTML = "";
+    if (!query || query.trim() === "") { contenedor.style.display = "none"; return; }
+
+    const q = query.toLowerCase();
+    const filtrados = examenesCatalogo.filter(ex =>
+        String(ex.nombre || "").toLowerCase().includes(q) ||
+        String(ex.codigo || "").toLowerCase().includes(q)
+    ).slice(0, 60);
+
+    if (filtrados.length === 0) { contenedor.style.display = "none"; return; }
+    contenedor.style.display = "block";
+    filtrados.forEach(ex => {
+        const item = document.createElement("a");
+        item.href = "#";
+        item.className = "list-group-item list-group-item-action py-2";
+        item.innerHTML = `<strong>${escapeHTML(ex.codigo)}</strong> - ${escapeHTML(ex.nombre)} <span class="float-end text-primary">S/ ${Number(ex.precio || 0).toFixed(2)}</span>`;
+        item.onclick = (e) => {
+            e.preventDefault();
+            agregarExamenSeleccionado(ex);
+            const input = document.getElementById("busqueda-examen");
+            if (input) input.value = "";
+            contenedor.style.display = "none";
+        };
+        contenedor.appendChild(item);
+    });
+}
+
+function agregarExamenSeleccionado(ex) {
+    const existente = examenesSeleccionados.find(i => i.codigo === ex.codigo);
+    if (existente) {
+        existente.cantidad += 1;
+    } else {
+        examenesSeleccionados.push({
+            codigo: ex.codigo,
+            nombre: ex.nombre,
+            cantidad: 1,
+            precio: Number(ex.precio || 0),
+            unidad: ex.unidad || "",
+            referencia: ex.referencia || ""
+        });
+    }
+    renderizarTablaSeleccionados();
+}
+
+function cambiarCantidadSeleccionado(codigo, nuevaCant) {
+    const item = examenesSeleccionados.find(i => i.codigo === codigo);
+    if (!item) return;
+    item.cantidad = parseInt(nuevaCant) || 1;
+    if (item.cantidad <= 0) item.cantidad = 1;
+    renderizarTablaSeleccionados();
+}
+
+function eliminarExamenSeleccionado(codigo) {
+    examenesSeleccionados = examenesSeleccionados.filter(i => i.codigo !== codigo);
+    renderizarTablaSeleccionados();
+}
+
+function calcularTotal() {
+    return examenesSeleccionados.reduce((acc, i) => acc + (i.cantidad * i.precio), 0);
+}
+
+function renderizarTablaSeleccionados() {
+    const tabla = document.getElementById("tabla-examenes-seleccionados");
+    if (!tabla) return;
+    const tbody = tabla.querySelector("tbody");
+    const totalEl = document.getElementById("total-cobrar");
+    tbody.innerHTML = "";
+
+    if (examenesSeleccionados.length === 0) {
+        tbody.innerHTML = `<tr id="empty-row"><td colspan="6" class="text-center text-muted py-4">No hay exámenes agregados.</td></tr>`;
+        if (totalEl) totalEl.textContent = "0.00";
+        return;
+    }
+
+    let total = 0;
+    examenesSeleccionados.forEach(item => {
+        const importe = item.cantidad * item.precio;
+        total += importe;
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+            <td>${escapeHTML(item.codigo)}</td>
+            <td>${escapeHTML(item.nombre)}</td>
+            <td><input type="number" class="form-control form-control-sm" style="width:70px" value="${item.cantidad}" min="1" onchange="cambiarCantidadSeleccionado('${item.codigo}', this.value)"></td>
+            <td>S/ ${Number(item.precio).toFixed(2)}</td>
+            <td>S/ ${importe.toFixed(2)}</td>
+            <td class="text-center"><button type="button" class="btn btn-sm btn-outline-danger" onclick="eliminarExamenSeleccionado('${item.codigo}')"><i class="bi bi-trash"></i></button></td>
+        `;
+        tbody.appendChild(tr);
+    });
+    if (totalEl) totalEl.textContent = total.toFixed(2);
+}
+
+// ==========================================
+// REGISTRAR ORDEN Y GENERAR TICKET
+// ==========================================
+function guardarOrdenGenerarTicket() {
+    const dni = val("pac-dni");
+    const nombre = val("pac-nombre");
+    const sexo = val("pac-sexo");
+    const inputFnac = document.getElementById("pac-fnac");
+    const fechaNacimiento = inputFnac ? inputFnac.value.trim() : "";
+    const edad = val("pac-edad");
+    const celularPaciente = val("pac-celular");
+    const doctor = val("pac-doctor");
+    const metodoPago = val("metodo-pago") || "Efectivo";
+
+    if (!dni || !nombre) {
+        alert("Por favor ingrese al menos el DNI y los Nombres y Apellidos del paciente.");
+        return;
+    }
+    if (examenesSeleccionados.length === 0) {
+        alert("Debe agregar al menos un examen a la orden.");
+        return;
+    }
+
+    const total = examenesSeleccionados.reduce((acc, item) => acc + (item.cantidad * item.precio), 0);
+    const nroOrden = "ORD-" + Math.floor(100000 + Math.random() * 900000);
+    const fechaHora = new Date().toLocaleString();
+
+    const nuevaOrden = {
+        nroOrden, fechaHora, dni, nombre, sexo, fechaNacimiento, edad,
+        celular: celularPaciente, doctor, metodoPago,
+        examenes: examenesSeleccionados.map(i => ({ ...i })),
+        total, estado: "Pendiente", en: Date.now()
+    };
+
+    ordenesRegistradas.unshift(nuevaOrden);
+
+    const movimiento = {
+        id: `${Date.now()}-${nroOrden}`,
+        hora: new Date().toLocaleTimeString(),
+        nroOrden, paciente: nombre, metodoPago, monto: total, en: Date.now()
+    };
+    cajaMovimientos.unshift(movimiento);
+
+    // AUTOMÁTICO: el paciente pasa a "Pacientes Registrados"
+    registrarPacienteDesdeOrden(nuevaOrden);
+
+    persistirDatos();
+    actualizarTotalesCaja();
+    cargarOrdenes();
+    cargarPacientes();
+    window.nubeGuardarOrden?.(nuevaOrden);
+    window.nubeGuardarMovimiento?.(movimiento);
+
+    // Limpiar formulario y carrito
+    const form = document.getElementById("form-paciente");
+    if (form) form.reset();
+    setVal("pac-edad", "");
+    examenesSeleccionados = [];
+    renderizarTablaSeleccionados();
+
+    showSection('ordenes');
+    mostrarTicket(nuevaOrden);
+}
+
+// ==========================================
+// GESTIÓN DE ÓRDENES Y RESULTADOS
+// ==========================================
+function cargarOrdenes() {
+    const tbody = document.getElementById('lista-ordenes-body');
+    if (!tbody) return;
+    tbody.innerHTML = "";
+    const ordenes = ordenesRegistradas || [];
+    if (ordenes.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" class="text-center text-muted py-4">No hay órdenes registradas.</td></tr>`;
+        return;
+    }
+    ordenes.forEach(ord => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+            <td class="fw-bold text-primary">${escapeHTML(ord.nroOrden)}</td>
+            <td>${escapeHTML(ord.fechaHora)}</td>
+            <td>${escapeHTML(ord.dni)}</td>
+            <td>${escapeHTML(ord.nombre)}</td>
+            <td><span class="badge bg-warning text-dark">${escapeHTML(ord.estado || "Pendiente")}</span></td>
+            <td class="text-end px-3">
+                <button class="btn btn-sm btn-outline-secondary me-1" title="Reimprimir ticket" onclick="mostrarTicketPorNro('${ord.nroOrden}')"><i class="bi bi-receipt"></i></button>
+                ${ord.resultados ? `<button class="btn btn-sm btn-outline-primary me-1" title="Imprimir informe de resultados" onclick="imprimirInforme('${ord.nroOrden}')"><i class="bi bi-file-ear-medical"></i> Informe</button>` : ""}
+                ${ord.resultados ? `<button class="btn btn-sm btn-outline-danger me-1" title="Descargar informe en PDF" onclick="descargarInformePDF('${ord.nroOrden}')"><i class="bi bi-file-earmark-pdf"></i> PDF</button>` : ""}
+                <button class="btn btn-sm btn-outline-primary me-1" onclick="abrirResultados('${ord.nroOrden}')" title="Resultados"><i class="bi bi-file-earmark-medical"></i> Resultados</button>
+                <button class="btn btn-sm btn-outline-danger" onclick="eliminarOrden('${ord.nroOrden}')" title="Eliminar Orden"><i class="bi bi-trash"></i></button>
+            </td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
+
+// ==========================================
+// 2. ELIMINAR ORDEN (LOCAL Y NUBE + LISTA NEGRA)
+// ==========================================
+function eliminarOrden(nroOrden) {
+    if (confirm("¿Estás seguro de eliminar esta orden por completo?")) {
+        const idOrden = String(nroOrden);
+
+        // 1. Registrar en la lista negra local para que nunca más reviva al actualizar
+        if (!window.ordenesEliminadas) {
+            window.ordenesEliminadas = leerJSON("vital_ordenes_eliminadas", []);
+        }
+        if (!window.ordenesEliminadas.includes(idOrden)) {
+            window.ordenesEliminadas.push(idOrden);
+            localStorage.setItem("vital_ordenes_eliminadas", JSON.stringify(window.ordenesEliminadas));
+        }
+
+        // 2. Filtrar de la memoria actual
+        ordenesRegistradas = ordenesRegistradas.filter(o => String(o.nroOrden) !== idOrden);
+        
+        // 3. Actualizar persistencia local
+        persistirDatos(); 
+
+        // 4. Eliminar permanentemente de Firebase / Nube de inmediato
+        if (typeof nubeEliminarOrden === "function") {
+            nubeEliminarOrden(idOrden);
+        } else if (typeof window.nubeEliminarOrden === "function") {
+            window.nubeEliminarOrden(idOrden);
+        } else if (typeof db !== "undefined" && db) {
+            db.collection("ordenes").doc(idOrden).delete().catch(err => console.log("Nota en nube:", err));
+        }
+
+        // 5. Refrescar la tabla en pantalla
+        cargarOrdenes();
+        
+        if (typeof actualizarTotalesCaja === "function") {
+            actualizarTotalesCaja();
+        }
+    }
+}
+function abrirResultados(nroOrden) {
+    const orden = (ordenesRegistradas || []).find(o => o.nroOrden === nroOrden);
+    if (!orden) return;
+
+    showSection('resultados');
+    const editor = document.getElementById("resultados-editor");
+    if (!editor) return;
+
+    let html = `
+        <div class="alert alert-secondary d-flex justify-content-between align-items-center flex-wrap gap-2 small py-2">
+            <div><strong>Orden:</strong> ${escapeHTML(orden.nroOrden)} | <strong>Paciente:</strong> ${escapeHTML(orden.nombre)} (${escapeHTML(orden.dni)})</div>
+            <div>
+                <button class="btn btn-success btn-sm" onclick="guardarResultados('${orden.nroOrden}')"><i class="bi bi-save me-1"></i> Guardar Resultados</button>
+                <button class="btn btn-outline-primary btn-sm ms-1" onclick="imprimirInforme('${orden.nroOrden}')"><i class="bi bi-printer me-1"></i> Imprimir Informe</button>
+                <button class="btn btn-outline-danger btn-sm ms-1" onclick="descargarInformePDF('${orden.nroOrden}')"><i class="bi bi-file-earmark-pdf me-1"></i> Descargar PDF</button>
+            </div>
+        </div>
+        <div class="list-group">
+    `;
+
+    orden.examenes.forEach((ex, exIdx) => {
+        const guardado = (orden.resultados || []).find(r => r.codigo === ex.codigo);
+        const plantilla = obtenerPlantillaIndicadores(ex.nombre);
+        const indicadores = plantilla && plantilla.length ? plantilla : [{
+            nombre: "Resultado del análisis",
+            unidad: ex.unidad || "",
+            refMin: ex.refMin ?? "",
+            refMax: ex.refMax ?? "",
+            referencia: ex.referencia || ""
+        }];
+
+        let filas = "";
+        indicadores.forEach((ind, indIdx) => {
+            const previo = guardado && guardado.indicadores && guardado.indicadores[indIdx] ? guardado.indicadores[indIdx] : null;
+            if (ind.esSeccion) {
+                filas += `
+                    <div class="row g-2 mb-2 mt-3" data-ex="${exIdx}" data-esseccion="true" data-nombre="${escapeHTML(ind.nombre)}">
+                        <div class="col-12">
+                            <h6 class="fw-bold text-dark bg-light p-2 border-start border-primary border-4 mb-0">${escapeHTML(ind.nombre)}</h6>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+            const referencia = ind.referencia || formatoRango(ind.refMin, ind.refMax);
+            const tieneUnidad = ind.unidad && ind.unidad.trim() !== "";
+            filas += `
+                <div class="row g-2 mb-2 align-items-center" data-ex="${exIdx}" data-ind="${indIdx}" data-nombre="${escapeHTML(ind.nombre)}" data-refmin="${escapeHTML(ind.refMin ?? "")}" data-refmax="${escapeHTML(ind.refMax ?? "")}">
+                    <div class="col-md-4"><label class="form-label small mb-0 ps-3">${escapeHTML(ind.nombre)}</label></div>
+                    <div class="${tieneUnidad ? 'col-md-3' : 'col-md-4'}">
+                        <input type="text" class="form-control form-control-sm" data-campo="resultado" placeholder="Valor obtenido" value="${escapeHTML(previo ? previo.resultado : "")}">
+                    </div>
+                    ${tieneUnidad ? `
+                    <div class="col-md-2">
+                        <input type="text" class="form-control form-control-sm bg-light" data-campo="unidad" value="${escapeHTML(ind.unidad)}" readonly>
+                    </div>` : `<input type="hidden" data-campo="unidad" value="">`}
+                    <div class="${tieneUnidad ? 'col-md-3' : 'col-md-4'}">
+                        <input type="text" class="form-control form-control-sm bg-light" data-campo="referencia" value="${escapeHTML(referencia)}" readonly>
+                    </div>
+                </div>
+            `;
+        });
+
+        html += `
+            <div class="list-group-item mb-3 shadow-sm border rounded">
+                <h6 class="fw-bold text-primary">${escapeHTML(ex.nombre)} (${escapeHTML(ex.codigo)})</h6>
+                ${filas}
+            </div>
+        `;
+    });
+
+    html += `</div>`;
+    editor.innerHTML = html;
+}
+
+function guardarResultados(nroOrden, silencioso = false) {
+    const orden = (ordenesRegistradas || []).find(o => o.nroOrden === nroOrden);
+    const editor = document.getElementById("resultados-editor");
+    if (!orden || !editor) return false;
+
+    const grupos = editor.querySelectorAll("[data-ex]");
+    if (!grupos.length) return false;
+
+    const porExamen = {};
+    grupos.forEach(fila => {
+        const exIdx = fila.dataset.ex;
+        if (!porExamen[exIdx]) porExamen[exIdx] = [];
+        const esSeccion = fila.dataset.esseccion === "true";
+        if (esSeccion) {
+            porExamen[exIdx].push({
+                nombre: fila.dataset.nombre || "", esSeccion: true,
+                resultado: "", unidad: "", refMin: "", refMax: "", referencia: ""
+            });
+            return;
+        }
+        const leer = campo => {
+            const el = fila.querySelector(`[data-campo="${campo}"]`);
+            return el ? el.value.trim() : "";
+        };
+        porExamen[exIdx].push({
+            nombre: fila.dataset.nombre || "Resultado", esSeccion: false,
+            resultado: leer("resultado"), unidad: leer("unidad"),
+            refMin: fila.dataset.refmin || "", refMax: fila.dataset.refmax || "",
+            referencia: leer("referencia")
+        });
+    });
+
+    orden.resultados = Object.keys(porExamen).sort((a, b) => a - b).map(exIdx => {
+        const base = orden.examenes[parseInt(exIdx, 10)];
+        const catalogo = examenesCatalogo.find(c => c.codigo === base.codigo);
+        return {
+            codigo: base.codigo, nombre: base.nombre,
+            metodo: (catalogo && catalogo.metodo) || "",
+            indicadores: porExamen[exIdx]
+        };
+    });
+
+    orden.estado = "Resultados listos";
+    orden.en = Date.now();
+    persistirDatos();
+    cargarOrdenes();
+    window.nubeGuardarOrden?.(orden);
+
+    if (!silencioso) alert(`Resultados guardados correctamente para la orden ${nroOrden}.`);
+    return true;
+}
+
+// ==========================================
+// CATÁLOGO Y PLANTILLAS
+// ==========================================
+function obtenerPlantillaIndicadores(nombreExamen) {
+    if (!nombreExamen) return [];
+    const normalizado = nombreExamen.toUpperCase()
+        .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+        .replace(/-/g, " ")
+        .replace(/\s+/g, " ")
+        .trim();
+
+    const equivalencias = [
+        { terms: ["HEMOGRAMA"], key: "HEMOGRAMA COMPLETO AUTOMATIZADO" },
+        { terms: ["LIPIDICO"], key: "PERFIL LIPIDICO" },
+        { terms: ["HEPATICO"], key: "PERFIL HEPATICO" },
+        { terms: ["RENAL"], key: "PERFIL RENAL" },
+        { terms: ["GLICOSILADA", "HBA1C"], key: "HEMOGLOBINA GLICOSILADA" },
+        { terms: ["GRUPO SANGUINEO", "FACTOR RH", "GRUPO Y FACTOR"], key: "GRUPO SANGUINEO Y FACTOR RH" },
+        { terms: ["DENGUE"], key: "DENGUE IGG / IGM" },
+        { terms: ["UROCULTIVO"], key: "UROCULTIVO Y ANTIBIOGRAMA" },
+        { terms: ["ORINA"], key: "EXAMEN COMPLETO DE ORINA" },
+        { terms: ["REACCION INFLAMATORIA", "EXAMEN GENERAL DE HECES"], key: "REACCION INFLAMATORIA EN HECES" },
+        { terms: ["PARASITOLOGICO"], key: "PARASITOLOGICO SERIADO 3 MUESTRAS" },
+        { terms: ["PSA"], key: "INDICE DE PSA" },
+        { terms: ["PROTEINA C REACTIVA"], key: "PROTEINA C REACTIVA" },
+        { terms: ["SEDIMENTACION", "VSG"], key: "VELOCIDAD DE SEDIMENTACION GLOBULAR" },
+        { terms: ["HIV", "RPR", "SIFILIS", "SEROLOGICAS", "VDRL"], key: "SEROLOGIA (VIH / SIFILIS)" },
+        { terms: ["BIOQUIMICA", "BIOQUÍMICA", "PERFIL DE RUTINA", "GLUCOSA"], key: "EXAMEN DE BIOQUIMICA" }
+    ];
+
+    for (const item of equivalencias) {
+        const coincide = item.terms.some(term => normalizado.includes(term));
+        if (coincide && BASE_VALORES_REFERENCIALES[item.key]) {
+            return BASE_VALORES_REFERENCIALES[item.key];
+        }
+    }
+    for (const clave in BASE_VALORES_REFERENCIALES) {
+        const claveNormalizada = clave.toUpperCase()
+            .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+            .replace(/-/g, " ")
+            .replace(/\s+/g, " ")
+            .trim();
+        if (normalizado === claveNormalizada || normalizado.includes(claveNormalizada) || claveNormalizada.includes(normalizado)) {
+            return BASE_VALORES_REFERENCIALES[clave];
+        }
+    }
+    return [];
+}
+
+function marcarRango(resultado, refMin, refMax) {
+    const num = parseFloat(String(resultado).replace(",", "."));
+    if (resultado === "" || resultado === null || isNaN(num)) return "";
+    const min = parseFloat(refMin);
+    const max = parseFloat(refMax);
+    if (!isNaN(min) && num < min) return " ↓";
+    if (!isNaN(max) && num > max) return " ↑";
+    return "";
+}
+
+function prepararNuevoExamen() {
+    const form = document.getElementById("form-catalogo");
+    if (form) form.reset();
+    setVal("cat-id-original", "");
+    const titulo = document.getElementById("catalogo-form-titulo");
+    if (titulo) titulo.innerHTML = `<i class="bi bi-layout-text-window-reverse me-2"></i>Nuevo Examen`;
+    const cont = document.getElementById("contenedor-indicadores");
+    if (cont) cont.innerHTML = "";
+}
+
+function agregarIndicadorResultado() {
+    const contenedor = document.getElementById("contenedor-indicadores");
+    if (!contenedor) return;
+    const div = document.createElement("div");
+    div.className = "row g-2 mb-2 align-items-center indicador-row";
+    div.innerHTML = `
+        <div class="col-4"><input type="text" class="form-control form-control-sm" placeholder="Nombre parámetro"></div>
+        <div class="col-3"><input type="text" class="form-control form-control-sm" placeholder="Unidad"></div>
+        <div class="col-4"><input type="text" class="form-control form-control-sm" placeholder="Referencia"></div>
+        <div class="col-1 text-center"><button type="button" class="btn btn-sm text-danger" onclick="this.closest('.row').remove()"><i class="bi bi-x-lg"></i></button></div>
+    `;
+    contenedor.appendChild(div);
+}
+
+function vaciarTodosLosIndicadores() {
+    const contenedor = document.getElementById("contenedor-indicadores");
+    if (contenedor) contenedor.innerHTML = "";
+}
+
+function guardarExamenCatalogo() {
+    const codigo = val("cat-codigo");
+    const nombre = val("cat-nombre");
+    const precio = parseFloat(document.getElementById("cat-precio").value) || 0;
+    const muestra = val("cat-muestra");
+    const metodo = val("cat-metodo");
+    const plantilla = val("cat-plantilla");
+    const refTexto = val("cat-ref-texto");
+
+    if (!codigo || !nombre) {
+        alert("Complete el código y nombre del examen.");
+        return;
+    }
+    const nuevoEx = { codigo, nombre, precio, muestra, metodo, plantilla, refTexto, en: Date.now() };
+    const index = examenesCatalogo.findIndex(e => e.codigo === codigo);
+    if (index >= 0) {
+        // Conservar campos referenciales previos si el formulario no los trae
+        const prev = examenesCatalogo[index];
+        examenesCatalogo[index] = Object.assign({}, prev, nuevoEx);
+    } else {
+        examenesCatalogo.push(nuevoEx);
+    }
+    renderizarTablaCatalogo();
+    persistirDatos();
+    window.nubeGuardarExamen?.(nuevoEx);
+    alert("Examen guardado en el catálogo correctamente.");
+    prepararNuevoExamen();
+}
+
+function renderizarTablaCatalogo(filtro = "") {
+    const tbody = document.getElementById("tabla-catalogo-body");
+    const countEl = document.getElementById("total-cat-count");
+    if (!tbody) return;
+    tbody.innerHTML = "";
+    filtro = filtro || "";
+    const filtrados = examenesCatalogo.filter(ex =>
+        String(ex.nombre || "").toLowerCase().includes(filtro.toLowerCase()) ||
+        String(ex.codigo || "").toLowerCase().includes(filtro.toLowerCase())
+    );
+    if (countEl) countEl.textContent = examenesCatalogo.length;
+    if (filtrados.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" class="text-center text-muted py-3">No hay exámenes en el catálogo.</td></tr>`;
+        return;
+    }
+    filtrados.forEach(ex => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+            <td>${escapeHTML(ex.codigo)}</td>
+            <td class="fw-semibold">${escapeHTML(ex.nombre)}</td>
+            <td><span class="badge bg-light text-dark border">Plantilla</span></td>
+            <td>S/ ${Number(ex.precio || 0).toFixed(2)}</td>
+            <td class="text-end">
+                <button class="btn btn-sm btn-outline-primary me-1" onclick="editarExamenCatalogo('${ex.codigo}')" title="Editar"><i class="bi bi-pencil"></i></button>
+                <button class="btn btn-sm btn-outline-danger" onclick="eliminarExamenCatalogo('${ex.codigo}')" title="Eliminar"><i class="bi bi-trash"></i></button>
+            </td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
+
+function editarExamenCatalogo(codigo) {
+    const ex = examenesCatalogo.find(e => e.codigo === codigo);
+    if (!ex) return;
+    setVal("cat-codigo", ex.codigo);
+    setVal("cat-id-original", ex.codigo);
+    setVal("cat-nombre", ex.nombre);
+    setVal("cat-precio", ex.precio || 0);
+    setVal("cat-muestra", ex.muestra || "");
+    setVal("cat-metodo", ex.metodo || "");
+    setVal("cat-plantilla", ex.plantilla || "personalizada");
+    setVal("cat-ref-texto", ex.refTexto || "");
+    const titulo = document.getElementById("catalogo-form-titulo");
+    if (titulo) titulo.innerHTML = `<i class="bi bi-pencil-square me-2"></i>Editar Examen: ${escapeHTML(ex.codigo)}`;
+}
+
+function eliminarExamenCatalogo(codigo) {
+    if (!confirm(`¿Estás seguro de eliminar el examen con código ${codigo} del catálogo?`)) return;
+    
+    const idCodStr = String(codigo);
+
+    // 1. Guardar en la lista negra local persistente
+    if (!window.examenesEliminados) {
+        window.examenesEliminados = leerJSON("vital_examenes_eliminados", []);
+    }
+    if (!window.examenesEliminados.includes(idCodStr)) {
+        window.examenesEliminados.push(idCodStr);
+        localStorage.setItem("vital_examenes_eliminados", JSON.stringify(window.examenesEliminados));
+    }
+
+    // 2. Quitar de la memoria local actual
+    examenesCatalogo = examenesCatalogo.filter(e => String(e.codigo) !== idCodStr);
+    
+    // 3. Guardar cambios locales
+    persistirDatos();
+    renderizarTablaCatalogo();
+
+    // 4. Eliminar físicamente de la nube de Firebase de inmediato
+    if (typeof nubeEliminarExamen === "function") {
+        nubeEliminarExamen(idCodStr);
+    } else if (typeof db !== "undefined" && db) {
+        deleteDoc(doc(db, "catalogo", idCodStr)).catch(err => console.log("Nota en nube:", err));
+    }
+
+    alert("Examen eliminado del catálogo correctamente y no volverá a aparecer.");
+}
+
+// ==========================================
+// CONTROL DE CAJA
+// ==========================================
+function actualizarTotalesCaja() {
+    let totalHoy = 0, efectivo = 0, digital = 0;
+    (cajaMovimientos || []).forEach(m => {
+        const monto = Number(m.monto || 0);
+        totalHoy += monto;
+        if (m.metodoPago === "Efectivo") efectivo += monto;
+        else digital += monto;
+    });
+    const setTxt = (id, txt) => { const el = document.getElementById(id); if (el) el.textContent = txt; };
+    setTxt("caja-total-hoy", totalHoy.toFixed(2));
+    setTxt("caja-efectivo", efectivo.toFixed(2));
+    setTxt("caja-digital", digital.toFixed(2));
+
+    const tbody = document.getElementById("caja-tabla-body");
+    if (!tbody) return;
+    tbody.innerHTML = "";
+    
+    if (!cajaMovimientos || cajaMovimientos.length === 0) {
+        // Nota: Se cambió colspan a 6 porque ahora tenemos 6 columnas en total
+        tbody.innerHTML = `<tr><td colspan="6" class="text-center text-muted py-3">No hay movimientos registrados hoy.</td></tr>`;
+        return;
+    }
+    
+    cajaMovimientos.forEach(m => {
+        // Asegurar que cada movimiento tenga un ID único (si no lo tiene se le asigna uno temporal basado en tiempo/azar)
+        if (!m.id) {
+            m.id = 'mov_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
+        }
+
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+            <td>${escapeHTML(m.hora)}</td>
+            <td class="fw-bold">${escapeHTML(m.nroOrden)}</td>
+            <td>${escapeHTML(m.paciente)}</td>
+            <td><span class="badge bg-info text-dark">${escapeHTML(m.metodoPago)}</span></td>
+            <td class="fw-bold text-success">S/ ${Number(m.monto || 0).toFixed(2)}</td>
+            <td class="text-end">
+                <button class="btn btn-sm btn-outline-danger" onclick="eliminarMovimientoCaja('${m.id}')" title="Eliminar movimiento">
+                    <i class="bi bi-trash"></i>
+                </button>
+            </td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
+
+function eliminarMovimientoCaja(idMovimiento) {
+    if (confirm("¿Deseas eliminar este movimiento de caja?")) {
+        const idMovStr = String(idMovimiento);
+        
+        // 1. Guardar en lista negra local persistente
+        let eliminados = JSON.parse(localStorage.getItem("vital_caja_eliminados") || "[]");
+        if (!eliminados.includes(idMovStr)) {
+            eliminados.push(idMovStr);
+            localStorage.setItem("vital_caja_eliminados", JSON.stringify(eliminados));
+        }
+
+        // 2. Quitar de memoria local
+        cajaMovimientos = cajaMovimientos.filter(m => String(m.id) !== idMovStr);
+        persistirDatos();
+        actualizarTotalesCaja();
+
+        // 3. Borrar físicamente de la nube de Firebase de inmediato
+        if (typeof nubeEliminarMovimiento === "function") {
+            nubeEliminarMovimiento(idMovStr);
+        } else if (typeof db !== "undefined" && db) {
+            deleteDoc(doc(db, "caja", idMovStr)).catch(err => console.log(err));
+        }
+    }
+}
+// ==========================================
+// MÓDULO DE COTIZACIÓN (formulario + guardadas)
+// ==========================================
+function filtrarExamenesCotizacion(query) {
+    const contenedor = document.getElementById("sugerencias-examenes-cotizacion");
+    if (!contenedor) return;
+    contenedor.innerHTML = "";
+    if (!query || query.trim() === "") { contenedor.style.display = "none"; return; }
+
+    const q = query.toLowerCase();
+    const filtrados = examenesCatalogo.filter(ex =>
+        String(ex.nombre || "").toLowerCase().includes(q) ||
+        String(ex.codigo || "").toLowerCase().includes(q)
+    ).slice(0, 60);
+
+    if (filtrados.length === 0) { contenedor.style.display = "none"; return; }
+    contenedor.style.display = "block";
+    filtrados.forEach(ex => {
+        const item = document.createElement("a");
+        item.href = "#";
+        item.className = "list-group-item list-group-item-action py-2";
+        item.innerHTML = `<strong>${escapeHTML(ex.codigo)}</strong> - ${escapeHTML(ex.nombre)} <span class="float-end text-primary">S/ ${Number(ex.precio || 0).toFixed(2)}</span>`;
+        item.onclick = (e) => {
+            e.preventDefault();
+            agregarExamenCotizacion(ex);
+            const input = document.getElementById("busqueda-examen-cotizacion");
+            if (input) input.value = "";
+            contenedor.style.display = "none";
+        };
+        contenedor.appendChild(item);
+    });
+}
+
+function agregarExamenCotizacion(ex) {
+    const existente = listaCotizacionInd.find(i => i.codigo === ex.codigo);
+    if (existente) existente.cantidad += 1;
+    else listaCotizacionInd.push({ codigo: ex.codigo, nombre: ex.nombre, cantidad: 1, precio: Number(ex.precio || 0) });
+    renderizarTablaCotizacion();
+}
+
+function cambiarCantidadCotizacion(codigo, nuevaCant) {
+    const item = listaCotizacionInd.find(i => i.codigo === codigo);
+    if (!item) return;
+    item.cantidad = parseInt(nuevaCant) || 1;
+    if (item.cantidad <= 0) item.cantidad = 1;
+    renderizarTablaCotizacion();
+}
+
+function eliminarExamenCotizacion(codigo) {
+    listaCotizacionInd = listaCotizacionInd.filter(i => i.codigo !== codigo);
+    renderizarTablaCotizacion();
+}
+
+function renderizarTablaCotizacion() {
+    const tabla = document.getElementById("tabla-cotizacion-independiente");
+    if (!tabla) return;
+    const tbody = tabla.querySelector("tbody");
+    const totalEl = document.getElementById("total-cotizacion");
+    tbody.innerHTML = "";
+
+    if (listaCotizacionInd.length === 0) {
+        tbody.innerHTML = `<tr id="empty-row-cotizacion"><td colspan="6" class="text-center text-muted py-4">No hay exámenes agregados para cotizar.</td></tr>`;
+        if (totalEl) totalEl.textContent = "0.00";
+        return;
+    }
+    let total = 0;
+    listaCotizacionInd.forEach(item => {
+        const importe = item.cantidad * item.precio;
+        total += importe;
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+            <td>${escapeHTML(item.codigo)}</td>
+            <td>${escapeHTML(item.nombre)}</td>
+            <td><input type="number" class="form-control form-control-sm" style="width:70px" value="${item.cantidad}" min="1" onchange="cambiarCantidadCotizacion('${item.codigo}', this.value)"></td>
+            <td>S/ ${Number(item.precio).toFixed(2)}</td>
+            <td>S/ ${importe.toFixed(2)}</td>
+            <td class="text-center"><button type="button" class="btn btn-sm btn-outline-danger" onclick="eliminarExamenCotizacion('${item.codigo}')"><i class="bi bi-trash"></i></button></td>
+        `;
+        tbody.appendChild(tr);
+    });
+    if (totalEl) totalEl.textContent = total.toFixed(2);
+}
+
+function guardarCotizacion() {
+    const nombres = val("nombres");
+    if (!nombres) {
+        alert("Por favor ingrese al menos el nombre del paciente para guardar la cotización.");
+        return;
+    }
+    if (listaCotizacionInd.length === 0) {
+        alert("Debe agregar al menos un examen para guardar la cotización.");
+        return;
+    }
+
+    const total = listaCotizacionInd.reduce((a, i) => a + i.cantidad * i.precio, 0);
+    const cotizacion = {
+        id: currentCotizacionId || ("cot_" + Date.now()),
+        nroCotizacion: currentCotizacionId
+            ? ((window.cotizacionesGuardadas.find(c => c.id === currentCotizacionId) || {}).nroCotizacion || ("COT-" + String(Date.now()).slice(-4)))
+            : ("COT-" + Math.floor(1000 + Math.random() * 9000)),
+        fechaHora: new Date().toLocaleString(),
+        convenio: val("tipo-convenio-cotizacion") || "Particular",
+        paciente: {
+            dni: val("dni"),
+            nombres: nombres,
+            medico: val("medico"),
+            fechaNacimiento: val("fechaNacimiento"),
+            edad: val("edad"),
+            celular: val("celular"),
+            sexo: val("sexo") || "MASCULINO"
+        },
+        examenes: listaCotizacionInd.map(i => ({ codigo: i.codigo, nombre: i.nombre, cantidad: i.cantidad, precio: i.precio, importe: i.cantidad * i.precio })),
+        total
+    };
+
+    if (!window.cotizacionesGuardadas) window.cotizacionesGuardadas = [];
+    const idx = window.cotizacionesGuardadas.findIndex(c => String(c.id) === String(cotizacion.id));
+    if (idx >= 0) {
+        cotizacion.nroCotizacion = window.cotizacionesGuardadas[idx].nroCotizacion || cotizacion.nroCotizacion;
+        window.cotizacionesGuardadas[idx] = cotizacion;
+        alert("¡Cotización actualizada con éxito!");
+    } else {
+        window.cotizacionesGuardadas.unshift(cotizacion);
+        alert("¡Cotización guardada exitosamente!");
+    }
+    currentCotizacionId = cotizacion.id;
+
+    persistirDatos();
+    window.nubeGuardarCotizacion?.(cotizacion);
+    setVal("input-buscar-cotizacion", "");
+    cargarCotizaciones();
+}
+
+function cargarCotizaciones() {
+    const lista = (window.cotizacionesGuardadas || []).map(normalizarCotizacion);
+    lista.sort((a, b) => String(b.fechaHora).localeCompare(String(a.fechaHora)));
+    renderizarTablaCotizaciones(lista);
+}
+
+function buscarCotizaciones() {
+    const input = document.getElementById("input-buscar-cotizacion");
+    const filtro = (input ? input.value : "").toLowerCase().trim();
+    let lista = (window.cotizacionesGuardadas || []).map(normalizarCotizacion);
+    if (filtro !== "") {
+        lista = lista.filter(c =>
+            String(c.nombre || "").toLowerCase().includes(filtro) ||
+            String(c.dni || "").toLowerCase().includes(filtro) ||
+            String(c.celular || "").toLowerCase().includes(filtro) ||
+            String(c.nroCotizacion || "").toLowerCase().includes(filtro) ||
+            String(c.fechaHora || "").toLowerCase().includes(filtro)
+        );
+    }
+    lista.sort((a, b) => String(b.fechaHora).localeCompare(String(a.fechaHora)));
+    renderizarTablaCotizaciones(lista);
+}
+
+// La tabla superior tiene 5 columnas: Nro | Fecha y Hora | Paciente / DNI | Total | Acciones
+function renderizarTablaCotizaciones(lista) {
+    const tbody = document.getElementById("tabla-cotizaciones-body");
+    if (!tbody) return;
+    tbody.innerHTML = "";
+    if (!lista || lista.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" class="text-center text-muted py-3">No se encontraron cotizaciones registradas.</td></tr>`;
+        return;
+    }
+    lista.forEach(c => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+            <td><strong>${escapeHTML(c.nroCotizacion || c.id)}</strong></td>
+            <td><small>${escapeHTML(c.fechaHora || "")}</small></td>
+            <td><strong>${escapeHTML(c.nombre || "N/A")}</strong><br><span class="text-muted small">DNI: ${escapeHTML(c.dni || "-")}</span></td>
+            <td><strong>S/ ${Number(c.total || 0).toFixed(2)}</strong></td>
+            <td class="text-center">
+                <div class="btn-group btn-group-sm" role="group">
+                    <button class="btn btn-outline-primary" title="Ver / Modificar" onclick="cargarCotizacion('${c.id}')"><i class="bi bi-pencil-square"></i></button>
+                    <button class="btn btn-outline-info" title="Imprimir" onclick="imprimirCotizacionGuardada('${c.id}')"><i class="bi bi-printer"></i></button>
+                    <button class="btn btn-outline-success" title="Pasar a Recepción" onclick="pasarCotizacionARecepcionDesde('${c.id}')"><i class="bi bi-arrow-right-circle"></i></button>
+                    <button class="btn btn-outline-danger" title="Eliminar" onclick="eliminarCotizacion('${c.id}')"><i class="bi bi-trash"></i></button>
+                </div>
+            </td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
+
+function buscarCotizacionPorId(id) {
+    return (window.cotizacionesGuardadas || []).find(c => String(c.id) === String(id));
+}
+
+function cargarCotizacion(id) {
+    const c = buscarCotizacionPorId(id);
+    if (!c) return;
+    const n = normalizarCotizacion(c);
+    currentCotizacionId = n.id;
+
+    setVal("dni", n.dni);
+    setVal("nombres", n.nombre);
+    setVal("medico", n.doctor);
+    setVal("fechaNacimiento", n.fechaNacimiento);
+    setVal("edad", n.edad);
+    setVal("celular", n.celular);
+    setVal("sexo", n.sexo || "MASCULINO");
+    setVal("tipo-convenio-cotizacion", n.convenio || "Particular");
+
+    listaCotizacionInd = (n.examenes || []).map(e => ({ codigo: e.codigo, nombre: e.nombre, cantidad: e.cantidad, precio: e.precio }));
+    renderizarTablaCotizacion();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function eliminarCotizacion(id) {
+    if (!confirm("¿Desea eliminar esta cotización guardada?")) return;
+    const idCotStr = String(id);
+    
+    // 1. Guardar en lista negra local persistente
+    let eliminados = JSON.parse(localStorage.getItem("vital_cotizaciones_eliminadas") || "[]");
+    if (!eliminados.includes(idCotStr)) {
+        eliminados.push(idCotStr);
+        localStorage.setItem("vital_cotizaciones_eliminadas", JSON.stringify(eliminados));
+    }
+
+    // 2. Quitar de memoria local
+    window.cotizacionesGuardadas = (window.cotizacionesGuardadas || []).filter(c => String(c.id) !== idCotStr);
+    if (typeof currentCotizacionId !== "undefined" && String(currentCotizacionId) === idCotStr) {
+        currentCotizacionId = null;
+        if (typeof listaCotizacionInd !== "undefined") listaCotizacionInd = [];
+    }
+    
+    persistirDatos();
+    if (typeof cargarCotizaciones === "function") cargarCotizaciones();
+
+    // 3. Borrar físicamente de la nube de Firebase de inmediato
+    if (typeof nubeEliminarCotizacion === "function") {
+        nubeEliminarCotizacion(idCotStr);
+    } else if (typeof db !== "undefined" && db) {
+        deleteDoc(doc(db, "cotizaciones", idCotStr)).catch(err => console.log(err));
+    }
+}
+function imprimirCotizacionGuardada(id) {
+    const c = buscarCotizacionPorId(id);
+    if (!c) { alert("No se encontró la cotización."); return; }
+    mostrarTicketCotizacion(normalizarCotizacionParaTicket(c));
+}
+
+// Arma el objeto con la forma que espera el ticket térmico de cotización
+function normalizarCotizacionParaTicket(c) {
+    const n = normalizarCotizacion(c);
+    return {
+        id: n.id,
+        nroCotizacion: n.nroCotizacion,
+        fechaHora: n.fechaHora,
+        convenio: n.convenio,
+        paciente: {
+            dni: n.dni, nombres: n.nombre, medico: n.doctor,
+            fechaNacimiento: n.fechaNacimiento, edad: n.edad, celular: n.celular
+        },
+        examenes: n.examenes.map(e => ({ nombre: e.nombre, cantidad: e.cantidad, precioUnit: e.precio, importe: e.importe })),
+        total: n.total
+    };
+}
+
+function imprimirCotizacion() {
+    const nombres = val("nombres");
+    if (listaCotizacionInd.length === 0) {
+        alert("No hay una cotización activa para imprimir.");
+        return;
+    }
+    const cotActual = {
+        id: currentCotizacionId || Date.now(),
+        nroCotizacion: currentCotizacionId
+            ? ((buscarCotizacionPorId(currentCotizacionId) || {}).nroCotizacion || ("COT-" + String(currentCotizacionId).replace(/\D/g, "").slice(-4)))
+            : "COT-" + Math.floor(1000 + Math.random() * 9000),
+        fechaHora: new Date().toLocaleString(),
+        convenio: val("tipo-convenio-cotizacion") || "Particular",
+        paciente: {
+            dni: val("dni"), nombres: nombres, medico: val("medico"),
+            fechaNacimiento: val("fechaNacimiento"), edad: val("edad"), celular: val("celular")
+        },
+        examenes: listaCotizacionInd.map(i => ({ nombre: i.nombre, cantidad: i.cantidad, precioUnit: i.precio, importe: i.cantidad * i.precio })),
+        total: listaCotizacionInd.reduce((a, i) => a + i.cantidad * i.precio, 0)
+    };
+    mostrarTicketCotizacion(cotActual);
+}
+
+function llenarRecepcionDesdeCotizacion(n) {
+    setVal("pac-dni", n.dni);
+    setVal("pac-nombre", n.nombre);
+    setVal("pac-doctor", n.doctor);
+    setVal("pac-fnac", n.fechaNacimiento);
+    setVal("pac-celular", n.celular);
+    setVal("pac-sexo", n.sexo || "MASCULINO");
+    if (n.fechaNacimiento) setVal("pac-edad", calcularEdadDesde(n.fechaNacimiento) || n.edad);
+    else setVal("pac-edad", n.edad);
+}
+
+function pasarCotizacionARecepcion() {
+    if (listaCotizacionInd.length === 0) {
+        alert("No hay exámenes en la cotización para pasar a admisión.");
+        return;
+    }
+    const n = {
+        dni: val("dni"), nombre: val("nombres"), doctor: val("medico"),
+        fechaNacimiento: val("fechaNacimiento"), edad: val("edad"),
+        celular: val("celular"), sexo: val("sexo") || "MASCULINO"
+    };
+    llenarRecepcionDesdeCotizacion(n);
+
+    listaCotizacionInd.forEach(item => {
+        const existente = examenesSeleccionados.find(i => i.codigo === item.codigo);
+        if (existente) existente.cantidad += item.cantidad;
+        else {
+            const catalogo = examenesCatalogo.find(c => c.codigo === item.codigo);
+            examenesSeleccionados.push({
+                codigo: item.codigo, nombre: item.nombre, cantidad: item.cantidad, precio: item.precio,
+                unidad: catalogo ? catalogo.unidad || "" : "", referencia: catalogo ? catalogo.referencia || "" : ""
+            });
+        }
+    });
+    listaCotizacionInd = [];
+    renderizarTablaCotizacion();
+    renderizarTablaSeleccionados();
+    showSection('recepcion');
+    alert("Cotización pasada a admisión. Complete/verifique los datos del paciente y registre la orden.");
+}
+
+function pasarCotizacionARecepcionDesde(id) {
+    const c = buscarCotizacionPorId(id);
+    if (!c) { alert("No se encontró la cotización."); return; }
+    const n = normalizarCotizacion(c);
+    llenarRecepcionDesdeCotizacion(n);
+
+    examenesSeleccionados = (n.examenes || []).map(e => {
+        const catalogo = examenesCatalogo.find(cat => cat.codigo === e.codigo);
+        return {
+            codigo: e.codigo, nombre: e.nombre, cantidad: e.cantidad, precio: e.precio,
+            unidad: catalogo ? catalogo.unidad || "" : "", referencia: catalogo ? catalogo.referencia || "" : ""
+        };
+    });
+    renderizarTablaSeleccionados();
+    showSection('recepcion');
+    alert(`Cotización ${n.nroCotizacion} transferida a Recepción. Ya puede generar la orden.`);
+}
+
+// ==========================================
+// GESTIÓN Y EDICIÓN DE PACIENTES
+// ==========================================
+function cargarPacientes() {
+    const lista = (window.pacientesRegistrados || []).map(normalizarPaciente);
+    lista.sort((a, b) => String(b.ultimaAtencion || "").localeCompare(String(a.ultimaAtencion || "")));
+    window.listaPacientesCache = lista;
+    renderizarTablaPacientes(lista);
+}
+
+function renderizarTablaPacientes(pacientes) {
+    const tbody = document.getElementById('lista-pacientes-body');
+    if (!tbody) return;
+    tbody.innerHTML = '';
+    if (!pacientes || pacientes.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" class="text-center text-muted py-4">No se encontraron pacientes registrados.</td></tr>`;
+        return;
+    }
+    pacientes.forEach(p => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td class="fw-bold">${escapeHTML(p.dni)}</td>
+            <td>${escapeHTML(p.nombre)}</td>
+            <td>${escapeHTML(p.celular || '-')}</td>
+            <td>${escapeHTML(p.fnac || '-')}</td>
+            <td>${escapeHTML(p.edad || '-')}</td>
+            <td>${escapeHTML(p.sexo || '-')}</td>
+            <td class="text-end px-3 text-nowrap">
+                <button type="button" class="btn btn-sm btn-outline-primary me-1 btn-editar-paciente" title="Editar Paciente"><i class="bi bi-pencil-square"></i></button>
+                <button type="button" class="btn btn-sm btn-outline-danger btn-eliminar-paciente" title="Eliminar Paciente"><i class="bi bi-trash3-fill"></i></button>
+            </td>
+        `;
+        tr.querySelector('.btn-editar-paciente').addEventListener('click', () => abrirEditarPaciente(p.dni));
+        tr.querySelector('.btn-eliminar-paciente').addEventListener('click', () => eliminarPaciente(p.dni));
+        tbody.appendChild(tr);
+    });
+}
+
+function filtrarPacientesTabla(filtro) {
+    const cache = window.listaPacientesCache || [];
+    const texto = (filtro || "").toLowerCase();
+    const filtrados = cache.filter(p =>
+        String(p.dni || "").toLowerCase().includes(texto) ||
+        String(p.nombre || "").toLowerCase().includes(texto)
+    );
+    renderizarTablaPacientes(filtrados);
+}
+
+function abrirEditarPaciente(dni) {
+    const pac = (window.listaPacientesCache || []).find(p => String(p.dni) === String(dni));
+    if (!pac) return;
+    setVal('edit-pac-original-dni', pac.dni);
+    setVal('edit-pac-dni', pac.dni);
+    setVal('edit-pac-nombre', pac.nombre);
+    setVal('edit-pac-celular', pac.celular);
+    setVal('edit-pac-sexo', pac.sexo || 'MASCULINO');
+    setVal('edit-pac-fnac', pac.fnac);
+    setVal('edit-pac-edad', pac.edad);
+    const modalEl = document.getElementById('modalEditarPaciente');
+    if (modalEl && window.bootstrap) bootstrap.Modal.getOrCreateInstance(modalEl).show();
+}
+
+function calcularEdadEdicion() {
+    const fnac = val('edit-pac-fnac');
+    if (!fnac) return;
+    const edad = calcularEdadDesde(fnac);
+    if (edad) setVal('edit-pac-edad', edad);
+}
+
+function guardarCambiosPaciente() {
+    const dniOriginal = val('edit-pac-original-dni');
+    const nuevoDni = val('edit-pac-dni');
+    const nuevoNombre = val('edit-pac-nombre');
+    const nuevoCelular = val('edit-pac-celular');
+    const nuevoSexo = val('edit-pac-sexo');
+    const nuevaFnac = val('edit-pac-fnac');
+    const nuevaEdad = val('edit-pac-edad');
+
+    if (!nuevoDni || !nuevoNombre) {
+        alert('El DNI y el Nombre son obligatorios.');
+        return;
+    }
+
+    // Actualizar el registro maestro de pacientes
+    const pac = (window.pacientesRegistrados || []).find(p => String(p.dni) === String(dniOriginal));
+    if (pac) {
+        pac.dni = nuevoDni; pac.nombre = nuevoNombre; pac.celular = nuevoCelular;
+        pac.sexo = nuevoSexo; pac.fnac = nuevaFnac; pac.edad = nuevaEdad;
+        window.nubeGuardarPaciente?.(pac);
+    } else {
+        upsertPaciente({ dni: nuevoDni, nombre: nuevoNombre, celular: nuevoCelular, sexo: nuevoSexo, fnac: nuevaFnac, edad: nuevaEdad });
+    }
+
+    // Propagar el cambio a las órdenes asociadas
+    (ordenesRegistradas || []).forEach(o => {
+        if (String(o.dni) === String(dniOriginal)) {
+            o.dni = nuevoDni; o.nombre = nuevoNombre; o.celular = nuevoCelular;
+            o.sexo = nuevoSexo; o.fechaNacimiento = nuevaFnac; o.edad = nuevaEdad;
+            window.nubeGuardarOrden?.(o);
+        }
+    });
+
+    persistirDatos();
+    const modalEl = document.getElementById('modalEditarPaciente');
+    if (modalEl && window.bootstrap) bootstrap.Modal.getInstance(modalEl)?.hide();
+    cargarPacientes();
+    cargarOrdenes();
+    alert('Datos del paciente actualizados correctamente.');
+}
+
+// Elimina al paciente de la lista de "Pacientes Registrados".
+// Las órdenes de trabajo y el arqueo de caja se conservan intactos.
+function eliminarPaciente(dni) {
+    const lista = window.pacientesRegistrados || [];
+    const indice = lista.findIndex(p => String(p.dni) === String(dni));
+    if (indice === -1) {
+        alert('No se encontró al paciente en la lista.');
+        return;
+    }
+    const pac = normalizarPaciente(lista[indice]);
+    const ordenesVinculadas = (ordenesRegistradas || []).filter(o => String(o.dni) === String(pac.dni));
+
+    let mensaje = `¿Está seguro de ELIMINAR al paciente?\n\n${pac.nombre}\nDNI: ${pac.dni}`;
+    if (ordenesVinculadas.length > 0) {
+        mensaje += `\n\nTiene ${ordenesVinculadas.length} orden(es) de trabajo y registros de caja asociados. ¡TODO SE ELIMINARÁ PERMANENTEMENTE!`;
+    }
+    if (!confirm(mensaje + "\n\nEsta acción no se puede deshacer.")) return;
+
+    // 1. Eliminar órdenes y movimientos de caja asociados (local, nube y listas negras)
+    ordenesVinculadas.forEach(ord => {
+        const nroOrd = String(ord.nroOrden);
+        if (!window.ordenesEliminadas) window.ordenesEliminadas = leerJSON("vital_ordenes_eliminidas", []);
+        if (!window.ordenesEliminadas.includes(nroOrd)) {
+            window.ordenesEliminadas.push(nroOrd);
+            localStorage.setItem("vital_ordenes_eliminadas", JSON.stringify(window.ordenesEliminadas));
+        }
+        if (typeof nubeEliminarOrden === "function") nubeEliminarOrden(nroOrd);
+
+        // Caja asociada a esta orden
+        const movsAsociados = cajaMovimientos.filter(m => String(m.nroOrden) === nroOrd);
+        movsAsociados.forEach(m => {
+            const idMov = String(m.id);
+            if (!window.cajaEliminados) window.cajaEliminados = leerJSON("vital_caja_eliminados", []);
+            if (!window.cajaEliminados.includes(idMov)) {
+                window.cajaEliminados.push(idMov);
+                localStorage.setItem("vital_caja_eliminados", JSON.stringify(window.cajaEliminados));
+            }
+            if (typeof nubeEliminarMovimiento === "function") nubeEliminarMovimiento(idMov);
+        });
+        cajaMovimientos = cajaMovimientos.filter(m => String(m.nroOrden) !== nroOrd);
+    });
+
+    const nrosOrdenesABorrar = ordenesVinculadas.map(o => String(o.nroOrden));
+    ordenesRegistradas = ordenesRegistradas.filter(o => !nrosOrdenesABorrar.includes(String(o.nroOrden)));
+
+    // 2. Eliminar al paciente
+    lista.splice(indice, 1);
+    window.pacientesRegistrados = lista;
+    marcarPacienteEliminado(pac.dni);
+    if (typeof window.nubeEliminarPaciente === "function") {
+        window.nubeEliminarPaciente(pac);
+    }
+
+    persistirDatos();
+    cargarPacientes();
+    cargarOrdenes();
+    actualizarTotalesCaja();
+    alert("Paciente, órdenes y movimientos de caja relacionados eliminados correctamente.");
+}
+
+// ==========================================
+// TICKET DE VENTA (TICKETERA TÉRMICA 58mm)
+// ==========================================
+function construirTicketHTML(orden) {
+    const fechaHora = String(orden.fechaHora || "").split(", ");
+    const fecha = fechaHora[0] || "";
+    const hora = fechaHora[1] || "";
+    const datoCelular = orden.celular ? `<div class="t-row"><span>Celular:</span><span>${escapeHTML(orden.celular)}</span></div>` : '';
+
+    let lineas = "";
+    orden.examenes.forEach(item => {
+        const importe = item.cantidad * item.precio;
+        lineas += `
+            <div class="t-item">
+                <span class="t-cant">${item.cantidad} x</span>
+                <span class="t-desc">${escapeHTML(item.nombre)}</span>
+                <span class="t-importe">${importe.toFixed(2)}</span>
+            </div>
+        `;
+    });
+
+    const datoExtra = orden.doctor
+        ? `<div class="t-row"><span>Médico:</span><span>${escapeHTML(orden.doctor)}</span></div>`
+        : "";
+
+    let fechaNac = orden.fechaNacimiento || orden.fnac || orden.fechaNac || orden.nacimiento || orden.fecha_nacimiento || "-";
+    if (fechaNac && fechaNac.includes("-") && fechaNac.length === 10) {
+        const [anio, mes, dia] = fechaNac.split("-");
+        fechaNac = `${dia}/${mes}/${anio}`;
+    }
+    const textoEdad = orden.edad ? String(orden.edad).trim() : "-";
+
+    return `
+        <div class="ticket-contenido">
+            <img src="logo.png" alt="" class="t-logo" onerror="this.style.display='none'">
+            <div class="t-centro t-negrita t-titulo">CENTRO MEDICO</div>
+            <div class="t-centro t-negrita t-titulo">VITAL HEALTH</div>
+            <div class="t-centro">Laboratorio Clínico</div>
+            <div class="t-centro t-dato">Av. Grau N° 1799 - Veintiséis de Octubre</div>
+            <div class="t-centro t-dato">WhatsApp: 984 089 927</div>
+            <div class="t-linea-doble"></div>
+            <div class="t-centro t-negrita t-subtitulo">TICKET DE VENTA</div>
+            <div class="t-centro t-dato">${escapeHTML(orden.nroOrden)}</div>
+            <div class="t-linea"></div>
+            <div class="t-row"><span>Fecha:</span><span>${escapeHTML(fecha)}</span></div>
+            <div class="t-row"><span>Hora:</span><span>${escapeHTML(hora)}</span></div>
+            <div class="t-row"><span>Paciente:</span><span>${escapeHTML(orden.nombre)}</span></div>
+            <div class="t-row"><span>DNI:</span><span>${escapeHTML(orden.dni)}</span></div>
+            <div class="t-row"><span>F. Nac:</span><span>${escapeHTML(fechaNac)}</span></div>
+            <div class="t-row"><span>Edad:</span><span>${escapeHTML(textoEdad)}</span></div>
+            ${datoCelular}
+            ${datoExtra}
+            <div class="t-linea"></div>
+            <div class="t-cabecera-items t-negrita">
+                <span>CANT</span><span>DESCRIPCION</span><span>IMPORTE</span>
+            </div>
+            <div class="t-linea"></div>
+            ${lineas}
+            <div class="t-linea"></div>
+            <div class="t-row t-negrita t-total"><span>TOTAL S/</span><span>${Number(orden.total).toFixed(2)}</span></div>
+            <div class="t-row"><span>Pago:</span><span>${escapeHTML(orden.metodoPago)}</span></div>
+            <div class="t-linea-doble"></div>
+            <div class="t-centro t-obs">¡Gracias por su preferencia!</div>
+            <div class="t-centro t-obs">Conserve este ticket para recoger</div>
+            <div class="t-centro t-obs">sus resultados de laboratorio</div>
+        </div>
+    `;
+}
+
+function mostrarTicket(orden) {
+    const html = construirTicketHTML(orden);
+    window._ticketActual = orden;
+
+    const cuerpo = document.getElementById("modal-ticket-body");
+    if (cuerpo) cuerpo.innerHTML = `<div class="ticket-visual">${html}</div>`;
+    const titulo = document.getElementById("modal-ticket-titulo");
+    if (titulo) titulo.innerHTML = `<i class="bi bi-receipt-cutoff me-1"></i>Ticket ${escapeHTML(orden.nroOrden)} (58 mm)`;
+    const zona = document.getElementById("zona-impresion");
+    if (zona) zona.innerHTML = `<div class="ticket-print">${html}</div>`;
+
+    const modalEl = document.getElementById("modalTicket");
+    if (modalEl && window.bootstrap) {
+        bootstrap.Modal.getOrCreateInstance(modalEl).show();
+    } else {
+        imprimirTicket();
+    }
+}
+
+function descargarTicketPNG() {
+    const nodo = document.querySelector("#modal-ticket-body .ticket-visual");
+    const orden = window._ticketActual;
+    if (!nodo || !orden) {
+        alert("Primero registre una orden para poder descargar su ticket.");
+        return;
+    }
+    if (typeof window.html2canvas !== "function") {
+        alert("No se pudo cargar la librería de descarga. Revise su conexión a internet y vuelva a intentar.");
+        return;
+    }
+    window.html2canvas(nodo, { scale: 3, backgroundColor: "#ffffff", useCORS: true }).then(canvas => {
+        const enlace = document.createElement("a");
+        enlace.download = `Ticket-${orden.nroOrden}.png`;
+        enlace.href = canvas.toDataURL("image/png");
+        enlace.click();
+    }).catch(() => {
+        alert("No se pudo generar la imagen del ticket.");
+    });
+}
+
+function mostrarTicketPorNro(nroOrden) {
+    const orden = (ordenesRegistradas || []).find(o => o.nroOrden === nroOrden);
+    if (orden) mostrarTicket(orden);
+}
+
+function ajustarPaginaTicket() {
+    const visual = document.querySelector("#modal-ticket-body .ticket-visual");
+    let altoMm = 200;
+    if (visual && visual.scrollHeight > 0) {
+        altoMm = Math.ceil((visual.scrollHeight * 25.4) / 96) + 10;
+    }
+    let estilo = document.getElementById("estilo-pagina-ticket");
+    if (!estilo) {
+        estilo = document.createElement("style");
+        estilo.id = "estilo-pagina-ticket";
+        document.head.appendChild(estilo);
+    }
+    estilo.textContent = `@page ticket { size: 58mm ${altoMm}mm; margin: 3mm 2mm; }`;
+}
+
+function imprimirTicket() {
+    ajustarPaginaTicket();
+    const modalEl = document.getElementById("modalTicket");
+    if (modalEl && window.bootstrap) {
+        bootstrap.Modal.getInstance(modalEl)?.hide();
+    }
+    const zona = document.getElementById("zona-impresion");
+    if (zona) {
+        esperarImagenes(zona).then(() => imprimirZona());
+    } else {
+        imprimirZona();
+    }
+}
+
+function imprimirZona() {
+    document.body.classList.add("imprimiendo");
+    const alTerminar = () => {
+        document.body.classList.remove("imprimiendo");
+        window.removeEventListener("afterprint", alTerminar);
+    };
+    window.addEventListener("afterprint", alTerminar);
+    window.print();
+}
+
+// ==========================================
+// TICKET TÉRMICO DE COTIZACIÓN (58mm)
+// ==========================================
+function construirTicketCotizacionHTML(cot) {
+    const fechaHora = String(cot.fechaHora || new Date().toLocaleString()).split(", ");
+    const fecha = fechaHora[0] || "";
+    const hora = fechaHora[1] || "";
+
+    const pac = cot.paciente || {};
+    const datoCelular = pac.celular ? `<div class="t-row"><span>Celular:</span><span>${escapeHTML(pac.celular)}</span></div>` : '';
+    const datoExtra = pac.medico ? `<div class="t-row"><span>Médico:</span><span>${escapeHTML(pac.medico)}</span></div>` : "";
+
+    let lineas = "";
+    (cot.examenes || []).forEach(item => {
+        let precioNum = parseFloat(String(item.precioUnit || item.precio || "0").replace('S/', '').trim()) || 0;
+        let cantNum = parseFloat(item.cantidad) || 1;
+        const importe = cantNum * precioNum;
+        lineas += `
+            <div class="t-item">
+                <span class="t-cant">${cantNum} x</span>
+                <span class="t-desc">${escapeHTML(item.nombre)}</span>
+                <span class="t-importe">${importe.toFixed(2)}</span>
+            </div>
+        `;
+    });
+
+    let fechaNac = pac.fechaNacimiento || "-";
+    if (fechaNac && fechaNac.includes("-") && fechaNac.length === 10) {
+        const [anio, mes, dia] = fechaNac.split("-");
+        fechaNac = `${dia}/${mes}/${anio}`;
+    }
+    const textoEdad = pac.edad ? String(pac.edad).trim() : "-";
+    const nroId = cot.nroCotizacion || cot.id || 'COT-001';
+
+    return `
+        <div class="ticket-contenido">
+            <img src="logo.png" alt="" class="t-logo" onerror="this.style.display='none'">
+            <div class="t-centro t-negrita t-titulo">CENTRO MEDICO</div>
+            <div class="t-centro t-negrita t-titulo">VITAL HEALTH</div>
+            <div class="t-centro">Laboratorio Clínico</div>
+            <div class="t-centro t-dato">Av. Grau N° 1799 - Veintiséis de Octubre</div>
+            <div class="t-centro t-dato">WhatsApp: 984 089 927</div>
+            <div class="t-linea-doble"></div>
+            <div class="t-centro t-negrita t-subtitulo">COTIZACIÓN DE EXÁMENES</div>
+            <div class="t-centro t-dato">Nro: ${escapeHTML(String(nroId))}</div>
+            <div class="t-linea"></div>
+            <div class="t-row"><span>Fecha:</span><span>${escapeHTML(fecha)}</span></div>
+            <div class="t-row"><span>Hora:</span><span>${escapeHTML(hora)}</span></div>
+            <div class="t-row"><span>Paciente:</span><span>${escapeHTML(pac.nombres || 'Cliente General')}</span></div>
+            <div class="t-row"><span>DNI:</span><span>${escapeHTML(pac.dni || '-')}</span></div>
+            <div class="t-row"><span>F. Nac:</span><span>${escapeHTML(fechaNac)}</span></div>
+            <div class="t-row"><span>Edad:</span><span>${escapeHTML(textoEdad)}</span></div>
+            ${datoCelular}
+            ${datoExtra}
+            <div class="t-linea"></div>
+            <div class="t-cabecera-items t-negrita">
+                <span>CANT</span><span>DESCRIPCION</span><span>IMPORTE</span>
+            </div>
+            <div class="t-linea"></div>
+            ${lineas}
+            <div class="t-linea"></div>
+            <div class="t-row t-negrita t-total"><span>TOTAL S/</span><span>${Number(cot.total || 0).toFixed(2)}</span></div>
+            <div class="t-row"><span>Tipo:</span><span>${escapeHTML(cot.convenio || 'Particular')}</span></div>
+            <div class="t-linea-doble"></div>
+            <div class="t-centro t-negrita" style="font-size: 10px; color: #000;">¡VALIDEZ: 7 DÍAS!</div>
+            <div class="t-centro t-obs" style="font-size: 9px;">Pasado este plazo los precios pueden cambiar.</div>
+        </div>
+    `;
+}
+
+function mostrarTicketCotizacion(cot) {
+    const html = construirTicketCotizacionHTML(cot);
+    window._cotizacionActual = cot;
+
+    const cuerpo = document.getElementById("modal-ticket-body");
+    if (cuerpo) cuerpo.innerHTML = `<div class="ticket-visual">${html}</div>`;
+    const titulo = document.getElementById("modal-ticket-titulo");
+    if (titulo) titulo.innerHTML = `<i class="bi bi-file-earmark-text me-1"></i>Cotización ${escapeHTML(cot.nroCotizacion || cot.id)} (58 mm)`;
+    const zona = document.getElementById("zona-impresion");
+    if (zona) zona.innerHTML = `<div class="ticket-print">${html}</div>`;
+
+    const modalEl = document.getElementById("modalTicket");
+    if (modalEl && window.bootstrap) {
+        bootstrap.Modal.getOrCreateInstance(modalEl).show();
+    } else {
+        imprimirTicket();
+    }
+}
+
+// ==========================================
+// INFORME DE RESULTADOS (A4)
+// ==========================================
+function construirInformeHTML(orden) {
+    const fechaEmision = new Date().toLocaleDateString();
+    const horaEmision = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const nota = orden.nota || "Ninguna.";
+    const tablas = generarTablasResultadosHTML(orden);
+
+    return `
+        <div class="informe-cabecera" style="border-bottom: 1px solid #cbd5e1; padding-bottom: 8px; margin-bottom: 10px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px;">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <img src="logo.png" alt="Centro Médico Vital Health" class="informe-logo" style="width: 76px; height: 76px; object-fit: contain;" onerror="this.style.display='none'">
+                    <div>
+                        <h1 style="font-size: 20px; margin: 0; letter-spacing: 2.5px; font-weight: 800; color: #0f172a;">CENTRO MEDICO VITAL HEALTH</h1>
+                        <p style="margin: 1px 0; font-size: 10px; color: #475569;"><strong>Laboratorio clínico, comprometido con tu salud.</strong></p>
+                    </div>
+                </div>
+                <div class="informe-qr-box">
+                    <img src="qr-redes.png" alt="QR de redes sociales" class="informe-qr" style="width: 84px; height: 84px; object-fit: contain;" onerror="this.parentNode.style.display='none'">
+                    <div class="informe-qr-texto">¡Síguenos aquí!</div>
+                </div>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 6px; font-size: 9.5px; color: #334155;">
+                <div>📍 Av. Grau N° 1799 - Veintiséis de Octubre</div>
+                <div style="display: flex; gap: 15px;">
+                    <span>📷 Vitalhealthlaboratorio</span>
+                    <span>f Vital Health's Lab</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="informe-titulo">INFORME DE RESULTADOS DE LABORATORIO</div>
+
+        <div class="informe-datos">
+            <div class="dato dato-ancho"><span class="dato-rotulo">Paciente</span><span class="dato-valor">${escapeHTML(orden.nombre)}</span></div>
+            <div class="dato"><span class="dato-rotulo">DNI</span><span class="dato-valor">${escapeHTML(orden.dni)}</span></div>
+            <div class="dato"><span class="dato-rotulo">Edad</span><span class="dato-valor">${escapeHTML(orden.edad || "—")}</span></div>
+            <div class="dato"><span class="dato-rotulo">Sexo</span><span class="dato-valor">${escapeHTML(orden.sexo || "—")}</span></div>
+            <div class="dato"><span class="dato-rotulo">Médico solicitante</span><span class="dato-valor">${escapeHTML(orden.doctor || "Particular")}</span></div>
+            <div class="dato"><span class="dato-rotulo">N° de orden</span><span class="dato-valor">${escapeHTML(orden.nroOrden)}</span></div>
+            <div class="dato"><span class="dato-rotulo">Toma de muestra</span><span class="dato-valor">${escapeHTML(orden.fechaHora || "")}</span></div>
+            <div class="dato"><span class="dato-rotulo">Fecha de informe</span><span class="dato-valor">${fechaEmision} ${horaEmision}</span></div>
+            <div class="dato"><span class="dato-rotulo">Exámenes incluidos</span><span class="dato-valor">${(orden.resultados || []).length}</span></div>
+        </div>
+
+        ${tablas}
+
+        <div class="informe-nota">Nota: ${nota}</div>
+
+        <div class="informe-firma" style="margin-top: 35px; text-align: center; page-break-inside: avoid;">
+            <img src="firma-biologa.png" alt="Firma" class="informe-firma-img" style="height: 140px; object-fit: contain; display: block; margin: 0 auto 2px auto;" onerror="this.style.display='none'">
+            <div class="informe-firma-linea" style="width: 300px; border-top: 1.5px solid #0f172a; margin: 0 auto 3px auto;"></div>
+            <div class="informe-firma-nombre" style="font-weight: 700; font-size: 11.5px; color: #0f172a;">Raysa Yadira Ursula Alberca Atarama</div>
+            <div class="informe-firma-det" style="font-size: 9.5px; color: #475569;">Bióloga</div>
+            <div class="informe-firma-det" style="font-size: 9.5px; color: #475569;">C.B.P.17763</div>
+        </div>
+
+        <div class="informe-pie-fijo" style="border-top: 1px solid #0072bc; margin-top: 20px; padding-top: 6px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 0 5px; font-size: 9.5px; color: #000;">
+                <div style="display: flex; align-items: center; gap: 5px;">
+                    <span style="font-size: 13px;">🟢</span> <strong style="font-size: 10px; color: #0f172a;">984 089 927</strong>
+                </div>
+                <div style="display: flex; align-items: center; gap: 5px;">
+                    <span style="font-size: 13px;">🏠</span> <strong style="font-size: 10px; color: #0f172a;">SERVICIO A DOMICILIO</strong>
+                </div>
+                <div style="font-weight: 700; font-style: italic; font-size: 9.5px; color: #0f172a;">
+                    “ANÁLISIS DE CALIDAD PARA EL CUIDADO DE TU SALUD”
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+function generarTablasResultadosHTML(orden) {
+    const examenes = orden.examenes || [];
+    if (!examenes.length) {
+        return '<p>No hay exámenes registrados.</p>';
+    }
+    let html = '';
+    examenes.forEach(ex => {
+        const plantilla = obtenerPlantillaIndicadores(ex.nombre);
+        const guardado = (orden.resultados || []).find(r => r.codigo === ex.codigo);
+        html += `
+            <div style="margin-bottom: 20px; page-break-inside: avoid;">
+                <h3 style="background-color: #f1f5f9; padding: 6px 10px; font-size: 14px; color: #1e293b; border-left: 4px solid #2563eb; margin-bottom: 8px;">
+                    ${escapeHTML(ex.nombre)} <span style="font-weight: normal; color: #64748b; font-size: 11px;">(${escapeHTML(ex.codigo)})</span>
+                </h3>
+                <table style="width: 100%; border-collapse: collapse; font-size: 11px; margin-bottom: 6px;">
+                    <tr style="background-color: #f8fafc; border-bottom: 1px solid #cbd5e1;">
+                        <th style="text-align: left; padding: 4px; width: 45%;">Parámetro / Indicador</th>
+                        <th style="text-align: left; padding: 4px; width: 25%;">Resultado</th>
+                        <th style="text-align: left; padding: 4px; width: 30%;">Valores de Referencia</th>
+                    </tr>
+        `;
+        if (plantilla && plantilla.length > 0) {
+            plantilla.forEach((ind, indIdx) => {
+                if (ind.esSeccion) {
+                    html += `
+                        <tr>
+                            <td colspan="3" style="background-color: #e2e8f0; font-weight: bold; color: #0f172a; padding: 6px 4px; font-size: 11.5px;">
+                                ${escapeHTML(ind.nombre)}
+                            </td>
+                        </tr>
+                    `;
+                    return;
+                }
+                const previo = guardado && guardado.indicadores && guardado.indicadores[indIdx] ? guardado.indicadores[indIdx] : null;
+                const valorObtenido = previo ? previo.resultado : '';
+                const unidadTexto = ind.unidad ? ` ${ind.unidad}` : '';
+                const referencia = ind.referencia || formatoRango(ind.refMin, ind.refMax) || '-';
+                html += `
+                    <tr style="border-bottom: 1px solid #e2e8f0;">
+                        <td style="padding: 4px; color: #334155; padding-left: 10px;">${escapeHTML(ind.nombre)}</td>
+                        <td style="padding: 4px; font-weight: bold; color: #0f172a;">${escapeHTML(valorObtenido)}${escapeHTML(unidadTexto)}</td>
+                        <td style="padding: 4px; color: #64748b;">${escapeHTML(referencia)}</td>
+                    </tr>
+                `;
+            });
+        } else {
+            html += `
+                <tr>
+                    <td colspan="3" style="padding: 6px; color: #64748b; text-align: center;">Sin parámetros configurados para este examen.</td>
+                </tr>
+            `;
+        }
+        html += `
+                </table>
+            </div>
+        `;
+    });
+    return html;
+}
+
+function imprimirInforme(nroOrden) {
+    const orden = (ordenesRegistradas || []).find(o => o.nroOrden === nroOrden);
+    if (!orden) return;
+    if (!orden.resultados || !orden.resultados.length) {
+        const guardado = guardarResultados(nroOrden, true);
+        if (!guardado) {
+            alert("Primero capture los resultados en el editor y guárdelos.");
+            return;
+        }
+    }
+    const zona = document.getElementById("zona-impresion");
+    if (!zona) return;
+    zona.innerHTML = `<div class="informe-print">${construirInformeHTML(orden)}</div>`;
+    esperarImagenes(zona).then(() => imprimirZona());
+}
+
+function esperarImagenes(contenedor) {
+    const imagenes = Array.from(contenedor.querySelectorAll("img"));
+    return Promise.all(imagenes.map(img => {
+        if (img.complete && img.naturalWidth > 0) return Promise.resolve();
+        return new Promise(resolver => {
+            img.addEventListener("load", resolver, { once: true });
+            img.addEventListener("error", resolver, { once: true });
+        });
+    }));
+}
+
+// Copia un lienzo en otro temporal recortando solo la franja que ocupa una hoja.
+function recortarLienzo(fuente, yInicioPx, altoPx) {
+    const altoReal = Math.max(1, Math.min(altoPx, fuente.height - yInicioPx));
+    const temporal = document.createElement("canvas");
+    temporal.width = fuente.width;
+    temporal.height = altoReal;
+    const ctx = temporal.getContext("2d");
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0, 0, temporal.width, temporal.height);
+    ctx.drawImage(fuente, 0, yInicioPx, fuente.width, altoReal, 0, 0, fuente.width, altoReal);
+    return temporal;
+}
+
+function crearContenedorOculto(html) {
+    const contenedor = document.createElement("div");
+    contenedor.style.position = "absolute";
+    contenedor.style.left = "-10000px";
+    contenedor.style.top = "0";
+    contenedor.style.width = "794px";
+    contenedor.style.background = "#ffffff";
+    contenedor.innerHTML = html;
+    document.body.appendChild(contenedor);
+    return contenedor;
+}
+
+function descargarInformePDF(nroOrden) {
+    const orden = (ordenesRegistradas || []).find(o => o.nroOrden === nroOrden);
+    if (!orden) return;
+    if (!orden.resultados || !orden.resultados.length) {
+        const guardado = guardarResultados(nroOrden, true);
+        if (!guardado) {
+            alert("Primero capture los resultados en el editor y guárdelos.");
+            return;
+        }
+    }
+    if (typeof window.html2canvas !== "function" || !window.jspdf) {
+        alert("No se pudo cargar la librería de PDF. Revise su conexión a internet y vuelva a intentar.");
+        return;
+    }
+
+    const htmlInforme = construirInformeHTML(orden);
+    const contenedor = crearContenedorOculto(`<div class="informe-print">${htmlInforme}</div>`);
+    const hoja = contenedor.querySelector(".informe-print");
+
+    // La cabecera se dibuja aparte para poder repetirla idéntica en cada hoja.
+    const nodoCabecera = hoja.querySelector(".informe-cabecera");
+    let contenedorCabecera = null;
+    if (nodoCabecera) {
+        contenedorCabecera = crearContenedorOculto("");
+        // Mismas tipografías que .informe-print para que la cabecera se vea idéntica.
+        contenedorCabecera.style.fontFamily = "'Segoe UI', Arial, Helvetica, sans-serif";
+        contenedorCabecera.style.fontSize = "11.5px";
+        contenedorCabecera.style.color = "#1e293b";
+        contenedorCabecera.appendChild(nodoCabecera.cloneNode(true));
+        nodoCabecera.remove();
+    }
+
+    // El pie ya no va fijo: se dibuja una vez al final del documento.
+    hoja.querySelectorAll(".informe-pie-fijo").forEach(el => {
+        el.classList.remove("informe-pie-fijo");
+        el.classList.add("informe-pie-estatico");
+    });
+
+    const opciones = { scale: 2, backgroundColor: "#ffffff", useCORS: true, logging: false };
+
+    Promise.all([
+        contenedorCabecera ? esperarImagenes(contenedorCabecera).then(() => window.html2canvas(contenedorCabecera, opciones)) : Promise.resolve(null),
+        esperarImagenes(hoja).then(() => window.html2canvas(hoja, opciones))
+    ]).then(([canvasCabecera, canvasCuerpo]) => {
+        const pdf = new window.jspdf.jsPDF("p", "mm", "a4");
+        const anchoHoja = 210;
+        const altoHoja = 297;
+        const margen = 10;
+        const margenInferior = 12;
+        const anchoUtil = anchoHoja - margen * 2;
+
+        const imgCabecera = canvasCabecera ? canvasCabecera.toDataURL("image/png") : null;
+        const altoCabeceraMm = canvasCabecera ? (canvasCabecera.height * anchoUtil / canvasCabecera.width) : 0;
+        const cuerpoTopMm = margen + altoCabeceraMm + (altoCabeceraMm ? 3 : 0);
+        const altoCuerpoMm = altoHoja - cuerpoTopMm - margenInferior;
+
+        const pxPorMm = canvasCuerpo.width / anchoUtil;
+        const altoFranjaPx = Math.floor(altoCuerpoMm * pxPorMm);
+        const totalPaginas = Math.max(1, Math.ceil(canvasCuerpo.height / altoFranjaPx));
+
+        for (let pagina = 0; pagina < totalPaginas; pagina++) {
+            if (pagina > 0) pdf.addPage();
+
+            // Cabecera idéntica en todas las hojas
+            if (imgCabecera) pdf.addImage(imgCabecera, "PNG", margen, margen, anchoUtil, altoCabeceraMm);
+
+            // Franja del cuerpo correspondiente a esta hoja
+            const yInicioPx = pagina * altoFranjaPx;
+            const franja = recortarLienzo(canvasCuerpo, yInicioPx, altoFranjaPx);
+            const altoFranjaMm = franja.height / pxPorMm;
+            pdf.addImage(franja.toDataURL("image/jpeg", 0.95), "JPEG", margen, cuerpoTopMm, anchoUtil, altoFranjaMm);
+
+            // Numeración de hoja
+            pdf.setFontSize(8);
+            pdf.setTextColor(100, 116, 139);
+            pdf.text(`Página ${pagina + 1} de ${totalPaginas}`, anchoHoja / 2, altoHoja - 6, { align: "center" });
+        }
+
+        pdf.save(`Informe-Resultados-${orden.nroOrden}.pdf`);
+    }).catch(error => {
+        console.error("Error generando el PDF del informe:", error);
+        alert("No se pudo generar el PDF del informe.");
+    }).finally(() => {
+        contenedor.remove();
+        if (contenedorCabecera) contenedorCabecera.remove();
+    });
+}
+
+// ==========================================
+// INICIALIZACIÓN
+// ==========================================
+document.addEventListener("DOMContentLoaded", () => {
+    // 1. Recuperar y fusionar toda la información guardada (incluye claves antiguas)
+    cargarDatosGuardados();
+    // 2. Asegurar que los pacientes de las órdenes estén registrados
+    reconciliarPacientesDesdeOrdenes();
+    // 3. Normalizar el almacenamiento en las claves canónicas
+    persistirDatos();
+
+    // 4. Interfaz
+    actualizarFechaActual();
+    crearBarraNavegacion();
+    renderizarTablaCatalogo();
+    cargarOrdenes();
+    cargarPacientes();
+    cargarCotizaciones();
+    actualizarTotalesCaja();
+    renderizarTablaSeleccionados();
+    renderizarTablaCotizacion();
+    showSection('recepcion');
+
+    // 5. Nube (si está configurada)
+    window.nubeIniciar?.();
+});
+
+// Guardado automático al cerrar o recargar la página
+window.addEventListener("beforeunload", persistirDatos);
