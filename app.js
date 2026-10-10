@@ -2265,21 +2265,37 @@ function renderizarTablaCatalogo(filtro = "") {
     });
 }
 
-function editarExamenCatalogo(codigo) {
-    const ex = examenesCatalogo.find(e => e.codigo === codigo);
-    if (!ex) return;
-    setVal("cat-codigo", ex.codigo);
-    setVal("cat-id-original", ex.codigo);
-    setVal("cat-nombre", ex.nombre);
-    setVal("cat-precio", ex.precio || 0);
-    setVal("cat-muestra", ex.muestra || "");
-    setVal("cat-metodo", ex.metodo || "");
-    setVal("cat-plantilla", ex.plantilla || "personalizada");
-    setVal("cat-ref-texto", ex.refTexto || "");
-    const titulo = document.getElementById("catalogo-form-titulo");
-    if (titulo) titulo.innerHTML = `<i class="bi bi-pencil-square me-2"></i>Editar Examen: ${escapeHTML(ex.codigo)}`;
-}
+// Función que se dispara al hacer clic en el botón de editar (lápiz) de la tabla del Catálogo
+function cargarExamenEnFormularioCatalogo(codigoExamen) {
+    // 1. Buscar el examen en tu catálogo global (ej. examenesCatalogo)
+    const examen = examenesCatalogo.find(ex => ex.codigo == codigoExamen);
+    if (!examen) return;
 
+    // 2. Rellenar los campos básicos del formulario izquierdo
+    document.getElementById('edit-codigo').value = examen.codigo || '';
+    document.getElementById('edit-nombre').value = examen.nombre || '';
+    document.getElementById('edit-precio').value = examen.precio || '';
+    
+    // Si tienes inputs para muestra o método en tu HTML, llanalos también:
+    if(document.getElementById('edit-muestra')) document.getElementById('edit-muestra').value = examen.tipoMuestra || '';
+    if(document.getElementById('edit-metodo')) document.getElementById('edit-metodo').value = examen.metodo || '';
+
+    // 3. CARGAR LOS INDICADORES / PARÁMETROS (Plantilla individual)
+    const contenedorIndicadores = document.getElementById('contenedor-indicadores'); // El contenedor donde agregas filas
+    if (contenedorIndicadores) {
+        contenedorIndicadores.innerHTML = ''; // Limpiamos los indicadores anteriores
+
+        // Verificamos si el examen tiene una plantilla o indicadores guardados
+        let listaParametros = examen.plantilla || examen.indicadores || [];
+
+        if (listaParametros.length > 0) {
+            listaParametros.forEach(param => {
+                // Función que pinta una fila de indicador en tu interfaz (asociada a tu botón "+ Agregar indicador")
+                agregarFilaIndicadorEnPantalla(param);
+            });
+        }
+    }
+}
 function eliminarExamenCatalogo(codigo) {
     if (!confirm(`¿Estás seguro de eliminar el examen con código ${codigo} del catálogo?`)) return;
     
