@@ -294,18 +294,16 @@ if (document.readyState === "loading") {
 // GESTIÓN DINÁMICA DE PLANTILLAS Y PARÁMETROS
 // ==========================================
 
-// 1. Obtener la plantilla (Revisa Firebase primero, si no está, busca en el app.js local)
 async function obtenerPlantillaCompleta(nombreOcodigo) {
     if (!nombreOcodigo) return null;
     const clave = String(nombreOcodigo).trim().toUpperCase();
 
-    // Intentar leer de Firestore (Plantillas editadas o creadas por la web)
+    // 1. Intentar leer de Firestore (Plantillas editadas o creadas desde la web)
     if (typeof db !== 'undefined' && db) {
         try {
             const docRef = doc(db, "plantillas_examenes", clave);
             const snap = await getDoc(docRef);
             if (snap.exists()) {
-                console.log("Plantilla cargada desde Firebase Firestore para:", clave);
                 return snap.data().parametros; 
             }
         } catch (e) {
@@ -313,16 +311,14 @@ async function obtenerPlantillaCompleta(nombreOcodigo) {
         }
     }
 
-    // Si no está en Firestore, buscar en el BASE_VALORES_REFERENCIALES estático del app.js
+    // 2. Si no está en Firestore, buscar en el BASE_VALORES_REFERENCIALES estático del app.js
     if (typeof BASE_VALORES_REFERENCIALES !== 'undefined' && BASE_VALORES_REFERENCIALES[clave]) {
-        console.log("Plantilla cargada desde el código local (app.js):", clave);
         return BASE_VALORES_REFERENCIALES[clave];
     }
 
-    return null; // Retorna nulo si el examen aún no tiene plantilla
+    return null;
 }
 
-// 2. Guardar o actualizar la plantilla directamente en Firestore desde la web
 async function guardarPlantillaEnNube(codigoOModulo, listaParametros) {
     if (!db) {
         alert("Error: Firebase no está inicializado.");
