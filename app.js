@@ -2268,30 +2268,28 @@ function guardarExamenCatalogo() {
     const filas = document.querySelectorAll("#contenedor-indicadores .indicador-row");
     let plantillaPersonalizada = [];
 
-    filas.forEach(fila => {
-        const idInput = fila.querySelector(".ind-id").value.trim();
-        const nombreParam = fila.querySelector(".ind-nombre").value.trim();
-        const unidad = fila.querySelector(".ind-unidad").value.trim();
-        const refMin = fila.querySelector(".ind-min").value;
-        const refMax = fila.querySelector(".ind-max").value;
-        const metodoParam = fila.querySelector(".ind-metodo").value.trim();
+    ilas.forEach(fila => {
+    const idInput = fila.querySelector(".ind-id").value.trim();
+    const nombreParam = fila.querySelector(".ind-nombre").value.trim();
+    const unidad = fila.querySelector(".ind-unidad").value.trim();
+    const refMin = fila.querySelector(".ind-min").value;
+    const refMax = fila.querySelector(".ind-max").value;
+    const metodoParam = fila.querySelector(".ind-metodo").value.trim(); // <--- Captura correcta del método
 
-        if (nombreParam) {
-            // Si el ID técnico está vacío, lo autogeneramos en minúsculas sin espacios
-            const idGenerado = idInput || nombreParam.toLowerCase().replace(/[^a-z0-9]/g, '_');
-            
-            plantillaPersonalizada.push({
-                id: idGenerado,
-                nombre: nombreParam,
-                valor: "",
-                unidad: unidad,
-                refMin: refMin !== "" ? parseFloat(refMin) : "",
-                refMax: refMax !== "" ? parseFloat(refMax) : "",
-                metodo: metodoParam
-            });
-        }
-    });
-
+    if (nombreParam) {
+        const idGenerado = idInput || nombreParam.toLowerCase().replace(/[^a-z0-9]/g, '_');
+        
+        plantillaPersonalizada.push({
+            id: idGenerado,
+            nombre: nombreParam,
+            valor: "",
+            unidad: unidad,
+            refMin: refMin !== "" ? parseFloat(refMin) : "",
+            refMax: refMax !== "" ? parseFloat(refMax) : "",
+            metodo: metodoParam // <--- Guardado en el objeto
+        });
+    }
+});
     const nuevoEx = { 
         codigo, 
         nombre, 
