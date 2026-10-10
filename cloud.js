@@ -37,6 +37,7 @@ function nubeIniciar() {
 
     const app = initializeApp(config);
     db = config.databaseId ? getFirestore(app, config.databaseId) : getFirestore(app);
+    window.db = db; // <--- Añade esta línea aquí para hacerlo accesible globalmente
     auth = getAuth(app);
 
     onAuthStateChanged(auth, usuario => {
