@@ -2323,10 +2323,15 @@ function editarExamenEnCatalogo(codigoExamen) {
     const examen = examenesCatalogo.find(ex => ex.codigo == codigoExamen);
     if (!examen) return;
 
-    // 2. Rellenar los campos básicos del formulario izquierdo
-    document.getElementById('edit-codigo').value = examen.codigo || '';
-    document.getElementById('edit-nombre').value = examen.nombre || '';
-    document.getElementById('edit-precio').value = examen.precio || '';
+    // 2. Rellenar los campos básicos del formulario izquierdo de forma segura
+    const inputCodigo = document.getElementById('edit-codigo');
+    if (inputCodigo) inputCodigo.value = examen.codigo || '';
+
+    const inputNombre = document.getElementById('edit-nombre');
+    if (inputNombre) inputNombre.value = examen.nombre || '';
+
+    const inputPrecio = document.getElementById('edit-precio');
+    if (inputPrecio) inputPrecio.value = examen.precio || '';
     
     // Si tienes inputs para muestra o método en tu HTML, llanalos también:
     if(document.getElementById('edit-muestra')) document.getElementById('edit-muestra').value = examen.tipoMuestra || '';
