@@ -2243,11 +2243,19 @@ async function guardarExamenCatalogo() {
 
 async function guardarPlantillaEnNube(codigoExamen, parametros) {
     try {
-        const dbCloud = (typeof firebase !== 'undefined' && firebase.firestore) ? firebase.firestore() : db;
-        await dbCloud.collection("plantillas_laboratorio").doc(codigoExamen).set({
+        // Obtenemos la instancia de Firestore de manera segura
+        const database = window.db || (typeof firebase !== 'undefined' && firebase.firestore ? firebase.firestore() : null);
+        
+        if (!database) {
+            console.error("No se encontró ninguna instancia de Firestore activa.");
+            return false;
+        }
+
+        await database.collection("plantillas_laboratorio").doc(codigoExamen).set({
             parametros: parametros,
             actualizado: new Date()
         }, { merge: true });
+        
         return true;
     } catch (error) {
         console.error("Error al guardar plantilla en nube:", error);
@@ -2257,8 +2265,11 @@ async function guardarPlantillaEnNube(codigoExamen, parametros) {
 
 async function cargarPlantillaDeNube(codigoExamen) {
     try {
-        const dbCloud = (typeof firebase !== 'undefined' && firebase.firestore) ? firebase.firestore() : db;
-        const docRef = await dbCloud.collection("plantillas_laboratorio").doc(codigoExamen).get();
+        const database = window.db || (typeof firebase !== 'undefined' && firebase.firestore ? firebase.firestore() : null);
+        
+        if (!database) return null;
+
+        const docRef = await database.collection("plantillas_laboratorio").doc(codigoExamen).get();
         if (docRef.exists) {
             return docRef.data().parametros;
         }
