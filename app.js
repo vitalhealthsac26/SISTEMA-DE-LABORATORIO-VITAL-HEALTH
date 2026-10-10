@@ -2205,35 +2205,71 @@ function vaciarTodosLosIndicadores() {
     if (contenedor) contenedor.innerHTML = "";
 }
 
-function guardarExamenCatalogo() {
-    const codigo = val("cat-codigo");
-    const nombre = val("cat-nombre");
-    const precio = parseFloat(document.getElementById("cat-precio").value) || 0;
-    const muestra = val("cat-muestra");
-    const metodo = val("cat-metodo");
-    const plantilla = val("cat-plantilla");
-    const refTexto = val("cat-ref-texto");
+function guardarConfiguracionExamenCompleto(event) {
+    if (event) event.preventDefault();
 
-    if (!codigo || !nombre) {
-        alert("Complete el código y nombre del examen.");
-        return;
-    }
-    const nuevoEx = { codigo, nombre, precio, muestra, metodo, plantilla, refTexto, en: Date.now() };
-    const index = examenesCatalogo.findIndex(e => e.codigo === codigo);
-    if (index >= 0) {
-        // Conservar campos referenciales previos si el formulario no los trae
-        const prev = examenesCatalogo[index];
-        examenesCatalogo[index] = Object.assign({}, prev, nuevoEx);
+    // 1. Capturar los valores principales del formulario
+    const codigo = document.getElementById('edit-codigo').value.trim();
+    const nombre = document.getElementById('edit-nombre').value.trim();
+    const precio = parseFloat(document.getElementById('edit-precio').value) || 0;
+    const tipoMuestra = document.getElementById('edit-muestra') ? document.getElementById('edit-muestra').value.trim() : '';
+    const metodo = document.getElementById('edit-metodo') ? document.getElementById('edit-metodo').value.trim() : '';
+
+    // 2. RECOLECTAR TODOS LOS INDICADORES / PARÁMETROS DE LA TABLA DINÁMICA
+    const indicadoresGuardados = [];
+    const filasIndicadores = document.querySelectorAll('.fila-indicador-dinamica'); // Ajusta esta clase según tu HTML real de los inputs de parámetros
+
+    filasIndicadores.forEach(fila => {
+        const nombreParametro = fila.querySelector('.input-nombre-parametro')?.value || '';
+        const unidad = fila.querySelector('.input-unidad')?.value || '';
+        const refMin = fila.querySelector('.input-refmin')?.value || '';
+        const refMax = fila.querySelector('.input-refmax')?.value || '';
+        const referenciaTexto = fila.querySelector('.input-referenciadetalle')?.value || '';
+
+        indicadoresGuardados.push({
+            nombre: nombreParametro,
+            unidad: unidad,
+            refMin: refMin,
+            refMax: refMax,
+            referencia: referenciaTexto
+        });
+    });
+
+    // 3. Buscar si el examen ya existe en el array general del catálogo
+    let index = examenesCatalogo.findIndex(ex => ex.codigo == codigo);
+
+    const objetoExamenActualizado = {
+        codigo: codigo,
+        nombre: nombre,
+        precio: precio,
+        tipoMuestra: tipoMuestra,
+        metodo: metodo,
+        plantilla: indicadoresGuardados // ¡Aquí guardamos permanentemente la plantilla de indicadores!
+    };
+
+    if (index !== -1) {
+        // Actualizamos el existente
+        examenesCatalogo[index] = objetoExamenActualizado;
     } else {
-        examenesCatalogo.push(nuevoEx);
+        // O lo agregamos si es nuevo
+        examenesCatalogo.push(objetoExamenActualizado);
     }
-    renderizarTablaCatalogo();
-    persistirDatos();
-    window.nubeGuardarExamen?.(nuevoEx);
-    alert("Examen guardado en el catálogo correctamente.");
-    prepararNuevoExamen();
-}
 
+    // 4. GUARDAR EN LOCALSTORAGE DE FORMA PERMANENTE
+    localStorage.setItem('examenesCatalogo', JSON.stringify(examenesCatalogo));
+
+    // 5. SINCRONIZAR CON FIREBASE (cloud.js)
+    if (typeof sincronizarExamenCloud === 'function') {
+        sincronizarExamenCloud(objetoExamenActualizado);
+    }
+
+    alert('¡Configuración y plantilla del examen guardadas permanentemente con éxito!');
+    
+    // Recargar la tabla del catálogo para reflejar los cambios
+    if (typeof renderizarTablaCatalogo === 'function') {
+        renderizarTablaCatalogo();
+    }
+}
 function renderizarTablaCatalogo(filtro = "") {
     const tbody = document.getElementById("tabla-catalogo-body");
     const countEl = document.getElementById("total-cat-count");
