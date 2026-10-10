@@ -2241,6 +2241,32 @@ async function guardarExamenCatalogo() {
     prepararNuevoExamen();
 }
 
+async function guardarPlantillaEnNube(codigoExamen, parametros) {
+    try {
+        await db.collection("plantillas_laboratorio").doc(codigoExamen).set({
+            parametros: parametros,
+            actualizado: new Date()
+        }, { merge: true });
+        return true;
+    } catch (error) {
+        console.error("Error al guardar plantilla en nube:", error);
+        return false;
+    }
+}
+
+async function cargarPlantillaDeNube(codigoExamen) {
+    try {
+        const docRef = await db.collection("plantillas_laboratorio").doc(codigoExamen).get();
+        if (docRef.exists) {
+            return docRef.data().parametros; // Retorna los parámetros guardados en la nube
+        }
+        return null;
+    } catch (error) {
+        console.error("Error al cargar la plantilla desde la nube:", error);
+        return null;
+    }
+}
+
 function renderizarTablaCatalogo(filtro = "") {
     const tbody = document.getElementById("tabla-catalogo-body");
     const countEl = document.getElementById("total-cat-count");
