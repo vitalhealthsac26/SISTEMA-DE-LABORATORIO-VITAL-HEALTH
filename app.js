@@ -2042,16 +2042,17 @@ function abrirResultados(nroOrden) {
             }
             const referencia = ind.referencia || formatoRango(ind.refMin, ind.refMax);
             const tieneUnidad = ind.unidad && ind.unidad.trim() !== "";
-            
-            const textoMetodo = ind.metodo ? `<br><small class="text-muted fst-italic" style="font-size: 10px;">Método: ${escapeHTML(ind.metodo)}</small>` : '';
+            const valorResultadoPrevio = previo ? previo.resultado : "";
+            // Recupera el valor del método guardado previamente o el del catálogo
+            const valorMetodoPrevio = previo && previo.metodo !== undefined ? previo.metodo : (ind.metodo || "");
 
             filas += `
-                <div class="row g-2 mb-2 align-items-center" data-ex="${exIdx}" data-ind="${indIdx}" data-nombre="${escapeHTML(ind.nombre)}" data-refmin="${escapeHTML(ind.refMin ?? "")}" data-refmax="${escapeHTML(ind.refMax ?? "")}" data-metodo="${escapeHTML(ind.metodo || "")}">
-                    <div class="col-md-4">
-                        <label class="form-label small mb-0 ps-3">${escapeHTML(ind.nombre)}${textoMetodo}</label>
+                <div class="row g-2 mb-2 align-items-center" data-ex="${exIdx}" data-ind="${indIdx}" data-nombre="${escapeHTML(ind.nombre)}" data-refmin="${escapeHTML(ind.refMin ?? "")}" data-refmax="${escapeHTML(ind.refMax ?? "")}">
+                    <div class="col-md-3">
+                        <label class="form-label small mb-0 ps-2 fw-semibold">${escapeHTML(ind.nombre)}</label>
                     </div>
-                    <div class="${tieneUnidad ? 'col-md-3' : 'col-md-4'}">
-                        <input type="text" class="form-control form-control-sm" data-campo="resultado" placeholder="Valor obtenido" value="${escapeHTML(previo ? previo.resultado : "")}">
+                    <div class="${tieneUnidad ? 'col-md-2' : 'col-md-3'}">
+                        <input type="text" class="form-control form-control-sm" data-campo="resultado" placeholder="Valor obtenido" value="${escapeHTML(valorResultadoPrevio)}">
                     </div>
                     ${tieneUnidad ? `
                     <div class="col-md-2">
@@ -2059,6 +2060,9 @@ function abrirResultados(nroOrden) {
                     </div>` : `<input type="hidden" data-campo="unidad" value="">`}
                     <div class="${tieneUnidad ? 'col-md-3' : 'col-md-4'}">
                         <input type="text" class="form-control form-control-sm bg-light" data-campo="referencia" value="${escapeHTML(referencia)}" readonly>
+                    </div>
+                    <div class="col-md-2">
+                        <input type="text" class="form-control form-control-sm" data-campo="metodo" placeholder="Método" value="${escapeHTML(valorMetodoPrevio)}">
                     </div>
                 </div>
             `;
