@@ -2012,7 +2012,7 @@ function abrirResultados(nroOrden) {
 
     orden.examenes.forEach((ex, exIdx) => {
         const guardado = (orden.resultados || []).find(r => r.codigo === ex.codigo);
-        const plantilla = obtenerPlantillaIndicadores(ex.nombre);
+        const plantilla = obtenerPlantillaIndicadores(ex.nombre, ex.codigo);
         const indicadores = plantilla && plantilla.length ? plantilla : [{
             nombre: "Resultado del análisis",
             unidad: ex.unidad || "",
