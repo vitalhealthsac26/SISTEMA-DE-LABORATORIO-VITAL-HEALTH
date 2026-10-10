@@ -2233,9 +2233,9 @@ async function guardarExamenCatalogo() {
     window.nubeGuardarExamen?.(nuevoEx);
 
     // 3. Si hay parámetros en la tabla web, guardarlos también como plantilla en la nube
-    if (nuevosParametros.length > 0 && typeof guardarPlantillaEnNube === "function") {
-        await guardarPlantillaEnNube(codigo, nuevosParametros);
-    }
+    if (nuevosParametros.length > 0 && typeof window.guardarPlantillaEnNube === "function") {
+    await window.guardarPlantillaEnNube(codigo, nuevosParametros);
+}
 
     alert("Examen y plantilla guardados en el catálogo correctamente.");
     prepararNuevoExamen();
