@@ -2118,9 +2118,26 @@ function guardarResultados(nroOrden, silencioso = false) {
 }
 
 // ==========================================
-// CATÁLOGO Y PLANTILLAS
+// CATÁLOGO Y PLANTILLAS (Actualizado con Estructura Avanzada)
 // ==========================================
-function obtenerPlantillaIndicadores(nombreExamen) {
+
+function obtenerPlantillaIndicadores(nombreExamen, codigoExamen = null) {
+    // 1. PRIORIDAD: Buscar si el examen en el catálogo tiene una plantilla avanzada personalizada guardada
+    if (codigoExamen) {
+        const exCat = examenesCatalogo.find(e => String(e.codigo) === String(codigoExamen));
+        if (exCat && Array.isArray(exCat.plantillaPersonalizada) && exCat.plantillaPersonalizada.length > 0) {
+            return exCat.plantillaPersonalizada;
+        }
+    }
+    
+    if (nombreExamen) {
+        const exCatByName = examenesCatalogo.find(e => String(e.nombre || "").trim().toUpperCase() === String(nombreExamen).trim().toUpperCase());
+        if (exCatByName && Array.isArray(exCatByName.plantillaPersonalizada) && exCatByName.plantillaPersonalizada.length > 0) {
+            return exCatByName.plantillaPersonalizada;
+        }
+    }
+
+    // 2. RESPALDO: Diccionarios tradicionales (Hemograma, Perfiles, etc.)
     if (!nombreExamen) return [];
     const normalizado = nombreExamen.toUpperCase()
         .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
@@ -2153,6 +2170,7 @@ function obtenerPlantillaIndicadores(nombreExamen) {
             return BASE_VALORES_REFERENCIALES[item.key];
         }
     }
+    
     for (const clave in BASE_VALORES_REFERENCIALES) {
         const claveNormalizada = clave.toUpperCase()
             .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
@@ -2186,16 +2204,43 @@ function prepararNuevoExamen() {
     if (cont) cont.innerHTML = "";
 }
 
-function agregarIndicadorResultado() {
+// NUEVA VERSIÓN: Permite agregar parámetros avanzados (id, nombre, unidad, refMin, refMax, metodo)
+function agregarIndicadorResultado(datos = {}) {
     const contenedor = document.getElementById("contenedor-indicadores");
     if (!contenedor) return;
+    
     const div = document.createElement("div");
-    div.className = "row g-2 mb-2 align-items-center indicador-row";
+    div.className = "row g-2 mb-2 align-items-center indicador-row border p-2 rounded bg-light";
+    
     div.innerHTML = `
-        <div class="col-4"><input type="text" class="form-control form-control-sm" placeholder="Nombre parámetro"></div>
-        <div class="col-3"><input type="text" class="form-control form-control-sm" placeholder="Unidad"></div>
-        <div class="col-4"><input type="text" class="form-control form-control-sm" placeholder="Referencia"></div>
-        <div class="col-1 text-center"><button type="button" class="btn btn-sm text-danger" onclick="this.closest('.row').remove()"><i class="bi bi-x-lg"></i></button></div>
+        <div class="col-md-2">
+            <label class="form-label small text-muted mb-0">ID técnico</label>
+            <input type="text" class="form-control form-control-sm ind-id" value="${datos.id || ''}" placeholder="ej. leucocitos">
+        </div>
+        <div class="col-md-3">
+            <label class="form-label small text-muted mb-0">Nombre Parámetro</label>
+            <input type="text" class="form-control form-control-sm ind-nombre" value="${datos.nombre || ''}" placeholder="ej. Leucocitos">
+        </div>
+        <div class="col-md-2">
+            <label class="form-label small text-muted mb-0">Unidad</label>
+            <input type="text" class="form-control form-control-sm ind-unidad" value="${datos.unidad || ''}" placeholder="Cél/uL">
+        </div>
+        <div class="col-md-2">
+            <label class="form-label small text-muted mb-0">Mín / Máx</label>
+            <div class="input-group input-group-sm">
+                <input type="number" step="any" class="form-control ind-min" value="${datos.refMin ?? ''}" placeholder="Mín">
+                <input type="number" step="any" class="form-control ind-max" value="${datos.refMax ?? ''}" placeholder="Máx">
+            </div>
+        </div>
+        <div class="col-md-2">
+            <label class="form-label small text-muted mb-0">Método</label>
+            <input type="text" class="form-control form-control-sm ind-metodo" value="${datos.metodo || ''}" placeholder="Método...">
+        </div>
+        <div class="col-md-1 text-center d-flex align-items-end">
+            <button type="button" class="btn btn-sm btn-outline-danger mt-3" onclick="this.closest('.row').remove()" title="Eliminar indicador">
+                <i class="bi bi-trash"></i>
+            </button>
+        </div>
     `;
     contenedor.appendChild(div);
 }
@@ -2218,19 +2263,59 @@ function guardarExamenCatalogo() {
         alert("Complete el código y nombre del examen.");
         return;
     }
-    const nuevoEx = { codigo, nombre, precio, muestra, metodo, plantilla, refTexto, en: Date.now() };
+
+    // Recolectar la estructura avanzada de indicadores desde el DOM de la vista
+    const filas = document.querySelectorAll("#contenedor-indicadores .indicador-row");
+    let plantillaPersonalizada = [];
+
+    filas.forEach(fila => {
+        const idInput = fila.querySelector(".ind-id").value.trim();
+        const nombreParam = fila.querySelector(".ind-nombre").value.trim();
+        const unidad = fila.querySelector(".ind-unidad").value.trim();
+        const refMin = fila.querySelector(".ind-min").value;
+        const refMax = fila.querySelector(".ind-max").value;
+        const metodoParam = fila.querySelector(".ind-metodo").value.trim();
+
+        if (nombreParam) {
+            // Si el ID técnico está vacío, lo autogeneramos en minúsculas sin espacios
+            const idGenerado = idInput || nombreParam.toLowerCase().replace(/[^a-z0-9]/g, '_');
+            
+            plantillaPersonalizada.push({
+                id: idGenerado,
+                nombre: nombreParam,
+                valor: "",
+                unidad: unidad,
+                refMin: refMin !== "" ? parseFloat(refMin) : "",
+                refMax: refMax !== "" ? parseFloat(refMax) : "",
+                metodo: metodoParam
+            });
+        }
+    });
+
+    const nuevoEx = { 
+        codigo, 
+        nombre, 
+        precio, 
+        muestra, 
+        metodo, 
+        plantilla, 
+        refTexto, 
+        plantillaPersonalizada, // <--- Aquí se guarda el array estructurado exacto que requieres
+        en: Date.now() 
+    };
+
     const index = examenesCatalogo.findIndex(e => e.codigo === codigo);
     if (index >= 0) {
-        // Conservar campos referenciales previos si el formulario no los trae
         const prev = examenesCatalogo[index];
         examenesCatalogo[index] = Object.assign({}, prev, nuevoEx);
     } else {
         examenesCatalogo.push(nuevoEx);
     }
+
     renderizarTablaCatalogo();
     persistirDatos();
     window.nubeGuardarExamen?.(nuevoEx);
-    alert("Examen guardado en el catálogo correctamente.");
+    alert("Examen y plantilla avanzada guardados en el catálogo correctamente.");
     prepararNuevoExamen();
 }
 
@@ -2250,11 +2335,15 @@ function renderizarTablaCatalogo(filtro = "") {
         return;
     }
     filtrados.forEach(ex => {
+        const tienePersonalizada = Array.isArray(ex.plantillaPersonalizada) && ex.plantillaPersonalizada.length > 0;
+        const badgeClass = tienePersonalizada ? "bg-success text-white" : "bg-light text-dark border";
+        const badgeText = tienePersonalizada ? `Personalizada (${ex.plantillaPersonalizada.length})` : "Plantilla";
+
         const tr = document.createElement("tr");
         tr.innerHTML = `
             <td>${escapeHTML(ex.codigo)}</td>
             <td class="fw-semibold">${escapeHTML(ex.nombre)}</td>
-            <td><span class="badge bg-light text-dark border">Plantilla</span></td>
+            <td><span class="badge ${badgeClass}">${badgeText}</span></td>
             <td>S/ ${Number(ex.precio || 0).toFixed(2)}</td>
             <td class="text-end">
                 <button class="btn btn-sm btn-outline-primary me-1" onclick="editarExamenCatalogo('${ex.codigo}')" title="Editar"><i class="bi bi-pencil"></i></button>
@@ -2276,8 +2365,43 @@ function editarExamenCatalogo(codigo) {
     setVal("cat-metodo", ex.metodo || "");
     setVal("cat-plantilla", ex.plantilla || "personalizada");
     setVal("cat-ref-texto", ex.refTexto || "");
+    
     const titulo = document.getElementById("catalogo-form-titulo");
     if (titulo) titulo.innerHTML = `<i class="bi bi-pencil-square me-2"></i>Editar Examen: ${escapeHTML(ex.codigo)}`;
+
+    // Cargar los indicadores avanzados al formulario visual
+    vaciarTodosLosIndicadores();
+    
+    // Si el examen tiene la plantilla avanzada guardada, la cargamos fila por fila
+    if (Array.isArray(ex.plantillaPersonalizada) && ex.plantillaPersonalizada.length > 0) {
+        ex.plantillaPersonalizada.forEach(ind => {
+            agregarIndicadorResultado({
+                id: ind.id || "",
+                nombre: ind.nombre || "",
+                unidad: ind.unidad || "",
+                refMin: ind.refMin ?? "",
+                refMax: ind.refMax ?? "",
+                metodo: ind.metodo || ""
+            });
+        });
+    } else {
+        // Como respaldo, si no tiene avanzada pero sí usa una del diccionario predefinido, la cargamos para que se pueda editar
+        const plantillaBase = obtenerPlantillaIndicadores(ex.nombre, ex.codigo);
+        if (Array.isArray(plantillaBase)) {
+            plantillaBase.forEach(ind => {
+                if (!ind.esSeccion) { // Omitir títulos de sección puros si los hay
+                    agregarIndicadorResultado({
+                        id: ind.id || "",
+                        nombre: ind.nombre || "",
+                        unidad: ind.unidad || "",
+                        refMin: ind.refMin ?? "",
+                        refMax: ind.refMax ?? "",
+                        metodo: ind.metodo || ""
+                    });
+                }
+            });
+        }
+    }
 }
 
 function eliminarExamenCatalogo(codigo) {
@@ -2285,7 +2409,6 @@ function eliminarExamenCatalogo(codigo) {
     
     const idCodStr = String(codigo);
 
-    // 1. Guardar en la lista negra local persistente
     if (!window.examenesEliminados) {
         window.examenesEliminados = leerJSON("vital_examenes_eliminados", []);
     }
@@ -2294,14 +2417,11 @@ function eliminarExamenCatalogo(codigo) {
         localStorage.setItem("vital_examenes_eliminados", JSON.stringify(window.examenesEliminados));
     }
 
-    // 2. Quitar de la memoria local actual
     examenesCatalogo = examenesCatalogo.filter(e => String(e.codigo) !== idCodStr);
     
-    // 3. Guardar cambios locales
     persistirDatos();
     renderizarTablaCatalogo();
 
-    // 4. Eliminar físicamente de la nube de Firebase de inmediato
     if (typeof nubeEliminarExamen === "function") {
         nubeEliminarExamen(idCodStr);
     } else if (typeof db !== "undefined" && db) {
