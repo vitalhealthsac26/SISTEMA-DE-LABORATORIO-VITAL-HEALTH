@@ -2120,8 +2120,16 @@ function guardarResultados(nroOrden, silencioso = false) {
 // ==========================================
 // CATÁLOGO Y PLANTILLAS
 // ==========================================
-function obtenerPlantillaIndicadores(nombreExamen) {
+async function obtenerPlantillaIndicadores(nombreExamen) {
     if (!nombreExamen) return [];
+
+    // 1. PRIMERO: Buscar si existe una plantilla personalizada guardada en Firebase
+    const plantillaNube = await obtenerPlantillaCompleta(nombreExamen);
+    if (plantillaNube && plantillaNube.length > 0) {
+        return plantillaNube;
+    }
+
+    // 2. SEGUNDO: Si no está en la nube, aplicar tu lógica local exacta
     const normalizado = nombreExamen.toUpperCase()
         .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
         .replace(/-/g, " ")
@@ -2153,6 +2161,7 @@ function obtenerPlantillaIndicadores(nombreExamen) {
             return BASE_VALORES_REFERENCIALES[item.key];
         }
     }
+    
     for (const clave in BASE_VALORES_REFERENCIALES) {
         const claveNormalizada = clave.toUpperCase()
             .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
