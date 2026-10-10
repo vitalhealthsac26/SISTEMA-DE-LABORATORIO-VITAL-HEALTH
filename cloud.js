@@ -344,22 +344,28 @@ async function guardarPlantillaEnNube(codigoOModulo, listaParametros) {
 }
 window.obtenerPlantillaCompleta = async function(nombreOcodigo) {
     if (!nombreOcodigo) return null;
-    const clave = String(nombreOcodigo).trim().toUpperCase();
+    let clave = String(nombreOcodigo).trim().toUpperCase();
+
+    // Extraer automáticamente el código si viene en formato "... (858)" al final
+    const matchParentesis = clave.match(/\((\d+)\)\s*$/);
+    if (matchParentesis && matchParentesis[1]) {
+        clave = matchParentesis[1]; // Esto convierte "PERFIL... (858)" en "858"
+    }
 
     if (db) {
         try {
-            // 1. Intentar buscar directamente por ID de documento (ej. "858")
+            // 1. Intentar buscar directamente por el código extraído o ID directo
             const docRef = doc(db, "plantillas_examenes", clave);
             let snap = await getDoc(docRef);
             if (snap.exists()) {
                 return snap.data().parametros; 
             }
 
-            // 2. Si no existe por ID directo, buscar en el catálogo si es un nombre para extraer su código
+            // 2. Si no existe, buscar en el catálogo por nombre limpio
             if (typeof examenesCatalogo !== 'undefined' && Array.isArray(examenesCatalogo)) {
                 const examenEnCatalogo = examenesCatalogo.find(e => 
-                    String(e.nombre || "").trim().toUpperCase() === clave || 
-                    String(e.codigo || "").trim().toUpperCase() === clave
+                    String(e.codigo || "").trim().toUpperCase() === clave || 
+                    String(e.nombre || "").trim().toUpperCase().includes(clave)
                 );
                 if (examenEnCatalogo && examenEnCatalogo.codigo) {
                     const docRefCodigo = doc(db, "plantillas_examenes", String(examenEnCatalogo.codigo));
@@ -374,7 +380,7 @@ window.obtenerPlantillaCompleta = async function(nombreOcodigo) {
         }
     }
 
-    // 3. Si no está en Firestore, buscar en el respaldo local BASE_VALORES_REFERENCIALES
+    // 3. Respaldo local
     if (typeof BASE_VALORES_REFERENCIALES !== 'undefined' && BASE_VALORES_REFERENCIALES[clave]) {
         return BASE_VALORES_REFERENCIALES[clave];
     }
