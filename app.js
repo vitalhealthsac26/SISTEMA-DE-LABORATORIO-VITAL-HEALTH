@@ -2318,7 +2318,7 @@ function renderizarTablaCatalogo(filtro = "") {
 }
 
 // Función que se dispara al hacer clic en el botón de editar (lápiz) de la tabla del Catálogo
-function cargarExamenEnFormularioCatalogo(codigoExamen) {
+function editarExamenCatalogo(codigoExamen) {
     // 1. Buscar el examen en tu catálogo global (ej. examenesCatalogo)
     const examen = examenesCatalogo.find(ex => ex.codigo == codigoExamen);
     if (!examen) return;
