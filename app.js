@@ -2317,9 +2317,13 @@ function renderizarTablaCatalogo(filtro = "") {
     });
 }
 
-// Puente o alias para evitar errores sin importar qué nombre busque el botón HTML
+// Definición global asegurada para el botón del catálogo
 function editarExamenCatalogo(codigoExamen) {
-    editarExamenEnCatalogo(codigoExamen);
+    if (typeof editarExamenEnCatalogo === 'function') {
+        editarExamenEnCatalogo(codigoExamen);
+    } else {
+        console.error("La función editarExamenEnCatalogo no está disponible.");
+    }
 }
 
 // Función principal que ya tienes
