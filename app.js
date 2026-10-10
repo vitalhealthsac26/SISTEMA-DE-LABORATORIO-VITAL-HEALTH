@@ -2270,6 +2270,22 @@ function guardarConfiguracionExamenCompleto(event) {
         renderizarTablaCatalogo();
     }
 }
+function agregarFilaIndicadorEnPantalla(param = {}) {
+    const contenedor = document.getElementById('contenedor-indicadores');
+    if (!contenedor) return;
+
+    const div = document.createElement('div');
+    div.className = 'row g-2 mb-2 align-items-center fila-indicador-dinamica';
+    div.innerHTML = `
+        <div class="col-md-3"><input type="text" class="form-control form-control-sm input-nombre-parametro" placeholder="Parámetro" value="${escapeHTML(param.nombre || '')}"></div>
+        <div class="col-md-2"><input type="text" class="form-control form-control-sm input-unidad" placeholder="Unidad" value="${escapeHTML(param.unidad || '')}"></div>
+        <div class="col-md-2"><input type="text" class="form-control form-control-sm input-refmin" placeholder="Mín" value="${escapeHTML(param.refMin || '')}"></div>
+        <div class="col-md-2"><input type="text" class="form-control form-control-sm input-refmax" placeholder="Máx" value="${escapeHTML(param.refMax || '')}"></div>
+        <div class="col-md-2"><input type="text" class="form-control form-control-sm input-referenciadetalle" placeholder="Detalle / Texto" value="${escapeHTML(param.referencia || '')}"></div>
+        <div class="col-md-1 text-center"><button type="button" class="btn btn-sm text-danger" onclick="this.closest('.row').remove()"><i class="bi bi-x-lg"></i></button></div>
+    `;
+    contenedor.appendChild(div);
+}
 function renderizarTablaCatalogo(filtro = "") {
     const tbody = document.getElementById("tabla-catalogo-body");
     const countEl = document.getElementById("total-cat-count");
