@@ -1990,6 +1990,11 @@ function eliminarOrden(nroOrden) {
         }
     }
 }
+// Función puente para evitar el error de referencia
+function obtenerIndicadoresParaOrden(ex) {
+    if (!ex) return [];
+    return obtenerPlantillaIndicadores(ex.nombre, ex.codigo);
+}
 function abrirResultados(nroOrden) {
     const orden = (ordenesRegistradas || []).find(o => o.nroOrden === nroOrden);
     if (!orden) return;
