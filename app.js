@@ -3364,9 +3364,10 @@ function generarTablasResultadosHTML(orden) {
                 </h3>
                 <table style="width: 100%; border-collapse: collapse; font-size: 11px; margin-bottom: 6px;">
                     <tr style="background-color: #f8fafc; border-bottom: 1px solid #cbd5e1;">
-                        <th style="text-align: left; padding: 4px; width: 45%;">Parámetro / Indicador</th>
-                        <th style="text-align: left; padding: 4px; width: 25%;">Resultado</th>
-                        <th style="text-align: left; padding: 4px; width: 30%;">Valores de Referencia</th>
+                        <th style="text-align: left; padding: 4px; width: 35%;">Parámetro / Indicador</th>
+                        <th style="text-align: left; padding: 4px; width: 22%;">Resultado</th>
+                        <th style="text-align: left; padding: 4px; width: 23%;">Valores de Referencia</th>
+                        <th style="text-align: left; padding: 4px; width: 20%;">Método</th>
                     </tr>
         `;
         if (plantilla && plantilla.length > 0) {
@@ -3374,7 +3375,7 @@ function generarTablasResultadosHTML(orden) {
                 if (ind.esSeccion) {
                     html += `
                         <tr>
-                            <td colspan="3" style="background-color: #e2e8f0; font-weight: bold; color: #0f172a; padding: 6px 4px; font-size: 11.5px;">
+                            <td colspan="4" style="background-color: #e2e8f0; font-weight: bold; color: #0f172a; padding: 6px 4px; font-size: 11.5px;">
                                 ${escapeHTML(ind.nombre)}
                             </td>
                         </tr>
@@ -3386,21 +3387,22 @@ function generarTablasResultadosHTML(orden) {
                 const unidadTexto = ind.unidad ? ` ${ind.unidad}` : '';
                 const referencia = ind.referencia || formatoRango(ind.refMin, ind.refMax) || '-';
                 
-                // NUEVO: Agrega subtítulo con el método si fue configurado
-                const textoMetodo = ind.metodo ? `<br><span style="font-size: 9px; color: #64748b; font-style: italic;">Método: ${escapeHTML(ind.metodo)}</span>` : '';
+                // Extrae el método asignado al indicador de forma individual
+                const textoMetodo = ind.metodo ? escapeHTML(ind.metodo) : '-';
 
                 html += `
                     <tr style="border-bottom: 1px solid #e2e8f0;">
-                        <td style="padding: 4px; color: #334155; padding-left: 10px;">${escapeHTML(ind.nombre)}${textoMetodo}</td>
+                        <td style="padding: 4px; color: #334155; padding-left: 10px;">${escapeHTML(ind.nombre)}</td>
                         <td style="padding: 4px; font-weight: bold; color: #0f172a;">${escapeHTML(valorObtenido)}${escapeHTML(unidadTexto)}</td>
                         <td style="padding: 4px; color: #64748b;">${escapeHTML(referencia)}</td>
+                        <td style="padding: 4px; color: #64748b; font-style: italic; font-size: 10px;">${textoMetodo}</td>
                     </tr>
                 `;
             });
         } else {
             html += `
                 <tr>
-                    <td colspan="3" style="padding: 6px; color: #64748b; text-align: center;">Sin parámetros configurados para este examen.</td>
+                    <td colspan="4" style="padding: 6px; color: #64748b; text-align: center;">Sin parámetros configurados para este examen.</td>
                 </tr>
             `;
         }
