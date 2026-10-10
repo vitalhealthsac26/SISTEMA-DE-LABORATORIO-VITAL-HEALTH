@@ -2104,15 +2104,12 @@ function guardarResultados(nroOrden, silencioso = false) {
             return el ? el.value.trim() : "";
         };
 
-        // Extraer el método que viene guardado en el dataset del indicador en el DOM
-        const metodoParam = fila.dataset.metodo || "";
-
         porExamen[exIdx].push({
             nombre: fila.dataset.nombre || "Resultado", esSeccion: false,
             resultado: leer("resultado"), unidad: leer("unidad"),
             refMin: fila.dataset.refmin || "", refMax: fila.dataset.refmax || "",
             referencia: leer("referencia"),
-            metodo: metodoParam // <--- Se guarda el método de cada indicador individual
+            metodo: leer("metodo") // <--- Lee el texto del input de la nueva columna Método
         });
     });
 
@@ -2135,7 +2132,6 @@ function guardarResultados(nroOrden, silencioso = false) {
     if (!silencioso) alert(`Resultados guardados correctamente para la orden ${nroOrden}.`);
     return true;
 }
-
 // ==========================================
 // CATÁLOGO Y PLANTILLAS (Actualizado con Estructura Avanzada)
 // ==========================================
