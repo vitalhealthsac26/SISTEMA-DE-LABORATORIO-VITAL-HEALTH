@@ -2068,9 +2068,13 @@ function abrirResultados(nroOrden) {
             `;
         });
 
+        // Buscar el nombre limpio directamente del catálogo
+        const itemCatalogo = (typeof examenesCatalogo !== 'undefined' ? examenesCatalogo : []).find(c => c.codigo === ex.codigo);
+        const nombreLimpioExamen = itemCatalogo && itemCatalogo.nombre ? itemCatalogo.nombre : ex.nombre;
+
         html += `
             <div class="list-group-item mb-3 shadow-sm border rounded">
-                <h6 class="fw-bold text-primary">${escapeHTML(ex.nombre)} (${escapeHTML(ex.codigo)})</h6>
+                <h6 class="fw-bold text-primary">${escapeHTML(nombreLimpioExamen)}</h6>
                 ${filas}
             </div>
         `;
