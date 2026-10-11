@@ -813,15 +813,20 @@ function abrirResultados(nroOrden) {
     if (!editor) return;
 
     let html = `
-        <div class="alert alert-secondary d-flex justify-content-between align-items-center flex-wrap gap-2 small py-2">
-            <div><strong>Orden:</strong> ${escapeHTML(orden.nroOrden)} | <strong>Paciente:</strong> ${escapeHTML(orden.nombre)} (${escapeHTML(orden.dni)})</div>
+        <div class="alert alert-secondary d-flex justify-content-between align-items-center flex-wrap gap-2 small py-2 mb-3">
             <div>
+                <strong>Orden:</strong> ${escapeHTML(orden.nroOrden)} | <strong>Paciente:</strong> ${escapeHTML(orden.nombre)} (${escapeHTML(orden.dni)})
+                <span class="text-muted ms-2 d-block d-md-inline mt-1 mt-md-0">
+                    <i class="bi bi-arrow-down-up me-1 text-primary"></i>Organiza el orden con los botones <strong>Subir / Bajar</strong> o <strong>arrastra</strong> los exámenes.
+                </span>
+            </div>
+            <div class="d-flex gap-2 flex-wrap">
                 <button class="btn btn-success btn-sm" onclick="guardarResultados('${orden.nroOrden}')"><i class="bi bi-save me-1"></i> Guardar Resultados</button>
                 <button class="btn btn-outline-primary btn-sm ms-1" onclick="imprimirInforme('${orden.nroOrden}')"><i class="bi bi-printer me-1"></i> Imprimir Informe</button>
                 <button class="btn btn-outline-danger btn-sm ms-1" onclick="descargarInformePDF('${orden.nroOrden}')"><i class="bi bi-file-earmark-pdf me-1"></i> Descargar PDF</button>
             </div>
         </div>
-        <div class="list-group">
+        <div class="list-group" id="contenedor-cards-examenes">
     `;
 
     orden.examenes.forEach((ex, exIdx) => {
@@ -880,8 +885,26 @@ function abrirResultados(nroOrden) {
         const nombreLimpioExamen = itemCatalogo && itemCatalogo.nombre ? itemCatalogo.nombre : ex.nombre;
 
         html += `
-            <div class="list-group-item mb-3 shadow-sm border rounded">
-                <h6 class="fw-bold text-primary">${escapeHTML(nombreLimpioExamen)}</h6>
+            <div class="list-group-item mb-3 shadow-sm border rounded card-examen-arrastrable" 
+                 draggable="true" 
+                 data-ex-card-idx="${exIdx}"
+                 style="cursor: default; transition: all 0.2s ease;">
+                <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom flex-wrap gap-2 bg-light p-2 rounded">
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="badge bg-primary text-white fs-6 px-2 py-1 drag-handle" style="cursor: grab;" title="Arrastrar para reordenar examen">
+                            <i class="bi bi-grip-vertical me-1"></i>#${exIdx + 1}
+                        </span>
+                        <h6 class="fw-bold text-primary mb-0 fs-6">${escapeHTML(nombreLimpioExamen)}</h6>
+                    </div>
+                    <div class="btn-group btn-group-sm" role="group">
+                        <button type="button" class="btn btn-outline-secondary" onclick="moverExamenEnResultados('${orden.nroOrden}', ${exIdx}, -1)" ${exIdx === 0 ? 'disabled' : ''} title="Subir examen en el informe">
+                            <i class="bi bi-arrow-up-circle me-1"></i> Subir
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary" onclick="moverExamenEnResultados('${orden.nroOrden}', ${exIdx}, 1)" ${exIdx === orden.examenes.length - 1 ? 'disabled' : ''} title="Bajar examen en el informe">
+                            <i class="bi bi-arrow-down-circle me-1"></i> Bajar
+                        </button>
+                    </div>
+                </div>
                 ${filas}
             </div>
         `;
@@ -889,7 +912,105 @@ function abrirResultados(nroOrden) {
 
     html += `</div>`;
     editor.innerHTML = html;
+    inicializarDragAndDropResultados(nroOrden);
 }
+
+function inicializarDragAndDropResultados(nroOrden) {
+    const contenedor = document.getElementById("contenedor-cards-examenes");
+    if (!contenedor) return;
+
+    let indexArrastrado = null;
+    const cards = contenedor.querySelectorAll(".card-examen-arrastrable");
+
+    cards.forEach(card => {
+        card.addEventListener("dragstart", (e) => {
+            indexArrastrado = parseInt(card.dataset.exCardIdx, 10);
+            card.classList.add("arrastrando");
+            e.dataTransfer.effectAllowed = "move";
+            e.dataTransfer.setData("text/plain", indexArrastrado);
+        });
+
+        card.addEventListener("dragend", () => {
+            card.classList.remove("arrastrando");
+            cards.forEach(c => c.classList.remove("drag-sobre"));
+        });
+
+        card.addEventListener("dragover", (e) => {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = "move";
+            card.classList.add("drag-sobre");
+        });
+
+        card.addEventListener("dragleave", () => {
+            card.classList.remove("drag-sobre");
+        });
+
+        card.addEventListener("drop", (e) => {
+            e.preventDefault();
+            card.classList.remove("drag-sobre");
+            const indexDestino = parseInt(card.dataset.exCardIdx, 10);
+            if (isNaN(indexArrastrado) || isNaN(indexDestino) || indexArrastrado === indexDestino) return;
+
+            reordenarExamenesDragDrop(nroOrden, indexArrastrado, indexDestino);
+        });
+    });
+}
+
+function moverExamenEnResultados(nroOrden, indexActual, direccion) {
+    guardarResultados(nroOrden, true);
+
+    const orden = (ordenesRegistradas || []).find(o => o.nroOrden === nroOrden);
+    if (!orden || !Array.isArray(orden.examenes)) return;
+
+    const nuevoIndex = indexActual + direccion;
+    if (nuevoIndex < 0 || nuevoIndex >= orden.examenes.length) return;
+
+    const temp = orden.examenes[indexActual];
+    orden.examenes[indexActual] = orden.examenes[nuevoIndex];
+    orden.examenes[nuevoIndex] = temp;
+
+    if (Array.isArray(orden.resultados)) {
+        orden.resultados.sort((a, b) => {
+            const idxA = orden.examenes.findIndex(e => e.codigo === a.codigo);
+            const idxB = orden.examenes.findIndex(e => e.codigo === b.codigo);
+            return idxA - idxB;
+        });
+    }
+
+    orden.en = Date.now();
+    persistirDatos();
+    cargarOrdenes();
+    window.nubeGuardarOrden?.(orden);
+    abrirResultados(nroOrden);
+}
+window.moverExamenEnResultados = moverExamenEnResultados;
+
+function reordenarExamenesDragDrop(nroOrden, desdeIndex, haciaIndex) {
+    guardarResultados(nroOrden, true);
+
+    const orden = (ordenesRegistradas || []).find(o => o.nroOrden === nroOrden);
+    if (!orden || !Array.isArray(orden.examenes)) return;
+
+    if (desdeIndex < 0 || desdeIndex >= orden.examenes.length || haciaIndex < 0 || haciaIndex >= orden.examenes.length) return;
+
+    const [elemento] = orden.examenes.splice(desdeIndex, 1);
+    orden.examenes.splice(haciaIndex, 0, elemento);
+
+    if (Array.isArray(orden.resultados)) {
+        orden.resultados.sort((a, b) => {
+            const idxA = orden.examenes.findIndex(e => e.codigo === a.codigo);
+            const idxB = orden.examenes.findIndex(e => e.codigo === b.codigo);
+            return idxA - idxB;
+        });
+    }
+
+    orden.en = Date.now();
+    persistirDatos();
+    cargarOrdenes();
+    window.nubeGuardarOrden?.(orden);
+    abrirResultados(nroOrden);
+}
+window.reordenarExamenesDragDrop = reordenarExamenesDragDrop;
 
 function guardarResultados(nroOrden, silencioso = false) {
     const orden = (ordenesRegistradas || []).find(o => o.nroOrden === nroOrden);
