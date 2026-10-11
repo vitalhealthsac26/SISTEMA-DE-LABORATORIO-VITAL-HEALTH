@@ -194,7 +194,8 @@ let examenesCatalogo = [
   { codigo: "351", nombre: "CREATININA SERICA", unidad: "mg/dL", refMin: 0.6, refMax: 1.3, referencia: "0.6 - 1.3 mg/dL", precio: 15.00 },
   { codigo: "1112", nombre: "UREA", unidad: "mg/dL", refMin: 10, refMax: 50, referencia: "10 - 50 mg/dL", precio: 15.00 },
   { codigo: "34", nombre: "ACIDO URICO", unidad: "mg/dL", refMin: 1.1, refMax: 5.4, referencia: "1.10 - 5.40 mg/dL", precio: 15.00 },
-  { codigo: "459", nombre: "EXAMEN COMPLETO DE ORINA", unidad: "", refMin: "", refMax: "", referencia: "Física, Química, Microscópico", precio: 15.00 }
+  { codigo: "459", nombre: "EXAMEN COMPLETO DE ORINA", unidad: "", refMin: "", refMax: "", referencia: "Física, Química, Microscópico", precio: 15.00 },
+  { codigo: "1050", nombre: "UROCULTIVO Y ANTIBIOGRAMA", unidad: "", refMin: "", refMax: "", referencia: "Física, Microscópico, Cultivo y Antibiograma", precio: 35.00 }
 ];
 
 // ==========================================
@@ -843,14 +844,28 @@ function abrirResultados(nroOrden) {
     orden.examenes.forEach((ex, exIdx) => {
         const guardado = (orden.resultados || []).find(r => r.codigo === ex.codigo);
         const plantilla = obtenerIndicadoresParaOrden(ex);
-        const indicadores = plantilla && plantilla.length ? plantilla : [{
-            nombre: "Resultado del análisis",
-            unidad: ex.unidad || "",
-            refMin: ex.refMin ?? "",
-            refMax: ex.refMax ?? "",
-            referencia: ex.referencia || "",
-            metodo: ex.metodo || ""
-        }];
+        const itemCatalogo = (typeof examenesCatalogo !== 'undefined' ? examenesCatalogo : []).find(c => c.codigo === ex.codigo);
+        const nombreLimpioExamen = itemCatalogo && itemCatalogo.nombre ? itemCatalogo.nombre : ex.nombre;
+
+        // Limpiar cualquier contaminación previa de la plantilla de 24 indicadores de orina en exámenes independientes
+        const teniaPlantillaOrinaErronea = (!plantilla || plantilla.length === 0) && guardado && Array.isArray(guardado.indicadores) &&
+            guardado.indicadores.some(i => i.nombre === "Urobilinógeno" || i.nombre === "Ácido Ascórbico" || i.nombre === "Recuento Bacteriano");
+
+        let indicadores = plantilla && plantilla.length ? plantilla : null;
+        if (!indicadores && guardado && Array.isArray(guardado.indicadores) && guardado.indicadores.length > 0 && !teniaPlantillaOrinaErronea) {
+            indicadores = guardado.indicadores;
+        }
+
+        if (!indicadores || !indicadores.length) {
+            indicadores = [{
+                nombre: nombreLimpioExamen || "Resultado del análisis",
+                unidad: ex.unidad || (itemCatalogo && itemCatalogo.unidad) || "",
+                refMin: ex.refMin ?? (itemCatalogo && itemCatalogo.refMin !== undefined ? itemCatalogo.refMin : ""),
+                refMax: ex.refMax ?? (itemCatalogo && itemCatalogo.refMax !== undefined ? itemCatalogo.refMax : ""),
+                referencia: ex.referencia || (itemCatalogo && itemCatalogo.referencia) || "",
+                metodo: ex.metodo || (itemCatalogo && itemCatalogo.metodo) || ""
+            }];
+        }
 
         let filas = "";
         indicadores.forEach((ind, indIdx) => {
@@ -891,9 +906,6 @@ function abrirResultados(nroOrden) {
                 </div>
             `;
         });
-
-        const itemCatalogo = (typeof examenesCatalogo !== 'undefined' ? examenesCatalogo : []).find(c => c.codigo === ex.codigo);
-        const nombreLimpioExamen = itemCatalogo && itemCatalogo.nombre ? itemCatalogo.nombre : ex.nombre;
 
         html += `
             <div class="list-group-item mb-3 shadow-sm border rounded card-examen-arrastrable" 
@@ -1096,30 +1108,78 @@ function obtenerPlantillaIndicadores(nombreExamen, codigoExamen = null) {
     }
 
     if (!nombreExamen) return [];
-    const normalizado = nombreExamen.toUpperCase()
+    const normalizado = String(nombreExamen).toUpperCase()
         .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
-        .replace(/-/g, " ")
+        .replace(/[-+]/g, " ")
         .replace(/\s+/g, " ")
         .trim();
 
+    // 1. UROCULTIVO + ANTIBIOGRAMA (Exclusivo para Urocultivo / Cultivo de Orina)
+    const esUrocultivo = normalizado.includes("UROCULTIVO") || 
+                         normalizado.includes("CULTIVO DE ORINA") || 
+                         normalizado.includes("CULTIVO EN ORINA") ||
+                         (normalizado.includes("CULTIVO") && normalizado.includes("ORINA")) ||
+                         normalizado.includes("ANTIBIOGRAMA EN ORINA");
+
+    if (esUrocultivo) {
+        return BASE_VALORES_REFERENCIALES["UROCULTIVO Y ANTIBIOGRAMA"] || [];
+    }
+
+    // 2. EXAMEN COMPLETO DE ORINA (SOLO si es específicamente el examen general/completo de orina)
+    // NUNCA asignar a exámenes con 'orina' como: Proteínas en orina, Microalbuminuria, Creatinina, Sedimento, Calcio, etc.
+    const esTerminoExamenOrina = normalizado === "EXAMEN COMPLETO DE ORINA" ||
+                                 normalizado === "EXAMEN DE ORINA COMPLETO" ||
+                                 normalizado === "ORINA COMPLETA" ||
+                                 normalizado === "EXAMEN GENERAL DE ORINA" ||
+                                 normalizado === "EXAMEN DE ORINA" ||
+                                 normalizado === "ANALISIS DE ORINA" ||
+                                 normalizado === "ANALISIS COMPLETO DE ORINA" ||
+                                 normalizado === "EGO" ||
+                                 normalizado.startsWith("EXAMEN COMPLETO DE ORINA") ||
+                                 normalizado.startsWith("ORINA COMPLETA") ||
+                                 normalizado.startsWith("EXAMEN GENERAL DE ORINA");
+
+    const contieneAnalisisEspecifico = normalizado.includes("PROTEIN") ||
+                                      normalizado.includes("MICROALBUMIN") ||
+                                      normalizado.includes("CREATIN") ||
+                                      normalizado.includes("CALCIO") ||
+                                      normalizado.includes("ELECTROLIT") ||
+                                      normalizado.includes("ACIDO URICO") ||
+                                      normalizado.includes("AMILAS") ||
+                                      normalizado.includes("SEDIMENTO") ||
+                                      normalizado.includes("EMBARAZO") ||
+                                      normalizado.includes("HCG") ||
+                                      normalizado.includes("24 H") ||
+                                      normalizado.includes("24H") ||
+                                      normalizado.includes("DEPURACION") ||
+                                      normalizado.includes("CULTIVO");
+
+    if (esTerminoExamenOrina && !contieneAnalisisEspecifico) {
+        return BASE_VALORES_REFERENCIALES["EXAMEN COMPLETO DE ORINA"] || [];
+    }
+
+    // Si el nombre contiene la palabra "ORINA" pero no es ni Urocultivo ni Examen Completo de Orina,
+    // NO debe cargar ninguna de las dos plantillas grandes.
+    if (normalizado.includes("ORINA") || normalizado.includes("URINARI")) {
+        return [];
+    }
+
+    // 3. RESTO DE EQUIVALENCIAS CLÍNICAS NORMADAS
     const equivalencias = [
-        { terms: ["HEMOGRAMA"], key: "HEMOGRAMA COMPLETO AUTOMATIZADO" },
-        { terms: ["LIPIDICO"], key: "PERFIL LIPIDICO" },
-        { terms: ["HEPATICO"], key: "PERFIL HEPATICO" },
-        { terms: ["GLICOSILADA", "HBA1C"], key: "HEMOGLOBINA GLICOSILADA" },
-        { terms: ["DENGUE"], key: "DENGUE IGG / IGM" },
-        { terms: ["UROCULTIVO"], key: "UROCULTIVO Y ANTIBIOGRAMA" },
-        { terms: ["ORINA"], key: "EXAMEN COMPLETO DE ORINA" },
-        { terms: ["REACCION INFLAMATORIA"], key: "REACCION INFLAMATORIA EN HECES" },
-        { terms: ["PARASITOLOGICO"], key: "PARASITOLOGICO SERIADO 3 MUESTRAS" },
-        { terms: ["PSA"], key: "INDICE DE PSA" },
-        { terms: ["PROTEINA C REACTIVA"], key: "PROTEINA C REACTIVA" },
-        { terms: ["SEDIMENTACION", "VSG"], key: "VELOCIDAD DE SEDIMENTACION GLOBULAR" }
+        { test: n => n.includes("HEMOGRAMA"), key: "HEMOGRAMA COMPLETO AUTOMATIZADO" },
+        { test: n => n.includes("LIPIDICO"), key: "PERFIL LIPIDICO" },
+        { test: n => n.includes("HEPATICO"), key: "PERFIL HEPATICO" },
+        { test: n => n.includes("GLICOSILADA") || n.includes("HBA1C"), key: "HEMOGLOBINA GLICOSILADA" },
+        { test: n => n.includes("DENGUE"), key: "DENGUE IGG / IGM" },
+        { test: n => n.includes("REACCION INFLAMATORIA"), key: "REACCION INFLAMATORIA EN HECES" },
+        { test: n => n.includes("PARASITOLOGICO"), key: "PARASITOLOGICO SERIADO 3 MUESTRAS" },
+        { test: n => n === "PSA" || n.includes("INDICE DE PSA") || n.includes("PSA TOTAL"), key: "INDICE DE PSA" },
+        { test: n => n.includes("PROTEINA C REACTIVA") || n === "PCR" || n.startsWith("PCR "), key: "PROTEINA C REACTIVA" },
+        { test: n => n.includes("SEDIMENTACION") || n.includes("VSG"), key: "VELOCIDAD DE SEDIMENTACION GLOBULAR" }
     ];
 
     for (const item of equivalencias) {
-        const coincide = item.terms.some(term => normalizado.includes(term));
-        if (coincide && BASE_VALORES_REFERENCIALES[item.key]) {
+        if (item.test(normalizado) && BASE_VALORES_REFERENCIALES[item.key]) {
             return BASE_VALORES_REFERENCIALES[item.key];
         }
     }
@@ -1127,10 +1187,12 @@ function obtenerPlantillaIndicadores(nombreExamen, codigoExamen = null) {
     for (const clave in BASE_VALORES_REFERENCIALES) {
         const claveNormalizada = clave.toUpperCase()
             .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
-            .replace(/-/g, " ")
+            .replace(/[-+]/g, " ")
             .replace(/\s+/g, " ")
             .trim();
-        if (normalizado === claveNormalizada || normalizado.includes(claveNormalizada) || claveNormalizada.includes(normalizado)) {
+        // Solo coincidencia exacta o si el examen contiene el nombre completo de la plantilla
+        // NUNCA al revés para evitar que palabras comunes atrapen plantillas erróneas
+        if (normalizado === claveNormalizada || (normalizado.length > 5 && normalizado.includes(claveNormalizada))) {
             return BASE_VALORES_REFERENCIALES[clave];
         }
     }
@@ -2047,7 +2109,6 @@ function construirDatosPacienteInformeHTML(orden) {
             <div class="dato"><span class="dato-rotulo">Sexo</span><span class="dato-valor">${escapeHTML(orden.sexo || "—")}</span></div>
             <div class="dato"><span class="dato-rotulo">Médico solicitante</span><span class="dato-valor">${escapeHTML(orden.doctor || "Particular")}</span></div>
             <div class="dato"><span class="dato-rotulo">N° de orden</span><span class="dato-valor">${escapeHTML(orden.nroOrden)}</span></div>
-            <div class="dato"><span class="dato-rotulo">Toma de muestra</span><span class="dato-valor">${escapeHTML(orden.fechaHora || "")}</span></div>
             <div class="dato"><span class="dato-rotulo">Fecha de informe</span><span class="dato-valor">${fechaEmision} ${horaEmision}</span></div>
             <div class="dato"><span class="dato-rotulo">Exámenes incluidos</span><span class="dato-valor">${(orden.resultados || orden.examenes || []).length}</span></div>
         </div>
@@ -2090,14 +2151,34 @@ function construirFirmaInformeHTML(nota = "Ninguna.") {
 }
 
 function generarBloqueExamenHTML(ex, orden) {
-    const plantilla = obtenerIndicadoresParaOrden(ex);
-    const guardado = (orden.resultados || []).find(r => r.codigo === ex.codigo);
     const itemCatalogo = (typeof examenesCatalogo !== 'undefined' ? examenesCatalogo : []).find(c => c.codigo === ex.codigo);
     const nombreLimpioExamen = itemCatalogo && itemCatalogo.nombre ? itemCatalogo.nombre : ex.nombre;
+    const plantilla = obtenerIndicadoresParaOrden(ex);
+    const guardado = (orden.resultados || []).find(r => r.codigo === ex.codigo);
+
+    // Evitar contaminación si el examen tenía accidentalmente indicadores de orina guardados en el pasado
+    const teniaPlantillaOrinaErronea = (!plantilla || plantilla.length === 0) && guardado && Array.isArray(guardado.indicadores) &&
+        guardado.indicadores.some(i => i.nombre === "Urobilinógeno" || i.nombre === "Ácido Ascórbico" || i.nombre === "Recuento Bacteriano");
+
+    let listaIndicadores = [];
+    if (plantilla && plantilla.length > 0) {
+        listaIndicadores = plantilla;
+    } else if (guardado && Array.isArray(guardado.indicadores) && guardado.indicadores.length > 0 && !teniaPlantillaOrinaErronea) {
+        listaIndicadores = guardado.indicadores;
+    } else {
+        listaIndicadores = [{
+            nombre: nombreLimpioExamen || "Resultado del análisis",
+            unidad: ex.unidad || (itemCatalogo && itemCatalogo.unidad) || "",
+            refMin: ex.refMin ?? (itemCatalogo && itemCatalogo.refMin !== undefined ? itemCatalogo.refMin : ""),
+            refMax: ex.refMax ?? (itemCatalogo && itemCatalogo.refMax !== undefined ? itemCatalogo.refMax : ""),
+            referencia: ex.referencia || (itemCatalogo && itemCatalogo.referencia) || "",
+            metodo: ex.metodo || (itemCatalogo && itemCatalogo.metodo) || ""
+        }];
+    }
 
     let filasHTML = '';
-    if (plantilla && plantilla.length > 0) {
-        plantilla.forEach((ind, indIdx) => {
+    if (listaIndicadores && listaIndicadores.length > 0) {
+        listaIndicadores.forEach((ind, indIdx) => {
             if (ind.esSeccion) {
                 filasHTML += `
                     <tr class="seccion-fila">
@@ -2109,10 +2190,11 @@ function generarBloqueExamenHTML(ex, orden) {
                 return;
             }
             const previo = guardado && guardado.indicadores && guardado.indicadores[indIdx] ? guardado.indicadores[indIdx] : null;
-            const valorObtenido = previo ? previo.resultado : '';
-            const unidadTexto = ind.unidad ? ` ${ind.unidad}` : '';
-            const referencia = ind.referencia || formatoRango(ind.refMin, ind.refMax) || '-';
-            const textoMetodo = ind.metodo ? escapeHTML(ind.metodo) : '-';
+            const valorObtenido = ind.resultado !== undefined && ind.resultado !== "" ? ind.resultado : (previo ? previo.resultado : '');
+            const unidadVal = ind.unidad || (previo && previo.unidad) || '';
+            const unidadTexto = unidadVal ? ` ${unidadVal}` : '';
+            const referencia = ind.referencia || (previo && previo.referencia) || formatoRango(ind.refMin, ind.refMax) || '-';
+            const textoMetodo = (ind.metodo || (previo && previo.metodo)) ? escapeHTML(ind.metodo || previo.metodo) : '-';
 
             filasHTML += `
                 <tr style="border-bottom: 1px solid #e2e8f0;">
