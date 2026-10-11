@@ -3377,10 +3377,15 @@ function generarTablasResultadosHTML(orden) {
     examenes.forEach(ex => {
         const plantilla = obtenerIndicadoresParaOrden(ex);
         const guardado = (orden.resultados || []).find(r => r.codigo === ex.codigo);
+        
+        // Forzar el nombre limpio y oficial del catálogo sin códigos ni textos extra
+        const itemCatalogo = (typeof examenesCatalogo !== 'undefined' ? examenesCatalogo : []).find(c => c.codigo === ex.codigo);
+        const nombreLimpioExamen = itemCatalogo && itemCatalogo.nombre ? itemCatalogo.nombre : ex.nombre;
+
         html += `
             <div style="margin-bottom: 20px; page-break-inside: avoid;">
                 <h3 style="background-color: #f1f5f9; padding: 6px 10px; font-size: 14px; color: #1e293b; border-left: 4px solid #2563eb; margin-bottom: 8px;">
-                    ${escapeHTML(ex.nombre)}
+                    ${escapeHTML(nombreLimpioExamen)}
                 </h3>
                 <table style="width: 100%; border-collapse: collapse; font-size: 11px; margin-bottom: 6px;">
                     <tr style="background-color: #f8fafc; border-bottom: 1px solid #cbd5e1;">
