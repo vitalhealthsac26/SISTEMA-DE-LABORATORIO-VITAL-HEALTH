@@ -47,10 +47,10 @@ const BASE_VALORES_REFERENCIALES = {
   { id: 'creatinina_serica', nombre: 'CREATININA SERICA', valor: '', unidad: 'mg/dL', refMin: 0.6, refMax: 1.3, referencia: 'Hombres: 0.70 - 1.30 | Mujeres: 0.60 - 1.10 | Niños: 0.30 - 0.70', metodo: 'Colorimétrico enzimático o Espectrofotometría EC9200' }
 ],
   "T4 LIBRE": [
-  { id: 't4_libre', nombre: 'T4 LIBRE', valor: '', unidad: 'ng/dL', refMin: 0.90, refMax: 1.70, referencia: 'Adultos: 0.90 - 1.70 | Niños: 0.65 - 1.75 | Neonatos: 0.83 - 3.09', metodo: 'Ensayo de electroquimioluminiscencia (ECLIA)' }
+  { id: 't4_libre', nombre: 'Tiroxina Libre (FT4)', valor: '', unidad: 'ng/dL', refMin: 0.90, refMax: 1.70, referencia: 'Adultos: 0.90 - 1.70 | Niños: 4 a 30 días: 0.83 - 3.09 | 1 a 12 meses: 0.48 - 2.34 | 1 a 6 años: 0.65 - 1.75 | 7 a 11 años: 0.90 - 1.67 | 12 a 19 años: 0.93 - 1.60', metodo: 'Ensayo de electroquimioluminiscencia (ECLIA)' }
 ],
   "TSH ULTRASENSIBLE": [
-  { id: 'tsh_ultrasensible', nombre: 'TSH ULTRASENSIBLE', valor: '', unidad: 'uUI / mL', refMin: 0.27, refMax: 4.2, referencia: 'Adultos: 0.27 - 4.20 | Niños: 0.54 - 4.50 | Neonatos: 0.43 - 16.0', metodo: 'Ensayo de electroquimioluminiscencia (ECLIA)' }
+  { id: 'tsh_ultrasensible', nombre: 'Hormona estimulante de tiroides ultrasensible (TSH us)', valor: '', unidad: 'uUI / mL', refMin: 0.27, refMax: 4.20, referencia: 'Adultos: 0.27 - 4.2 | Niños: 4 a 30 días: 0.43 - 16.0 | 1 a 12 meses: 0.62 - 8.0 | 1 a 6 años: 0.54 - 4.5 | 7 a 11 años: 0.66 - 4.14 | 12 a 19 años: 0.53 - 3.59', metodo: 'Ensayo de electroquimioluminiscencia (ECLIA)' }
 ],
   "VIH 1-2 (AC - AG 3º/4º Generación)-VIH": [
   { id: 'vih', nombre: 'VIH 1-2 (AC - AG 3º/4º Generación)-VIH', valor: '', unidad: 'S/U', refMin: '', refMax: '', referencia: 'No Reactivo (-)', metodo: 'Inmunocromatografía' }
@@ -171,7 +171,39 @@ const BASE_VALORES_REFERENCIALES = {
 ],
 
 "PROTEINA C REACTIVA": [
-  { id: 'pcr', nombre: 'Proteína C Reactiva - Cuantitativa', valor: '', unidad: 'mg/dL', refMin: 0, refMax: 10, referencia: 'Normal: Menor 10 | Leve a Moderado: 10.0 - 40.0 | Moderado a Severo: 40.0 - 200.0 | Severo: > 200.0' }
+  { id: 'pcr', nombre: 'Proteina C Reactiva - Cuantitativa', valor: '', unidad: 'mg/dL', refMin: 0, refMax: 10, referencia: 'Normal: Menor 10 | Leve a Moderado: 10.0 - 40.0 | Moderado a Severo: 40.0 - 200.0 | Severo: > 200.0', metodo: 'Inmunoturbidimetría' }
+],
+
+"PROTEINA C REACTIVA - CUANTITATIVA": [
+  { id: 'pcr', nombre: 'Proteina C Reactiva - Cuantitativa', valor: '', unidad: 'mg/dL', refMin: 0, refMax: 10, referencia: 'Normal: Menor 10 | Leve a Moderado: 10.0 - 40.0 | Moderado a Severo: 40.0 - 200.0 | Severo: > 200.0', metodo: 'Inmunoturbidimetría' }
+],
+
+"PROTEINA C REACTIVA - CUANTITATIVO": [
+  { id: 'pcr', nombre: 'Proteina C Reactiva - Cuantitativa', valor: '', unidad: 'mg/dL', refMin: 0, refMax: 10, referencia: 'Normal: Menor 10 | Leve a Moderado: 10.0 - 40.0 | Moderado a Severo: 40.0 - 200.0 | Severo: > 200.0', metodo: 'Inmunoturbidimetría' }
+],
+
+"PROTEINA C REACTIVA CUANTITATIVA": [
+  { id: 'pcr', nombre: 'Proteina C Reactiva - Cuantitativa', valor: '', unidad: 'mg/dL', refMin: 0, refMax: 10, referencia: 'Normal: Menor 10 | Leve a Moderado: 10.0 - 40.0 | Moderado a Severo: 40.0 - 200.0 | Severo: > 200.0', metodo: 'Inmunoturbidimetría' }
+],
+
+"PROTEINA C REACTIVA CUANTITATIVO": [
+  { id: 'pcr', nombre: 'Proteina C Reactiva - Cuantitativa', valor: '', unidad: 'mg/dL', refMin: 0, refMax: 10, referencia: 'Normal: Menor 10 | Leve a Moderado: 10.0 - 40.0 | Moderado a Severo: 40.0 - 200.0 | Severo: > 200.0', metodo: 'Inmunoturbidimetría' }
+],
+
+"PCR CUANTITATIVO": [
+  { id: 'pcr', nombre: 'Proteina C Reactiva - Cuantitativa', valor: '', unidad: 'mg/dL', refMin: 0, refMax: 10, referencia: 'Normal: Menor 10 | Leve a Moderado: 10.0 - 40.0 | Moderado a Severo: 40.0 - 200.0 | Severo: > 200.0', metodo: 'Inmunoturbidimetría' }
+],
+
+"TIROXINA LIBRE (FT4)": [
+  { id: 't4_libre', nombre: 'Tiroxina Libre (FT4)', valor: '', unidad: 'ng/dL', refMin: 0.90, refMax: 1.70, referencia: 'Adultos: 0.90 - 1.70 | Niños: 4 a 30 días: 0.83 - 3.09 | 1 a 12 meses: 0.48 - 2.34 | 1 a 6 años: 0.65 - 1.75 | 7 a 11 años: 0.90 - 1.67 | 12 a 19 años: 0.93 - 1.60', metodo: 'Ensayo de electroquimioluminiscencia (ECLIA)' }
+],
+
+"T4 LIBRE (TIROXINA LIBRE FT4)": [
+  { id: 't4_libre', nombre: 'Tiroxina Libre (FT4)', valor: '', unidad: 'ng/dL', refMin: 0.90, refMax: 1.70, referencia: 'Adultos: 0.90 - 1.70 | Niños: 4 a 30 días: 0.83 - 3.09 | 1 a 12 meses: 0.48 - 2.34 | 1 a 6 años: 0.65 - 1.75 | 7 a 11 años: 0.90 - 1.67 | 12 a 19 años: 0.93 - 1.60', metodo: 'Ensayo de electroquimioluminiscencia (ECLIA)' }
+],
+
+"HORMONA ESTIMULANTE DE TIROIDES ULTRASENSIBLE (TSH US)": [
+  { id: 'tsh_ultrasensible', nombre: 'Hormona estimulante de tiroides ultrasensible (TSH us)', valor: '', unidad: 'uUI / mL', refMin: 0.27, refMax: 4.20, referencia: 'Adultos: 0.27 - 4.2 | Niños: 4 a 30 días: 0.43 - 16.0 | 1 a 12 meses: 0.62 - 8.0 | 1 a 6 años: 0.54 - 4.5 | 7 a 11 años: 0.66 - 4.14 | 12 a 19 años: 0.53 - 3.59', metodo: 'Ensayo de electroquimioluminiscencia (ECLIA)' }
 ],
 
 "VELOCIDAD DE SEDIMENTACION GLOBULAR": [
@@ -195,7 +227,10 @@ let examenesCatalogo = [
   { codigo: "1112", nombre: "UREA", unidad: "mg/dL", refMin: 10, refMax: 50, referencia: "Adultos: 15.00 - 45.00 | Niños: 10.00 - 40.00", precio: 15.00 },
   { codigo: "34", nombre: "ACIDO URICO", unidad: "mg/dL", refMin: 1.1, refMax: 5.4, referencia: "Hombres: 3.40 - 7.00 | Mujeres: 2.40 - 5.70 | Niños: 2.00 - 5.50", precio: 15.00 },
   { codigo: "459", nombre: "EXAMEN COMPLETO DE ORINA", unidad: "", refMin: "", refMax: "", referencia: "Física, Química, Microscópico", precio: 15.00 },
-  { codigo: "1050", nombre: "UROCULTIVO Y ANTIBIOGRAMA", unidad: "", refMin: "", refMax: "", referencia: "Física, Microscópico, Cultivo y Antibiograma", precio: 35.00 }
+  { codigo: "1050", nombre: "UROCULTIVO Y ANTIBIOGRAMA", unidad: "", refMin: "", refMax: "", referencia: "Física, Microscópico, Cultivo y Antibiograma", precio: 35.00 },
+  { codigo: "658", nombre: "T4 LIBRE (TIROXINA LIBRE FT4)", unidad: "ng/dL", refMin: 0.90, refMax: 1.70, referencia: "Adultos: 0.90 - 1.70 | Niños: 4 a 30 días: 0.83 - 3.09 | 1 a 12 meses: 0.48 - 2.34 | 1 a 6 años: 0.65 - 1.75 | 7 a 11 años: 0.90 - 1.67 | 12 a 19 años: 0.93 - 1.60", metodo: "Ensayo de electroquimioluminiscencia (ECLIA)", precio: 45.00 },
+  { codigo: "659", nombre: "TSH ULTRASENSIBLE", unidad: "uUI / mL", refMin: 0.27, refMax: 4.20, referencia: "Adultos: 0.27 - 4.2 | Niños: 4 a 30 días: 0.43 - 16.0 | 1 a 12 meses: 0.62 - 8.0 | 1 a 6 años: 0.54 - 4.5 | 7 a 11 años: 0.66 - 4.14 | 12 a 19 años: 0.53 - 3.59", metodo: "Ensayo de electroquimioluminiscencia (ECLIA)", precio: 45.00 },
+  { codigo: "750", nombre: "PROTEINA C REACTIVA - CUANTITATIVA", unidad: "mg/dL", refMin: 0, refMax: 10, referencia: "Normal: Menor 10 | Leve a Moderado: 10.0 - 40.0 | Moderado a Severo: 40.0 - 200.0 | Severo: > 200.0", metodo: "Inmunoturbidimetría", precio: 35.00 }
 ];
 
 // ==========================================
@@ -821,25 +856,50 @@ function extraerReferenciaSegunPaciente(referencia, sexo, edad) {
     const esMasculino = sexoNorm.startsWith("M") || sexoNorm.includes("HOMBRE") || sexoNorm.includes("VARON");
 
     const edadStr = String(edad || "").toLowerCase().trim();
-    const edadNum = parseFloat(edadStr.replace(/[^0-9.]/g, ""));
-    const esNeonato = edadStr.includes("día") || edadStr.includes("dia") || edadStr.includes("mes") || (!isNaN(edadNum) && edadNum === 0);
-    const esNino = !esNeonato && !isNaN(edadNum) && edadNum > 0 && edadNum < 18;
-    const esAdulto = !esNeonato && !esNino && !isNaN(edadNum) && edadNum >= 18;
+    let edadDias = null;
+    let edadMeses = null;
+    let edadAnos = null;
+
+    if (edadStr.includes("día") || edadStr.includes("dia")) {
+        edadDias = parseFloat(edadStr.replace(/[^0-9.]/g, "")) || 0;
+    } else if (edadStr.includes("mes")) {
+        edadMeses = parseFloat(edadStr.replace(/[^0-9.]/g, "")) || 0;
+    } else {
+        const num = parseFloat(edadStr.replace(/[^0-9.]/g, ""));
+        if (!isNaN(num)) edadAnos = num;
+    }
 
     let sugerencia = null;
     let etiqueta = "";
 
-    // 1. Prioridad: Etapa etaria si es neonato o niño
-    if (esNeonato) {
-        const parte = partes.find(p => /neonato/i.test(p));
-        if (parte) { sugerencia = parte; etiqueta = "Neonato"; }
-    } else if (esNino) {
-        const parte = partes.find(p => /niño|pedi[aá]tr/i.test(p));
-        if (parte) { sugerencia = parte; etiqueta = "Niño"; }
+    // 1. Evaluación por sub-etapas pediátricas precisas si existen
+    if (edadDias !== null) {
+        const parte = partes.find(p => /d[ií]as/i.test(p) || /neonato/i.test(p));
+        if (parte) { sugerencia = parte; etiqueta = `${edadDias} días`; }
+    } else if (edadMeses !== null) {
+        const parte = partes.find(p => /meses/i.test(p));
+        if (parte) { sugerencia = parte; etiqueta = `${edadMeses} meses`; }
+    } else if (edadAnos !== null && edadAnos < 19) {
+        for (const p of partes) {
+            const m = p.match(/(\d+)\s*a\s*(\d+)\s*a[ñn]os/i);
+            if (m) {
+                const minA = parseInt(m[1], 10);
+                const maxA = parseInt(m[2], 10);
+                if (edadAnos >= minA && edadAnos <= maxA) {
+                    sugerencia = p;
+                    etiqueta = `${edadAnos} años`;
+                    break;
+                }
+            }
+        }
+        if (!sugerencia) {
+            const parteNino = partes.find(p => /niño|pedi[aá]tr/i.test(p));
+            if (parteNino) { sugerencia = parteNino; etiqueta = "Niño"; }
+        }
     }
 
-    // 2. Por sexo si no hubo coincidencia pediátrica
-    if (!sugerencia) {
+    // 2. Si es adulto (>= 18 años o sin bracket pediátrico)
+    if (!sugerencia && (edadAnos === null || edadAnos >= 18)) {
         if (esFemenino) {
             const parte = partes.find(p => /(?:^|[\s(])(?:mujer|femenina|f:)(?:[\s)]|$)/i.test(p) || /(?:^|[\s])f\s*:/i.test(p) || /mujeres/i.test(p));
             if (parte) { sugerencia = parte; etiqueta = "Mujer"; }
@@ -847,12 +907,10 @@ function extraerReferenciaSegunPaciente(referencia, sexo, edad) {
             const parte = partes.find(p => /(?:^|[\s(])(?:hombre|masculino|varon|m:)(?:[\s)]|$)/i.test(p) || /(?:^|[\s])m\s*:/i.test(p) || /hombres/i.test(p));
             if (parte) { sugerencia = parte; etiqueta = "Hombre"; }
         }
-    }
-
-    // 3. Si aún no hay sugerencia y es adulto
-    if (!sugerencia && esAdulto) {
-        const parte = partes.find(p => /adulto/i.test(p));
-        if (parte) { sugerencia = parte; etiqueta = "Adulto"; }
+        if (!sugerencia) {
+            const parteAdulto = partes.find(p => /adulto/i.test(p));
+            if (parteAdulto) { sugerencia = parteAdulto; etiqueta = "Adulto"; }
+        }
     }
 
     return { sugerencia, etiqueta, todas: partes };
@@ -1284,7 +1342,9 @@ function obtenerPlantillaIndicadores(nombreExamen, codigoExamen = null) {
         { test: n => n.includes("REACCION INFLAMATORIA"), key: "REACCION INFLAMATORIA EN HECES" },
         { test: n => n.includes("PARASITOLOGICO"), key: "PARASITOLOGICO SERIADO 3 MUESTRAS" },
         { test: n => n === "PSA" || n.includes("INDICE DE PSA") || n.includes("PSA TOTAL"), key: "INDICE DE PSA" },
-        { test: n => n.includes("PROTEINA C REACTIVA") || n === "PCR" || n.startsWith("PCR "), key: "PROTEINA C REACTIVA" },
+        { test: n => n.includes("T4 LIBRE") || n.includes("TIROXINA LIBRE") || n === "T4" || n.includes("FT4"), key: "T4 LIBRE" },
+        { test: n => n.includes("TSH") || n.includes("TIROIDES ULTRASENSIBLE") || n.includes("TIROTROPINA"), key: "TSH ULTRASENSIBLE" },
+        { test: n => n.includes("PROTEINA C REACTIVA") || n === "PCR" || n.startsWith("PCR ") || n.includes("PCR CUANTITATIV"), key: "PROTEINA C REACTIVA" },
         { test: n => n.includes("SEDIMENTACION") || n.includes("VSG"), key: "VELOCIDAD DE SEDIMENTACION GLOBULAR" }
     ];
 
@@ -1363,6 +1423,10 @@ function insertarPlantillaRef(btn, tipo) {
         inputRef.value = "Hombres: 0.00 - 0.00 | Mujeres: 0.00 - 0.00";
     } else if (tipo === "edad") {
         inputRef.value = "Adultos: 0.00 - 0.00 | Niños: 0.00 - 0.00 | Neonatos: 0.00 - 0.00";
+    } else if (tipo === "tiroideo") {
+        inputRef.value = "Adultos: 0.90 - 1.70 | Niños: 4 a 30 días: 0.83 - 3.09 | 1 a 12 meses: 0.48 - 2.34 | 1 a 6 años: 0.65 - 1.75 | 7 a 11 años: 0.90 - 1.67 | 12 a 19 años: 0.93 - 1.60";
+    } else if (tipo === "pcr") {
+        inputRef.value = "Normal: Menor 10 | Leve a Moderado: 10.0 - 40.0 | Moderado a Severo: 40.0 - 200.0 | Severo: > 200.0";
     } else if (tipo === "generico") {
         inputRef.value = "Deseable: < 0.00 | Límite: 0.00 - 0.00 | Elevado: >= 0.00";
     }
@@ -1411,12 +1475,18 @@ function agregarIndicadorResultado(datos = {}) {
                 <label class="form-label small text-primary mb-0 fw-bold">
                     <i class="bi bi-person-lines-fill me-1"></i>Valores de Referencia / Variaciones (Sexo, Edad, etc.):
                 </label>
-                <div class="btn-group btn-group-sm">
+                <div class="btn-group btn-group-sm flex-wrap">
                     <button type="button" class="btn btn-outline-secondary py-0 px-2" style="font-size: 10px;" onclick="insertarPlantillaRef(this, 'sexo')" title="Plantilla rápida para Hombre y Mujer">
                         + Sexo (H/M)
                     </button>
                     <button type="button" class="btn btn-outline-secondary py-0 px-2" style="font-size: 10px;" onclick="insertarPlantillaRef(this, 'edad')" title="Plantilla rápida para Adulto, Niño y Neonato">
-                        + Edad (Adulto/Niño/Neonato)
+                        + Edad
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary py-0 px-2" style="font-size: 10px;" onclick="insertarPlantillaRef(this, 'tiroideo')" title="Plantilla rápida por rangos etarios pediátricos y adultos">
+                        + Tiroideo/Pediatría
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary py-0 px-2" style="font-size: 10px;" onclick="insertarPlantillaRef(this, 'pcr')" title="Plantilla rápida para etapas clínicas (PCR)">
+                        + PCR/Etapas
                     </button>
                     <button type="button" class="btn btn-outline-secondary py-0 px-2" style="font-size: 10px;" onclick="insertarPlantillaRef(this, 'generico')" title="Plantilla rápida">
                         + Rangos
