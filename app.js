@@ -4,53 +4,53 @@
 const BASE_VALORES_REFERENCIALES = {
   "HEMOGRAMA COMPLETO AUTOMATIZADO": [
   // --- SERIE ROJA Y BLANCA PRINCIPAL ---
-  { id: 'leucocitos', nombre: 'Leucocitos', valor: '', unidad: 'Cél/uL', refMin: 4500.00, refMax: 13500.00, metodo: 'Citometría de flujo o impedancia eléctrica (Método Coulter)' },
-  { id: 'hematies', nombre: 'Glóbulos Rojos (hematíes)', valor: '', unidad: 'Cél/uL', refMin: 4000000.00, refMax: 5200000.00 },
-  { id: 'hemoglobina', nombre: 'Hemoglobina', valor: '', unidad: 'g/dL', refMin: 11.50, refMax: 15.50 },
-  { id: 'hematocrito', nombre: 'Hematocrito', valor: '', unidad: '%', refMin: 35.00, refMax: 45.00 },
-  { id: 'vcm', nombre: 'Volumen Corpuscular medio VCM', valor: '', unidad: 'fL', refMin: 77.00, refMax: 95.00 },
-  { id: 'hcm', nombre: 'Hemoglobina Corpuscular media - HCM', valor: '', unidad: 'pg', refMin: 25.00, refMax: 33.00 },
-  { id: 'chcm', nombre: 'Concentración de Hemoglobina Corpuscular media - CHCM', valor: '', unidad: 'g/dL', refMin: 30.00, refMax: 36.00 },
-  { id: 'plaquetas', nombre: 'Recuento Plaquetario', valor: '', unidad: 'Cél/uL', refMin: 150000.00, refMax: 475000.00 },
-  { id: 'rdw_sd', nombre: 'RDW-SD', valor: '', unidad: 'fL', refMin: 37.00, refMax: 54.00 },
-  { id: 'rdw_cv', nombre: 'RDW-CV', valor: '', unidad: '%', refMin: 11.50, refMax: 15.60 },
-  { id: 'vpm', nombre: 'Vol. plaquetario medio - VPM', valor: '', unidad: 'fL', refMin: 7.60, refMax: 10.80 },
+  { id: 'leucocitos', nombre: 'Leucocitos', valor: '', unidad: 'Cél/uL', refMin: 4500.00, refMax: 10000.00, referencia: 'Adultos: 4,500 - 10,000 | Niños: 5,000 - 13,500 | Neonatos: 9,000 - 30,000', metodo: 'Citometría de flujo o impedancia eléctrica (Método Coulter)' },
+  { id: 'hematies', nombre: 'Glóbulos Rojos (hematíes)', valor: '', unidad: 'Cél/uL', refMin: 4000000.00, refMax: 5400000.00, referencia: 'Hombres: 4.5 - 5.9 | Mujeres: 4.0 - 5.2 | Niños: 3.8 - 5.0' },
+  { id: 'hemoglobina', nombre: 'Hemoglobina', valor: '', unidad: 'g/dL', refMin: 12.00, refMax: 17.50, referencia: 'Hombres: 13.5 - 17.5 | Mujeres: 12.0 - 15.5 | Niños: 11.5 - 15.0' },
+  { id: 'hematocrito', nombre: 'Hematocrito', valor: '', unidad: '%', refMin: 36.00, refMax: 50.00, referencia: 'Hombres: 41.0 - 50.0 | Mujeres: 36.0 - 45.0 | Niños: 35.0 - 44.0' },
+  { id: 'vcm', nombre: 'Volumen Corpuscular medio VCM', valor: '', unidad: 'fL', refMin: 77.00, refMax: 95.00, referencia: '77.00 - 95.00' },
+  { id: 'hcm', nombre: 'Hemoglobina Corpuscular media - HCM', valor: '', unidad: 'pg', refMin: 25.00, refMax: 33.00, referencia: '25.00 - 33.00' },
+  { id: 'chcm', nombre: 'Concentración de Hemoglobina Corpuscular media - CHCM', valor: '', unidad: 'g/dL', refMin: 30.00, refMax: 36.00, referencia: '30.00 - 36.00' },
+  { id: 'plaquetas', nombre: 'Recuento Plaquetario', valor: '', unidad: 'Cél/uL', refMin: 150000.00, refMax: 475000.00, referencia: '150,000 - 475,000' },
+  { id: 'rdw_sd', nombre: 'RDW-SD', valor: '', unidad: 'fL', refMin: 37.00, refMax: 54.00, referencia: '37.00 - 54.00' },
+  { id: 'rdw_cv', nombre: 'RDW-CV', valor: '', unidad: '%', refMin: 11.50, refMax: 15.60, referencia: '11.50 - 15.60' },
+  { id: 'vpm', nombre: 'Vol. plaquetario medio - VPM', valor: '', unidad: 'fL', refMin: 7.60, refMax: 10.80, referencia: '7.60 - 10.80' },
 
   // --- SECCIÓN: RECUENTO DIFERENCIAL PORCENTUAL ---
   { nombre: "Recuento Diferencial Porcentual", esSeccion: true },
-  { id: 'neutrofilos_seg', nombre: 'Neutrófilos Segmentados', valor: '', unidad: '%', refMin: 31.00, refMax: 51.00 },
-  { id: 'neutrofilos_aba', nombre: 'Neutrófilos Abastonados', valor: '', unidad: '%', refMin: 0.00, refMax: 5.00 },
-  { id: 'linfocitos', nombre: 'Linfocitos', valor: '', unidad: '%', refMin: 4.00, refMax: 28.00 },
-  { id: 'monocitos', nombre: 'Monocitos', valor: '', unidad: '%', refMin: 0.00, refMax: 10.00 },
-  { id: 'eosinofilos', nombre: 'Eosinófilos', valor: '', unidad: '%', refMin: 0.00, refMax: 2.50 },
-  { id: 'basofilos', nombre: 'Basófilo', valor: '', unidad: '%', refMin: 0.00, refMax: 2.00 },
-  { id: 'metamielocitos', nombre: 'Metamielocitos', valor: '', unidad: '%', refMin: 0, refMax: 0 },
-  { id: 'mielocitos', nombre: 'Mielocitos', valor: '', unidad: '%', refMin: 0, refMax: 0 },
-  { id: 'promielocitos', nombre: 'Promielocitos', valor: '', unidad: '%', refMin: 0, refMax: 0 },
-  { id: 'blastos', nombre: 'Blastos', valor: '', unidad: '%', refMin: 0, refMax: 0 },
-  { id: 'suma_diferencial', nombre: 'Suma de recuento diferencial', valor: '100.00', unidad: '%', refMin: '', refMax: '' },
+  { id: 'neutrofilos_seg', nombre: 'Neutrófilos Segmentados', valor: '', unidad: '%', refMin: 31.00, refMax: 51.00, referencia: '31.00 - 51.00' },
+  { id: 'neutrofilos_aba', nombre: 'Neutrófilos Abastonados', valor: '', unidad: '%', refMin: 0.00, refMax: 5.00, referencia: '0.00 - 5.00' },
+  { id: 'linfocitos', nombre: 'Linfocitos', valor: '', unidad: '%', refMin: 20.00, refMax: 45.00, referencia: '20.00 - 45.00' },
+  { id: 'monocitos', nombre: 'Monocitos', valor: '', unidad: '%', refMin: 0.00, refMax: 10.00, referencia: '0.00 - 10.00' },
+  { id: 'eosinofilos', nombre: 'Eosinófilos', valor: '', unidad: '%', refMin: 0.00, refMax: 2.50, referencia: '0.00 - 2.50' },
+  { id: 'basofilos', nombre: 'Basófilo', valor: '', unidad: '%', refMin: 0.00, refMax: 2.00, referencia: '0.00 - 2.00' },
+  { id: 'metamielocitos', nombre: 'Metamielocitos', valor: '', unidad: '%', refMin: 0, refMax: 0, referencia: '0 - 0' },
+  { id: 'mielocitos', nombre: 'Mielocitos', valor: '', unidad: '%', refMin: 0, refMax: 0, referencia: '0 - 0' },
+  { id: 'promielocitos', nombre: 'Promielocitos', valor: '', unidad: '%', refMin: 0, refMax: 0, referencia: '0 - 0' },
+  { id: 'blastos', nombre: 'Blastos', valor: '', unidad: '%', refMin: 0, refMax: 0, referencia: '0 - 0' },
+  { id: 'suma_diferencial', nombre: 'Suma de recuento diferencial', valor: '100.00', unidad: '%', refMin: '', refMax: '', referencia: '100.00' },
 
   // --- SECCIÓN: RECUENTO DIFERENCIAL ABSOLUTO ---
   { nombre: "Recuento Diferencial Absoluto", esSeccion: true },
-  { id: 'seg_absoluto', nombre: 'Segmentados', valor: '', unidad: 'Cél/uL', refMin: 1200.00, refMax: 5500.00 }
+  { id: 'seg_absoluto', nombre: 'Segmentados', valor: '', unidad: 'Cél/uL', refMin: 1200.00, refMax: 5500.00, referencia: '1200.00 - 5500.00' }
 ],
   "GLUCOSA BASAL": [
   { id: 'glucosa', nombre: 'GLUCOSA BASAL', valor: '', unidad: 'mg/dL', refMin: 74, refMax: 106, referencia: 'Adultos: 74 - 106 | Niños: 60 - 100 | Neonatos: 50 - 80', metodo: 'Colorimétrico Enzimático o Espectrofotometría EC 9200' }
 ],
   "ACIDO URICO": [
-  { id: 'acido_urico', nombre: 'ACIDO URICO', valor: '', unidad: 'mg/dL', refMin: 1.10, refMax: 5.40, referencia: '1.10 - 5.40', metodo: 'Colorimétrico Enzimático o Espectrofotometría EC 9200' }
+  { id: 'acido_urico', nombre: 'ACIDO URICO', valor: '', unidad: 'mg/dL', refMin: 2.40, refMax: 7.00, referencia: 'Hombres: 3.40 - 7.00 | Mujeres: 2.40 - 5.70 | Niños: 2.00 - 5.50', metodo: 'Colorimétrico Enzimático o Espectrofotometría EC 9200' }
 ],
  "UREA": [
-  { id: 'urea', nombre: 'UREA', valor: '', unidad: 'mg/dL', refMin: 10.00, refMax: 50.00, referencia: '10.00 - 50.00', metodo: 'Colorimétrico enzimático o Espectrofotometría EC9200' }
+  { id: 'urea', nombre: 'UREA', valor: '', unidad: 'mg/dL', refMin: 10.00, refMax: 50.00, referencia: 'Adultos: 15.00 - 45.00 | Niños: 10.00 - 40.00', metodo: 'Colorimétrico enzimático o Espectrofotometría EC9200' }
 ],
   "CREATININA SERICA": [
-  { id: 'creatinina_serica', nombre: 'CREATININA SERICA', valor: '', unidad: 'mg/dL', refMin: 0.6, refMax: 1.3, referencia: 'M: 0.7 - 1.3 | F: 0.6 - 1.1', metodo: 'Colorimétrico enzimático o Espectrofotometría EC9200' }
+  { id: 'creatinina_serica', nombre: 'CREATININA SERICA', valor: '', unidad: 'mg/dL', refMin: 0.6, refMax: 1.3, referencia: 'Hombres: 0.70 - 1.30 | Mujeres: 0.60 - 1.10 | Niños: 0.30 - 0.70', metodo: 'Colorimétrico enzimático o Espectrofotometría EC9200' }
 ],
   "T4 LIBRE": [
-  { id: 't4_libre', nombre: 'T4 LIBRE', valor: '', unidad: 'ng/dL', refMin: 0.90, refMax: 1.70, referencia: 'Adultos: 0.90 - 1.70 | Niños: 4 a 30 días: 0.83-3.09 | 1-12 meses: 0.48-2.34 | 1-6 años: 0.65-1.75 | 7-11 años: 0.90-1.67 | 12-19 años: 0.93-1.60', metodo: 'Ensayo de electroquimioluminiscencia (ECLIA)' }
+  { id: 't4_libre', nombre: 'T4 LIBRE', valor: '', unidad: 'ng/dL', refMin: 0.90, refMax: 1.70, referencia: 'Adultos: 0.90 - 1.70 | Niños: 0.65 - 1.75 | Neonatos: 0.83 - 3.09', metodo: 'Ensayo de electroquimioluminiscencia (ECLIA)' }
 ],
   "TSH ULTRASENSIBLE": [
-  { id: 'tsh_ultrasensible', nombre: 'TSH ULTRASENSIBLE', valor: '', unidad: 'uUI / mL', refMin: 0.27, refMax: 4.2, referencia: 'Adultos: 0.27 - 4.2 | Niños: 4 a 30 días: 0.43-16.0 | 1-12 meses: 0.62-8.0 | 1-6 años: 0.54-4.5 | 7-11 años: 0.66-4.14 | 12-19 años: 0.53-3.59', metodo: 'Ensayo de electroquimioluminiscencia (ECLIA)' }
+  { id: 'tsh_ultrasensible', nombre: 'TSH ULTRASENSIBLE', valor: '', unidad: 'uUI / mL', refMin: 0.27, refMax: 4.2, referencia: 'Adultos: 0.27 - 4.20 | Niños: 0.54 - 4.50 | Neonatos: 0.43 - 16.0', metodo: 'Ensayo de electroquimioluminiscencia (ECLIA)' }
 ],
   "VIH 1-2 (AC - AG 3º/4º Generación)-VIH": [
   { id: 'vih', nombre: 'VIH 1-2 (AC - AG 3º/4º Generación)-VIH', valor: '', unidad: 'S/U', refMin: '', refMax: '', referencia: 'No Reactivo (-)', metodo: 'Inmunocromatografía' }
@@ -84,25 +84,25 @@ const BASE_VALORES_REFERENCIALES = {
   
   // ============ EXTENDIDA: PERFIL LIPIDICO (se agrega VLDL del PDF) ============
 "PERFIL LIPIDICO": [
-  { id: 'col_tot', nombre: 'Colesterol Total', valor: '', unidad: 'mg/dL', refMin: 0, refMax: 200, referencia: 'Normal < 200 | Moderadamente alto 200-239 | Elevado > 240' },
-  { id: 'hdl', nombre: 'HDL - Colesterol', valor: '', unidad: 'mg/dL', refMin: 40, refMax: 60, referencia: '40.00 - 60.00' },
-  { id: 'ldl', nombre: 'LDL - Colesterol', valor: '', unidad: 'mg/dL', refMin: 0, refMax: 129, referencia: 'Riesgo bajo < 129 | Riesgo moderado 130-189 | Riesgo alto >= 190' },
+  { id: 'col_tot', nombre: 'Colesterol Total', valor: '', unidad: 'mg/dL', refMin: 0, refMax: 200, referencia: 'Deseable: < 200 | Moderadamente alto: 200 - 239 | Elevado: >= 240' },
+  { id: 'hdl', nombre: 'HDL - Colesterol', valor: '', unidad: 'mg/dL', refMin: 40, refMax: 60, referencia: 'Hombres: > 40.00 | Mujeres: > 50.00' },
+  { id: 'ldl', nombre: 'LDL - Colesterol', valor: '', unidad: 'mg/dL', refMin: 0, refMax: 129, referencia: 'Óptimo: < 100 | Riesgo moderado: 100 - 129 | Riesgo alto: >= 130' },
   { id: 'vldl', nombre: 'VLDL - Colesterol', valor: '', unidad: 'mg/dL', refMin: 2, refMax: 30, referencia: '2.00 - 30.00' },
-  { id: 'trig', nombre: 'Triglicéridos', valor: '', unidad: 'mg/dL', refMin: 0, refMax: 150, referencia: 'Normal < 150 | Moderado elevado 150-199 | Elevado 200-499 | Muy elevado > 500' }
+  { id: 'trig', nombre: 'Triglicéridos', valor: '', unidad: 'mg/dL', refMin: 0, refMax: 150, referencia: 'Normal: < 150 | Límite: 150 - 199 | Elevado: >= 200' }
 ],
 
 // ============ EXTENDIDA: PERFIL HEPATICO (completa según PDF, 10 parámetros) ============
 "PERFIL HEPATICO": [
-  { id: 'bt', nombre: 'Bilirrubina Total', valor: '', unidad: 'mg/dL', refMin: 0.0, refMax: 1.2, referencia: '0.00 - 1.20' },
+  { id: 'bt', nombre: 'Bilirrubina Total', valor: '', unidad: 'mg/dL', refMin: 0.0, refMax: 1.2, referencia: 'Adultos: 0.20 - 1.20 | Neonatos: hasta 12.00' },
   { id: 'bd', nombre: 'Bilirrubina Directa', valor: '', unidad: 'mg/dL', refMin: 0.0, refMax: 0.3, referencia: '0.00 - 0.30' },
   { id: 'bi', nombre: 'Bilirrubina Indirecta', valor: '', unidad: 'mg/dL', refMin: 0.0, refMax: 0.8, referencia: '0.00 - 0.80' },
   { id: 'pt', nombre: 'Proteínas Totales', valor: '', unidad: 'g/dL', refMin: 6.10, refMax: 7.90, referencia: '6.10 - 7.90' },
   { id: 'alb', nombre: 'Albúmina', valor: '', unidad: 'g/dL', refMin: 3.50, refMax: 4.80, referencia: '3.50 - 4.80' },
   { id: 'glob', nombre: 'Globulinas', valor: '', unidad: 'g/dL', refMin: 2.00, refMax: 3.50, referencia: '2.00 - 3.50' },
-  { id: 'tgo', nombre: 'TGO (ASAT)', valor: '', unidad: 'U/L', refMin: 0, refMax: 38, referencia: 'M: <= 38.00 | F: <= 32.00' },
-  { id: 'tgp', nombre: 'TGP (ALAT)', valor: '', unidad: 'U/L', refMin: 0, refMax: 41, referencia: 'M: <= 41.00 | F: <= 31.00' },
-  { id: 'fal', nombre: 'Fosfatasa Alcalina (ALP)', valor: '', unidad: 'U/L', refMin: 40, refMax: 300, referencia: 'Adultos: 40.0 - 300.0 | Niños y adolescentes: < 645.0' },
-  { id: 'ggt', nombre: 'Gamma Glutamil Transpeptidasa (GGT)', valor: '', unidad: 'U/L', refMin: 5, refMax: 40, referencia: '5.00 - 40.00' }
+  { id: 'tgo', nombre: 'TGO (ASAT)', valor: '', unidad: 'U/L', refMin: 0, refMax: 38, referencia: 'Hombres: <= 38.00 | Mujeres: <= 32.00 | Niños: <= 40.00' },
+  { id: 'tgp', nombre: 'TGP (ALAT)', valor: '', unidad: 'U/L', refMin: 0, refMax: 41, referencia: 'Hombres: <= 41.00 | Mujeres: <= 31.00 | Niños: <= 35.00' },
+  { id: 'fal', nombre: 'Fosfatasa Alcalina (ALP)', valor: '', unidad: 'U/L', refMin: 40, refMax: 300, referencia: 'Adultos: 40.0 - 150.0 | Niños y adolescentes: < 645.0' },
+  { id: 'ggt', nombre: 'Gamma Glutamil Transpeptidasa (GGT)', valor: '', unidad: 'U/L', refMin: 5, refMax: 40, referencia: 'Hombres: 11.00 - 50.00 | Mujeres: 7.00 - 32.00' }
 ],
 
 // ============ OTRAS PLANTILLAS CLÍNICAS ============
@@ -186,14 +186,14 @@ const BASE_VALORES_REFERENCIALES = {
 };
 
 let examenesCatalogo = [
-  { codigo: "593", nombre: "HEMOGRAMA COMPLETO AUTOMATIZADO", unidad: "", refMin: "", refMax: "", referencia: "Leucocitos: 4500-13500/uL", precio: 25.00 },
+  { codigo: "593", nombre: "HEMOGRAMA COMPLETO AUTOMATIZADO", unidad: "", refMin: "", refMax: "", referencia: "Leucocitos: 4500-10000 | Hb: H 13.5-17.5, M 12.0-15.5", precio: 25.00 },
   { codigo: "864", nombre: "PERFIL HEPATICO", unidad: "", refMin: "", refMax: "", referencia: "Bilirrubinas, Transaminasas, Fosfatasa", precio: 85.00 },
   { codigo: "869", nombre: "PERFIL LIPIDICO", unidad: "", refMin: "", refMax: "", referencia: "Colesterol, HDL, LDL, VLDL, Triglicéridos", precio: 50.00 },
   { codigo: "840", nombre: "PARASITOLOGICO SERIADO 3 MUESTRAS", unidad: "", refMin: "", refMax: "", referencia: "Física, Microscópico, Muestras", precio: 30.00 },
-  { codigo: "548", nombre: "GLUCOSA BASAL", unidad: "mg/dL", refMin: 74, refMax: 106, referencia: "74 - 106 mg/dL", precio: 15.00 },
-  { codigo: "351", nombre: "CREATININA SERICA", unidad: "mg/dL", refMin: 0.6, refMax: 1.3, referencia: "0.6 - 1.3 mg/dL", precio: 15.00 },
-  { codigo: "1112", nombre: "UREA", unidad: "mg/dL", refMin: 10, refMax: 50, referencia: "10 - 50 mg/dL", precio: 15.00 },
-  { codigo: "34", nombre: "ACIDO URICO", unidad: "mg/dL", refMin: 1.1, refMax: 5.4, referencia: "1.10 - 5.40 mg/dL", precio: 15.00 },
+  { codigo: "548", nombre: "GLUCOSA BASAL", unidad: "mg/dL", refMin: 74, refMax: 106, referencia: "Adultos: 74 - 106 | Niños: 60 - 100 | Neonatos: 50 - 80", precio: 15.00 },
+  { codigo: "351", nombre: "CREATININA SERICA", unidad: "mg/dL", refMin: 0.6, refMax: 1.3, referencia: "Hombres: 0.70 - 1.30 | Mujeres: 0.60 - 1.10 | Niños: 0.30 - 0.70", precio: 15.00 },
+  { codigo: "1112", nombre: "UREA", unidad: "mg/dL", refMin: 10, refMax: 50, referencia: "Adultos: 15.00 - 45.00 | Niños: 10.00 - 40.00", precio: 15.00 },
+  { codigo: "34", nombre: "ACIDO URICO", unidad: "mg/dL", refMin: 1.1, refMax: 5.4, referencia: "Hombres: 3.40 - 7.00 | Mujeres: 2.40 - 5.70 | Niños: 2.00 - 5.50", precio: 15.00 },
   { codigo: "459", nombre: "EXAMEN COMPLETO DE ORINA", unidad: "", refMin: "", refMax: "", referencia: "Física, Química, Microscópico", precio: 15.00 },
   { codigo: "1050", nombre: "UROCULTIVO Y ANTIBIOGRAMA", unidad: "", refMin: "", refMax: "", referencia: "Física, Microscópico, Cultivo y Antibiograma", precio: 35.00 }
 ];
@@ -811,6 +811,78 @@ function eliminarOrden(nroOrden) {
     }
 }
 
+function extraerReferenciaSegunPaciente(referencia, sexo, edad) {
+    if (!referencia || typeof referencia !== "string") return null;
+    const partes = referencia.split("|").map(p => p.trim()).filter(Boolean);
+    if (partes.length <= 1) return null;
+
+    const sexoNorm = String(sexo || "").trim().toUpperCase();
+    const esFemenino = sexoNorm.startsWith("F") || sexoNorm.includes("MUJER");
+    const esMasculino = sexoNorm.startsWith("M") || sexoNorm.includes("HOMBRE") || sexoNorm.includes("VARON");
+
+    const edadStr = String(edad || "").toLowerCase().trim();
+    const edadNum = parseFloat(edadStr.replace(/[^0-9.]/g, ""));
+    const esNeonato = edadStr.includes("día") || edadStr.includes("dia") || edadStr.includes("mes") || (!isNaN(edadNum) && edadNum === 0);
+    const esNino = !esNeonato && !isNaN(edadNum) && edadNum > 0 && edadNum < 18;
+    const esAdulto = !esNeonato && !esNino && !isNaN(edadNum) && edadNum >= 18;
+
+    let sugerencia = null;
+    let etiqueta = "";
+
+    // 1. Prioridad: Etapa etaria si es neonato o niño
+    if (esNeonato) {
+        const parte = partes.find(p => /neonato/i.test(p));
+        if (parte) { sugerencia = parte; etiqueta = "Neonato"; }
+    } else if (esNino) {
+        const parte = partes.find(p => /niño|pedi[aá]tr/i.test(p));
+        if (parte) { sugerencia = parte; etiqueta = "Niño"; }
+    }
+
+    // 2. Por sexo si no hubo coincidencia pediátrica
+    if (!sugerencia) {
+        if (esFemenino) {
+            const parte = partes.find(p => /(?:^|[\s(])(?:mujer|femenina|f:)(?:[\s)]|$)/i.test(p) || /(?:^|[\s])f\s*:/i.test(p) || /mujeres/i.test(p));
+            if (parte) { sugerencia = parte; etiqueta = "Mujer"; }
+        } else if (esMasculino) {
+            const parte = partes.find(p => /(?:^|[\s(])(?:hombre|masculino|varon|m:)(?:[\s)]|$)/i.test(p) || /(?:^|[\s])m\s*:/i.test(p) || /hombres/i.test(p));
+            if (parte) { sugerencia = parte; etiqueta = "Hombre"; }
+        }
+    }
+
+    // 3. Si aún no hay sugerencia y es adulto
+    if (!sugerencia && esAdulto) {
+        const parte = partes.find(p => /adulto/i.test(p));
+        if (parte) { sugerencia = parte; etiqueta = "Adulto"; }
+    }
+
+    return { sugerencia, etiqueta, todas: partes };
+}
+window.extraerReferenciaSegunPaciente = extraerReferenciaSegunPaciente;
+
+function aplicarVariacionRef(btn, texto) {
+    const fila = btn.closest(".row[data-ex]");
+    if (!fila) return;
+    const input = fila.querySelector('[data-campo="referencia"]');
+    if (input) {
+        input.value = texto;
+        input.dispatchEvent(new Event("input", { bubbles: true }));
+        const bgOriginal = input.style.backgroundColor;
+        input.style.backgroundColor = "#e0f2fe";
+        setTimeout(() => { input.style.backgroundColor = bgOriginal; }, 400);
+    }
+}
+window.aplicarVariacionRef = aplicarVariacionRef;
+
+function formatearReferenciaParaInforme(ref) {
+    if (!ref || ref === "-") return "-";
+    if (typeof ref === "string" && ref.includes("|")) {
+        const lineas = ref.split("|").map(l => escapeHTML(l.trim())).filter(Boolean);
+        return lineas.join("<br>");
+    }
+    return escapeHTML(ref);
+}
+window.formatearReferenciaParaInforme = formatearReferenciaParaInforme;
+
 function obtenerIndicadoresParaOrden(ex) {
     if (!ex) return [];
     return obtenerPlantillaIndicadores(ex.nombre, ex.codigo);
@@ -828,8 +900,10 @@ function abrirResultados(nroOrden) {
         <div class="alert alert-secondary d-flex justify-content-between align-items-center flex-wrap gap-2 small py-2 mb-3">
             <div>
                 <strong>Orden:</strong> ${escapeHTML(orden.nroOrden)} | <strong>Paciente:</strong> ${escapeHTML(orden.nombre)} (${escapeHTML(orden.dni)})
+                <span class="badge bg-primary-subtle text-primary border border-primary-subtle ms-2">Sexo: ${escapeHTML(orden.sexo || "—")}</span>
+                <span class="badge bg-secondary-subtle text-secondary border ms-1">Edad: ${escapeHTML(orden.edad || "—")}</span>
                 <span class="text-muted ms-2 d-block d-md-inline mt-1 mt-md-0">
-                    <i class="bi bi-arrow-down-up me-1 text-primary"></i>Organiza el orden con los botones <strong>Subir / Bajar</strong> o <strong>arrastra</strong> los exámenes.
+                    <i class="bi bi-arrow-down-up me-1 text-primary"></i>Organiza el orden o usa los atajos rápidos de variación por sexo/edad.
                 </span>
             </div>
             <div class="d-flex gap-2 flex-wrap">
@@ -880,10 +954,45 @@ function abrirResultados(nroOrden) {
                 `;
                 return;
             }
-            const referencia = ind.referencia || formatoRango(ind.refMin, ind.refMax);
+            const referenciaBase = ind.referencia || formatoRango(ind.refMin, ind.refMax);
+            const valorReferenciaPrevio = (previo && previo.referencia !== undefined && previo.referencia !== "") 
+                ? previo.referencia 
+                : referenciaBase;
             const tieneUnidad = ind.unidad && ind.unidad.trim() !== "";
             const valorResultadoPrevio = previo ? previo.resultado : "";
             const valorMetodoPrevio = previo && previo.metodo !== undefined ? previo.metodo : (ind.metodo || "");
+
+            // Variaciones inteligentes para Sexo / Edad
+            let htmlVariaciones = "";
+            if (referenciaBase && typeof referenciaBase === "string" && referenciaBase.includes("|")) {
+                const varAnalisis = extraerReferenciaSegunPaciente(referenciaBase, orden.sexo, orden.edad);
+                if (varAnalisis && Array.isArray(varAnalisis.todas)) {
+                    const botonesVar = [];
+                    if (varAnalisis.sugerencia) {
+                        botonesVar.push(`
+                            <button type="button" class="btn btn-xs btn-outline-primary py-0 px-2 fw-semibold" style="font-size: 10px;" onclick="aplicarVariacionRef(this, '${escapeHTML(varAnalisis.sugerencia)}')" title="Aplicar automáticamente para este paciente (${escapeHTML(varAnalisis.etiqueta)})">
+                                ⚡ ${escapeHTML(varAnalisis.etiqueta)}: ${escapeHTML(varAnalisis.sugerencia)}
+                            </button>
+                        `);
+                    }
+                    varAnalisis.todas.forEach(v => {
+                        if (!varAnalisis.sugerencia || v !== varAnalisis.sugerencia) {
+                            const label = v.split(":")[0]?.trim() || v;
+                            botonesVar.push(`
+                                <button type="button" class="btn btn-xs btn-outline-secondary py-0 px-1" style="font-size: 10px;" onclick="aplicarVariacionRef(this, '${escapeHTML(v)}')" title="Usar: ${escapeHTML(v)}">
+                                    ${escapeHTML(label)}
+                                </button>
+                            `);
+                        }
+                    });
+                    botonesVar.push(`
+                        <button type="button" class="btn btn-xs btn-link text-decoration-none py-0 px-1 text-muted" style="font-size: 10px;" onclick="aplicarVariacionRef(this, '${escapeHTML(referenciaBase)}')" title="Restaurar texto completo">
+                            ↺ Todos
+                        </button>
+                    `);
+                    htmlVariaciones = `<div class="d-flex flex-wrap gap-1 mt-1">${botonesVar.join("")}</div>`;
+                }
+            }
 
             filas += `
                 <div class="row g-2 mb-2 align-items-center" data-ex="${exIdx}" data-ind="${indIdx}" data-nombre="${escapeHTML(ind.nombre)}" data-refmin="${escapeHTML(ind.refMin ?? "")}" data-refmax="${escapeHTML(ind.refMax ?? "")}">
@@ -898,7 +1007,8 @@ function abrirResultados(nroOrden) {
                         <input type="text" class="form-control form-control-sm bg-light" data-campo="unidad" value="${escapeHTML(ind.unidad)}" readonly>
                     </div>` : `<input type="hidden" data-campo="unidad" value="">`}
                     <div class="${tieneUnidad ? 'col-md-3' : 'col-md-4'}">
-                        <input type="text" class="form-control form-control-sm bg-light" data-campo="referencia" value="${escapeHTML(referencia)}" readonly>
+                        <input type="text" class="form-control form-control-sm bg-white" data-campo="referencia" value="${escapeHTML(valorReferenciaPrevio)}" placeholder="Valores de referencia">
+                        ${htmlVariaciones}
                     </div>
                     <div class="col-md-2">
                         <input type="text" class="form-control form-control-sm" data-campo="metodo" placeholder="Método" value="${escapeHTML(valorMetodoPrevio)}">
@@ -1244,22 +1354,40 @@ function prepararNuevoExamen() {
     if (cont) cont.innerHTML = "";
 }
 
+function insertarPlantillaRef(btn, tipo) {
+    const fila = btn.closest(".indicador-row");
+    if (!fila) return;
+    const inputRef = fila.querySelector(".ind-referencia");
+    if (!inputRef) return;
+    if (tipo === "sexo") {
+        inputRef.value = "Hombres: 0.00 - 0.00 | Mujeres: 0.00 - 0.00";
+    } else if (tipo === "edad") {
+        inputRef.value = "Adultos: 0.00 - 0.00 | Niños: 0.00 - 0.00 | Neonatos: 0.00 - 0.00";
+    } else if (tipo === "generico") {
+        inputRef.value = "Deseable: < 0.00 | Límite: 0.00 - 0.00 | Elevado: >= 0.00";
+    }
+    inputRef.focus();
+}
+window.insertarPlantillaRef = insertarPlantillaRef;
+
 function agregarIndicadorResultado(datos = {}) {
     const contenedor = document.getElementById("contenedor-indicadores");
     if (!contenedor) return;
     
     const div = document.createElement("div");
-    div.className = "row g-2 mb-2 align-items-center indicador-row border p-2 rounded bg-light";
+    div.className = "row g-2 mb-2 p-2 rounded bg-light border indicador-row align-items-center";
     
+    const refVal = datos.referencia || (datos.refMin !== undefined && datos.refMax !== undefined && datos.refMin !== "" && datos.refMax !== "" ? formatoRango(datos.refMin, datos.refMax) : "");
+
     div.innerHTML = `
         <input type="hidden" class="ind-id" value="${datos.id || ''}">
         <div class="col-md-4 col-12">
             <label class="form-label small text-muted mb-0 fw-semibold">Nombre Parámetro</label>
-            <input type="text" class="form-control form-control-sm ind-nombre" value="${datos.nombre || ''}" placeholder="ej. Glóbulos Rojos (hematíes)">
+            <input type="text" class="form-control form-control-sm ind-nombre" value="${datos.nombre || ''}" placeholder="ej. Creatinina Sérica">
         </div>
         <div class="col-md-2 col-4">
             <label class="form-label small text-muted mb-0 fw-semibold">Unidad</label>
-            <input type="text" class="form-control form-control-sm ind-unidad" value="${datos.unidad || ''}" placeholder="Cél/uL">
+            <input type="text" class="form-control form-control-sm ind-unidad" value="${datos.unidad || ''}" placeholder="mg/dL">
         </div>
         <div class="col-md-2 col-4">
             <label class="form-label small text-muted mb-0 fw-semibold">Mín / Máx</label>
@@ -1270,12 +1398,32 @@ function agregarIndicadorResultado(datos = {}) {
         </div>
         <div class="col-md-3 col-3">
             <label class="form-label small text-muted mb-0 fw-semibold">Método</label>
-            <input type="text" class="form-control form-control-sm ind-metodo" value="${datos.metodo || ''}" placeholder="Método...">
+            <input type="text" class="form-control form-control-sm ind-metodo" value="${datos.metodo || ''}" placeholder="Colorimétrico...">
         </div>
         <div class="col-md-1 col-1 text-center d-flex align-items-end justify-content-center">
-            <button type="button" class="btn btn-sm btn-outline-danger mt-3" onclick="this.closest('.row').remove()" title="Eliminar indicador">
+            <button type="button" class="btn btn-sm btn-outline-danger mt-3" onclick="this.closest('.indicador-row').remove()" title="Eliminar indicador">
                 <i class="bi bi-trash"></i>
             </button>
+        </div>
+        <!-- FILA DE VALORES DE REFERENCIA Y VARIACIONES POR SEXO / EDAD -->
+        <div class="col-12 mt-1 pt-1 border-top">
+            <div class="d-flex justify-content-between align-items-center mb-1 flex-wrap gap-1">
+                <label class="form-label small text-primary mb-0 fw-bold">
+                    <i class="bi bi-person-lines-fill me-1"></i>Valores de Referencia / Variaciones (Sexo, Edad, etc.):
+                </label>
+                <div class="btn-group btn-group-sm">
+                    <button type="button" class="btn btn-outline-secondary py-0 px-2" style="font-size: 10px;" onclick="insertarPlantillaRef(this, 'sexo')" title="Plantilla rápida para Hombre y Mujer">
+                        + Sexo (H/M)
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary py-0 px-2" style="font-size: 10px;" onclick="insertarPlantillaRef(this, 'edad')" title="Plantilla rápida para Adulto, Niño y Neonato">
+                        + Edad (Adulto/Niño/Neonato)
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary py-0 px-2" style="font-size: 10px;" onclick="insertarPlantillaRef(this, 'generico')" title="Plantilla rápida">
+                        + Rangos
+                    </button>
+                </div>
+            </div>
+            <input type="text" class="form-control form-control-sm ind-referencia bg-white" value="${escapeHTML(refVal)}" placeholder="Ej: Hombres: 0.70 - 1.30 | Mujeres: 0.60 - 1.10   ó   Adultos: 74 - 106 | Niños: 60 - 100 | Neonatos: 50 - 80">
         </div>
     `;
     contenedor.appendChild(div);
@@ -1310,6 +1458,7 @@ function guardarExamenCatalogo() {
         const unidad = fila.querySelector(".ind-unidad").value.trim();
         const refMin = fila.querySelector(".ind-min").value;
         const refMax = fila.querySelector(".ind-max").value;
+        const referenciaParam = fila.querySelector(".ind-referencia") ? fila.querySelector(".ind-referencia").value.trim() : "";
         const metodoParam = fila.querySelector(".ind-metodo").value.trim();
 
         if (nombreParam) {
@@ -1321,6 +1470,7 @@ function guardarExamenCatalogo() {
                 unidad: unidad,
                 refMin: refMin !== "" ? parseFloat(refMin) : "",
                 refMax: refMax !== "" ? parseFloat(refMax) : "",
+                referencia: referenciaParam,
                 metodo: metodoParam
             });
         }
@@ -2193,14 +2343,16 @@ function generarBloqueExamenHTML(ex, orden) {
             const valorObtenido = ind.resultado !== undefined && ind.resultado !== "" ? ind.resultado : (previo ? previo.resultado : '');
             const unidadVal = ind.unidad || (previo && previo.unidad) || '';
             const unidadTexto = unidadVal ? ` ${unidadVal}` : '';
-            const referencia = ind.referencia || (previo && previo.referencia) || formatoRango(ind.refMin, ind.refMax) || '-';
+            const referencia = (previo && previo.referencia !== undefined && previo.referencia !== "") 
+                ? previo.referencia 
+                : (ind.referencia || formatoRango(ind.refMin, ind.refMax) || '-');
             const textoMetodo = (ind.metodo || (previo && previo.metodo)) ? escapeHTML(ind.metodo || previo.metodo) : '-';
 
             filasHTML += `
                 <tr style="border-bottom: 1px solid #e2e8f0;">
                     <td style="padding: 3.5px 6px; color: #334155; padding-left: 10px;">${escapeHTML(ind.nombre)}</td>
                     <td style="padding: 3.5px 6px; font-weight: bold; color: #0f172a;">${escapeHTML(valorObtenido)}${escapeHTML(unidadTexto)}</td>
-                    <td style="padding: 3.5px 6px; color: #64748b;">${escapeHTML(referencia)}</td>
+                    <td style="padding: 3.5px 6px; color: #64748b; line-height: 1.35; font-size: 10px;">${formatearReferenciaParaInforme(referencia)}</td>
                     <td style="padding: 3.5px 6px; color: #64748b; font-style: italic; font-size: 9.5px;">${textoMetodo}</td>
                 </tr>
             `;
