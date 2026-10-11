@@ -467,14 +467,25 @@ function actualizarFechaActual() {
 }
 
 function toggleSidebar() {
+    const wrapper = document.getElementById("wrapper");
     const sidebar = document.getElementById("sidebar");
     const overlay = document.getElementById("sidebar-overlay");
-    if (!sidebar) return;
-    sidebar.classList.toggle("active");
-    sidebar.classList.toggle("show");
-    if (overlay) {
-        overlay.classList.toggle("active");
-        overlay.classList.toggle("show");
+
+    if (window.innerWidth <= 991) {
+        if (sidebar) {
+            sidebar.classList.toggle("active");
+            sidebar.classList.toggle("show");
+        }
+        if (overlay) {
+            overlay.classList.toggle("active");
+            overlay.classList.toggle("show");
+        }
+    } else {
+        if (wrapper) {
+            wrapper.classList.toggle("sidebar-colapsado");
+            const estaColapsado = wrapper.classList.contains("sidebar-colapsado");
+            localStorage.setItem("vital_sidebar_colapsado", estaColapsado ? "1" : "0");
+        }
     }
 }
 
@@ -1179,30 +1190,27 @@ function agregarIndicadorResultado(datos = {}) {
     div.className = "row g-2 mb-2 align-items-center indicador-row border p-2 rounded bg-light";
     
     div.innerHTML = `
-        <div class="col-md-2">
-            <label class="form-label small text-muted mb-0">ID técnico</label>
-            <input type="text" class="form-control form-control-sm ind-id" value="${datos.id || ''}" placeholder="ej. leucocitos">
+        <input type="hidden" class="ind-id" value="${datos.id || ''}">
+        <div class="col-md-4 col-12">
+            <label class="form-label small text-muted mb-0 fw-semibold">Nombre Parámetro</label>
+            <input type="text" class="form-control form-control-sm ind-nombre" value="${datos.nombre || ''}" placeholder="ej. Glóbulos Rojos (hematíes)">
         </div>
-        <div class="col-md-3">
-            <label class="form-label small text-muted mb-0">Nombre Parámetro</label>
-            <input type="text" class="form-control form-control-sm ind-nombre" value="${datos.nombre || ''}" placeholder="ej. Leucocitos">
-        </div>
-        <div class="col-md-2">
-            <label class="form-label small text-muted mb-0">Unidad</label>
+        <div class="col-md-2 col-4">
+            <label class="form-label small text-muted mb-0 fw-semibold">Unidad</label>
             <input type="text" class="form-control form-control-sm ind-unidad" value="${datos.unidad || ''}" placeholder="Cél/uL">
         </div>
-        <div class="col-md-2">
-            <label class="form-label small text-muted mb-0">Mín / Máx</label>
+        <div class="col-md-2 col-4">
+            <label class="form-label small text-muted mb-0 fw-semibold">Mín / Máx</label>
             <div class="input-group input-group-sm">
-                <input type="number" step="any" class="form-control ind-min" value="${datos.refMin ?? ''}" placeholder="Mín">
-                <input type="number" step="any" class="form-control ind-max" value="${datos.refMax ?? ''}" placeholder="Máx">
+                <input type="number" step="any" class="form-control ind-min px-1" value="${datos.refMin ?? ''}" placeholder="Mín">
+                <input type="number" step="any" class="form-control ind-max px-1" value="${datos.refMax ?? ''}" placeholder="Máx">
             </div>
         </div>
-        <div class="col-md-2">
-            <label class="form-label small text-muted mb-0">Método</label>
+        <div class="col-md-3 col-3">
+            <label class="form-label small text-muted mb-0 fw-semibold">Método</label>
             <input type="text" class="form-control form-control-sm ind-metodo" value="${datos.metodo || ''}" placeholder="Método...">
         </div>
-        <div class="col-md-1 text-center d-flex align-items-end">
+        <div class="col-md-1 col-1 text-center d-flex align-items-end justify-content-center">
             <button type="button" class="btn btn-sm btn-outline-danger mt-3" onclick="this.closest('.row').remove()" title="Eliminar indicador">
                 <i class="bi bi-trash"></i>
             </button>
@@ -2388,6 +2396,10 @@ document.addEventListener("DOMContentLoaded", () => {
     showSection('recepcion');
 
     window.nubeIniciar?.();
+
+    if (window.innerWidth > 991 && localStorage.getItem("vital_sidebar_colapsado") === "1") {
+        document.getElementById("wrapper")?.classList.add("sidebar-colapsado");
+    }
 });
 
 window.addEventListener("beforeunload", persistirDatos);
