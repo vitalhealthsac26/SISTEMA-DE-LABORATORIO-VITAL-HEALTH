@@ -112,109 +112,14 @@ body { background-color: var(--bg-light); font-family: 'Segoe UI', Tahoma, Genev
     .ticket-print .t-obs { font-size: 11px; }
 }
 
-/* ==========================================
-   INFORME DE RESULTADOS (HOJA A4)
-   ========================================== */
-.informe-print {
-    color: #1e293b;
-    font-family: 'Segoe UI', Arial, Helvetica, sans-serif;
-    font-size: 11.5px;
-    width: 210mm;
-    margin: 0 auto;
-    background: #ffffff;
-}
-.informe-cabecera { 
-    text-align: center; 
-    padding-bottom: 8px; 
-    margin-bottom: 2px; 
-    border-bottom: 1px solid #cbd5e1; 
-}
-.informe-logo { display: block; width: 76px; height: 76px; object-fit: contain; margin: 0 auto 4px auto; }
-.informe-qr {
-    display: block;
-    width: 84px;
-    height: 84px;
-    object-fit: contain;
-}
-.informe-cabecera h1 { font-size: 20px; margin: 0; letter-spacing: 2.5px; font-weight: 800; color: #0f172a; }
-.informe-cabecera p { margin: 1px 0; font-size: 10px; color: #475569; }
-.informe-titulo {
-    text-align: center;
-    color: #0072bc;
-    font-weight: 800;
-    font-size: 12.5px;
-    letter-spacing: 2px;
-    margin: 10px 0 12px 0;
-}
-.informe-datos {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 3px 18px;
-    background: #f8fafc !important;
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
-    border-radius: 6px;
-    padding: 7px 12px;
-    margin-bottom: 12px;
-}
-.dato { display: flex; align-items: baseline; gap: 5px; min-width: 0; }
-.dato-ancho { grid-column: 1 / -1; }
-.dato-rotulo { font-size: 8px; color: #64748b; text-transform: uppercase; letter-spacing: .6px; font-weight: 700; white-space: nowrap; }
-.dato-rotulo::after { content: ":"; }
-.dato-valor { font-size: 10.5px; font-weight: 600; color: #0f172a; min-width: 0; word-break: break-word; }
-.informe-tabla { width: 100%; border-collapse: collapse; margin: 0 0 12px 0; }
-.informe-tabla th,
-.informe-tabla td { border: 0; border-bottom: 1px solid #e2e8f0; padding: 4px 6px; font-size: 10.5px; text-align: left; vertical-align: top; }
-.informe-tabla thead th {
-    border-bottom: 1.5px solid #0072bc;
-    color: #64748b;
-    font-size: 8.5px;
-    text-transform: uppercase;
-    letter-spacing: .7px;
-    padding-top: 6px;
-}
-.informe-tabla td.td-centro,
-.informe-tabla th.th-centro { text-align: center; }
-.informe-examen-titulo th {
-    background: #eaf3fb !important;
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
-    border-bottom: 0;
-    padding: 6px 8px;
-    font-size: 11.5px;
-    color: #0b5ea8;
-}
-.informe-metodo { float: right; font-weight: 600; font-size: 9px; color: #64748b; }
-.informe-nota { font-size: 9px; font-style: italic; color: #64748b; margin: 0 0 4px 0; }
-.res-flag { font-weight: 700; }
-.res-alto { color: #c0263a; }
-.res-bajo { color: #b45309; }
-
-/* Firma de la bióloga */
-.informe-firma { margin-top: 20px; text-align: center; page-break-inside: avoid; }
-.informe-firma-img { height: 110px; object-fit: contain; display: block; margin: 0 auto 2px auto; }
-.informe-firma-linea { width: 230px; border-top: 1.5px solid #0f172a; margin: 0 auto 3px auto; }
-.informe-firma-nombre { font-weight: 700; font-size: 11px; color: #0f172a; }
-.informe-firma-det { font-size: 9px; color: #475569; }
-
-/* Pie de página del centro médico */
-.informe-pie-fijo {
-    border-top: 1px solid #0072bc;
-    padding-top: 5px;
-    text-align: center;
-    font-size: 8.5px;
-    color: #475569;
-    background: #ffffff;
-}
-.informe-pie-fijo strong { color: #0f172a; font-size: 9px; }
-
 /* =========================================================
    IMPRESIÓN PROFESIONAL DEL INFORME A4 (DEFINITIVO)
    ========================================================= */
 
 @page {
     size: A4 portrait;
-    margin: 12mm 10mm 12mm 10mm;
+    /* Margen superior e inferior generosos para dar espacio al encabezado y pie fijos */
+    margin: 24mm 10mm 20mm 10mm; 
 }
 
 @media print {
@@ -244,45 +149,38 @@ body { background-color: var(--bg-light); font-family: 'Segoe UI', Tahoma, Genev
         display: none !important;
     }
 
-    /* =====================================================
-       CONTENEDOR PRINCIPAL
-       ===================================================== */
     .informe-print {
-        position: relative !important;
         width: 100% !important;
         max-width: 100% !important;
         margin: 0 !important;
         padding: 0 !important;
         background: #ffffff !important;
+        /* Espacio superior para que el contenido no tape al encabezado fijo */
+        padding-top: 22mm !important; 
     }
 
     /* =====================================================
-       CABECERA
+       1. ENCABEZADO FIJO (Se repite automáticamente en cada hoja)
        ===================================================== */
     .informe-cabecera {
-        position: relative !important;
-        display: block !important;
-        width: 100% !important;
-        margin-bottom: 10px !important;
-        padding-bottom: 6px !important;
+        position: fixed !important;
+        top: -22mm !important;
+        left: 0 !important;
+        right: 0 !important;
+        height: auto !important;
         background: #ffffff !important;
         border-bottom: 1px solid #cbd5e1 !important;
-        page-break-after: avoid !important;
-        break-after: avoid !important;
+        z-index: 9999;
+        padding-bottom: 6px !important;
+        margin-bottom: 0 !important;
     }
 
     .informe-logo {
-        width: 55px !important;
-        height: 55px !important;
+        width: 50px !important;
+        height: 50px !important;
         object-fit: contain !important;
         display: block !important;
         margin: 0 auto 2px auto !important;
-    }
-
-    .informe-qr {
-        width: 48px !important;
-        height: 48px !important;
-        object-fit: contain !important;
     }
 
     .informe-cabecera h1 {
@@ -296,54 +194,44 @@ body { background-color: var(--bg-light); font-family: 'Segoe UI', Tahoma, Genev
         margin: 1px 0 !important;
     }
 
-    .informe-datos {
-        margin-bottom: 10px !important;
-        page-break-inside: avoid !important;
-        break-inside: avoid !important;
-    }
-
     /* =====================================================
-       CONTROL INTELIGENTE DE EXÁMENES Y TABLAS
-       (Evita que un título de examen quede solo o se rompa)
+       2. SALTOS DE PÁGINA INTELIGENTES POR CADA EXAMEN
        ===================================================== */
+    /* Cada bloque de examen o sección principal arrancará en una nueva página */
     .resultado-seccion,
-    .card {
+    .card,
+    .informe-bloque-examen {
+        page-break-before: always !important;
+        break-before: page !important;
         page-break-inside: avoid !important;
         break-inside: avoid !important;
-        margin-bottom: 10px !important;
+        margin-top: 10px !important;
     }
 
-    .informe-tabla {
-        width: 100% !important;
-        border-collapse: collapse !important;
-        margin-bottom: 10px !important;
-    }
-
-    .informe-tabla thead {
-        display: table-header-group !important;
-    }
-
-    .informe-tabla tr,
-    .informe-tabla td,
-    .informe-tabla th {
-        page-break-inside: avoid !important;
-        break-inside: avoid !important;
+    /* Evita el salto de página en el primer bloque para que los datos del paciente salgan juntos */
+    .informe-print > .resultado-seccion:first-child,
+    .informe-print > .card:first-child,
+    .informe-print > div:first-child {
+        page-break-before: avoid !important;
+        break-before: avoid !important;
     }
 
     /* =====================================================
-       PIE DE PÁGINA Y FIRMA
+       3. PIE DE PÁGINA FIJO (Se ancla al fondo de cada hoja)
        ===================================================== */
     .informe-pie-fijo {
-        position: relative !important;
-        display: block !important;
-        width: 100% !important;
-        margin-top: 15mm !important;
-        padding-top: 4px !important;
+        position: fixed !important;
+        bottom: -16mm !important;
+        left: 0 !important;
+        right: 0 !important;
+        height: 12mm !important;
         background: #ffffff !important;
         border-top: 1px solid #0072bc !important;
         text-align: center !important;
         font-size: 8px !important;
         color: #475569 !important;
+        z-index: 9999;
+        padding-top: 4px !important;
     }
 
     .informe-pie-fijo strong {
@@ -351,27 +239,23 @@ body { background-color: var(--bg-light); font-family: 'Segoe UI', Tahoma, Genev
         color: #0f172a !important;
     }
 
-    .informe-seccion-final {
-        display: flex !important;
-        width: 100% !important;
-        justify-content: space-between !important;
-        align-items: flex-end !important;
-        margin-top: 20mm !important;
-        margin-bottom: 10mm !important;
-        page-break-inside: avoid !important;
-        break-inside: avoid !important;
-    }
-
+    /* =====================================================
+       4. FIRMA DE LA BIÓLOGA (Solo al final del último bloque)
+       ===================================================== */
+    /* Al NO tener position: fixed, fluirá de manera natural y aparecerá 
+       exclusivamente al final de la última hoja donde termine el contenido */
     .informe-firma {
-        width: 100% !important;
-        text-align: center !important;
+        position: relative !important;
+        display: block !important;
         page-break-inside: avoid !important;
         break-inside: avoid !important;
+        margin-top: 25px !important;
+        text-align: center !important;
     }
 
     .informe-firma-img {
-        height: 70px !important;
-        max-width: 160px !important;
+        height: 65px !important;
+        max-width: 150px !important;
         object-fit: contain !important;
         display: block !important;
         margin: 0 auto 2px auto !important;
@@ -391,6 +275,23 @@ body { background-color: var(--bg-light); font-family: 'Segoe UI', Tahoma, Genev
     .informe-firma-det {
         font-size: 7.5px !important;
         color: #475569 !important;
+    }
+
+    /* Protección de tablas para evitar cortes extraños de filas */
+    .informe-tabla {
+        width: 100% !important;
+        border-collapse: collapse !important;
+    }
+
+    .informe-tabla thead {
+        display: table-header-group !important;
+    }
+
+    .informe-tabla tr,
+    .informe-tabla td,
+    .informe-tabla th {
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
     }
 
     * {
