@@ -303,6 +303,28 @@ function numeroTexto(v) {
     return parseFloat(String(v ?? "0").replace("S/", "").replace(",", "").trim()) || 0;
 }
 
+// Resuelve siempre el nombre del examen tal como está configurado actualmente en el sistema / catálogo
+function resolverNombreExamenCatalogo(item) {
+    if (!item) return "";
+    const cod = item.codigo != null ? String(item.codigo).trim() : "";
+    const nomOriginal = item.nombre != null ? String(item.nombre).trim() : "";
+    const catalogo = (typeof examenesCatalogo !== "undefined" && Array.isArray(examenesCatalogo)) ? examenesCatalogo : [];
+
+    // 1. Búsqueda por código exacto
+    if (cod) {
+        const porCod = catalogo.find(c => String(c.codigo).trim() === cod);
+        if (porCod && porCod.nombre) return porCod.nombre;
+    }
+
+    // 2. Búsqueda por nombre original normalizado en caso de que coincida con uno modificado
+    if (nomOriginal) {
+        const porNom = catalogo.find(c => String(c.nombre || "").trim().toUpperCase() === nomOriginal.toUpperCase());
+        if (porNom && porNom.nombre) return porNom.nombre;
+    }
+
+    return nomOriginal || (cod ? `Examen (${cod})` : "Servicio de Laboratorio");
+}
+
 // ==========================================
 // NORMALIZACIÓN DE PACIENTES Y COTIZACIONES
 // ==========================================
@@ -645,6 +667,29 @@ function buscarPaciente() {
     }
 }
 
+function buscarPacienteCotizacion() {
+    const dni = val("dni");
+    if (dni.length < 8) {
+        alert("Ingrese un DNI o documento válido de al menos 8 dígitos.");
+        return;
+    }
+    const lista = (window.pacientesRegistrados || []).concat(window.listaPacientesCache || []);
+    const pac = lista.map(normalizarPaciente).find(p => String(p.dni) === dni);
+    if (!pac) {
+        alert("No se encontró un paciente registrado con ese DNI en la base de datos.");
+        return;
+    }
+    setVal("nombres", pac.nombre);
+    setVal("celular", pac.celular);
+    setVal("fechaNacimiento", pac.fnac);
+    setVal("sexo", pac.sexo || "MASCULINO");
+    if (pac.fnac) {
+        setVal("edad", calcularEdadDesde(pac.fnac) || pac.edad);
+    } else {
+        setVal("edad", pac.edad);
+    }
+}
+
 function filtrarExamenes(query) {
     const contenedor = document.getElementById("sugerencias-examenes");
     if (!contenedor) return;
@@ -819,6 +864,9 @@ function cargarOrdenes() {
             <td>${escapeHTML(ord.nombre)}</td>
             <td><span class="badge bg-warning text-dark">${escapeHTML(ord.estado || "Pendiente")}</span></td>
             <td class="text-end px-3">
+                <button class="btn btn-sm btn-outline-success me-1 text-success" title="Enviar mensaje por WhatsApp al paciente" onclick="enviarResultadoWhatsApp('${ord.nroOrden}')">
+                    <i class="bi bi-whatsapp"></i>
+                </button>
                 <button class="btn btn-sm btn-outline-secondary me-1" title="Reimprimir ticket" onclick="mostrarTicketPorNro('${ord.nroOrden}')"><i class="bi bi-receipt"></i></button>
                 ${ord.resultados ? `<button class="btn btn-sm btn-outline-primary me-1" title="Imprimir informe de resultados" onclick="imprimirInforme('${ord.nroOrden}')"><i class="bi bi-printer"></i> Informe</button>` : ""}
                 ${ord.resultados ? `<button class="btn btn-sm btn-outline-danger me-1" title="Descargar informe en PDF" onclick="descargarInformePDF('${ord.nroOrden}')"><i class="bi bi-file-earmark-pdf"></i> PDF</button>` : ""}
@@ -828,6 +876,47 @@ function cargarOrdenes() {
         `;
         tbody.appendChild(tr);
     });
+}
+
+function enviarResultadoWhatsApp(nroOrden) {
+    const orden = (ordenesRegistradas || []).find(o => String(o.nroOrden) === String(nroOrden));
+    if (!orden) {
+        alert("Orden no encontrada.");
+        return;
+    }
+
+    // Obtener celular de la orden o buscar en el registro de pacientes
+    let tel = (orden.celular || "").trim();
+    if (!tel && orden.dni) {
+        const pac = (window.pacientesRegistrados || []).find(p => String(p.dni) === String(orden.dni));
+        if (pac && pac.celular) tel = pac.celular.trim();
+    }
+
+    // Limpiar caracteres no numéricos
+    let numeroLimpio = tel.replace(/[^0-9]/g, "");
+    if (!numeroLimpio || numeroLimpio.length < 8) {
+        const nuevoTel = prompt(`El paciente "${orden.nombre}" no tiene un celular registrado válido.\nIngrese el número de WhatsApp (9 dígitos):`, "");
+        if (!nuevoTel) return;
+        numeroLimpio = nuevoTel.replace(/[^0-9]/g, "");
+        if (numeroLimpio.length >= 9) {
+            orden.celular = numeroLimpio;
+            persistirDatos();
+        }
+    }
+
+    // Prefijo de Perú (51) si no lo tiene
+    if (numeroLimpio.length === 9) {
+        numeroLimpio = "51" + numeroLimpio;
+    }
+
+    const pacienteNombre = (orden.nombre || "Paciente").trim();
+    const codigoOrden = orden.nroOrden || "";
+    const examenesTxt = (orden.examenes || []).map(e => resolverNombreExamenCatalogo(e)).join(", ");
+
+    const mensaje = `Estimado(a) paciente *${pacienteNombre}*, se hace envío de su resultado de laboratorio de *Centro Médico Vital Health* correspondiente a la orden *${codigoOrden}*.\n\n🔬 *Análisis realizados:* ${examenesTxt}\n\n📍 *Atención:* Av. Grau N° 1799 - Veintiséis de Octubre\n📞 *Consultas:* 984 089 927\n\n¡Gracias por confiar en Centro Médico Vital Health! Que tenga un excelente día.`;
+
+    const url = `https://wa.me/${numeroLimpio}?text=${encodeURIComponent(mensaje)}`;
+    window.open(url, "_blank");
 }
 
 function eliminarOrden(nroOrden) {
@@ -1614,20 +1703,36 @@ function eliminarExamenCatalogo(codigo) {
 }
 
 // ==========================================
-// CONTROL DE CAJA
+// CONTROL DE CAJA Y CIERRE DIARIO
 // ==========================================
 function actualizarTotalesCaja() {
-    let totalHoy = 0, efectivo = 0, digital = 0;
+    let totalHoy = 0;
+    let efectivo = 0;
+    let yape = 0;
+    let plin = 0;
+    let tarjeta = 0;
+
     (cajaMovimientos || []).forEach(m => {
         const monto = Number(m.monto || 0);
         totalHoy += monto;
-        if (m.metodoPago === "Efectivo") efectivo += monto;
-        else digital += monto;
+        const metodo = String(m.metodoPago || "").trim().toLowerCase();
+        if (metodo === "efectivo") {
+            efectivo += monto;
+        } else if (metodo === "yape") {
+            yape += monto;
+        } else if (metodo === "plin") {
+            plin += monto;
+        } else {
+            tarjeta += monto;
+        }
     });
+
     const setTxt = (id, txt) => { const el = document.getElementById(id); if (el) el.textContent = txt; };
     setTxt("caja-total-hoy", totalHoy.toFixed(2));
     setTxt("caja-efectivo", efectivo.toFixed(2));
-    setTxt("caja-digital", digital.toFixed(2));
+    setTxt("caja-yape", yape.toFixed(2));
+    setTxt("caja-plin", plin.toFixed(2));
+    setTxt("caja-tarjeta", tarjeta.toFixed(2));
 
     const tbody = document.getElementById("caja-tabla-body");
     if (!tbody) return;
@@ -1655,6 +1760,140 @@ function actualizarTotalesCaja() {
         `;
         tbody.appendChild(tr);
     });
+}
+
+// Cierre de caja y reporte diario a Excel (.xlsx) con desglose exacto
+function exportarCierreCajaExcel() {
+    if (!cajaMovimientos || cajaMovimientos.length === 0) {
+        alert("No hay movimientos registrados en la caja para exportar.");
+        return;
+    }
+
+    let efectivo = 0, yape = 0, plin = 0, tarjeta = 0, total = 0;
+    const filasDetalle = [];
+
+    cajaMovimientos.forEach((m, idx) => {
+        const monto = Number(m.monto || 0);
+        total += monto;
+        const metodoNorm = String(m.metodoPago || "").trim().toLowerCase();
+        if (metodoNorm === "efectivo") efectivo += monto;
+        else if (metodoNorm === "yape") yape += monto;
+        else if (metodoNorm === "plin") plin += monto;
+        else tarjeta += monto;
+
+        filasDetalle.push({
+            "N°": idx + 1,
+            "Hora": m.hora || "",
+            "N° Orden": m.nroOrden || "",
+            "Paciente": m.paciente || "",
+            "Método de Pago": m.metodoPago || "",
+            "Monto (S/)": monto
+        });
+    });
+
+    const fechaHoy = new Date().toLocaleDateString("es-PE").replace(/\//g, "-");
+
+    // Si la librería XLSX está disponible, genera archivo .xlsx real con dos hojas
+    if (window.XLSX) {
+        const wb = XLSX.utils.book_new();
+
+        // Hoja 1: Resumen de Cierre de Caja
+        const datosResumen = [
+            ["CENTRO MÉDICO VITAL HEALTH - LABORATORIO CLÍNICO"],
+            ["REPORTE DIARIO Y CIERRE DE CAJA DE TURNO"],
+            [`Fecha de Cierre: ${new Date().toLocaleString("es-PE")}`],
+            [],
+            ["MÉTODO DE PAGO", "IMPORTE TOTAL (S/)", "NRO. OPERACIONES"],
+            ["Efectivo en Caja", efectivo, cajaMovimientos.filter(m => String(m.metodoPago).toLowerCase() === "efectivo").length],
+            ["Yape", yape, cajaMovimientos.filter(m => String(m.metodoPago).toLowerCase() === "yape").length],
+            ["Plin", plin, cajaMovimientos.filter(m => String(m.metodoPago).toLowerCase() === "plin").length],
+            ["Tarjeta / Transferencia / POS", tarjeta, cajaMovimientos.filter(m => !["efectivo", "yape", "plin"].includes(String(m.metodoPago).toLowerCase())).length],
+            [],
+            ["TOTAL RECAUDADO (S/)", total, cajaMovimientos.length],
+            [],
+            ["Estado del Cuadre", "CAJA CONCILIADA CON RECEPCIÓN", "SIN DISCREPANCIAS"]
+        ];
+        const wsResumen = XLSX.utils.aoa_to_sheet(datosResumen);
+        XLSX.utils.book_append_sheet(wb, wsResumen, "Cierre_Caja");
+
+        // Hoja 2: Detalle de Movimientos
+        const wsDetalle = XLSX.utils.json_to_sheet(filasDetalle);
+        XLSX.utils.book_append_sheet(wb, wsDetalle, "Detalle_Cobros");
+
+        XLSX.writeFile(wb, `Cierre_Caja_VitalHealth_${fechaHoy}.xlsx`);
+    } else {
+        // Fallback a CSV compatible con Excel
+        let csv = "sep=,\n";
+        csv += "CENTRO MEDICO VITAL HEALTH - CIERRE DE CAJA\n";
+        csv += `Fecha,${fechaHoy}\n\n`;
+        csv += "DESGLOSE POR METODO DE PAGO\n";
+        csv += `Efectivo,${efectivo.toFixed(2)}\n`;
+        csv += `Yape,${yape.toFixed(2)}\n`;
+        csv += `Plin,${plin.toFixed(2)}\n`;
+        csv += `Tarjeta / POS,${tarjeta.toFixed(2)}\n`;
+        csv += `TOTAL DEL DIA,${total.toFixed(2)}\n\n`;
+        csv += "DETALLE DE MOVIMIENTOS\n";
+        csv += "N,Hora,Nro Orden,Paciente,Metodo,Monto S/\n";
+        filasDetalle.forEach(f => {
+            csv += `${f["N°"]},"${f.Hora}","${f["N° Orden"]}","${f.Paciente}","${f["Método de Pago"]}",${f["Monto (S/)"]}\n`;
+        });
+
+        const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
+        const enlace = document.createElement("a");
+        enlace.href = URL.createObjectURL(blob);
+        enlace.download = `Cierre_Caja_VitalHealth_${fechaHoy}.csv`;
+        enlace.click();
+    }
+}
+
+// Imprimir Cierre de Caja en ticketera de 58 mm
+function imprimirCierreCajaTicket() {
+    let efectivo = 0, yape = 0, plin = 0, tarjeta = 0, total = 0;
+    (cajaMovimientos || []).forEach(m => {
+        const monto = Number(m.monto || 0);
+        total += monto;
+        const metodoNorm = String(m.metodoPago || "").trim().toLowerCase();
+        if (metodoNorm === "efectivo") efectivo += monto;
+        else if (metodoNorm === "yape") yape += monto;
+        else if (metodoNorm === "plin") plin += monto;
+        else tarjeta += monto;
+    });
+
+    const ahora = new Date().toLocaleString("es-PE");
+    const html = `
+        <div class="ticket-contenido">
+            <img src="logo.png" alt="" class="t-logo" onerror="this.style.display='none'">
+            <div class="t-centro t-negrita t-titulo">CENTRO MEDICO</div>
+            <div class="t-centro t-negrita t-titulo">VITAL HEALTH</div>
+            <div class="t-centro">Laboratorio Clínico</div>
+            <div class="t-linea-doble"></div>
+            <div class="t-centro t-negrita t-subtitulo">CIERRE DE CAJA DIARIO</div>
+            <div class="t-centro t-dato">${ahora}</div>
+            <div class="t-linea"></div>
+            <div class="t-cabecera-items t-negrita"><span>MÉTODO</span><span></span><span>IMPORTE</span></div>
+            <div class="t-linea"></div>
+            <div class="t-item"><span>Efectivo:</span><span></span><span class="t-negrita">S/ ${efectivo.toFixed(2)}</span></div>
+            <div class="t-item"><span>Yape:</span><span></span><span class="t-negrita">S/ ${yape.toFixed(2)}</span></div>
+            <div class="t-item"><span>Plin:</span><span></span><span class="t-negrita">S/ ${plin.toFixed(2)}</span></div>
+            <div class="t-item"><span>Tarjeta / POS:</span><span></span><span class="t-negrita">S/ ${tarjeta.toFixed(2)}</span></div>
+            <div class="t-linea"></div>
+            <div class="t-row t-negrita t-total"><span>TOTAL DÍA</span><span>S/ ${total.toFixed(2)}</span></div>
+            <div class="t-row"><span>Operaciones:</span><span>${(cajaMovimientos || []).length}</span></div>
+            <div class="t-linea-doble"></div>
+            <div class="t-centro t-negrita">CUADRE DE TURNO CONFORME</div>
+            <div class="t-centro t-obs" style="margin-top: 25px; border-top: 1px dashed #000; padding-top: 4px;">Firma Recepcionista / Cajero</div>
+        </div>
+    `;
+
+    const cuerpo = document.getElementById("modal-ticket-body");
+    if (cuerpo) cuerpo.innerHTML = `<div class="ticket-visual">${html}</div>`;
+    const titulo = document.getElementById("modal-ticket-titulo");
+    if (titulo) titulo.innerHTML = `<i class="bi bi-cash-stack me-1"></i>Cierre de Caja (58 mm)`;
+    const zona = document.getElementById("zona-impresion");
+    if (zona) zona.innerHTML = `<div class="ticket-print">${html}</div>`;
+
+    const modalEl = document.getElementById("modalTicket");
+    if (modalEl && window.bootstrap) bootstrap.Modal.getOrCreateInstance(modalEl).show();
 }
 
 function eliminarMovimientoCaja(idMovimiento) {
@@ -2123,17 +2362,23 @@ function construirTicketHTML(orden) {
     let lineas = "";
     orden.examenes.forEach(item => {
         const importe = item.cantidad * item.precio;
+        const nombreVigente = resolverNombreExamenCatalogo(item);
         lineas += `
             <div class="t-item">
                 <span class="t-cant">${item.cantidad} x</span>
-                <span class="t-desc">${escapeHTML(item.nombre)}</span>
+                <span class="t-desc">${escapeHTML(nombreVigente)}</span>
                 <span class="t-importe">${importe.toFixed(2)}</span>
             </div>
         `;
     });
 
     const datoExtra = orden.doctor ? `<div class="t-row"><span>Médico:</span><span>${escapeHTML(orden.doctor)}</span></div>` : "";
-    let fechaNac = orden.fechaNacimiento || orden.fnac || "-";
+    let fechaNac = orden.fechaNacimiento || orden.fnac || "";
+    if (!fechaNac && orden.dni) {
+        const pEncontrado = (window.pacientesRegistrados || []).find(p => String(p.dni) === String(orden.dni));
+        if (pEncontrado && pEncontrado.fnac) fechaNac = pEncontrado.fnac;
+    }
+    const textoFechaNac = fechaNac ? `<div class="t-row"><span>F. Nac:</span><span>${escapeHTML(fechaNac)}</span></div>` : '<div class="t-row"><span>F. Nac:</span><span>-</span></div>';
     const textoEdad = orden.edad ? String(orden.edad).trim() : "-";
 
     return `
@@ -2151,8 +2396,8 @@ function construirTicketHTML(orden) {
             <div class="t-row"><span>Fecha:</span><span>${escapeHTML(fecha)}</span></div>
             <div class="t-row"><span>Hora:</span><span>${escapeHTML(hora)}</span></div>
             <div class="t-row"><span>Paciente:</span><span>${escapeHTML(orden.nombre)}</span></div>
-            <div class="t-row"><span>DNI:</span><span>${escapeHTML(orden.dni)}</span></div>
-            <div class="t-row"><span>F. Nac:</span><span>${escapeHTML(fechaNac)}</span></div>
+            <div class="t-row"><span>DNI:</span><span>${escapeHTML(orden.dni || '-')}</span></div>
+            ${textoFechaNac}
             <div class="t-row"><span>Edad:</span><span>${escapeHTML(textoEdad)}</span></div>
             ${datoCelular}
             ${datoExtra}
@@ -2197,15 +2442,23 @@ function construirTicketCotizacionHTML(cot) {
     const datoCelular = pac.celular ? `<div class="t-row"><span>Celular:</span><span>${escapeHTML(pac.celular)}</span></div>` : '';
     const datoExtra = pac.medico ? `<div class="t-row"><span>Médico:</span><span>${escapeHTML(pac.medico)}</span></div>` : "";
 
+    let fechaNacCot = pac.fechaNacimiento || pac.fnac || "";
+    if (!fechaNacCot && pac.dni) {
+        const pEncontrado = (window.pacientesRegistrados || []).find(p => String(p.dni) === String(pac.dni));
+        if (pEncontrado && pEncontrado.fnac) fechaNacCot = pEncontrado.fnac;
+    }
+    const textoFechaNacCot = fechaNacCot ? `<div class="t-row"><span>F. Nac:</span><span>${escapeHTML(fechaNacCot)}</span></div>` : '<div class="t-row"><span>F. Nac:</span><span>-</span></div>';
+
     let lineas = "";
     (cot.examenes || []).forEach(item => {
         let precioNum = parseFloat(String(item.precioUnit || item.precio || "0").replace('S/', '').trim()) || 0;
         let cantNum = parseFloat(item.cantidad) || 1;
         const importe = cantNum * precioNum;
+        const nombreVigente = resolverNombreExamenCatalogo(item);
         lineas += `
             <div class="t-item">
                 <span class="t-cant">${cantNum} x</span>
-                <span class="t-desc">${escapeHTML(item.nombre)}</span>
+                <span class="t-desc">${escapeHTML(nombreVigente)}</span>
                 <span class="t-importe">${importe.toFixed(2)}</span>
             </div>
         `;
@@ -2227,6 +2480,7 @@ function construirTicketCotizacionHTML(cot) {
             <div class="t-row"><span>Hora:</span><span>${escapeHTML(hora)}</span></div>
             <div class="t-row"><span>Paciente:</span><span>${escapeHTML(pac.nombres || 'Cliente General')}</span></div>
             <div class="t-row"><span>DNI:</span><span>${escapeHTML(pac.dni || '-')}</span></div>
+            ${textoFechaNacCot}
             <div class="t-row"><span>Edad:</span><span>${escapeHTML(pac.edad || '-')}</span></div>
             ${datoCelular}
             ${datoExtra}
