@@ -2297,8 +2297,8 @@ function construirCabeceraInformeHTML() {
                 <div style="display: flex; align-items: center; gap: 12px;">
                     <img src="logo.png" alt="Centro Médico Vital Health" class="informe-logo" style="width: 70px; height: 70px; object-fit: contain;" onerror="this.style.display='none'">
                     <div>
-                        <h1 class="informe-titulo-marca" style="font-family: 'Montserrat', 'Segoe UI', Arial, sans-serif; font-size: 19px; margin: 0; letter-spacing: 2px; font-weight: 800; color: #0f172a; text-transform: uppercase;">CENTRO MEDICO VITAL HEALTH</h1>
-                        <p style="margin: 2px 0 0 0; font-size: 9.5px; color: #475569;"><strong>Laboratorio clínico, comprometido con tu salud.</strong></p>
+                        <h1 class="informe-titulo-marca" style="font-family: 'Ultra', 'Cooper Black', 'Alfa Slab One', 'Rockwell Extra Bold', 'Arial Black', serif; font-size: 19px; margin: 0; letter-spacing: 0.8px; font-weight: 900; color: #0b1528; text-transform: uppercase; line-height: 1.15;">CENTRO MEDICO VITAL HEALTH</h1>
+                        <p class="informe-subtitulo-marca" style="margin: 3px 0 0 0; font-size: 9.5px; color: #475569; font-family: 'Segoe UI', Arial, sans-serif;"><strong>Laboratorio clínico, comprometido con tu salud.</strong></p>
                     </div>
                 </div>
                 <div class="informe-qr-box" style="text-align: center;">
@@ -2686,25 +2686,28 @@ async function descargarInformePDF(nroOrden) {
             elementosPagina.push(paginaDiv);
         }
 
-        // Esperar imágenes una sola vez con timeout estricto (máx 150ms)
+        // Esperar imágenes una sola vez con timeout estricto
         await esperarImagenes(contenedor);
+        // Esperar un ciclo de renderizado del navegador para asegurar layout completo
+        await new Promise(r => requestAnimationFrame(() => setTimeout(r, 40)));
 
-        // Capturar páginas de forma secuencial ultra-optimizada
+        // Capturar páginas de forma eficiente y rápida:
+        // Scale 1.25 ofrece lectura cristalina a 1000px de ancho y reduce el tiempo de CPU a 1-3 segundos
         for (let i = 0; i < totalPaginas; i++) {
             const paginaDiv = elementosPagina[i];
 
             const canvas = await window.html2canvas(paginaDiv, {
-                scale: 1.5, // 1.5x ofrece excelente nitidez clínica y renderiza al menos 3x más rápido que 2x+
+                scale: 1.25, // Óptimo para velocidad inmediata sin perder legibilidad médica
                 backgroundColor: "#ffffff",
                 useCORS: true,
                 logging: false,
-                imageTimeout: 500,
+                imageTimeout: 300,
                 removeContainer: false,
                 windowWidth: 794,
                 windowHeight: 1123
             });
 
-            const imgData = canvas.toDataURL("image/jpeg", 0.90);
+            const imgData = canvas.toDataURL("image/jpeg", 0.82);
             if (i > 0) pdf.addPage("a4", "portrait");
             pdf.addImage(imgData, "JPEG", 0, 0, 210, 297, undefined, "FAST");
         }
