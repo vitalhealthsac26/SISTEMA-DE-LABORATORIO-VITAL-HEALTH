@@ -817,10 +817,18 @@ function guardarOrdenGenerarTicket() {
 
     ordenesRegistradas.unshift(nuevaOrden);
 
+    const ahora = new Date();
     const movimiento = {
         id: `${Date.now()}-${nroOrden}`,
-        hora: new Date().toLocaleTimeString(),
-        nroOrden, paciente: nombre, metodoPago, monto: total, en: Date.now()
+        fecha: ahora.toISOString().split("T")[0],
+        fechaVisual: ahora.toLocaleDateString("es-PE"),
+        hora: ahora.toLocaleTimeString(),
+        nroOrden,
+        dni,
+        paciente: nombre,
+        metodoPago,
+        monto: total,
+        en: Date.now()
     };
     cajaMovimientos.unshift(movimiento);
 
@@ -904,16 +912,21 @@ function enviarResultadoWhatsApp(nroOrden) {
         }
     }
 
-    // Prefijo de Perú (51) si no lo tiene
+    // Prefijo de Perú (51) si tiene 9 dígitos locales
     if (numeroLimpio.length === 9) {
         numeroLimpio = "51" + numeroLimpio;
     }
 
-    const pacienteNombre = (orden.nombre || "Paciente").trim();
-    const codigoOrden = orden.nroOrden || "";
-    const examenesTxt = (orden.examenes || []).map(e => resolverNombreExamenCatalogo(e)).join(", ");
+    // Saludo según sexo: Estimado si es hombre o Estimada si es mujer
+    const sexoNorm = String(orden.sexo || "").trim().toUpperCase();
+    const esMujer = sexoNorm.startsWith("F") || sexoNorm.includes("MUJER");
+    const tratamiento = esMujer ? "Estimada" : "Estimado";
 
-    const mensaje = `Estimado(a) paciente *${pacienteNombre}*, se hace envío de su resultado de laboratorio de *Centro Médico Vital Health* correspondiente a la orden *${codigoOrden}*.\n\n🔬 *Análisis realizados:* ${examenesTxt}\n\n📍 *Atención:* Av. Grau N° 1799 - Veintiséis de Octubre\n📞 *Consultas:* 984 089 927\n\n¡Gracias por confiar en Centro Médico Vital Health! Que tenga un excelente día.`;
+    const pacienteNombre = (orden.nombre || "paciente").trim();
+    const codigoOrden = orden.nroOrden || "";
+
+    // Mensaje conciso exacto solicitado
+    const mensaje = `${tratamiento} paciente ${pacienteNombre}, se hace envío de su resultado de laboratorio de Centro Médico Vital Health correspondiente a la orden ${codigoOrden}.`;
 
     const url = `https://wa.me/${numeroLimpio}?text=${encodeURIComponent(mensaje)}`;
     window.open(url, "_blank");
@@ -1054,7 +1067,8 @@ function abrirResultados(nroOrden) {
                 </span>
             </div>
             <div class="d-flex gap-2 flex-wrap">
-                <button class="btn btn-success btn-sm" onclick="guardarResultados('${orden.nroOrden}')"><i class="bi bi-save me-1"></i> Guardar Resultados</button>
+                <button class="btn btn-success btn-sm fw-semibold" onclick="enviarResultadoWhatsApp('${orden.nroOrden}')" title="Enviar WhatsApp al paciente"><i class="bi bi-whatsapp me-1"></i> WhatsApp</button>
+                <button class="btn btn-primary btn-sm" onclick="guardarResultados('${orden.nroOrden}')"><i class="bi bi-save me-1"></i> Guardar Resultados</button>
                 <button class="btn btn-outline-primary btn-sm ms-1" onclick="imprimirInforme('${orden.nroOrden}')"><i class="bi bi-printer me-1"></i> Imprimir Informe</button>
                 <button class="btn btn-outline-danger btn-sm ms-1" onclick="descargarInformePDF('${orden.nroOrden}')"><i class="bi bi-file-earmark-pdf me-1"></i> Descargar PDF</button>
             </div>
@@ -1705,16 +1719,122 @@ function eliminarExamenCatalogo(codigo) {
 // ==========================================
 // CONTROL DE CAJA Y CIERRE DIARIO
 // ==========================================
+// Variable global de filtro de fecha para caja (por defecto fecha de hoy en formato YYYY-MM-DD)
+window.fechaSeleccionadaCaja = null;
+
+function obtenerFechaISO(fechaStrOEn) {
+    if (!fechaStrOEn) return "";
+    if (typeof fechaStrOEn === "string" && /^\d{4}-\d{2}-\d{2}$/.test(fechaStrOEn)) return fechaStrOEn;
+    const d = new Date(fechaStrOEn);
+    if (isNaN(d.getTime())) return "";
+    const anio = d.getFullYear();
+    const mes = String(d.getMonth() + 1).padStart(2, "0");
+    const dia = String(d.getDate()).padStart(2, "0");
+    return `${anio}-${mes}-${dia}`;
+}
+
+function filtrarCajaPorFecha(fechaValor) {
+    window.fechaSeleccionadaCaja = fechaValor || null;
+    actualizarTotalesCaja();
+}
+
+function cargarCajaHoy() {
+    const hoyStr = obtenerFechaISO(new Date());
+    window.fechaSeleccionadaCaja = hoyStr;
+    const inputFecha = document.getElementById("filtro-caja-fecha");
+    if (inputFecha) inputFecha.value = hoyStr;
+    actualizarTotalesCaja();
+}
+
+function verTodosLosCobrosCaja() {
+    window.fechaSeleccionadaCaja = "todos";
+    const inputFecha = document.getElementById("filtro-caja-fecha");
+    if (inputFecha) inputFecha.value = "";
+    actualizarTotalesCaja();
+}
+
+// Normaliza un movimiento de caja asegurando fecha, hora, DNI y paciente
+function normalizarMovimientoCaja(m) {
+    if (!m) return {};
+    let fechaISO = m.fecha ? obtenerFechaISO(m.fecha) : "";
+    let hora = m.hora || "";
+    let dni = m.dni || "";
+    let fechaVisual = m.fechaVisual || "";
+
+    // Si falta fecha o DNI, intentar resolver desde su timestamp o desde la orden registrada
+    if (!fechaISO && m.en) {
+        fechaISO = obtenerFechaISO(m.en);
+        const d = new Date(m.en);
+        if (!isNaN(d.getTime())) {
+            fechaVisual = d.toLocaleDateString("es-PE");
+            if (!hora) hora = d.toLocaleTimeString();
+        }
+    }
+    if ((!dni || !fechaISO) && m.nroOrden) {
+        const ord = (ordenesRegistradas || []).find(o => String(o.nroOrden) === String(m.nroOrden));
+        if (ord) {
+            if (!dni) dni = ord.dni || "";
+            if (!fechaISO && ord.fechaHora) {
+                fechaISO = obtenerFechaISO(ord.fechaHora);
+                const partes = String(ord.fechaHora).split(", ");
+                if (!fechaVisual && partes[0]) fechaVisual = partes[0];
+                if (!hora && partes[1]) hora = partes[1];
+            }
+        }
+    }
+    if (!fechaISO) {
+        fechaISO = obtenerFechaISO(new Date());
+        if (!fechaVisual) fechaVisual = new Date().toLocaleDateString("es-PE");
+    }
+
+    return {
+        ...m,
+        fecha: fechaISO,
+        fechaVisual: fechaVisual || fechaISO,
+        hora: hora || "-",
+        dni: dni || "-",
+        paciente: m.paciente || "Cliente General",
+        metodoPago: m.metodoPago || "Efectivo",
+        monto: Number(m.monto || 0)
+    };
+}
+
 function actualizarTotalesCaja() {
-    let totalHoy = 0;
+    // Si no hay fecha elegida, fijar hoy en el input
+    const inputFecha = document.getElementById("filtro-caja-fecha");
+    const hoyISO = obtenerFechaISO(new Date());
+    if (window.fechaSeleccionadaCaja === null) {
+        window.fechaSeleccionadaCaja = hoyISO;
+        if (inputFecha && !inputFecha.value) inputFecha.value = hoyISO;
+    }
+
+    const fechaFiltro = window.fechaSeleccionadaCaja;
+    const movimientosNormalizados = (cajaMovimientos || []).map(normalizarMovimientoCaja);
+
+    // Filtrar movimientos según la fecha seleccionada
+    let movimientosFiltrados = movimientosNormalizados;
+    let textoSubtitulo = "Mostrando cobros de hoy";
+    if (fechaFiltro && fechaFiltro !== "todos") {
+        movimientosFiltrados = movimientosNormalizados.filter(m => m.fecha === fechaFiltro);
+        textoSubtitulo = fechaFiltro === hoyISO 
+            ? `Mostrando cobros de hoy (${new Date().toLocaleDateString("es-PE")})` 
+            : `Mostrando cobros del día: ${fechaFiltro.split("-").reverse().join("/")}`;
+    } else if (fechaFiltro === "todos") {
+        textoSubtitulo = "Mostrando histórico completo de cobros";
+    }
+
+    const subEl = document.getElementById("caja-subtitulo-fecha");
+    if (subEl) subEl.textContent = textoSubtitulo;
+
+    let totalRecaudado = 0;
     let efectivo = 0;
     let yape = 0;
     let plin = 0;
     let tarjeta = 0;
 
-    (cajaMovimientos || []).forEach(m => {
+    movimientosFiltrados.forEach(m => {
         const monto = Number(m.monto || 0);
-        totalHoy += monto;
+        totalRecaudado += monto;
         const metodo = String(m.metodoPago || "").trim().toLowerCase();
         if (metodo === "efectivo") {
             efectivo += monto;
@@ -1728,7 +1848,7 @@ function actualizarTotalesCaja() {
     });
 
     const setTxt = (id, txt) => { const el = document.getElementById(id); if (el) el.textContent = txt; };
-    setTxt("caja-total-hoy", totalHoy.toFixed(2));
+    setTxt("caja-total-hoy", totalRecaudado.toFixed(2));
     setTxt("caja-efectivo", efectivo.toFixed(2));
     setTxt("caja-yape", yape.toFixed(2));
     setTxt("caja-plin", plin.toFixed(2));
@@ -1738,22 +1858,24 @@ function actualizarTotalesCaja() {
     if (!tbody) return;
     tbody.innerHTML = "";
     
-    if (!cajaMovimientos || cajaMovimientos.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="6" class="text-center text-muted py-3">No hay movimientos registrados hoy.</td></tr>`;
+    if (movimientosFiltrados.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="8" class="text-center text-muted py-4">No se encontraron movimientos registrados para la fecha seleccionada.</td></tr>`;
         return;
     }
     
-    cajaMovimientos.forEach(m => {
+    movimientosFiltrados.forEach(m => {
         if (!m.id) m.id = 'mov_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
         const tr = document.createElement("tr");
         tr.innerHTML = `
+            <td><small class="text-secondary fw-semibold">${escapeHTML(m.fechaVisual || m.fecha)}</small></td>
             <td>${escapeHTML(m.hora)}</td>
-            <td class="fw-bold">${escapeHTML(m.nroOrden)}</td>
-            <td>${escapeHTML(m.paciente)}</td>
+            <td class="fw-bold text-primary">${escapeHTML(m.nroOrden)}</td>
+            <td><span class="badge bg-light text-dark border">${escapeHTML(m.dni)}</span></td>
+            <td class="fw-semibold">${escapeHTML(m.paciente)}</td>
             <td><span class="badge bg-info text-dark">${escapeHTML(m.metodoPago)}</span></td>
             <td class="fw-bold text-success">S/ ${Number(m.monto || 0).toFixed(2)}</td>
             <td class="text-end">
-                <button class="btn btn-sm btn-outline-danger" onclick="eliminarMovimientoCaja('${m.id}')" title="Eliminar movimiento">
+                <button class="btn btn-sm btn-outline-danger" onclick="eliminarMovimientoCaja('${m.id}')" title="Eliminar cobro de caja">
                     <i class="bi bi-trash"></i>
                 </button>
             </td>
@@ -1764,15 +1886,23 @@ function actualizarTotalesCaja() {
 
 // Cierre de caja y reporte diario a Excel (.xlsx) con desglose exacto
 function exportarCierreCajaExcel() {
-    if (!cajaMovimientos || cajaMovimientos.length === 0) {
-        alert("No hay movimientos registrados en la caja para exportar.");
+    const fechaFiltro = window.fechaSeleccionadaCaja;
+    const movimientosNormalizados = (cajaMovimientos || []).map(normalizarMovimientoCaja);
+    let listaExportar = movimientosNormalizados;
+
+    if (fechaFiltro && fechaFiltro !== "todos") {
+        listaExportar = movimientosNormalizados.filter(m => m.fecha === fechaFiltro);
+    }
+
+    if (listaExportar.length === 0) {
+        alert("No hay movimientos registrados para exportar en la fecha seleccionada.");
         return;
     }
 
     let efectivo = 0, yape = 0, plin = 0, tarjeta = 0, total = 0;
     const filasDetalle = [];
 
-    cajaMovimientos.forEach((m, idx) => {
+    listaExportar.forEach((m, idx) => {
         const monto = Number(m.monto || 0);
         total += monto;
         const metodoNorm = String(m.metodoPago || "").trim().toLowerCase();
@@ -1783,15 +1913,17 @@ function exportarCierreCajaExcel() {
 
         filasDetalle.push({
             "N°": idx + 1,
+            "Fecha": m.fechaVisual || m.fecha || "",
             "Hora": m.hora || "",
             "N° Orden": m.nroOrden || "",
+            "DNI": m.dni || "-",
             "Paciente": m.paciente || "",
             "Método de Pago": m.metodoPago || "",
             "Monto (S/)": monto
         });
     });
 
-    const fechaHoy = new Date().toLocaleDateString("es-PE").replace(/\//g, "-");
+    const etiquetaFecha = (fechaFiltro && fechaFiltro !== "todos") ? fechaFiltro : new Date().toLocaleDateString("es-PE").replace(/\//g, "-");
 
     // Si la librería XLSX está disponible, genera archivo .xlsx real con dos hojas
     if (window.XLSX) {
@@ -1800,56 +1932,64 @@ function exportarCierreCajaExcel() {
         // Hoja 1: Resumen de Cierre de Caja
         const datosResumen = [
             ["CENTRO MÉDICO VITAL HEALTH - LABORATORIO CLÍNICO"],
-            ["REPORTE DIARIO Y CIERRE DE CAJA DE TURNO"],
-            [`Fecha de Cierre: ${new Date().toLocaleString("es-PE")}`],
+            ["REPORTE Y CUADRE DE CAJA DIARIO"],
+            [`Fecha del Arqueo: ${etiquetaFecha}`],
+            [`Generado: ${new Date().toLocaleString("es-PE")}`],
             [],
             ["MÉTODO DE PAGO", "IMPORTE TOTAL (S/)", "NRO. OPERACIONES"],
-            ["Efectivo en Caja", efectivo, cajaMovimientos.filter(m => String(m.metodoPago).toLowerCase() === "efectivo").length],
-            ["Yape", yape, cajaMovimientos.filter(m => String(m.metodoPago).toLowerCase() === "yape").length],
-            ["Plin", plin, cajaMovimientos.filter(m => String(m.metodoPago).toLowerCase() === "plin").length],
-            ["Tarjeta / Transferencia / POS", tarjeta, cajaMovimientos.filter(m => !["efectivo", "yape", "plin"].includes(String(m.metodoPago).toLowerCase())).length],
+            ["Efectivo en Caja", efectivo, listaExportar.filter(m => String(m.metodoPago).toLowerCase() === "efectivo").length],
+            ["Yape", yape, listaExportar.filter(m => String(m.metodoPago).toLowerCase() === "yape").length],
+            ["Plin", plin, listaExportar.filter(m => String(m.metodoPago).toLowerCase() === "plin").length],
+            ["Tarjeta / Transferencia / POS", tarjeta, listaExportar.filter(m => !["efectivo", "yape", "plin"].includes(String(m.metodoPago).toLowerCase())).length],
             [],
-            ["TOTAL RECAUDADO (S/)", total, cajaMovimientos.length],
+            ["TOTAL RECAUDADO (S/)", total, listaExportar.length],
             [],
             ["Estado del Cuadre", "CAJA CONCILIADA CON RECEPCIÓN", "SIN DISCREPANCIAS"]
         ];
         const wsResumen = XLSX.utils.aoa_to_sheet(datosResumen);
-        XLSX.utils.book_append_sheet(wb, wsResumen, "Cierre_Caja");
+        XLSX.utils.book_append_sheet(wb, wsResumen, "Resumen_Caja");
 
         // Hoja 2: Detalle de Movimientos
         const wsDetalle = XLSX.utils.json_to_sheet(filasDetalle);
         XLSX.utils.book_append_sheet(wb, wsDetalle, "Detalle_Cobros");
 
-        XLSX.writeFile(wb, `Cierre_Caja_VitalHealth_${fechaHoy}.xlsx`);
+        XLSX.writeFile(wb, `Cierre_Caja_VitalHealth_${etiquetaFecha}.xlsx`);
     } else {
         // Fallback a CSV compatible con Excel
         let csv = "sep=,\n";
         csv += "CENTRO MEDICO VITAL HEALTH - CIERRE DE CAJA\n";
-        csv += `Fecha,${fechaHoy}\n\n`;
+        csv += `Fecha,${etiquetaFecha}\n\n`;
         csv += "DESGLOSE POR METODO DE PAGO\n";
         csv += `Efectivo,${efectivo.toFixed(2)}\n`;
         csv += `Yape,${yape.toFixed(2)}\n`;
         csv += `Plin,${plin.toFixed(2)}\n`;
         csv += `Tarjeta / POS,${tarjeta.toFixed(2)}\n`;
-        csv += `TOTAL DEL DIA,${total.toFixed(2)}\n\n`;
+        csv += `TOTAL,${total.toFixed(2)}\n\n`;
         csv += "DETALLE DE MOVIMIENTOS\n";
-        csv += "N,Hora,Nro Orden,Paciente,Metodo,Monto S/\n";
+        csv += "N,Fecha,Hora,Nro Orden,DNI,Paciente,Metodo,Monto S/\n";
         filasDetalle.forEach(f => {
-            csv += `${f["N°"]},"${f.Hora}","${f["N° Orden"]}","${f.Paciente}","${f["Método de Pago"]}",${f["Monto (S/)"]}\n`;
+            csv += `${f["N°"]},"${f.Fecha}","${f.Hora}","${f["N° Orden"]}","${f.DNI}","${f.Paciente}","${f["Método de Pago"]}",${f["Monto (S/)"]}\n`;
         });
 
         const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
         const enlace = document.createElement("a");
         enlace.href = URL.createObjectURL(blob);
-        enlace.download = `Cierre_Caja_VitalHealth_${fechaHoy}.csv`;
+        enlace.download = `Cierre_Caja_VitalHealth_${etiquetaFecha}.csv`;
         enlace.click();
     }
 }
 
 // Imprimir Cierre de Caja en ticketera de 58 mm
 function imprimirCierreCajaTicket() {
+    const fechaFiltro = window.fechaSeleccionadaCaja;
+    const movimientosNormalizados = (cajaMovimientos || []).map(normalizarMovimientoCaja);
+    let listaFiltrada = movimientosNormalizados;
+    if (fechaFiltro && fechaFiltro !== "todos") {
+        listaFiltrada = movimientosNormalizados.filter(m => m.fecha === fechaFiltro);
+    }
+
     let efectivo = 0, yape = 0, plin = 0, tarjeta = 0, total = 0;
-    (cajaMovimientos || []).forEach(m => {
+    listaFiltrada.forEach(m => {
         const monto = Number(m.monto || 0);
         total += monto;
         const metodoNorm = String(m.metodoPago || "").trim().toLowerCase();
@@ -1859,7 +1999,11 @@ function imprimirCierreCajaTicket() {
         else tarjeta += monto;
     });
 
-    const ahora = new Date().toLocaleString("es-PE");
+    const fechaVisual = (fechaFiltro && fechaFiltro !== "todos") 
+        ? fechaFiltro.split("-").reverse().join("/") 
+        : new Date().toLocaleDateString("es-PE");
+    const ahora = new Date().toLocaleTimeString("es-PE");
+
     const html = `
         <div class="ticket-contenido">
             <img src="logo.png" alt="" class="t-logo" onerror="this.style.display='none'">
@@ -1867,8 +2011,8 @@ function imprimirCierreCajaTicket() {
             <div class="t-centro t-negrita t-titulo">VITAL HEALTH</div>
             <div class="t-centro">Laboratorio Clínico</div>
             <div class="t-linea-doble"></div>
-            <div class="t-centro t-negrita t-subtitulo">CIERRE DE CAJA DIARIO</div>
-            <div class="t-centro t-dato">${ahora}</div>
+            <div class="t-centro t-negrita t-subtitulo">CIERRE DE CAJA</div>
+            <div class="t-centro t-dato">Fecha: ${fechaVisual} ${ahora}</div>
             <div class="t-linea"></div>
             <div class="t-cabecera-items t-negrita"><span>MÉTODO</span><span></span><span>IMPORTE</span></div>
             <div class="t-linea"></div>
@@ -1877,13 +2021,16 @@ function imprimirCierreCajaTicket() {
             <div class="t-item"><span>Plin:</span><span></span><span class="t-negrita">S/ ${plin.toFixed(2)}</span></div>
             <div class="t-item"><span>Tarjeta / POS:</span><span></span><span class="t-negrita">S/ ${tarjeta.toFixed(2)}</span></div>
             <div class="t-linea"></div>
-            <div class="t-row t-negrita t-total"><span>TOTAL DÍA</span><span>S/ ${total.toFixed(2)}</span></div>
-            <div class="t-row"><span>Operaciones:</span><span>${(cajaMovimientos || []).length}</span></div>
+            <div class="t-row t-negrita t-total"><span>TOTAL</span><span>S/ ${total.toFixed(2)}</span></div>
+            <div class="t-row"><span>Operaciones:</span><span>${listaFiltrada.length}</span></div>
             <div class="t-linea-doble"></div>
             <div class="t-centro t-negrita">CUADRE DE TURNO CONFORME</div>
             <div class="t-centro t-obs" style="margin-top: 25px; border-top: 1px dashed #000; padding-top: 4px;">Firma Recepcionista / Cajero</div>
         </div>
     `;
+
+    const cierreObj = { nroOrden: `CIERRE-${Date.now()}` };
+    window._ticketActual = cierreObj;
 
     const cuerpo = document.getElementById("modal-ticket-body");
     if (cuerpo) cuerpo.innerHTML = `<div class="ticket-visual">${html}</div>`;
@@ -2511,15 +2658,76 @@ function mostrarTicketCotizacion(cot) {
 }
 
 function descargarTicketPNG() {
-    const nodo = document.querySelector("#modal-ticket-body .ticket-visual");
-    const orden = window._ticketActual;
-    if (!nodo || !orden) return;
-    if (typeof window.html2canvas !== "function") return;
-    window.html2canvas(nodo, { scale: 3, backgroundColor: "#ffffff", useCORS: true }).then(canvas => {
-        const enlace = document.createElement("a");
-        enlace.download = `Ticket-${orden.nroOrden}.png`;
-        enlace.href = canvas.toDataURL("image/png");
-        enlace.click();
+    const nodo = document.querySelector("#modal-ticket-body .ticket-visual") || document.querySelector("#modal-ticket-body");
+    const item = window._ticketActual || window._cotizacionActual;
+    if (!nodo) {
+        alert("No se encontró el contenido del ticket para descargar.");
+        return;
+    }
+
+    // Determinar nombre del archivo
+    let nombreArchivo = "Ticket-VitalHealth.png";
+    if (item) {
+        if (item.nroOrden) {
+            nombreArchivo = `Ticket-${item.nroOrden}.png`;
+        } else if (item.nroCotizacion || item.id) {
+            nombreArchivo = `Cotizacion-${item.nroCotizacion || item.id}.png`;
+        }
+    } else {
+        const tituloEl = document.getElementById("modal-ticket-titulo");
+        const txt = tituloEl ? tituloEl.textContent.trim().replace(/[^a-zA-Z0-9_-]/g, "_") : "";
+        if (txt) nombreArchivo = `${txt}.png`;
+    }
+
+    // Feedback visual en el botón de descarga
+    const btnDescargar = document.querySelector("#modalTicket button[onclick*='descargarTicketPNG']");
+    const textoOriginal = btnDescargar ? btnDescargar.innerHTML : "";
+    if (btnDescargar) {
+        btnDescargar.disabled = true;
+        btnDescargar.innerHTML = `<span class="spinner-border spinner-border-sm me-1"></span>Descargando...`;
+    }
+
+    const restaurarBoton = () => {
+        if (btnDescargar) {
+            btnDescargar.disabled = false;
+            btnDescargar.innerHTML = textoOriginal;
+        }
+    };
+
+    if (typeof window.html2canvas !== "function") {
+        restaurarBoton();
+        alert("La herramienta de captura aún se está cargando. Intente en 1 segundo.");
+        return;
+    }
+
+    // html2canvas ultra-optimizado: scale 2 (nítido y ligero), logging deshabilitado, timeout corto
+    window.html2canvas(nodo, {
+        scale: 2,
+        backgroundColor: "#ffffff",
+        useCORS: true,
+        allowTaint: true,
+        logging: false,
+        imageTimeout: 1500
+    }).then(canvas => {
+        try {
+            const dataUrl = canvas.toDataURL("image/png");
+            const enlace = document.createElement("a");
+            enlace.download = nombreArchivo;
+            enlace.href = dataUrl;
+            document.body.appendChild(enlace);
+            enlace.click();
+            setTimeout(() => {
+                document.body.removeChild(enlace);
+                restaurarBoton();
+            }, 100);
+        } catch (e) {
+            console.error("Error al exportar imagen:", e);
+            restaurarBoton();
+        }
+    }).catch(err => {
+        console.error("Error en captura canvas:", err);
+        restaurarBoton();
+        alert("Hubo un problema al generar la imagen. Inténtelo nuevamente.");
     });
 }
 
