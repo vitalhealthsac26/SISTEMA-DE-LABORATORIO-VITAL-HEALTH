@@ -2366,8 +2366,8 @@ function construirFirmaInformeHTML(nota = "Ninguna.", mostrarNota = true) {
                 <img src="firma-biologa.png" alt="Firma" class="informe-firma-img" style="height: 72px; max-height: 72px; object-fit: contain; display: block; margin: 0 auto 2px auto;" onerror="this.style.display='none'">
                 <div class="informe-firma-linea" style="width: 220px; border-top: 1.5px solid #0f172a; margin: 0 auto 3px auto;"></div>
                 <div class="informe-firma-nombre" style="font-weight: 700; font-size: 10.5px; color: #0f172a;">Raysa Yadira Ursula Alberca Atarama</div>
-                <div class="informe-firma-det" style="font-size: 8.5px; color: #475569;">Bióloga</div>
-                <div class="informe-firma-det" style="font-size: 8.5px; color: #475569;">C.B.P. 17763</div>
+                <div class="informe-firma-det" style="font-weight: 700; font-size: 8.5px; color: #0f172a;">Bióloga</div>
+                <div class="informe-firma-det" style="font-weight: 700; font-size: 8.5px; color: #0f172a;">C.B.P. 17763</div>
             </div>
         </div>
     `;
