@@ -568,6 +568,15 @@ function showSection(sectionId) {
         target.style.display = 'block';
     }
     marcarNavActiva(sectionId);
+    if (sectionId === 'cotizacion') {
+        cargarCotizaciones();
+    } else if (sectionId === 'caja') {
+        actualizarTotalesCaja();
+    } else if (sectionId === 'ordenes') {
+        cargarOrdenes();
+    } else if (sectionId === 'pacientes') {
+        cargarPacientes();
+    }
     const sidebar = document.getElementById("sidebar");
     const overlay = document.getElementById("sidebar-overlay");
     if (sidebar) { sidebar.classList.remove('active'); sidebar.classList.remove('show'); }
@@ -2191,43 +2200,128 @@ function guardarCotizacion() {
     cargarCotizaciones();
 }
 
+// Variable global para filtrar cotizaciones por fecha
+window.fechaSeleccionadaCotizacion = null;
+
+function filtrarCotizacionesPorFecha(fechaValor) {
+    window.fechaSeleccionadaCotizacion = fechaValor || null;
+    buscarCotizaciones();
+}
+
+function cargarCotizacionesHoy() {
+    const hoyStr = obtenerFechaISO(new Date());
+    window.fechaSeleccionadaCotizacion = hoyStr;
+    const inputFecha = document.getElementById("filtro-cotizacion-fecha");
+    if (inputFecha) inputFecha.value = hoyStr;
+    buscarCotizaciones();
+}
+
+function verTodasLasCotizaciones() {
+    window.fechaSeleccionadaCotizacion = "todos";
+    const inputFecha = document.getElementById("filtro-cotizacion-fecha");
+    if (inputFecha) inputFecha.value = "";
+    buscarCotizaciones();
+}
+
+function limpiarFiltrosCotizaciones() {
+    window.fechaSeleccionadaCotizacion = null;
+    const inputFecha = document.getElementById("filtro-cotizacion-fecha");
+    if (inputFecha) inputFecha.value = "";
+    const inputTexto = document.getElementById("input-buscar-cotizacion");
+    if (inputTexto) inputTexto.value = "";
+    cargarCotizaciones();
+}
+
 function cargarCotizaciones() {
-    const lista = (window.cotizacionesGuardadas || []).map(normalizarCotizacion);
-    lista.sort((a, b) => String(b.fechaHora).localeCompare(String(a.fechaHora)));
-    renderizarTablaCotizaciones(lista);
+    buscarCotizaciones();
 }
 
 function buscarCotizaciones() {
     const input = document.getElementById("input-buscar-cotizacion");
-    const filtro = (input ? input.value : "").toLowerCase().trim();
+    const filtroTexto = (input ? input.value : "").toLowerCase().trim();
+    const fechaFiltro = window.fechaSeleccionadaCotizacion;
+
     let lista = (window.cotizacionesGuardadas || []).map(normalizarCotizacion);
-    if (filtro !== "") {
+
+    // 1. Filtrar por fecha si está activa
+    if (fechaFiltro && fechaFiltro !== "todos") {
+        lista = lista.filter(c => {
+            const fechaCot = obtenerFechaISO(c.fechaHora || "");
+            return fechaCot === fechaFiltro;
+        });
+    }
+
+    // 2. Filtrar por texto (nombre, DNI, celular, nro cotización)
+    if (filtroTexto !== "") {
         lista = lista.filter(c =>
-            String(c.nombre || "").toLowerCase().includes(filtro) ||
-            String(c.dni || "").toLowerCase().includes(filtro) ||
-            String(c.celular || "").toLowerCase().includes(filtro) ||
-            String(c.nroCotizacion || "").toLowerCase().includes(filtro)
+            String(c.nombre || "").toLowerCase().includes(filtroTexto) ||
+            String(c.dni || "").toLowerCase().includes(filtroTexto) ||
+            String(c.celular || "").toLowerCase().includes(filtroTexto) ||
+            String(c.nroCotizacion || "").toLowerCase().includes(filtroTexto)
         );
     }
+
     lista.sort((a, b) => String(b.fechaHora).localeCompare(String(a.fechaHora)));
     renderizarTablaCotizaciones(lista);
 }
 
 function renderizarTablaCotizaciones(lista) {
     const tbody = document.getElementById("tabla-cotizaciones-body");
+    const contadorEl = document.getElementById("cotizaciones-contador-texto");
     if (!tbody) return;
     tbody.innerHTML = "";
+
+    const totalGuardadas = (window.cotizacionesGuardadas || []).length;
+    const cantFiltrada = (lista || []).length;
+    const fechaFiltro = window.fechaSeleccionadaCotizacion;
+    const hoyStr = obtenerFechaISO(new Date());
+
+    let detalleFiltro = "todas";
+    if (fechaFiltro === hoyStr) {
+        detalleFiltro = `de hoy (${new Date().toLocaleDateString("es-PE")})`;
+    } else if (fechaFiltro && fechaFiltro !== "todos") {
+        detalleFiltro = `del ${fechaFiltro.split("-").reverse().join("/")}`;
+    }
+
+    const totalMonto = (lista || []).reduce((acc, c) => acc + (Number(c.total) || 0), 0);
+
+    // Actualizar estilo visual activo de los botones de filtro rápido
+    const btnHoy = document.getElementById("btn-cot-hoy");
+    const btnTodas = document.getElementById("btn-cot-todas");
+    if (btnHoy && btnTodas) {
+        if (fechaFiltro === hoyStr) {
+            btnHoy.className = "btn btn-primary text-white";
+            btnTodas.className = "btn btn-outline-secondary";
+        } else if (fechaFiltro === "todos" || (!fechaFiltro && !document.getElementById("filtro-cotizacion-fecha")?.value)) {
+            btnHoy.className = "btn btn-outline-secondary";
+            btnTodas.className = "btn btn-primary text-white";
+        } else {
+            btnHoy.className = "btn btn-outline-secondary";
+            btnTodas.className = "btn btn-outline-secondary";
+        }
+    }
+
+    const badgeTotal = document.getElementById("badge-total-cotizaciones");
+    if (badgeTotal) {
+        badgeTotal.innerHTML = `<i class="bi bi-file-earmark-text me-1"></i>${cantFiltrada} Cotizaciones | S/ ${totalMonto.toFixed(2)}`;
+    }
+
+    if (contadorEl) {
+        contadorEl.innerHTML = `Mostrando <strong>${cantFiltrada}</strong> cotizaciones (${detalleFiltro}) de <strong>${totalGuardadas}</strong> registradas — Total cotizado: <strong class="text-success">S/ ${totalMonto.toFixed(2)}</strong>`;
+    }
+
     if (!lista || lista.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="5" class="text-center text-muted py-3">No se encontraron cotizaciones registradas.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="5" class="text-center text-muted py-4"><i class="bi bi-search me-1"></i>No se encontraron cotizaciones para los filtros seleccionados.</td></tr>`;
         return;
     }
+
     lista.forEach(c => {
         const tr = document.createElement("tr");
         tr.innerHTML = `
-            <td><strong>${escapeHTML(c.nroCotizacion || c.id)}</strong></td>
-            <td><small>${escapeHTML(c.fechaHora || "")}</small></td>
+            <td><strong class="text-primary">${escapeHTML(c.nroCotizacion || c.id)}</strong></td>
+            <td><small class="text-secondary fw-semibold">${escapeHTML(c.fechaHora || "")}</small></td>
             <td><strong>${escapeHTML(c.nombre || "N/A")}</strong><br><span class="text-muted small">DNI: ${escapeHTML(c.dni || "-")}</span></td>
-            <td><strong>S/ ${Number(c.total || 0).toFixed(2)}</strong></td>
+            <td class="fw-bold text-success">S/ ${Number(c.total || 0).toFixed(2)}</td>
             <td class="text-center">
                 <div class="btn-group btn-group-sm" role="group">
                     <button class="btn btn-outline-primary" title="Ver / Modificar" onclick="cargarCotizacion('${c.id}')"><i class="bi bi-pencil-square"></i></button>
