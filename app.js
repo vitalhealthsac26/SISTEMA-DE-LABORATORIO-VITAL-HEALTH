@@ -2577,12 +2577,9 @@ async function precargarImagenesInforme() {
     const fuentes = ["logo.png", "qr-redes.png", "firma-biologa.png"];
     await Promise.all(fuentes.map(src => new Promise(resolver => {
         const img = new Image();
-        let terminado = false;
-        const terminar = () => { if (!terminado) { terminado = true; resolver(); } };
-        img.onload = terminar;
-        img.onerror = terminar;
-        setTimeout(terminar, 80);
+        img.onload = img.onerror = resolver;
         img.src = src;
+        if (img.complete) resolver();
     })));
     imagenesInformeCacheadas = true;
 }
@@ -2594,17 +2591,16 @@ function esperarImagenes(contenedor) {
     return Promise.all(imagenes.map(img => {
         if (img.complete) return Promise.resolve();
         return new Promise(resolver => {
-            let terminado = false;
-            const terminar = () => { if (!terminado) { terminado = true; resolver(); } };
-            const timer = setTimeout(terminar, 60);
-            img.addEventListener("load", () => { clearTimeout(timer); terminar(); }, { once: true });
-            img.addEventListener("error", () => { clearTimeout(timer); terminar(); }, { once: true });
+            const timer = setTimeout(resolver, 300);
+            img.addEventListener("load", () => { clearTimeout(timer); resolver(); }, { once: true });
+            img.addEventListener("error", () => { clearTimeout(timer); resolver(); }, { once: true });
         });
     }));
 }
 
 // =========================================================================
-// DESCARGA AUTOMÁTICA Y ULTRARRÁPIDA DE INFORME EN PDF (CON FIRMA EN TODAS LAS HOJAS)
+// DESCARGA AUTOMÁTICA Y ULTRARRÁPIDA DE INFORME EN PDF EN ALTA DEFINICIÓN (HD)
+// CON FIRMA DE LA BIÓLOGA EN TODAS LAS HOJAS
 // =========================================================================
 async function descargarInformePDF(nroOrden) {
     const orden = (ordenesRegistradas || []).find(o => o.nroOrden === nroOrden);
@@ -2624,7 +2620,7 @@ async function descargarInformePDF(nroOrden) {
     if (btn) {
         textoOriginal = btn.innerHTML;
         btn.disabled = true;
-        btn.innerHTML = `<span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span> Generando PDF...`;
+        btn.innerHTML = `<span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span> Generando PDF HD...`;
     }
 
     // Ceder el hilo para pintar el spinner de inmediato
@@ -2637,8 +2633,14 @@ async function descargarInformePDF(nroOrden) {
         return;
     }
 
-    // Precargar imágenes en memoria para acelerar html2canvas
-    precargarImagenesInforme();
+    // Aislar la aplicación del clonador de html2canvas para máxima velocidad
+    const wrapper = document.getElementById("wrapper");
+    if (wrapper) wrapper.setAttribute("data-html2canvas-ignore", "true");
+    const modales = document.querySelectorAll(".modal");
+    modales.forEach(m => m.setAttribute("data-html2canvas-ignore", "true"));
+
+    // Precargar imágenes en memoria
+    await precargarImagenesInforme();
 
     // 1. Paginación inteligente
     const paginas = paginarInformeOrden(orden);
@@ -2646,6 +2648,7 @@ async function descargarInformePDF(nroOrden) {
 
     // 2. Contenedor invisible pero renderizable por el navegador
     const contenedor = document.createElement("div");
+    contenedor.id = "pdf-render-container";
     contenedor.style.cssText = "position: fixed; left: -9999px; top: 0; width: 794px; background: #ffffff; pointer-events: none; z-index: -9999; overflow: visible;";
     document.body.appendChild(contenedor);
 
@@ -2658,7 +2661,7 @@ async function descargarInformePDF(nroOrden) {
             compress: true
         });
 
-        // Montar todas las páginas en el DOM a la vez para optimizar layout del motor del navegador
+        // Montar todas las páginas en el DOM para procesado
         const elementosPagina = [];
         for (let i = 0; i < totalPaginas; i++) {
             const numPag = i + 1;
@@ -2666,7 +2669,7 @@ async function descargarInformePDF(nroOrden) {
 
             const paginaDiv = document.createElement("div");
             paginaDiv.className = "pagina-a4-pdf";
-            paginaDiv.style.cssText = "width: 794px; height: 1123px; padding: 24px 38px 18px 38px; box-sizing: border-box; background: #ffffff; display: flex; flex-direction: column; justify-content: space-between; overflow: hidden; font-family: 'Segoe UI', Arial, Helvetica, sans-serif; color: #1e293b; margin-bottom: 20px;";
+            paginaDiv.style.cssText = "width: 794px; height: 1123px; padding: 24px 38px 18px 38px; box-sizing: border-box; background: #ffffff; display: flex; flex-direction: column; justify-content: space-between; overflow: hidden; font-family: 'Segoe UI', Arial, Helvetica, sans-serif; color: #0f172a; margin-bottom: 20px; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; text-rendering: optimizeLegibility;";
 
             const cabeceraHTML = construirCabeceraInformeHTML();
             const datosHTML = p.esPrimera ? construirDatosPacienteInformeHTML(orden) : "";
@@ -2690,32 +2693,39 @@ async function descargarInformePDF(nroOrden) {
             elementosPagina.push(paginaDiv);
         }
 
-        // Esperar imágenes una sola vez con timeout mínimo
+        // Asegurar que las imágenes estén renderizadas en el contenedor
         await esperarImagenes(contenedor);
-        // Esperar un ciclo corto de pintado
         await new Promise(r => setTimeout(r, 20));
 
-        // Capturar páginas de forma rápida y nítida
+        // Capturar páginas en ALTA RESOLUCIÓN (HD scale 2 = 1588x2246 px) de forma ultrarrápida
         for (let i = 0; i < totalPaginas; i++) {
             const paginaDiv = elementosPagina[i];
 
             const canvas = await window.html2canvas(paginaDiv, {
-                scale: 1.15, // Equilibrio óptimo: renderizado ultrarrápido sin sobrecargar CPU
+                scale: 2.0, // Alta definición nítida (1588 x 2246 píxeles por página A4)
                 backgroundColor: "#ffffff",
-                useCORS: false,
+                useCORS: true,
                 allowTaint: true,
                 logging: false,
-                imageTimeout: 100,
+                imageTimeout: 1000,
                 removeContainer: false,
                 windowWidth: 794,
-                windowHeight: 1123
+                windowHeight: 1123,
+                ignoreElements: (el) => {
+                    // Ignorar cualquier elemento fuera del contenedor para clonación casi instantánea
+                    if (el.parentElement === document.body && el !== contenedor) {
+                        return true;
+                    }
+                    return false;
+                }
             });
 
-            const imgData = canvas.toDataURL("image/jpeg", 0.80);
+            // Calidad máxima 0.96: nitidez absoluta en textos, tablas y firmas
+            const imgData = canvas.toDataURL("image/jpeg", 0.96);
             if (i > 0) pdf.addPage("a4", "portrait");
             pdf.addImage(imgData, "JPEG", 0, 0, 210, 297, undefined, "FAST");
             
-            // Ceder un frame entre hojas para evitar congelamiento de la interfaz
+            // Pausa mínima entre páginas para fluidez
             if (i < totalPaginas - 1) {
                 await new Promise(r => setTimeout(r, 10));
             }
@@ -2730,6 +2740,8 @@ async function descargarInformePDF(nroOrden) {
         imprimirInforme(nroOrden);
     } finally {
         contenedor.remove();
+        if (wrapper) wrapper.removeAttribute("data-html2canvas-ignore");
+        modales.forEach(m => m.removeAttribute("data-html2canvas-ignore"));
         if (btn) {
             btn.disabled = false;
             btn.innerHTML = textoOriginal;
