@@ -2338,15 +2338,15 @@ function construirDatosPacienteInformeHTML(orden) {
 function construirPieInformeHTML(numPagina, totalPaginas) {
     const textoPaginacion = (numPagina && totalPaginas) ? `<div style="text-align: center; font-size: 8px; color: #64748b; margin-top: 2px;">Página ${numPagina} de ${totalPaginas}</div>` : '';
     return `
-        <div class="informe-pie-fijo" style="border-top: 1px solid #0072bc; margin-top: 8px; padding-top: 4px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; padding: 0 4px; font-size: 9px; color: #000;">
+        <div class="informe-pie-fijo" style="border-top: 1px solid #0072bc; margin-top: 4px; padding-top: 4px; width: 100%;">
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 0 4px; font-size: 8.5px; color: #000;">
                 <div style="display: flex; align-items: center; gap: 4px;">
-                    <span style="font-size: 11px;">🟢</span> <strong style="font-size: 9.5px; color: #0f172a;">984 089 927</strong>
+                    <span style="font-size: 10px;">🟢</span> <strong style="font-size: 9px; color: #0f172a;">984 089 927</strong>
                 </div>
                 <div style="display: flex; align-items: center; gap: 4px;">
-                    <span style="font-size: 11px;">🏠</span> <strong style="font-size: 9.5px; color: #0f172a;">SERVICIO A DOMICILIO</strong>
+                    <span style="font-size: 10px;">🏠</span> <strong style="font-size: 9px; color: #0f172a;">SERVICIO A DOMICILIO</strong>
                 </div>
-                <div style="font-weight: 700; font-style: italic; font-size: 8.5px; color: #0f172a;">
+                <div style="font-weight: 700; font-style: italic; font-size: 8px; color: #0f172a;">
                     “ANÁLISIS DE CALIDAD PARA EL CUIDADO DE TU SALUD”
                 </div>
             </div>
@@ -2355,16 +2355,19 @@ function construirPieInformeHTML(numPagina, totalPaginas) {
     `;
 }
 
-function construirFirmaInformeHTML(nota = "Ninguna.") {
+function construirFirmaInformeHTML(nota = "Ninguna.", mostrarNota = true) {
+    const textoNota = (mostrarNota && nota && nota.trim() !== "" && nota.trim().toLowerCase() !== "ninguna.")
+        ? `<div class="informe-nota" style="font-size: 8.5px; font-style: italic; color: #64748b; margin-bottom: 4px;">Nota: ${escapeHTML(nota)}</div>`
+        : "";
     return `
-        <div class="bloque-firma-completo" style="page-break-inside: avoid; break-inside: avoid; margin-top: 12px;">
-            <div class="informe-nota" style="font-size: 9px; font-style: italic; color: #64748b; margin-bottom: 8px;">Nota: ${escapeHTML(nota)}</div>
+        <div class="bloque-firma-completo" style="page-break-inside: avoid; break-inside: avoid; margin-top: auto; padding-top: 4px;">
+            ${textoNota}
             <div class="informe-firma" style="text-align: center;">
-                <img src="firma-biologa.png" alt="Firma" class="informe-firma-img" style="height: 100px; object-fit: contain; display: block; margin: 0 auto 2px auto;" onerror="this.style.display='none'">
-                <div class="informe-firma-linea" style="width: 250px; border-top: 1.5px solid #0f172a; margin: 0 auto 3px auto;"></div>
-                <div class="informe-firma-nombre" style="font-weight: 700; font-size: 11px; color: #0f172a;">Raysa Yadira Ursula Alberca Atarama</div>
-                <div class="informe-firma-det" style="font-size: 9px; color: #475569;">Bióloga</div>
-                <div class="informe-firma-det" style="font-size: 9px; color: #475569;">C.B.P.17763</div>
+                <img src="firma-biologa.png" alt="Firma" class="informe-firma-img" style="height: 72px; max-height: 72px; object-fit: contain; display: block; margin: 0 auto 2px auto;" onerror="this.style.display='none'">
+                <div class="informe-firma-linea" style="width: 220px; border-top: 1.5px solid #0f172a; margin: 0 auto 3px auto;"></div>
+                <div class="informe-firma-nombre" style="font-weight: 700; font-size: 10.5px; color: #0f172a;">Raysa Yadira Ursula Alberca Atarama</div>
+                <div class="informe-firma-det" style="font-size: 8.5px; color: #475569;">Bióloga</div>
+                <div class="informe-firma-det" style="font-size: 8.5px; color: #475569;">C.B.P. 17763</div>
             </div>
         </div>
     `;
@@ -2457,21 +2460,99 @@ function generarBloqueExamenHTML(ex, orden) {
     `;
 }
 
+// =========================================================================
+// PAGINACIÓN INTELIGENTE A4 (CON FIRMA EN TODAS LAS HOJAS DE RESULTADOS)
+// =========================================================================
+function paginarInformeOrden(orden) {
+    const examenes = orden.examenes || [];
+    if (!examenes.length) {
+        return [{
+            esPrimera: true,
+            elementosHTML: [`<div style="padding: 20px; text-align: center; color: #64748b;">No hay exámenes asignados a esta orden.</div>`]
+        }];
+    }
+
+    // Medir altura de cada bloque de examen en el DOM en una única pasada rápida
+    const medidor = document.createElement("div");
+    medidor.style.cssText = "position: fixed; left: 0; top: 0; width: 718px; opacity: 0; pointer-events: none; z-index: -9999; font-family: 'Segoe UI', Arial, sans-serif; font-size: 10.5px; background: #ffffff;";
+    medidor.innerHTML = examenes.map((ex, i) => `<div class="medidor-bloque" data-idx="${i}">${generarBloqueExamenHTML(ex, orden)}</div>`).join("");
+    document.body.appendChild(medidor);
+
+    const alturas = Array.from(medidor.querySelectorAll(".medidor-bloque")).map(el => Math.max(el.offsetHeight, 65));
+    medidor.remove();
+
+    // Alturas útiles estimadas por hoja A4 a 96DPI (1123px total):
+    // Descontando: márgenes (42px), cabecera (~110px), pie+firma (~145px) y holgura (25px)
+    const ALTO_UTIL_PAGINA_1 = 690; // En hoja 1 se restan además los datos del paciente (~95px)
+    const ALTO_UTIL_OTRAS = 790;
+
+    const bloques = examenes.map((ex, i) => ({
+        examen: ex,
+        html: generarBloqueExamenHTML(ex, orden),
+        alto: alturas[i] || 100
+    }));
+
+    const paginas = [];
+    let paginaActual = {
+        esPrimera: true,
+        elementosHTML: [],
+        altoDisponible: ALTO_UTIL_PAGINA_1,
+        altoUsado: 0
+    };
+
+    for (const bloque of bloques) {
+        const espacioRequerido = bloque.alto + 8;
+        if (paginaActual.elementosHTML.length === 0 || (paginaActual.altoUsado + espacioRequerido <= paginaActual.altoDisponible)) {
+            paginaActual.elementosHTML.push(bloque.html);
+            paginaActual.altoUsado += espacioRequerido;
+        } else {
+            paginas.push(paginaActual);
+            paginaActual = {
+                esPrimera: false,
+                elementosHTML: [bloque.html],
+                altoDisponible: ALTO_UTIL_OTRAS,
+                altoUsado: espacioRequerido
+            };
+        }
+    }
+
+    if (paginaActual.elementosHTML.length > 0) {
+        paginas.push(paginaActual);
+    }
+
+    return paginas;
+}
+
 // Vista de impresión nativa (para Imprimir Informe / Ctrl + P)
 function construirInformeHTML(orden) {
-    const cabecera = construirCabeceraInformeHTML();
-    const datos = construirDatosPacienteInformeHTML(orden);
-    const examenesHTML = (orden.examenes || []).map(ex => generarBloqueExamenHTML(ex, orden)).join("");
-    const firma = construirFirmaInformeHTML(orden.nota || "Ninguna.");
-    const pie = construirPieInformeHTML();
+    const paginas = paginarInformeOrden(orden);
+    const totalPaginas = paginas.length;
 
-    return `
-        ${cabecera}
-        ${datos}
-        ${examenesHTML}
-        ${firma}
-        ${pie}
-    `;
+    return paginas.map((p, idx) => {
+        const numPag = idx + 1;
+        const cabecera = construirCabeceraInformeHTML();
+        const datos = p.esPrimera ? construirDatosPacienteInformeHTML(orden) : "";
+        const cuerpo = p.elementosHTML.join("");
+        // En TODAS las hojas se incluye la firma de la bióloga al final de la página
+        const firma = construirFirmaInformeHTML(orden.nota || "Ninguna.", numPag === totalPaginas);
+        const pie = construirPieInformeHTML(numPag, totalPaginas);
+
+        return `
+            <div class="informe-pagina-a4" style="${idx < totalPaginas - 1 ? 'page-break-after: always; break-after: page;' : ''}">
+                <div class="pagina-superior">
+                    ${cabecera}
+                    ${datos}
+                </div>
+                <div class="pagina-cuerpo">
+                    ${cuerpo}
+                </div>
+                <div class="pagina-inferior">
+                    ${firma}
+                    ${pie}
+                </div>
+            </div>
+        `;
+    }).join("");
 }
 
 function imprimirInforme(nroOrden) {
@@ -2491,18 +2572,21 @@ function imprimirInforme(nroOrden) {
 }
 
 function esperarImagenes(contenedor) {
+    if (!contenedor) return Promise.resolve();
     const imagenes = Array.from(contenedor.querySelectorAll("img"));
+    if (!imagenes.length) return Promise.resolve();
     return Promise.all(imagenes.map(img => {
-        if (img.complete && img.naturalWidth > 0) return Promise.resolve();
+        if (img.complete) return Promise.resolve();
         return new Promise(resolver => {
-            img.addEventListener("load", resolver, { once: true });
-            img.addEventListener("error", resolver, { once: true });
+            const timer = setTimeout(resolver, 200);
+            img.addEventListener("load", () => { clearTimeout(timer); resolver(); }, { once: true });
+            img.addEventListener("error", () => { clearTimeout(timer); resolver(); }, { once: true });
         });
     }));
 }
 
 // =========================================================================
-// DESCARGA PROFESIONAL DE INFORME EN PDF (CON PAGINACIÓN INTELIGENTE A4)
+// DESCARGA AUTOMÁTICA Y RÁPIDA DE INFORME EN PDF (CON FIRMA EN TODAS LAS HOJAS)
 // =========================================================================
 async function descargarInformePDF(nroOrden) {
     const orden = (ordenesRegistradas || []).find(o => o.nroOrden === nroOrden);
@@ -2514,115 +2598,44 @@ async function descargarInformePDF(nroOrden) {
             return;
         }
     }
+
+    // Feedback visual en el botón para evitar congelamiento percibido y doble clic
+    const botones = Array.from(document.querySelectorAll(`button[onclick*="descargarInformePDF('${nroOrden}')"]`));
+    const btn = botones.find(b => b.offsetWidth > 0) || botones[0];
+    let textoOriginal = "";
+    if (btn) {
+        textoOriginal = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = `<span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span> Descargando PDF...`;
+    }
+
+    // Permitir al navegador refrescar el DOM antes de procesar
+    await new Promise(r => setTimeout(r, 40));
+
     if (typeof window.html2canvas !== "function" || !window.jspdf) {
-        alert("No se pudo cargar la librería de PDF. Revise su conexión a internet y vuelva a intentar.");
+        if (btn) { btn.disabled = false; btn.innerHTML = textoOriginal; }
+        alert("Librería gráfica no lista. Abriendo vista de impresión para Guardar como PDF...");
+        imprimirInforme(nroOrden);
         return;
     }
 
-    // 1. Crear un contenedor invisible para medir con exactitud los elementos
-    const medidor = document.createElement("div");
-    medidor.style.position = "absolute";
-    medidor.style.left = "-10000px";
-    medidor.style.top = "0";
-    medidor.style.width = "718px"; // Ancho útil dentro de la hoja A4 (794px - 76px de márgenes)
-    medidor.style.fontFamily = "'Segoe UI', Arial, Helvetica, sans-serif";
-    medidor.style.fontSize = "11px";
-    medidor.style.color = "#1e293b";
-    medidor.style.background = "#ffffff";
-    document.body.appendChild(medidor);
-
-    // Medir altura de la cabecera
-    medidor.innerHTML = construirCabeceraInformeHTML();
-    await esperarImagenes(medidor);
-    const altoCabecera = medidor.offsetHeight;
-
-    // Medir altura de los datos del paciente
-    medidor.innerHTML = construirDatosPacienteInformeHTML(orden);
-    const altoDatosPaciente = medidor.offsetHeight;
-
-    // Medir altura de la firma y nota
-    medidor.innerHTML = construirFirmaInformeHTML(orden.nota || "Ninguna.");
-    await esperarImagenes(medidor);
-    const altoFirma = medidor.offsetHeight;
-
-    // Medir altura del pie de página
-    medidor.innerHTML = construirPieInformeHTML(1, 1);
-    const altoPie = medidor.offsetHeight;
-
-    // Medir cada bloque de examen individualmente
-    const examenes = orden.examenes || [];
-    const bloquesExamenes = [];
-    for (const ex of examenes) {
-        const html = generarBloqueExamenHTML(ex, orden);
-        medidor.innerHTML = html;
-        const alto = medidor.offsetHeight;
-        bloquesExamenes.push({ examen: ex, html, alto });
-    }
-    medidor.remove();
-
-    // 2. Altura útil de una página A4 en px a 96DPI (1123px total)
-    // Con padding superior e inferior de 55px y margen seguro para el pie fijo:
-    const ALTO_PAGINA_TOTAL = 1123;
-    const PADDING_V = 55;
-    const ESPACIO_UTIL_MAX = ALTO_PAGINA_TOTAL - PADDING_V - altoPie - 15;
-
-    // En Página 1: Cabecera + Datos del Paciente
-    const altoFijoPagina1 = altoCabecera + altoDatosPaciente + 10;
-    // En Páginas siguientes: Cabecera
-    const altoFijoOtrasPaginas = altoCabecera + 10;
-
-    // 3. Distribución inteligente de exámenes en páginas
-    const paginas = [];
-    let paginaActual = {
-        esPrimera: true,
-        elementosHTML: [],
-        altoDisponible: ESPACIO_UTIL_MAX - altoFijoPagina1,
-        altoUsado: 0
-    };
-
-    for (const item of bloquesExamenes) {
-        if (paginaActual.altoUsado + item.alto <= paginaActual.altoDisponible) {
-            paginaActual.elementosHTML.push(item.html);
-            paginaActual.altoUsado += item.alto + 8;
-        } else {
-            if (paginaActual.elementosHTML.length > 0) {
-                paginas.push(paginaActual);
-            }
-            paginaActual = {
-                esPrimera: false,
-                elementosHTML: [item.html],
-                altoDisponible: ESPACIO_UTIL_MAX - altoFijoOtrasPaginas,
-                altoUsado: item.alto + 8
-            };
-        }
-    }
-
-    // 4. Ubicar la firma: ¡ÚNICAMENTE al final de la última hoja!
-    const espacioRestante = paginaActual.altoDisponible - paginaActual.altoUsado;
-    if (espacioRestante >= altoFirma) {
-        paginaActual.elementosHTML.push(construirFirmaInformeHTML(orden.nota || "Ninguna."));
-        paginas.push(paginaActual);
-    } else {
-        paginas.push(paginaActual);
-        paginas.push({
-            esPrimera: false,
-            elementosHTML: [construirFirmaInformeHTML(orden.nota || "Ninguna.")],
-            altoDisponible: ESPACIO_UTIL_MAX - altoFijoOtrasPaginas,
-            altoUsado: altoFirma
-        });
-    }
-
+    // 1. Obtener páginas distribuidas con firma en TODAS las hojas
+    const paginas = paginarInformeOrden(orden);
     const totalPaginas = paginas.length;
 
-    // 5. Renderizar cada página A4 independiente y armar el PDF
-    const contenedorPaginas = document.createElement("div");
-    contenedorPaginas.style.position = "absolute";
-    contenedorPaginas.style.left = "-10000px";
-    contenedorPaginas.style.top = "0";
-    document.body.appendChild(contenedorPaginas);
+    // 2. Contenedor invisible con posición fija estable para captura ultrarrápida
+    const contenedor = document.createElement("div");
+    contenedor.style.cssText = "position: fixed; left: 0; top: 0; width: 794px; opacity: 0.01; pointer-events: none; z-index: -9999; background: #ffffff; overflow: hidden;";
+    document.body.appendChild(contenedor);
 
     try {
-        const pdf = new window.jspdf.jsPDF("p", "mm", "a4");
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF({
+            orientation: "portrait",
+            unit: "mm",
+            format: "a4",
+            compress: true
+        });
 
         for (let i = 0; i < totalPaginas; i++) {
             const numPag = i + 1;
@@ -2630,19 +2643,13 @@ async function descargarInformePDF(nroOrden) {
 
             const paginaDiv = document.createElement("div");
             paginaDiv.className = "pagina-a4-pdf";
-            paginaDiv.style.width = "794px";
-            paginaDiv.style.height = "1123px";
-            paginaDiv.style.padding = "25px 38px 20px 38px";
-            paginaDiv.style.boxSizing = "border-box";
-            paginaDiv.style.background = "#ffffff";
-            paginaDiv.style.display = "flex";
-            paginaDiv.style.flexDirection = "column";
-            paginaDiv.style.justifyContent = "space-between";
-            paginaDiv.style.overflow = "hidden";
+            paginaDiv.style.cssText = "width: 794px; height: 1123px; padding: 24px 38px 18px 38px; box-sizing: border-box; background: #ffffff; display: flex; flex-direction: column; justify-content: space-between; overflow: hidden; font-family: 'Segoe UI', Arial, Helvetica, sans-serif; color: #1e293b;";
 
             const cabeceraHTML = construirCabeceraInformeHTML();
             const datosHTML = p.esPrimera ? construirDatosPacienteInformeHTML(orden) : "";
-            const cuerpoHTML = `<div class="pagina-cuerpo" style="flex: 1 1 auto;">${p.elementosHTML.join("")}</div>`;
+            const cuerpoHTML = `<div class="pagina-cuerpo" style="flex: 1 1 auto; overflow: hidden;">${p.elementosHTML.join("")}</div>`;
+            // Firma de la bióloga presente en TODAS las hojas
+            const firmaHTML = construirFirmaInformeHTML(orden.nota || "Ninguna.", numPag === totalPaginas);
             const pieHTML = `<div class="pagina-pie" style="flex: 0 0 auto; margin-top: auto;">${construirPieInformeHTML(numPag, totalPaginas)}</div>`;
 
             paginaDiv.innerHTML = `
@@ -2651,32 +2658,45 @@ async function descargarInformePDF(nroOrden) {
                     ${datosHTML}
                 </div>
                 ${cuerpoHTML}
-                ${pieHTML}
+                <div style="flex: 0 0 auto; margin-top: auto;">
+                    ${firmaHTML}
+                    ${pieHTML}
+                </div>
             `;
 
-            contenedorPaginas.appendChild(paginaDiv);
+            contenedor.appendChild(paginaDiv);
             await esperarImagenes(paginaDiv);
 
             const canvas = await window.html2canvas(paginaDiv, {
-                scale: 2,
+                scale: 1.8,
                 backgroundColor: "#ffffff",
                 useCORS: true,
-                logging: false
+                logging: false,
+                imageTimeout: 800,
+                windowWidth: 794,
+                windowHeight: 1123
             });
 
-            const imgData = canvas.toDataURL("image/jpeg", 0.96);
-            if (i > 0) pdf.addPage();
-            pdf.addImage(imgData, "JPEG", 0, 0, 210, 297);
+            const imgData = canvas.toDataURL("image/jpeg", 0.94);
+            if (i > 0) pdf.addPage("a4", "portrait");
+            pdf.addImage(imgData, "JPEG", 0, 0, 210, 297, undefined, "FAST");
 
             paginaDiv.remove();
         }
 
-        pdf.save(`Informe-Resultados-${orden.nroOrden}.pdf`);
+        const nombreLimpio = (orden.nombre || "Paciente").replace(/[^a-zA-Z0-9áéíóúÁÉÍÓÚñÑ\s_-]/g, "").trim();
+        const nombreArchivo = `Informe-${orden.nroOrden}-${nombreLimpio || "Resultados"}.pdf`;
+        pdf.save(nombreArchivo);
     } catch (err) {
         console.error("Error al generar PDF:", err);
-        alert("Ocurrió un error al generar el PDF del informe.");
+        alert("Ocurrió una eventualidad con el generador rápido. Abriendo vista de impresión para Guardar como PDF...");
+        imprimirInforme(nroOrden);
     } finally {
-        contenedorPaginas.remove();
+        contenedor.remove();
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = textoOriginal;
+        }
     }
 }
 
