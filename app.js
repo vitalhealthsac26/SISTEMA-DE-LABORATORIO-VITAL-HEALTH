@@ -2297,7 +2297,7 @@ function construirCabeceraInformeHTML() {
                 <div style="display: flex; align-items: center; gap: 12px;">
                     <img src="logo.png" alt="Centro Médico Vital Health" class="informe-logo" style="width: 70px; height: 70px; object-fit: contain;" onerror="this.style.display='none'">
                     <div>
-                        <h1 class="informe-titulo-marca" style="font-family: 'Ultra', 'Cooper Black', 'Alfa Slab One', 'Rockwell Extra Bold', 'Arial Black', serif; font-size: 19px; margin: 0; letter-spacing: 0.8px; font-weight: 900; color: #0b1528; text-transform: uppercase; line-height: 1.15;">CENTRO MEDICO VITAL HEALTH</h1>
+                        <h1 class="informe-titulo-marca" style="font-family: 'Montserrat', 'Segoe UI', Arial, sans-serif; font-size: 18px; margin: 0; letter-spacing: 0.8px; font-weight: 800; color: #0f172a; text-transform: uppercase; line-height: 1.25;">CENTRO MEDICO VITAL HEALTH</h1>
                         <p class="informe-subtitulo-marca" style="margin: 3px 0 0 0; font-size: 9.5px; color: #475569; font-family: 'Segoe UI', Arial, sans-serif;"><strong>Laboratorio clínico, comprometido con tu salud.</strong></p>
                     </div>
                 </div>
@@ -2577,9 +2577,11 @@ async function precargarImagenesInforme() {
     const fuentes = ["logo.png", "qr-redes.png", "firma-biologa.png"];
     await Promise.all(fuentes.map(src => new Promise(resolver => {
         const img = new Image();
-        img.onload = () => resolver();
-        img.onerror = () => resolver();
-        setTimeout(resolver, 300);
+        let terminado = false;
+        const terminar = () => { if (!terminado) { terminado = true; resolver(); } };
+        img.onload = terminar;
+        img.onerror = terminar;
+        setTimeout(terminar, 80);
         img.src = src;
     })));
     imagenesInformeCacheadas = true;
@@ -2592,9 +2594,11 @@ function esperarImagenes(contenedor) {
     return Promise.all(imagenes.map(img => {
         if (img.complete) return Promise.resolve();
         return new Promise(resolver => {
-            const timer = setTimeout(resolver, 120);
-            img.addEventListener("load", () => { clearTimeout(timer); resolver(); }, { once: true });
-            img.addEventListener("error", () => { clearTimeout(timer); resolver(); }, { once: true });
+            let terminado = false;
+            const terminar = () => { if (!terminado) { terminado = true; resolver(); } };
+            const timer = setTimeout(terminar, 60);
+            img.addEventListener("load", () => { clearTimeout(timer); terminar(); }, { once: true });
+            img.addEventListener("error", () => { clearTimeout(timer); terminar(); }, { once: true });
         });
     }));
 }
@@ -2686,30 +2690,35 @@ async function descargarInformePDF(nroOrden) {
             elementosPagina.push(paginaDiv);
         }
 
-        // Esperar imágenes una sola vez con timeout estricto
+        // Esperar imágenes una sola vez con timeout mínimo
         await esperarImagenes(contenedor);
-        // Esperar un ciclo de renderizado del navegador para asegurar layout completo
-        await new Promise(r => requestAnimationFrame(() => setTimeout(r, 40)));
+        // Esperar un ciclo corto de pintado
+        await new Promise(r => setTimeout(r, 20));
 
-        // Capturar páginas de forma eficiente y rápida:
-        // Scale 1.25 ofrece lectura cristalina a 1000px de ancho y reduce el tiempo de CPU a 1-3 segundos
+        // Capturar páginas de forma rápida y nítida
         for (let i = 0; i < totalPaginas; i++) {
             const paginaDiv = elementosPagina[i];
 
             const canvas = await window.html2canvas(paginaDiv, {
-                scale: 1.25, // Óptimo para velocidad inmediata sin perder legibilidad médica
+                scale: 1.15, // Equilibrio óptimo: renderizado ultrarrápido sin sobrecargar CPU
                 backgroundColor: "#ffffff",
-                useCORS: true,
+                useCORS: false,
+                allowTaint: true,
                 logging: false,
-                imageTimeout: 300,
+                imageTimeout: 100,
                 removeContainer: false,
                 windowWidth: 794,
                 windowHeight: 1123
             });
 
-            const imgData = canvas.toDataURL("image/jpeg", 0.82);
+            const imgData = canvas.toDataURL("image/jpeg", 0.80);
             if (i > 0) pdf.addPage("a4", "portrait");
             pdf.addImage(imgData, "JPEG", 0, 0, 210, 297, undefined, "FAST");
+            
+            // Ceder un frame entre hojas para evitar congelamiento de la interfaz
+            if (i < totalPaginas - 1) {
+                await new Promise(r => setTimeout(r, 10));
+            }
         }
 
         const nombreLimpio = (orden.nombre || "Paciente").replace(/[^a-zA-Z0-9áéíóúÁÉÍÓÚñÑ\s_-]/g, "").trim();
