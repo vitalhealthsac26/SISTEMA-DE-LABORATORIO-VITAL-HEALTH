@@ -576,18 +576,31 @@
 
                     <div class="card shadow-sm border-0">
                         <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center flex-wrap gap-2">
-                            <h5 class="card-title fw-bold text-primary mb-0"><i class="bi bi-list-check me-2"></i>Movimientos de Cobro Registrados Hoy</h5>
-                            <button class="btn btn-sm btn-outline-success" onclick="exportarCierreCajaExcel()">
-                                <i class="bi bi-download me-1"></i>Descargar Excel
-                            </button>
+                            <div>
+                                <h5 class="card-title fw-bold text-primary mb-1"><i class="bi bi-list-check me-2"></i>Movimientos de Cobro Detallados</h5>
+                                <small class="text-muted" id="caja-subtitulo-fecha">Mostrando cobros del día</small>
+                            </div>
+                            <div class="d-flex align-items-center gap-2 flex-wrap">
+                                <div class="input-group input-group-sm" style="width: auto;">
+                                    <span class="input-group-text bg-light fw-semibold text-secondary"><i class="bi bi-calendar-event me-1"></i>Fecha:</span>
+                                    <input type="date" id="filtro-caja-fecha" class="form-control form-control-sm" onchange="filtrarCajaPorFecha(this.value)">
+                                    <button class="btn btn-outline-secondary btn-sm" type="button" onclick="cargarCajaHoy()" title="Ver los cobros de hoy">Hoy</button>
+                                    <button class="btn btn-outline-secondary btn-sm" type="button" onclick="verTodosLosCobrosCaja()" title="Ver histórico completo">Todos</button>
+                                </div>
+                                <button class="btn btn-sm btn-outline-success fw-semibold" onclick="exportarCierreCajaExcel()">
+                                    <i class="bi bi-download me-1"></i>Descargar Excel
+                                </button>
+                            </div>
                         </div>
                         <div class="card-body p-0">
                             <div class="table-responsive">
                                 <table class="table table-hover align-middle mb-0">
                                     <thead class="table-light">
                                         <tr>
+                                            <th>Fecha</th>
                                             <th>Hora</th>
                                             <th>N° Orden</th>
+                                            <th>DNI</th>
                                             <th>Paciente</th>
                                             <th>Método de Pago</th>
                                             <th>Monto</th>
