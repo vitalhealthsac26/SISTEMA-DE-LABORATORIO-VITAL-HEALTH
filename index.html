@@ -263,17 +263,41 @@
                         </h2>
 
                         <div class="card shadow-sm border-0 mb-4">
+                            <div class="card-header bg-white py-2 px-3 border-bottom d-flex justify-content-between align-items-center flex-wrap gap-2">
+                                <h6 class="card-title fw-bold text-primary mb-0">
+                                    <i class="bi bi-clock-history me-2"></i>Historial de Cotizaciones Emitidas
+                                </h6>
+                                <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2 py-1" id="badge-total-cotizaciones">
+                                    <i class="bi bi-file-earmark-text me-1"></i>Cotizaciones
+                                </span>
+                            </div>
                             <div class="card-body">
-                                <div class="row align-items-center">
-                                    <div class="col-md-6">
-                                        <label class="form-label fw-semibold text-muted">Buscar cotizaciones guardadas:</label>
-                                        <div class="input-group">
-                                            <input type="text" id="input-buscar-cotizacion" class="form-control" placeholder="Buscar por nombre, DNI, celular o fecha...">
+                                <div class="row g-3 align-items-end">
+                                    <div class="col-12 col-md-5">
+                                        <label class="form-label fw-semibold text-muted small mb-1">Buscar por paciente, DNI o N°:</label>
+                                        <div class="input-group input-group-sm">
+                                            <input type="text" id="input-buscar-cotizacion" class="form-control" placeholder="Nombre, DNI, celular o N°..." oninput="buscarCotizaciones()" onkeydown="if(event.key==='Enter'){event.preventDefault();buscarCotizaciones();}">
                                             <button class="btn btn-primary" type="button" onclick="buscarCotizaciones()">
                                                 <i class="bi bi-search me-1"></i> Buscar
                                             </button>
                                         </div>
                                     </div>
+                                    <div class="col-12 col-md-7">
+                                        <div class="d-flex align-items-center justify-content-md-end gap-2 flex-wrap">
+                                            <div class="input-group input-group-sm" style="max-width: 330px;">
+                                                <span class="input-group-text bg-light fw-semibold text-secondary"><i class="bi bi-calendar-event me-1"></i>Fecha:</span>
+                                                <input type="date" id="filtro-cotizacion-fecha" class="form-control" onchange="filtrarCotizacionesPorFecha(this.value)">
+                                                <button id="btn-cot-hoy" class="btn btn-outline-secondary" type="button" onclick="cargarCotizacionesHoy()" title="Ver cotizaciones de hoy"><i class="bi bi-calendar-check me-1"></i>Hoy</button>
+                                                <button id="btn-cot-todas" class="btn btn-outline-secondary" type="button" onclick="verTodasLasCotizaciones()" title="Ver todas las cotizaciones"><i class="bi bi-collection me-1"></i>Todas</button>
+                                            </div>
+                                            <button class="btn btn-sm btn-outline-secondary" type="button" onclick="limpiarFiltrosCotizaciones()" title="Limpiar todos los filtros">
+                                                <i class="bi bi-arrow-counterclockwise"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center mt-2 pt-2 border-top">
+                                    <small class="text-muted" id="cotizaciones-contador-texto">Cargando cotizaciones...</small>
                                 </div>
                                 <div class="table-responsive mt-3">
                                     <table class="table table-bordered table-sm">
