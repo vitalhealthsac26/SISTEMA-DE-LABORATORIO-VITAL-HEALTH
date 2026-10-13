@@ -4131,12 +4131,12 @@ function generarBloquePaternidadOficialHTML(ex, orden) {
                 </table>
 
                 <!-- CUADRO DE INTERPRETACIÓN PERICIAL -->
-                <div style="border: 1.5px solid #000000; padding: 4px 6px; margin-bottom: 5px; font-size: 11.5px; line-height: 1.3; background: #ffffff;">
-                    <div style="font-weight: 700; margin-bottom: 2px; text-decoration: underline;">Interpretación:</div>
-                    <div style="text-align: justify; color: #000000;">
-                        ${interpretacion}
-                    </div>
-                </div>
+<div style="border: 1.5px solid #000000; padding: 8px 10px; margin-bottom: 5px; font-size: 13.5px; line-height: 1.4; background: #ffffff;">
+    <div style="font-weight: 700; margin-bottom: 3px; text-decoration: none; font-size: 13.5px;">Interpretación:</div>
+    <div style="text-align: justify; color: #000000; font-size: 13.5px;">
+        ${interpretacion}
+    </div>
+</div>
 
                 <!-- CUADRO DE RESULTADOS GLOBALES -->
 <div style="border: 1.5px solid #000000; padding: 10px 12px; margin-bottom: 6px; background: #ffffff;">
