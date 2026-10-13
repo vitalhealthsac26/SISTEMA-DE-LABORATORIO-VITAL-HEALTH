@@ -302,21 +302,84 @@ body { background-color: var(--bg-light); font-family: 'Segoe UI', Tahoma, Genev
     background: #ffffff;
 }
 /* ========================================================
-   BLOQUE GLOBALES E INFORMES GENERALES (MEJORADO)
+   ESTILO EXACTO Y DEFINITIVO PARA INFORME ADN Y PATERNIDAD
    ======================================================== */
 
+/* Contenedor principal */
+.adn-paternidad-contenedor {
+    font-family: Arial, sans-serif !important;
+    color: #000000 !important;
+    width: 100%;
+    margin: 0 auto;
+    font-size: 11px !important;
+    line-height: 1.3;
+}
+
+/* Tabla comparativa de Loci / Alelos */
+.adn-tabla-comparativa {
+    width: 100%;
+    border-collapse: collapse;
+    border: 1.5px solid #000000 !important;
+    margin-bottom: 6px;
+    font-size: 11px !important;
+}
+
+/* Bordes internos delgados para celdas y encabezados */
+.adn-tabla-comparativa th,
+.adn-tabla-comparativa td {
+    border: 1px solid #000000 !important; /* Líneas divisorias bien definidas */
+    padding: 3px 5px !important;
+    text-align: center;
+    vertical-align: middle;
+    font-size: 11px !important;
+}
+
+/* Encabezados y títulos principales dentro del cuadro */
+.adn-tabla-comparativa th,
+.adn-th-header {
+    background-color: #ffffff !important;
+    font-weight: bold !important;
+    color: #000000 !important;
+    text-transform: uppercase;
+}
+
+/* Nombres de los examinados (NORMA / ENRIQUE, etc.) */
+.adn-nombre-paciente {
+    font-size: 12px !important;
+    font-weight: bold !important;
+    letter-spacing: 0.5px;
+}
+
+/* Valores y números de los alelos */
+.adn-tabla-comparativa td {
+    font-weight: 600 !important;
+    color: #000000 !important;
+}
+
+/* Bloque inferior de Interpretación */
+.adn-bloque-interpretacion {
+    border: 1.5px solid #000000 !important;
+    padding: 8px 10px;
+    margin-bottom: 6px;
+    font-size: 10.5px !important;
+    line-height: 1.4;
+    background: #ffffff;
+    text-align: justify;
+}
+
+/* Bloque de Resultados Globales y Secciones de Firma */
 .adn-bloque-globales {
-    border: 1.5px solid #000000;
+    border: 1.5px solid #000000 !important;
     margin-bottom: 6px;
     display: flex;
     background: #ffffff;
-    font-size: 11px !important; /* Tamaño general legible */
 }
 
 .adn-globales-col-izq {
     flex: 1 1 58%;
-    border-right: 1.5px solid #000000;
-    padding: 6px 8px;
+    border-right: 1.5px solid #000000 !important;
+    padding: 8px;
+    font-size: 10.5px !important;
 }
 
 .adn-globales-col-der {
@@ -326,17 +389,18 @@ body { background-color: var(--bg-light); font-family: 'Segoe UI', Tahoma, Genev
 
 .adn-subcol-personal {
     flex: 1 1 50%;
-    padding: 5px 4px;
-    font-size: 10.5px !important; /* Aumentado de 8px a 10.5px para legibilidad */
+    padding: 4px;
+    font-size: 8.5px !important;
+    font-weight: bold;
     text-align: center;
-    border-right: 1px solid #e2e8f0; /* Borde más suave */
+    border-right: 1.5px solid #000000 !important;
 }
 
 .adn-subcol-personal:last-child {
-    border-right: none;
+    border-right: none !important;
 }
 
-/* Bloque individual de cada examen */
+/* Bloque para exámenes generales estándar */
 .examen-bloque {
     margin-bottom: 12px;
     page-break-inside: avoid !important;
@@ -346,7 +410,7 @@ body { background-color: var(--bg-light); font-family: 'Segoe UI', Tahoma, Genev
 .examen-bloque h3 {
     background-color: #f1f5f9;
     padding: 6px 10px;
-    font-size: 13px !important; /* Tamaño de título ligeramente mayor */
+    font-size: 13px !important;
     color: #1e293b;
     border-left: 4px solid #2563eb;
     margin-bottom: 6px;
@@ -358,7 +422,7 @@ body { background-color: var(--bg-light); font-family: 'Segoe UI', Tahoma, Genev
 .informe-tabla { 
     width: 100%; 
     border-collapse: collapse; 
-    font-size: 11px !important; /* Aumentado de 10.5px a 11px */
+    font-size: 11px !important;
     margin-bottom: 6px; 
 }
 
@@ -375,7 +439,7 @@ body { background-color: var(--bg-light); font-family: 'Segoe UI', Tahoma, Genev
     border-bottom: 1.5px solid #0072bc;
     background-color: #f8fafc;
     color: #334155;
-    font-size: 10px !important; /* Aumentado de 8.5px a 10px */
+    font-size: 10px !important;
     text-transform: uppercase;
     letter-spacing: .5px;
     padding-top: 5px;
