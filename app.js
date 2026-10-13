@@ -4131,27 +4131,27 @@ function generarBloquePaternidadOficialHTML(ex, orden) {
                 </table>
 
                 <!-- CUADRO DE INTERPRETACIÓN PERICIAL -->
-<div style="border: 1.5px solid #000000; padding: 8px 10px; margin-bottom: 5px; font-size: 13.5px; line-height: 1.4; background: #ffffff;">
-    <div style="font-weight: 700; margin-bottom: 3px; text-decoration: none; font-size: 13.5px;">Interpretación:</div>
-    <div style="text-align: justify; color: #000000; font-size: 12.5px;">
+<div style="border: 1.5px solid #000000; padding: 5px 8px; margin-bottom: 4px; font-size: 11.5px; line-height: 1.3; background: #ffffff;">
+    <div style="font-weight: 700; margin-bottom: 2px; font-size: 11.5px;">Interpretación:</div>
+    <div style="text-align: justify; color: #000000; font-size: 11.5px;">
         ${interpretacion}
     </div>
 </div>
 
-                <!-- CUADRO DE RESULTADOS GLOBALES -->
-<div style="border: 1.5px solid #000000; padding: 10px 12px; margin-bottom: 6px; background: #ffffff;">
-    <div style="text-align: center; font-weight: 800; font-size: 15px; margin-bottom: 8px; letter-spacing: 0.5px; text-transform: uppercase;">
+<!-- CUADRO DE RESULTADOS GLOBALES -->
+<div style="border: 1.5px solid #000000; padding: 6px 10px; margin-bottom: 4px; background: #ffffff;">
+    <div style="text-align: center; font-weight: 800; font-size: 13px; margin-bottom: 4px; letter-spacing: 0.5px; text-transform: uppercase;">
         RESULTADOS GLOBALES
     </div>
-    <div style="font-size: 13.5px; margin-bottom: 6px; line-height: 1.4;">
+    <div style="font-size: 11.5px; margin-bottom: 3px; line-height: 1.3;">
         <span style="font-weight: 700;">ÍNDICE DE PATERNIDAD ACUMULATIVO:</span> 
-        <span style="font-weight: 800; font-family: Arial, sans-serif; font-size: 15px;">${ipc}</span>
+        <span style="font-weight: 800; font-family: Arial, sans-serif; font-size: 13.5px;">${ipc}</span>
     </div>
-    <div style="font-size: 13.5px; margin-bottom: 8px; line-height: 1.4;">
+    <div style="font-size: 11.5px; margin-bottom: 4px; line-height: 1.3;">
         <span style="font-weight: 700;">PROBABILIDAD DE PATERNIDAD ACUMULATIVA:</span> 
-        <span style="font-weight: 800; font-family: Arial, sans-serif; font-size: 15px;">${prob}</span>
+        <span style="font-weight: 800; font-family: Arial, sans-serif; font-size: 14.5px;">${prob}</span>
     </div>
-    <div style="font-size: 11.5px; color: #000000; line-height: 1.3;">
+    <div style="font-size: 9.5px; color: #000000; line-height: 1.2;">
         ${notaLab}
     </div>
 </div>
