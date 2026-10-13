@@ -1,4 +1,36 @@
 // ==========================================
+// GESTIÓN DE LOGO Y FORMATOS DE MARCA
+// ==========================================
+function obtenerLogoSrc() {
+    return localStorage.getItem("vital_logo_custom") || (typeof window !== "undefined" && window.VITAL_LOGO_BASE64) || "logo.png";
+}
+
+function cambiarLogoLaboratorio(event) {
+    const file = event.target.files && event.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        const base64 = e.target.result;
+        try {
+            localStorage.setItem("vital_logo_custom", base64);
+            if (typeof window !== "undefined") window.VITAL_LOGO_CUSTOM = base64;
+            const sideImg = document.getElementById("sidebar-logo-img");
+            if (sideImg) sideImg.src = base64;
+            if (window.nubeGuardarConfiguracion) {
+                window.nubeGuardarConfiguracion({ logoBase64: base64 });
+            }
+            alert("Logo del Centro Médico actualizado con éxito en todos los formatos.");
+        } catch (err) {
+            console.error("Error al guardar logo:", err);
+            alert("No se pudo guardar el logo en el almacenamiento local.");
+        }
+    };
+    reader.readAsDataURL(file);
+}
+window.obtenerLogoSrc = obtenerLogoSrc;
+window.cambiarLogoLaboratorio = cambiarLogoLaboratorio;
+
+// ==========================================
 // DICCIONARIOS Y BASE DE DATOS INICIAL
 // ==========================================
 const BASE_VALORES_REFERENCIALES = {
@@ -214,6 +246,46 @@ const BASE_VALORES_REFERENCIALES = {
 "DENGUE IGG / IGM": [
   { id: 'igg', nombre: 'Banda IgG', valor: '', unidad: 'S/U', referencia: 'No Reactivo' },
   { id: 'igm', nombre: 'Banda IgM', valor: '', unidad: 'S/U', referencia: 'No Reactivo' }
+],
+
+"PRUEBA DE PATERNIDAD INFORMATIVA": [
+  // --- IDENTIFICACIÓN DE LAS MUESTRAS EVALUADAS ---
+  { nombre: "Datos de las Muestras y Participantes", esSeccion: true },
+  { id: 'presunto_padre', nombre: 'Presunto Padre (Nombre y DNI)', valor: '', unidad: '', referencia: 'Muestra: Hisopado Bucal / Sangre EDTA', metodo: 'Hisopado bucal estéril' },
+  { id: 'hijo_menor', nombre: 'Hijo(a) / Menor (Nombre y DNI)', valor: '', unidad: '', referencia: 'Muestra: Hisopado Bucal / Sangre EDTA', metodo: 'Hisopado bucal estéril' },
+  { id: 'madre_biologica', nombre: 'Madre Biológica (Nombre y DNI)', valor: 'No participa / No requerida', unidad: '', referencia: 'Muestra: No analizada (opcional)', metodo: '-' },
+  { id: 'tipo_estudio', nombre: 'Tipo de Análisis', valor: 'Prueba de Paternidad Informativa Privada', unidad: '', referencia: 'Conocimiento privado confidencial', metodo: 'Extracción de ADN y PCR Multiplex STR' },
+
+  // --- SISTEMA DE MARCADORES GENÉTICOS STR (ADN) ---
+  { nombre: "Marcadores Genéticos STR Analizados (Alelos / Loci)", esSeccion: true },
+  { id: 'str_amelogenina', nombre: 'Amelogenina (Marcador Sexual)', valor: '', unidad: '', referencia: 'Cromosoma Sexual (X, Y)', metodo: 'PCR Multiplex / Electroforesis Capilar' },
+  { id: 'str_d3s1358', nombre: 'D3S1358', valor: '', unidad: '', referencia: 'Locus STR autosómico', metodo: 'PCR Multiplex / Electroforesis Capilar' },
+  { id: 'str_vwa', nombre: 'vWA', valor: '', unidad: '', referencia: 'Locus STR autosómico', metodo: 'PCR Multiplex / Electroforesis Capilar' },
+  { id: 'str_d16s539', nombre: 'D16S539', valor: '', unidad: '', referencia: 'Locus STR autosómico', metodo: 'PCR Multiplex / Electroforesis Capilar' },
+  { id: 'str_csf1po', nombre: 'CSF1PO', valor: '', unidad: '', referencia: 'Locus STR autosómico', metodo: 'PCR Multiplex / Electroforesis Capilar' },
+  { id: 'str_tpox', nombre: 'TPOX', valor: '', unidad: '', referencia: 'Locus STR autosómico', metodo: 'PCR Multiplex / Electroforesis Capilar' },
+  { id: 'str_d8s1179', nombre: 'D8S1179', valor: '', unidad: '', referencia: 'Locus STR autosómico', metodo: 'PCR Multiplex / Electroforesis Capilar' },
+  { id: 'str_d21s11', nombre: 'D21S11', valor: '', unidad: '', referencia: 'Locus STR autosómico', metodo: 'PCR Multiplex / Electroforesis Capilar' },
+  { id: 'str_d18s51', nombre: 'D18S51', valor: '', unidad: '', referencia: 'Locus STR autosómico', metodo: 'PCR Multiplex / Electroforesis Capilar' },
+  { id: 'str_d2s1338', nombre: 'D2S1338', valor: '', unidad: '', referencia: 'Locus STR autosómico', metodo: 'PCR Multiplex / Electroforesis Capilar' },
+  { id: 'str_d19s433', nombre: 'D19S433', valor: '', unidad: '', referencia: 'Locus STR autosómico', metodo: 'PCR Multiplex / Electroforesis Capilar' },
+  { id: 'str_th01', nombre: 'TH01', valor: '', unidad: '', referencia: 'Locus STR autosómico', metodo: 'PCR Multiplex / Electroforesis Capilar' },
+  { id: 'str_fga', nombre: 'FGA', valor: '', unidad: '', referencia: 'Locus STR autosómico', metodo: 'PCR Multiplex / Electroforesis Capilar' },
+  { id: 'str_d5s818', nombre: 'D5S818', valor: '', unidad: '', referencia: 'Locus STR autosómico', metodo: 'PCR Multiplex / Electroforesis Capilar' },
+  { id: 'str_d13s317', nombre: 'D13S317', valor: '', unidad: '', referencia: 'Locus STR autosómico', metodo: 'PCR Multiplex / Electroforesis Capilar' },
+  { id: 'str_d7s820', nombre: 'D7S820', valor: '', unidad: '', referencia: 'Locus STR autosómico', metodo: 'PCR Multiplex / Electroforesis Capilar' },
+  { id: 'str_d10s1248', nombre: 'D10S1248', valor: '', unidad: '', referencia: 'Locus STR autosómico', metodo: 'PCR Multiplex / Electroforesis Capilar' },
+  { id: 'str_d22s1045', nombre: 'D22S1045', valor: '', unidad: '', referencia: 'Locus STR autosómico', metodo: 'PCR Multiplex / Electroforesis Capilar' },
+  { id: 'str_d1s1656', nombre: 'D1S1656', valor: '', unidad: '', referencia: 'Locus STR autosómico', metodo: 'PCR Multiplex / Electroforesis Capilar' },
+  { id: 'str_d12s391', nombre: 'D12S391', valor: '', unidad: '', referencia: 'Locus STR autosómico', metodo: 'PCR Multiplex / Electroforesis Capilar' },
+  { id: 'str_d2s441', nombre: 'D2S441', valor: '', unidad: '', referencia: 'Locus STR autosómico', metodo: 'PCR Multiplex / Electroforesis Capilar' },
+
+  // --- RESULTADOS Y CONCLUSIÓN BIOESTADÍSTICA ---
+  { nombre: "Evaluación Bioestadística y Dictamen", esSeccion: true },
+  { id: 'ipc', nombre: 'Índice de Paternidad Combinado (IPC)', valor: '', unidad: '', referencia: 'IPC > 10,000 (Indica Paternidad Prácticamente Probada)', metodo: 'Cálculo Bayesiano' },
+  { id: 'probabilidad_paternidad', nombre: 'Probabilidad de Paternidad (W)', valor: '99.9999%', unidad: '%', referencia: 'Inclusión: > 99.99% | Exclusión: 0.00%', metodo: 'Fórmula de Essen-Möller' },
+  { id: 'conclusion_diagnostica', nombre: 'Conclusión Diagnóstica', valor: 'NO SE EXCLUYE la paternidad biológica (Inclusión Positiva)', unidad: '', referencia: 'El presunto padre coincide con los alelos obligados paternos', metodo: '-' },
+  { id: 'nota_legal_informativa', nombre: 'Alcance Informativo', valor: 'Prueba informativa y confidencial para conocimiento privado de las partes. No tiene validez judicial ni pericial.', unidad: '', referencia: 'Carácter exclusivamente informativo', metodo: '-' }
 ]
 };
 
@@ -230,7 +302,8 @@ let examenesCatalogo = [
   { codigo: "1050", nombre: "UROCULTIVO Y ANTIBIOGRAMA", unidad: "", refMin: "", refMax: "", referencia: "Física, Microscópico, Cultivo y Antibiograma", precio: 35.00 },
   { codigo: "658", nombre: "T4 LIBRE (TIROXINA LIBRE FT4)", unidad: "ng/dL", refMin: 0.90, refMax: 1.70, referencia: "Adultos: 0.90 - 1.70 | Niños: 4 a 30 días: 0.83 - 3.09 | 1 a 12 meses: 0.48 - 2.34 | 1 a 6 años: 0.65 - 1.75 | 7 a 11 años: 0.90 - 1.67 | 12 a 19 años: 0.93 - 1.60", metodo: "Ensayo de electroquimioluminiscencia (ECLIA)", precio: 45.00 },
   { codigo: "659", nombre: "TSH ULTRASENSIBLE", unidad: "uUI / mL", refMin: 0.27, refMax: 4.20, referencia: "Adultos: 0.27 - 4.2 | Niños: 4 a 30 días: 0.43 - 16.0 | 1 a 12 meses: 0.62 - 8.0 | 1 a 6 años: 0.54 - 4.5 | 7 a 11 años: 0.66 - 4.14 | 12 a 19 años: 0.53 - 3.59", metodo: "Ensayo de electroquimioluminiscencia (ECLIA)", precio: 45.00 },
-  { codigo: "750", nombre: "PROTEINA C REACTIVA - CUANTITATIVA", unidad: "mg/dL", refMin: 0, refMax: 10, referencia: "Normal: Menor 10 | Leve a Moderado: 10.0 - 40.0 | Moderado a Severo: 40.0 - 200.0 | Severo: > 200.0", metodo: "Inmunoturbidimetría", precio: 35.00 }
+  { codigo: "750", nombre: "PROTEINA C REACTIVA - CUANTITATIVA", unidad: "mg/dL", refMin: 0, refMax: 10, referencia: "Normal: Menor 10 | Leve a Moderado: 10.0 - 40.0 | Moderado a Severo: 40.0 - 200.0 | Severo: > 200.0", metodo: "Inmunoturbidimetría", precio: 35.00 },
+  { codigo: "990", nombre: "PRUEBA DE PATERNIDAD INFORMATIVA", unidad: "", refMin: "", refMax: "", referencia: "Probabilidad: > 99.999% (Inclusión) | 0.00% (Exclusión)", metodo: "Extracción de ADN y PCR Multiplex de marcadores STR (Electroforesis Capilar)", tubo: "Hisopado bucal / Tubo lila (EDTA)", precio: 750.00 }
 ];
 
 // ==========================================
@@ -1057,6 +1130,27 @@ function obtenerIndicadoresParaOrden(ex) {
     return obtenerPlantillaIndicadores(ex.nombre, ex.codigo);
 }
 
+function debeOcultarFirma(orden) {
+    if (!orden) return false;
+    if (orden.ocultarFirma === true) return true;
+    const examenes = orden.examenes || orden.resultados || [];
+    return examenes.some(e => {
+        const nom = String(e.nombre || "").toUpperCase();
+        const cod = String(e.codigo || "");
+        return nom.includes("PATERNIDAD") || nom.includes("ADN") || nom.includes("FILIACION") || cod === "990";
+    });
+}
+
+function cambiarOcultarFirma(nroOrden, ocultar) {
+    const orden = (ordenesRegistradas || []).find(o => o.nroOrden === nroOrden);
+    if (!orden) return;
+    orden.ocultarFirma = !!ocultar;
+    persistirDatos();
+    window.nubeGuardarOrden?.(orden);
+}
+window.debeOcultarFirma = debeOcultarFirma;
+window.cambiarOcultarFirma = cambiarOcultarFirma;
+
 function abrirResultados(nroOrden) {
     const orden = (ordenesRegistradas || []).find(o => o.nroOrden === nroOrden);
     if (!orden) return;
@@ -1075,8 +1169,14 @@ function abrirResultados(nroOrden) {
                     <i class="bi bi-arrow-down-up me-1 text-primary"></i>Organiza el orden o usa los atajos rápidos de variación por sexo/edad.
                 </span>
             </div>
-            <div class="d-flex gap-2 flex-wrap">
+            <div class="d-flex gap-2 flex-wrap align-items-center">
                 <button class="btn btn-outline-info btn-sm fw-semibold" onclick="abrirHistorialEvolutivo('${orden.dni}')" title="Ver Historial Evolutivo y Comparativa del Paciente"><i class="bi bi-graph-up me-1"></i> Evolución</button>
+                <div class="form-check form-switch ms-1 me-1 mb-0 py-1 px-2 border rounded bg-white shadow-sm" title="Activar para omitir la firma física o de la bióloga en el informe impreso y en el PDF">
+                    <input class="form-check-input ms-0 me-1" type="checkbox" id="check-ocultar-firma-${orden.nroOrden}" ${debeOcultarFirma(orden) ? 'checked' : ''} onchange="cambiarOcultarFirma('${orden.nroOrden}', this.checked)">
+                    <label class="form-check-label small fw-semibold text-secondary" for="check-ocultar-firma-${orden.nroOrden}" style="font-size: 0.78rem; cursor: pointer;">
+                        <i class="bi bi-pen me-1 text-muted"></i>Sin firma en informe
+                    </label>
+                </div>
                 <button class="btn btn-success btn-sm fw-semibold" onclick="enviarResultadoWhatsApp('${orden.nroOrden}')" title="Enviar WhatsApp al paciente"><i class="bi bi-whatsapp me-1"></i> WhatsApp</button>
                 <button class="btn btn-primary btn-sm" onclick="guardarResultados('${orden.nroOrden}')"><i class="bi bi-save me-1"></i> Guardar Resultados</button>
                 <button class="btn btn-outline-primary btn-sm ms-1" onclick="imprimirInforme('${orden.nroOrden}')"><i class="bi bi-printer me-1"></i> Imprimir Informe</button>
@@ -1360,6 +1460,11 @@ function guardarResultados(nroOrden, silencioso = false) {
         };
     });
 
+    const checkOcultar = document.getElementById(`check-ocultar-firma-${nroOrden}`);
+    if (checkOcultar) {
+        orden.ocultarFirma = checkOcultar.checked;
+    }
+
     orden.estado = "Resultados listos";
     orden.en = Date.now();
     persistirDatos();
@@ -1458,7 +1563,8 @@ function obtenerPlantillaIndicadores(nombreExamen, codigoExamen = null) {
         { test: n => n.includes("T4 LIBRE") || n.includes("TIROXINA LIBRE") || n === "T4" || n.includes("FT4"), key: "T4 LIBRE" },
         { test: n => n.includes("TSH") || n.includes("TIROIDES ULTRASENSIBLE") || n.includes("TIROTROPINA"), key: "TSH ULTRASENSIBLE" },
         { test: n => n.includes("PROTEINA C REACTIVA") || n === "PCR" || n.startsWith("PCR ") || n.includes("PCR CUANTITATIV"), key: "PROTEINA C REACTIVA" },
-        { test: n => n.includes("SEDIMENTACION") || n.includes("VSG"), key: "VELOCIDAD DE SEDIMENTACION GLOBULAR" }
+        { test: n => n.includes("SEDIMENTACION") || n.includes("VSG"), key: "VELOCIDAD DE SEDIMENTACION GLOBULAR" },
+        { test: n => n.includes("PATERNIDAD") || n.includes("ADN") || n.includes("FILIACION"), key: "PRUEBA DE PATERNIDAD INFORMATIVA" }
     ];
 
     for (const item of equivalencias) {
@@ -2150,10 +2256,7 @@ function imprimirCierreCajaTicket() {
 
     const html = `
         <div class="ticket-contenido">
-            <img src="logo.png" alt="" class="t-logo" onerror="this.style.display='none'">
-            <div class="t-centro t-negrita t-titulo">CENTRO MEDICO</div>
-            <div class="t-centro t-negrita t-titulo">VITAL HEALTH</div>
-            <div class="t-centro">Laboratorio Clínico</div>
+            <img src="${obtenerLogoSrc()}" alt="Centro Médico Vital Health" class="t-logo" onerror="this.style.display='none'">
             <div class="t-linea-doble"></div>
             <div class="t-centro t-negrita t-subtitulo">CIERRE DE CAJA</div>
             <div class="t-centro t-dato">Fecha: ${fechaVisual} ${ahora}</div>
@@ -3212,10 +3315,7 @@ function construirTicketHTML(orden) {
 
     return `
         <div class="ticket-contenido">
-            <img src="logo.png" alt="" class="t-logo" onerror="this.style.display='none'">
-            <div class="t-centro t-negrita t-titulo">CENTRO MEDICO</div>
-            <div class="t-centro t-negrita t-titulo">VITAL HEALTH</div>
-            <div class="t-centro">Laboratorio Clínico</div>
+            <img src="${obtenerLogoSrc()}" alt="Centro Médico Vital Health" class="t-logo" onerror="this.style.display='none'">
             <div class="t-centro t-dato">Av. Grau N° 1799 - Veintiséis de Octubre</div>
             <div class="t-centro t-dato">WhatsApp: 984 089 927</div>
             <div class="t-linea-doble"></div>
@@ -3295,10 +3395,7 @@ function construirTicketCotizacionHTML(cot) {
 
     return `
         <div class="ticket-contenido">
-            <img src="logo.png" alt="" class="t-logo" onerror="this.style.display='none'">
-            <div class="t-centro t-negrita t-titulo">CENTRO MEDICO</div>
-            <div class="t-centro t-negrita t-titulo">VITAL HEALTH</div>
-            <div class="t-centro">Laboratorio Clínico</div>
+            <img src="${obtenerLogoSrc()}" alt="Centro Médico Vital Health" class="t-logo" onerror="this.style.display='none'">
             <div class="t-centro t-dato">Av. Grau N° 1799 - Veintiséis de Octubre</div>
             <div class="t-centro t-dato">WhatsApp: 984 089 927</div>
             <div class="t-linea-doble"></div>
@@ -3435,22 +3532,19 @@ function imprimirZona() {
 // =========================================================================
 
 function construirCabeceraInformeHTML() {
+    const logoSrc = obtenerLogoSrc();
     return `
-        <div class="informe-cabecera" style="border-bottom: 1px solid #cbd5e1; padding-bottom: 6px; margin-bottom: 6px;">
-            <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px;">
-                <div style="display: flex; align-items: center; gap: 12px;">
-                    <img src="logo.png" alt="Centro Médico Vital Health" class="informe-logo" style="width: 70px; height: 70px; object-fit: contain;" onerror="this.style.display='none'">
-                    <div>
-                        <h1 class="informe-titulo-marca" style="font-family: 'Montserrat', 'Segoe UI', Arial, sans-serif; font-size: 18px; margin: 0; letter-spacing: 0.8px; font-weight: 800; color: #0f172a; text-transform: uppercase; line-height: 1.25;">CENTRO MEDICO VITAL HEALTH</h1>
-                        <p class="informe-subtitulo-marca" style="margin: 3px 0 0 0; font-size: 9.5px; color: #475569; font-family: 'Segoe UI', Arial, sans-serif;"><strong>Laboratorio clínico, comprometido con tu salud.</strong></p>
-                    </div>
+        <div class="informe-cabecera" style="border-bottom: 1.5px solid #0072bc; padding-bottom: 6px; margin-bottom: 6px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px;">
+                <div style="display: flex; align-items: center;">
+                    <img src="${logoSrc}" alt="Centro Médico Vital Health" class="informe-logo" style="max-height: 64px; max-width: 320px; width: auto; height: auto; object-fit: contain; display: block;" onerror="this.style.display='none'">
                 </div>
                 <div class="informe-qr-box" style="text-align: center;">
-                    <img src="qr-redes.png" alt="QR de redes sociales" class="informe-qr" style="width: 76px; height: 76px; object-fit: contain;" onerror="this.parentNode.style.display='none'">
+                    <img src="qr-redes.png" alt="QR de redes sociales" class="informe-qr" style="width: 72px; height: 72px; object-fit: contain;" onerror="this.parentNode.style.display='none'">
                     <div class="informe-qr-texto" style="font-size: 8.5px; font-weight: 700; color: #0f172a; margin-top: 1px;">¡Síguenos aquí!</div>
                 </div>
             </div>
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 4px; font-size: 9px; color: #334155;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 4px; font-size: 9px; color: #334155; border-top: 1px solid #e2e8f0; padding-top: 3px;">
                 <div>📍 Av. Grau N° 1799 - Veintiséis de Octubre</div>
                 <div style="display: flex; gap: 14px;">
                     <span>📷 Vitalhealthlaboratorio</span>
@@ -3499,10 +3593,19 @@ function construirPieInformeHTML(numPagina, totalPaginas) {
     `;
 }
 
-function construirFirmaInformeHTML(nota = "Ninguna.", mostrarNota = true) {
+function construirFirmaInformeHTML(nota = "Ninguna.", mostrarNota = true, orden = null) {
     const textoNota = (mostrarNota && nota && nota.trim() !== "" && nota.trim().toLowerCase() !== "ninguna.")
         ? `<div class="informe-nota" style="font-size: 8.5px; font-style: italic; color: #64748b; margin-bottom: 4px;">Nota: ${escapeHTML(nota)}</div>`
         : "";
+
+    if (debeOcultarFirma(orden)) {
+        return `
+            <div class="bloque-firma-completo" style="page-break-inside: avoid; break-inside: avoid; margin-top: auto; padding-top: 4px; min-height: 20px;">
+                ${textoNota}
+            </div>
+        `;
+    }
+
     return `
         <div class="bloque-firma-completo" style="page-break-inside: avoid; break-inside: avoid; margin-top: auto; padding-top: 4px;">
             ${textoNota}
@@ -3626,9 +3729,9 @@ function paginarInformeOrden(orden) {
     medidor.remove();
 
     // Alturas útiles estimadas por hoja A4 a 96DPI (1123px total):
-    // Descontando: márgenes (42px), cabecera (~110px), pie+firma (~145px) y holgura (25px)
-    const ALTO_UTIL_PAGINA_1 = 690; // En hoja 1 se restan además los datos del paciente (~95px)
-    const ALTO_UTIL_OTRAS = 790;
+    const sinFirma = debeOcultarFirma(orden);
+    const ALTO_UTIL_PAGINA_1 = sinFirma ? 760 : 690; // En hoja 1 se restan además los datos del paciente (~95px)
+    const ALTO_UTIL_OTRAS = sinFirma ? 860 : 790;
 
     const bloques = examenes.map((ex, i) => ({
         examen: ex,
@@ -3677,8 +3780,8 @@ function construirInformeHTML(orden) {
         const cabecera = construirCabeceraInformeHTML();
         const datos = p.esPrimera ? construirDatosPacienteInformeHTML(orden) : "";
         const cuerpo = p.elementosHTML.join("");
-        // En TODAS las hojas se incluye la firma de la bióloga al final de la página
-        const firma = construirFirmaInformeHTML(orden.nota || "Ninguna.", numPag === totalPaginas);
+        // En TODAS las hojas se incluye la firma (o se omite si es paternidad/sin firma)
+        const firma = construirFirmaInformeHTML(orden.nota || "Ninguna.", numPag === totalPaginas, orden);
         const pie = construirPieInformeHTML(numPag, totalPaginas);
 
         return `
@@ -3718,7 +3821,7 @@ function imprimirInforme(nroOrden) {
 let imagenesInformeCacheadas = false;
 async function precargarImagenesInforme() {
     if (imagenesInformeCacheadas) return;
-    const fuentes = ["logo.png", "qr-redes.png", "firma-biologa.png"];
+    const fuentes = [obtenerLogoSrc(), "qr-redes.png", "firma-biologa.png"];
     await Promise.all(fuentes.map(src => new Promise(resolver => {
         const img = new Image();
         img.onload = img.onerror = resolver;
@@ -3818,7 +3921,7 @@ async function descargarInformePDF(nroOrden) {
             const cabeceraHTML = construirCabeceraInformeHTML();
             const datosHTML = p.esPrimera ? construirDatosPacienteInformeHTML(orden) : "";
             const cuerpoHTML = `<div class="pagina-cuerpo" style="flex: 1 1 auto; overflow: hidden;">${p.elementosHTML.join("")}</div>`;
-            const firmaHTML = construirFirmaInformeHTML(orden.nota || "Ninguna.", numPag === totalPaginas);
+            const firmaHTML = construirFirmaInformeHTML(orden.nota || "Ninguna.", numPag === totalPaginas, orden);
             const pieHTML = `<div class="pagina-pie" style="flex: 0 0 auto; margin-top: auto;">${construirPieInformeHTML(numPag, totalPaginas)}</div>`;
 
             paginaDiv.innerHTML = `
@@ -3897,6 +4000,9 @@ async function descargarInformePDF(nroOrden) {
 // INICIALIZACIÓN
 // ==========================================
 document.addEventListener("DOMContentLoaded", () => {
+    const sideImg = document.getElementById("sidebar-logo-img");
+    if (sideImg) sideImg.src = obtenerLogoSrc();
+
     cargarDatosGuardados();
     reconciliarPacientesDesdeOrdenes();
     persistirDatos();
