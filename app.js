@@ -4055,10 +4055,6 @@ function generarBloquePaternidadOficialHTML(ex, orden) {
                     <div style="font-size: 15px; font-weight: 800; letter-spacing: 0.5px; color: #000000; text-transform: none;">Informe de prueba de ADN</div>
                     <div style="font-size: 9px; font-weight: 700; color: #111111; margin-top: 1px;">Solo para conocimiento propio</div>
                 </div>
-                <div style="flex: 0 0 28%; text-align: right; font-size: 8.5px;">
-                    <div style="font-weight: 800; color: #000000;">${convenio}</div>
-                    <div style="color: #444444; margin-top: 3px; font-size: 8px;">Página 1 / 1</div>
-                </div>
             </div>
 
             <!-- CUADRO DE DATOS DE CASO (FONDO VERDE PASTEL SUAVE COMO EL PDF) -->
@@ -4163,37 +4159,10 @@ function generarBloquePaternidadOficialHTML(ex, orden) {
                     <div style="font-size: 7.5px; color: #222222; line-height: 1.25; margin-top: 3px;">
                         ${notaLab}
                     </div>
-                </div>
-
-                <!-- COLUMNA DERECHA: RECUADROS DE PERSONAL (SIN FIRMAS) -->
-                <div style="flex: 1 1 42%; display: flex;">
-                    <div style="flex: 1 1 50%; border-right: 1px solid #000000; padding: 4px; text-align: center; display: flex; flex-direction: column; justify-content: space-between;">
-                        <div style="font-weight: 700; font-size: 7px; line-height: 1.1; text-transform: uppercase;">
-                            PERSONAL A CARGO DE LA TOMA DE LA MUESTRA
-                        </div>
-                        <div style="height: 48px; display: flex; align-items: flex-end; justify-content: center;">
-                            <div style="width: 85%; border-top: 0.8px dashed #888888; font-size: 6.5px; color: #666666; padding-top: 1px;">Conforme</div>
-                        </div>
-                    </div>
-                    <div style="flex: 1 1 50%; padding: 4px; text-align: center; display: flex; flex-direction: column; justify-content: space-between;">
-                        <div style="font-weight: 700; font-size: 7px; line-height: 1.1; text-transform: uppercase;">
-                            PERSONAL A CARGO DEL ANALISIS DE LA MUESTRA
-                        </div>
-                        <div style="height: 48px; display: flex; align-items: flex-end; justify-content: center;">
-                            <div style="width: 85%; border-top: 0.8px dashed #888888; font-size: 6.5px; color: #666666; padding-top: 1px;">Conforme</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- PIE DISCRETO SEDES -->
-            <div style="display: flex; justify-content: space-between; font-size: 7.5px; color: #888888; padding: 1px 4px 0 4px;">
-                <span>Santiago de Surco (Sede Central, Lima)</span>
-                <span>Yanahuara, Arequipa</span>
-                <span>Piura, Piura</span>
-            </div>
         </div>
-    `;
+    </div>
+</div>
+`;
 }
 
 function generarBloqueExamenHTML(ex, orden) {
