@@ -380,12 +380,20 @@ body { background-color: var(--bg-light); font-family: 'Segoe UI', Tahoma, Genev
 /* Bloque inferior de Interpretación */
 .adn-bloque-interpretacion {
     border: 1.5px solid #000000 !important;
-    padding: 8px 10px;
-    margin-bottom: 6px;
-    font-size: 10.5px !important;
-    line-height: 1.4;
+    padding: 10px 12px !important;
+    margin-bottom: 8px;
+    font-size: 12.5px !important; /* Aumentado de 10.5px a 12.5px */
+    line-height: 1.45;
     background: #ffffff;
     text-align: justify;
+    color: #000000 !important;
+}
+
+.adn-bloque-interpretacion u,
+.adn-bloque-interpretacion strong,
+.adn-bloque-interpretacion b {
+    font-size: 13px !important;
+    font-weight: bold !important;
 }
 
 /* Bloque de Resultados Globales y Secciones de Firma */
@@ -396,13 +404,33 @@ body { background-color: var(--bg-light); font-family: 'Segoe UI', Tahoma, Genev
     background: #ffffff;
 }
 
+/* Columna izquierda: Título, Números e Índice */
 .adn-globales-col-izq {
     flex: 1 1 58%;
     border-right: 1.5px solid #000000 !important;
-    padding: 8px;
-    font-size: 10.5px !important;
+    padding: 10px 12px !important;
+    font-size: 12px !important; /* Aumentado de 10.5px a 12px */
+    color: #000000 !important;
+    line-height: 1.4;
 }
 
+/* Título "RESULTADOS GLOBALES" y textos/números en negrita */
+.adn-globales-col-izq h4,
+.adn-globales-col-izq .titulo-globales {
+    font-size: 14px !important;
+    font-weight: bold !important;
+    text-align: center;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+}
+
+.adn-globales-col-izq strong,
+.adn-globales-col-izq b {
+    font-size: 13px !important; /* Aumenta el tamaño de los números y porcentajes */
+    font-weight: bold !important;
+}
+
+/* Columna derecha: Sección de Firmas y Sellos */
 .adn-globales-col-der {
     flex: 1 1 42%;
     display: flex;
@@ -410,17 +438,17 @@ body { background-color: var(--bg-light); font-family: 'Segoe UI', Tahoma, Genev
 
 .adn-subcol-personal {
     flex: 1 1 50%;
-    padding: 4px;
-    font-size: 8.5px !important;
+    padding: 6px 4px;
+    font-size: 9px !important; /* Ligeramente más legible para los encabezados de firma */
     font-weight: bold;
     text-align: center;
     border-right: 1.5px solid #000000 !important;
+    color: #000000 !important;
 }
 
 .adn-subcol-personal:last-child {
     border-right: none !important;
 }
-
 /* Estilos de soporte para otros informes */
 .examen-bloque {
     margin-bottom: 12px;
