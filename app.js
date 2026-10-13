@@ -4139,22 +4139,22 @@ function generarBloquePaternidadOficialHTML(ex, orden) {
                 </div>
 
                 <!-- CUADRO DE RESULTADOS GLOBALES -->
-                <div style="border: 1.5px solid #000000; padding: 5px 8px; margin-bottom: 4px; background: #ffffff;">
-                    <div style="text-align: center; font-weight: 800; font-size: 10px; margin-bottom: 3px; letter-spacing: 0.5px;">
-                        RESULTADOS GLOBALES
-                    </div>
-                    <div style="font-size: 8.5px; margin-bottom: 2px;">
-                        <span style="font-weight: 700;">ÍNDICE DE PATERNIDAD ACUMULATIVO:</span> 
-                        <span style="font-weight: 800; font-family: monospace;">${ipc}</span>
-                    </div>
-                    <div style="font-size: 8.5px; margin-bottom: 4px;">
-                        <span style="font-weight: 700;">PROBABILIDAD DE PATERNIDAD ACUMULATIVA:</span> 
-                        <span style="font-weight: 800; font-family: monospace;">${prob}</span>
-                    </div>
-                    <div style="font-size: 7.5px; color: #222222; line-height: 1.25;">
-                        ${notaLab}
-                    </div>
-                </div>
+<div style="border: 1.5px solid #000000; padding: 10px 12px; margin-bottom: 6px; background: #ffffff;">
+    <div style="text-align: center; font-weight: 800; font-size: 16px; margin-bottom: 8px; letter-spacing: 0.5px; text-transform: uppercase;">
+        RESULTADOS GLOBALES
+    </div>
+    <div style="font-size: 13.5px; margin-bottom: 6px; line-height: 1.4;">
+        <span style="font-weight: 700;">ÍNDICE DE PATERNIDAD ACUMULATIVO:</span> 
+        <span style="font-weight: 800; font-family: Arial, sans-serif; font-size: 15px;">${ipc}</span>
+    </div>
+    <div style="font-size: 13.5px; margin-bottom: 8px; line-height: 1.4;">
+        <span style="font-weight: 700;">PROBABILIDAD DE PATERNIDAD ACUMULATIVA:</span> 
+        <span style="font-weight: 800; font-family: Arial, sans-serif; font-size: 17px;">${prob}</span>
+    </div>
+    <div style="font-size: 11.5px; color: #000000; line-height: 1.3;">
+        ${notaLab}
+    </div>
+</div>
             </div>
 
             <!-- SU PIE DE PÁGINA QUE SIEMPRE LE PONES A LOS RESULTADOS -->
