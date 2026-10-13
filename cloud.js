@@ -3,7 +3,7 @@
 // ============================================================
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import {
-    getFirestore, collection, getDocs, doc, setDoc, deleteDoc, onSnapshot
+    getFirestore, collection, getDocs, doc, setDoc, deleteDoc, onSnapshot, query, where
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import {
     getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut
@@ -277,10 +277,23 @@ window.nubeGuardarCotizacion = function (cotizacion) {
         .catch(error => console.error("No se pudo subir la cotización a la nube:", error));
 };
 
-window.nubeEliminarOrden = function (nroOrden) {
+// ELIMINAR ORDEN EN CASCADA (Borra también su movimiento de caja vinculado)
+window.nubeEliminarOrden = async function (nroOrden) {
     if (!db || !auth || !auth.currentUser) return;
-    deleteDoc(doc(db, "ordenes", String(nroOrden)))
-        .catch(error => console.error("No se pudo eliminar la orden de la nube:", error));
+    const idOrdenStr = String(nroOrden);
+    try {
+        // 1. Borrar la orden de Firestore
+        await deleteDoc(doc(db, "ordenes", idOrdenStr));
+
+        // 2. Buscar y borrar el movimiento de caja asociado a esta orden (por nroOrden o referencia)
+        const qCaja = query(collection(db, "caja"), where("nroOrden", "==", idOrdenStr));
+        const snapCaja = await getDocs(qCaja);
+        snapCaja.forEach(async (docCaja) => {
+            await deleteDoc(doc(db, "caja", docCaja.id));
+        });
+    } catch (error) {
+        console.error("No se pudo eliminar la orden o su movimiento de caja en cascada:", error);
+    }
 };
 
 window.nubeEliminarMovimiento = async function (idMovimiento) {
@@ -294,12 +307,37 @@ window.nubeEliminarExamen = function (codigoExamen) {
         .catch(error => console.error("No se pudo eliminar el examen de la nube:", error));
 };
 
-window.nubeEliminarPaciente = function (paciente) {
+// ELIMINAR PACIENTE EN CASCADA (Borra también todas las órdenes vinculadas a su DNI)
+window.nubeEliminarPaciente = async function (paciente) {
     if (!db || !auth || !auth.currentUser) return;
     const idDoc = String(paciente.dni || paciente.id);
     if (!idDoc) return;
-    deleteDoc(doc(db, "pacientes", idDoc))
-        .catch(error => console.error("No se pudo eliminar el paciente de la nube:", error));
+
+    try {
+        // 1. Borrar al paciente de Firestore
+        await deleteDoc(doc(db, "pacientes", idDoc));
+
+        // 2. Si el paciente tiene DNI, buscar y borrar todas sus órdenes asociadas
+        if (paciente.dni) {
+            const qOrdenes = query(collection(db, "ordenes"), where("dni", "==", paciente.dni));
+            const snapOrdenes = await getDocs(qOrdenes);
+            
+            snapOrdenes.forEach(async (docOrden) => {
+                const ordenId = docOrden.id;
+                // Borrar orden
+                await deleteDoc(doc(db, "ordenes", ordenId));
+
+                // Borrar también el movimiento de caja de cada orden eliminada en cascada
+                const qCajaOrden = query(collection(db, "caja"), where("nroOrden", "==", ordenId));
+                const snapCajaOrden = await getDocs(qCajaOrden);
+                snapCajaOrden.forEach(async (docCaja) => {
+                    await deleteDoc(doc(db, "caja", docCaja.id));
+                });
+            });
+        }
+    } catch (error) {
+        console.error("No se pudo eliminar el paciente y sus dependencias de la nube:", error);
+    }
 };
 
 window.nubeEliminarCotizacion = async function (idCotizacion) {
