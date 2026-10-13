@@ -4131,7 +4131,7 @@ function generarBloquePaternidadOficialHTML(ex, orden) {
                 </table>
 
                 <!-- CUADRO DE INTERPRETACIÓN PERICIAL -->
-                <div style="border: 1.5px solid #000000; padding: 4px 6px; margin-bottom: 5px; font-size: 8.5px; line-height: 1.3; background: #ffffff;">
+                <div style="border: 1.5px solid #000000; padding: 4px 6px; margin-bottom: 5px; font-size: 11.5px; line-height: 1.3; background: #ffffff;">
                     <div style="font-weight: 700; margin-bottom: 2px; text-decoration: underline;">Interpretación:</div>
                     <div style="text-align: justify; color: #000000;">
                         ${interpretacion}
@@ -4149,7 +4149,7 @@ function generarBloquePaternidadOficialHTML(ex, orden) {
     </div>
     <div style="font-size: 13.5px; margin-bottom: 8px; line-height: 1.4;">
         <span style="font-weight: 700;">PROBABILIDAD DE PATERNIDAD ACUMULATIVA:</span> 
-        <span style="font-weight: 800; font-family: Arial, sans-serif; font-size: 17px;">${prob}</span>
+        <span style="font-weight: 800; font-family: Arial, sans-serif; font-size: 15px;">${prob}</span>
     </div>
     <div style="font-size: 11.5px; color: #000000; line-height: 1.3;">
         ${notaLab}
