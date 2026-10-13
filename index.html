@@ -29,9 +29,13 @@
                 <button type="button" class="btn btn-sm btn-outline-light position-absolute top-0 end-0 m-1 p-1 lh-1" onclick="toggleSidebar()" title="Ocultar menú lateral" style="font-size: 0.75rem;">
                     <i class="bi bi-chevron-left"></i>
                 </button>
-                <img src="./logo.png" alt="Centro Médico Vital Health" class="sidebar-logo" onerror="this.style.display='none'">
+                <img id="sidebar-logo-img" src="./logo.png" alt="Centro Médico Vital Health" class="sidebar-logo" onerror="this.style.display='none'">
                 <h5 class="fw-bold mb-0 text-white fs-6">Vital Health</h5>
                 <small class="text-white-50" style="font-size: 0.72rem;">Laboratorio Clínico</small>
+                <div class="mt-2 text-center">
+                    <button type="button" class="btn btn-xs btn-outline-light py-0 px-2 text-nowrap" style="font-size: 0.68rem; border-color: rgba(255,255,255,0.25);" onclick="document.getElementById('input-subir-logo').click()" title="Cargar nuevo logo del laboratorio"><i class="bi bi-image me-1"></i>Actualizar Logo</button>
+                    <input type="file" id="input-subir-logo" accept="image/png,image/jpeg,image/webp" class="d-none" onchange="cambiarLogoLaboratorio(event)">
+                </div>
             </div>
 
             <ul class="nav flex-column mt-2">
@@ -844,6 +848,7 @@
     <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <script src="./logo-data.js"></script>
     <script src="./firebase-config.js"></script>
     <script src="./app.js"></script>
     <script type="module" src="./cloud.js"></script>
