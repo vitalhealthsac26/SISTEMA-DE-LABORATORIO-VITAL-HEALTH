@@ -1076,6 +1076,7 @@ function abrirResultados(nroOrden) {
                 </span>
             </div>
             <div class="d-flex gap-2 flex-wrap">
+                <button class="btn btn-outline-info btn-sm fw-semibold" onclick="abrirHistorialEvolutivo('${orden.dni}')" title="Ver Historial Evolutivo y Comparativa del Paciente"><i class="bi bi-graph-up me-1"></i> Evolución</button>
                 <button class="btn btn-success btn-sm fw-semibold" onclick="enviarResultadoWhatsApp('${orden.nroOrden}')" title="Enviar WhatsApp al paciente"><i class="bi bi-whatsapp me-1"></i> WhatsApp</button>
                 <button class="btn btn-primary btn-sm" onclick="guardarResultados('${orden.nroOrden}')"><i class="bi bi-save me-1"></i> Guardar Resultados</button>
                 <button class="btn btn-outline-primary btn-sm ms-1" onclick="imprimirInforme('${orden.nroOrden}')"><i class="bi bi-printer me-1"></i> Imprimir Informe</button>
@@ -1500,11 +1501,15 @@ function renderizarTablaCatalogo(filtro = "") {
         const tienePersonalizada = Array.isArray(ex.plantillaPersonalizada) && ex.plantillaPersonalizada.length > 0;
         const badgeClass = tienePersonalizada ? "bg-success text-white" : "bg-light text-dark border";
         const badgeText = tienePersonalizada ? `Personalizada (${ex.plantillaPersonalizada.length})` : "Plantilla";
+        const tuboInfo = ex.tubo ? `<small class="text-primary d-block mt-0" style="font-size:0.75rem;"><i class="bi bi-eyedropper me-1"></i>${escapeHTML(ex.tubo)}</small>` : '';
 
         const tr = document.createElement("tr");
         tr.innerHTML = `
             <td>${escapeHTML(ex.codigo)}</td>
-            <td class="fw-semibold">${escapeHTML(ex.nombre)}</td>
+            <td>
+                <span class="fw-semibold">${escapeHTML(ex.nombre)}</span>
+                ${tuboInfo}
+            </td>
             <td><span class="badge ${badgeClass}">${badgeText}</span></td>
             <td>S/ ${Number(ex.precio || 0).toFixed(2)}</td>
             <td class="text-end">
@@ -1520,6 +1525,7 @@ function prepararNuevoExamen() {
     const form = document.getElementById("form-catalogo");
     if (form) form.reset();
     setVal("cat-id-original", "");
+    setVal("cat-tubo", "");
     const titulo = document.getElementById("catalogo-form-titulo");
     if (titulo) titulo.innerHTML = `<i class="bi bi-layout-text-window-reverse me-2"></i>Nuevo Examen`;
     const cont = document.getElementById("contenedor-indicadores");
@@ -1623,6 +1629,7 @@ function guardarExamenCatalogo() {
     const precio = parseFloat(document.getElementById("cat-precio").value) || 0;
     const muestra = val("cat-muestra");
     const metodo = val("cat-metodo");
+    const tubo = val("cat-tubo").trim();
     const plantilla = val("cat-plantilla");
     const refTexto = val("cat-ref-texto");
 
@@ -1659,7 +1666,7 @@ function guardarExamenCatalogo() {
     });
 
     const nuevoEx = { 
-        codigo, nombre, precio, muestra, metodo, plantilla, refTexto, plantillaPersonalizada, en: Date.now()
+        codigo, nombre, precio, muestra, metodo, tubo, plantilla, refTexto, plantillaPersonalizada, en: Date.now()
     };
 
     let index = -1;
@@ -1689,6 +1696,7 @@ function editarExamenCatalogo(codigo) {
     setVal("cat-precio", ex.precio || 0);
     setVal("cat-muestra", ex.muestra || "");
     setVal("cat-metodo", ex.metodo || "");
+    setVal("cat-tubo", ex.tubo || "");
     setVal("cat-plantilla", ex.plantilla || "personalizada");
     setVal("cat-ref-texto", ex.refTexto || "");
     
@@ -1864,33 +1872,160 @@ function actualizarTotalesCaja() {
     setTxt("caja-tarjeta", tarjeta.toFixed(2));
 
     const tbody = document.getElementById("caja-tabla-body");
+    if (tbody) {
+        tbody.innerHTML = "";
+        if (movimientosFiltrados.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="8" class="text-center text-muted py-4">No se encontraron movimientos registrados para la fecha seleccionada.</td></tr>`;
+        } else {
+            movimientosFiltrados.forEach(m => {
+                if (!m.id) m.id = 'mov_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
+                const tr = document.createElement("tr");
+                tr.innerHTML = `
+                    <td><small class="text-secondary fw-semibold">${escapeHTML(m.fechaVisual || m.fecha)}</small></td>
+                    <td>${escapeHTML(m.hora)}</td>
+                    <td class="fw-bold text-primary">${escapeHTML(m.nroOrden)}</td>
+                    <td><span class="badge bg-light text-dark border">${escapeHTML(m.dni)}</span></td>
+                    <td class="fw-semibold">${escapeHTML(m.paciente)}</td>
+                    <td><span class="badge bg-info text-dark">${escapeHTML(m.metodoPago)}</span></td>
+                    <td class="fw-bold text-success">S/ ${Number(m.monto || 0).toFixed(2)}</td>
+                    <td class="text-end">
+                        <button class="btn btn-sm btn-outline-danger" onclick="eliminarMovimientoCaja('${m.id}')" title="Eliminar cobro de caja">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+    }
+
+    // Actualizar reporte de productividad y demanda de reactivos
+    renderizarTopExamenesCaja(fechaFiltro);
+}
+
+// Renderiza el Top 10 de exámenes más solicitados para gestión y compras de reactivos
+function renderizarTopExamenesCaja(fechaFiltro) {
+    const tbody = document.getElementById("top-examenes-body");
+    const subtitulo = document.getElementById("top-examenes-subtitulo");
     if (!tbody) return;
+
+    let ordenes = (ordenesRegistradas || []);
+    let etiquetaPeriodo = "del periodo histórico general";
+    const hoyISO = obtenerFechaISO(new Date());
+
+    if (fechaFiltro && fechaFiltro !== "todos") {
+        ordenes = ordenes.filter(o => obtenerFechaISO(o.fechaHora || o.en) === fechaFiltro);
+        etiquetaPeriodo = fechaFiltro === hoyISO 
+            ? `de hoy (${new Date().toLocaleDateString("es-PE")})` 
+            : `del día ${fechaFiltro.split("-").reverse().join("/")}`;
+    }
+
+    if (subtitulo) {
+        subtitulo.innerHTML = `Demanda de pruebas para control de reactivos e insumos <strong>${etiquetaPeriodo}</strong> (${ordenes.length} órdenes analizadas).`;
+    }
+
+    const mapa = {};
+    let totalGeneralVeces = 0;
+
+    ordenes.forEach(ord => {
+        (ord.examenes || []).forEach(ex => {
+            const cod = String(ex.codigo || ex.id || "").trim();
+            const nombre = resolverNombreExamenCatalogo(ex) || ex.nombre;
+            const cant = Number(ex.cantidad || 1);
+            const precio = Number(ex.precio || 0);
+            const clave = cod || nombre;
+
+            if (!mapa[clave]) {
+                const exCat = examenesCatalogo.find(c => String(c.codigo) === cod || c.nombre === nombre);
+                mapa[clave] = {
+                    codigo: cod || "-",
+                    nombre: nombre,
+                    tubo: (exCat && (exCat.tubo || exCat.muestra)) || "Tubo estándar / Suero",
+                    veces: 0,
+                    monto: 0
+                };
+            }
+            mapa[clave].veces += cant;
+            mapa[clave].monto += (cant * precio);
+            totalGeneralVeces += cant;
+        });
+    });
+
+    const ranking = Object.values(mapa).sort((a, b) => b.veces - a.veces).slice(0, 10);
+    window.topExamenesActuales = ranking;
+
     tbody.innerHTML = "";
-    
-    if (movimientosFiltrados.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="8" class="text-center text-muted py-4">No se encontraron movimientos registrados para la fecha seleccionada.</td></tr>`;
+    if (ranking.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" class="text-center text-muted py-4"><i class="bi bi-info-circle me-1"></i>No hay órdenes registradas en este periodo para generar el ranking.</td></tr>`;
         return;
     }
-    
-    movimientosFiltrados.forEach(m => {
-        if (!m.id) m.id = 'mov_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
+
+    const maxVeces = ranking[0].veces || 1;
+
+    ranking.forEach((item, index) => {
+        const pct = totalGeneralVeces > 0 ? ((item.veces / totalGeneralVeces) * 100).toFixed(1) : "0.0";
+        const barPct = Math.round((item.veces / maxVeces) * 100);
+        const badgeColor = index === 0 ? "bg-warning text-dark fw-bold" : (index === 1 ? "bg-secondary text-white fw-bold" : (index === 2 ? "bg-info text-white fw-bold" : "bg-light text-dark border fw-semibold"));
+
         const tr = document.createElement("tr");
         tr.innerHTML = `
-            <td><small class="text-secondary fw-semibold">${escapeHTML(m.fechaVisual || m.fecha)}</small></td>
-            <td>${escapeHTML(m.hora)}</td>
-            <td class="fw-bold text-primary">${escapeHTML(m.nroOrden)}</td>
-            <td><span class="badge bg-light text-dark border">${escapeHTML(m.dni)}</span></td>
-            <td class="fw-semibold">${escapeHTML(m.paciente)}</td>
-            <td><span class="badge bg-info text-dark">${escapeHTML(m.metodoPago)}</span></td>
-            <td class="fw-bold text-success">S/ ${Number(m.monto || 0).toFixed(2)}</td>
-            <td class="text-end">
-                <button class="btn btn-sm btn-outline-danger" onclick="eliminarMovimientoCaja('${m.id}')" title="Eliminar cobro de caja">
-                    <i class="bi bi-trash"></i>
-                </button>
+            <td class="text-center"><span class="badge ${badgeColor} rounded-circle px-2 py-1">${index + 1}</span></td>
+            <td>
+                <strong class="text-dark">${escapeHTML(item.nombre)}</strong>
+                <small class="text-muted d-block" style="font-size:0.75rem;">Cód: ${escapeHTML(item.codigo)}</small>
             </td>
+            <td>
+                <span class="badge bg-light text-primary border border-primary-subtle px-2 py-1" style="font-size:0.75rem;">
+                    <i class="bi bi-eyedropper me-1"></i>${escapeHTML(item.tubo)}
+                </span>
+            </td>
+            <td class="text-center fw-bold fs-6 text-primary">${item.veces}</td>
+            <td>
+                <div class="d-flex align-items-center gap-2">
+                    <div class="progress flex-grow-1" style="height: 8px;">
+                        <div class="progress-bar bg-primary" role="progressbar" style="width: ${barPct}%;" aria-valuenow="${barPct}" aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
+                    <small class="text-muted fw-semibold" style="min-width: 45px;">${pct}%</small>
+                </div>
+            </td>
+            <td class="text-end fw-bold text-success">S/ ${item.monto.toFixed(2)}</td>
         `;
         tbody.appendChild(tr);
     });
+}
+
+// Exporta el ranking de los 10 exámenes más pedidos a Excel (.xlsx)
+function exportarTopExamenesExcel() {
+    const ranking = window.topExamenesActuales || [];
+    if (!ranking || ranking.length === 0) {
+        alert("No hay exámenes en el ranking actual para exportar.");
+        return;
+    }
+    const fechaFiltro = window.fechaSeleccionadaCaja || "historico";
+    const etiquetaFecha = (fechaFiltro === "todos" || !fechaFiltro) ? "HISTORICO_COMPLETO" : fechaFiltro;
+
+    const datos = [
+        ["CENTRO MÉDICO VITAL HEALTH - LABORATORIO CLÍNICO"],
+        ["REPORTE DE PRODUCTIVIDAD Y TOP EXÁMENES MÁS SOLICITADOS"],
+        [`Periodo evaluado: ${etiquetaFecha}`],
+        [`Fecha de Emisión: ${new Date().toLocaleString("es-PE")}`],
+        [],
+        ["RANKING", "CÓDIGO", "EXAMEN / PRUEBA", "TUBO / RECIPIENTE DE MUESTRA", "VECES SOLICITADO", "TOTAL GENERADO (S/)"]
+    ];
+
+    ranking.forEach((r, idx) => {
+        datos.push([idx + 1, r.codigo, r.nombre, r.tubo, r.veces, Number(r.monto.toFixed(2))]);
+    });
+
+    if (window.XLSX) {
+        const wb = XLSX.utils.book_new();
+        const ws = XLSX.utils.aoa_to_sheet(datos);
+        ws["!cols"] = [{ wch: 10 }, { wch: 12 }, { wch: 38 }, { wch: 32 }, { wch: 18 }, { wch: 22 }];
+        XLSX.utils.book_append_sheet(wb, ws, "Top Exámenes");
+        XLSX.writeFile(wb, `VitalHealth_Top_Examenes_${etiquetaFecha}.xlsx`);
+    } else {
+        alert("Generando reporte...");
+    }
 }
 
 // Cierre de caja y reporte diario a Excel (.xlsx) con desglose exacto
@@ -2495,10 +2630,12 @@ function renderizarTablaPacientes(pacientes) {
             <td>${escapeHTML(p.edad || '-')}</td>
             <td>${escapeHTML(p.sexo || '-')}</td>
             <td class="text-end px-3 text-nowrap">
+                <button type="button" class="btn btn-sm btn-outline-info me-1 btn-evolucion-paciente" title="Historial Evolutivo y Comparativa de Resultados"><i class="bi bi-graph-up me-1"></i>Evolución</button>
                 <button type="button" class="btn btn-sm btn-outline-primary me-1 btn-editar-paciente" title="Editar"><i class="bi bi-pencil-square"></i></button>
                 <button type="button" class="btn btn-sm btn-outline-danger btn-eliminar-paciente" title="Eliminar"><i class="bi bi-trash3-fill"></i></button>
             </td>
         `;
+        tr.querySelector('.btn-evolucion-paciente').addEventListener('click', () => abrirHistorialEvolutivo(p.dni));
         tr.querySelector('.btn-editar-paciente').addEventListener('click', () => abrirEditarPaciente(p.dni));
         tr.querySelector('.btn-eliminar-paciente').addEventListener('click', () => eliminarPaciente(p.dni));
         tbody.appendChild(tr);
@@ -2514,6 +2651,457 @@ function filtrarPacientesTabla(filtro) {
     );
     renderizarTablaPacientes(filtrados);
 }
+
+// ==========================================
+// HISTORIAL EVOLUTIVO Y COMPARATIVO DE PACIENTES
+// ==========================================
+window.historialPacienteActual = null;
+
+function abrirHistorialEvolutivo(dni) {
+    if (!dni) {
+        alert("DNI de paciente no especificado.");
+        return;
+    }
+    const dniLimpio = String(dni).trim();
+
+    // 1. Obtener datos del paciente
+    const pacRegistrado = (window.pacientesRegistrados || []).find(p => String(p.dni) === dniLimpio);
+    const ordRelacionada = (ordenesRegistradas || []).find(o => String(o.dni) === dniLimpio || String(o.pacienteDni) === dniLimpio);
+
+    const paciente = {
+        dni: dniLimpio,
+        nombre: (pacRegistrado && pacRegistrado.nombre) || (ordRelacionada && ordRelacionada.nombre) || "Paciente",
+        edad: (pacRegistrado && pacRegistrado.edad) || (ordRelacionada && ordRelacionada.edad) || "—",
+        sexo: (pacRegistrado && pacRegistrado.sexo) || (ordRelacionada && ordRelacionada.sexo) || "—",
+        celular: (pacRegistrado && pacRegistrado.celular) || (ordRelacionada && ordRelacionada.celular) || "—",
+        fnac: (pacRegistrado && pacRegistrado.fnac) || (ordRelacionada && ordRelacionada.fnac) || "—"
+    };
+
+    // 2. Buscar todas las órdenes de este paciente ordenadas cronológicamente
+    const ordenes = (ordenesRegistradas || [])
+        .filter(o => String(o.dni) === dniLimpio || String(o.pacienteDni) === dniLimpio)
+        .sort((a, b) => {
+            const tA = new Date(a.fechaHora || a.en || 0).getTime();
+            const tB = new Date(b.fechaHora || b.en || 0).getTime();
+            return tA - tB;
+        });
+
+    // 3. Extraer todas las mediciones de resultados analíticos
+    const mediciones = [];
+    ordenes.forEach(ord => {
+        const fechaStr = ord.fechaHora || (ord.en ? new Date(ord.en).toLocaleString("es-PE") : "Sin fecha");
+        const nroOrden = ord.nroOrden || "-";
+        const resultados = ord.resultados || [];
+
+        resultados.forEach(res => {
+            const exNombre = res.nombre || "Examen";
+            (res.indicadores || []).forEach(ind => {
+                const valStr = String(ind.valor !== undefined && ind.valor !== null ? ind.valor : "").trim();
+                if (valStr !== "" && !ind.esSeccion) {
+                    const numLimpio = parseFloat(valStr.replace(",", "."));
+                    mediciones.push({
+                        fecha: fechaStr,
+                        nroOrden: nroOrden,
+                        examen: exNombre,
+                        parametro: (ind.nombre || exNombre).trim(),
+                        valorTexto: valStr,
+                        numVal: !isNaN(numLimpio) ? numLimpio : null,
+                        unidad: ind.unidad || "",
+                        refMin: (ind.refMin !== "" && ind.refMin !== undefined && ind.refMin !== null) ? Number(ind.refMin) : null,
+                        refMax: (ind.refMax !== "" && ind.refMax !== undefined && ind.refMax !== null) ? Number(ind.refMax) : null,
+                        referencia: ind.referencia || "",
+                        metodo: ind.metodo || res.metodo || ""
+                    });
+                }
+            });
+        });
+    });
+
+    // 4. Agrupar mediciones por parámetro
+    const porParametro = {};
+    mediciones.forEach(m => {
+        const clave = m.parametro.toUpperCase();
+        if (!porParametro[clave]) porParametro[clave] = [];
+        porParametro[clave].push(m);
+    });
+
+    window.historialPacienteActual = {
+        paciente,
+        ordenesTotal: ordenes.length,
+        porParametro,
+        medicionesTotal: mediciones.length
+    };
+
+    const modalBody = document.getElementById("historial-modal-body");
+    const modalTitulo = document.getElementById("historial-modal-titulo");
+    if (!modalBody) return;
+
+    if (modalTitulo) {
+        modalTitulo.innerHTML = `<i class="bi bi-graph-up-arrow me-2"></i>Evolución Clínica: ${escapeHTML(paciente.nombre)}`;
+    }
+
+    // Cabecera con datos del paciente
+    let html = `
+        <div class="card border-0 shadow-sm mb-3">
+            <div class="card-body p-3">
+                <div class="row g-2 align-items-center">
+                    <div class="col-12 col-md-5">
+                        <div class="d-flex align-items-center gap-2">
+                            <div class="bg-primary text-white rounded-circle p-2 text-center" style="width: 42px; height: 42px; line-height: 26px;">
+                                <i class="bi bi-person-fill fs-5"></i>
+                            </div>
+                            <div>
+                                <h6 class="fw-bold mb-0 text-dark">${escapeHTML(paciente.nombre)}</h6>
+                                <small class="text-muted">DNI: <strong class="text-primary">${escapeHTML(paciente.dni)}</strong> | ${escapeHTML(paciente.edad)} | ${escapeHTML(paciente.sexo)}</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-4 text-md-center">
+                        <span class="badge bg-light text-dark border px-3 py-2">
+                            <i class="bi bi-receipt me-1 text-primary"></i><strong>${ordenes.length}</strong> Órdenes Registradas
+                        </span>
+                    </div>
+                    <div class="col-6 col-md-3 text-end">
+                        <span class="badge bg-info-subtle text-info-emphasis border border-info-subtle px-3 py-2">
+                            <i class="bi bi-check2-circle me-1"></i><strong>${mediciones.length}</strong> Resultados Históricos
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+
+    const clavesParametros = Object.keys(porParametro).sort((a, b) => porParametro[b].length - porParametro[a].length);
+
+    if (clavesParametros.length === 0) {
+        html += `
+            <div class="alert alert-warning border-0 shadow-sm text-center py-4 my-3">
+                <i class="bi bi-clock-history fs-1 d-block mb-2 text-warning"></i>
+                <h5 class="fw-bold">No hay resultados ingresados para este paciente</h5>
+                <p class="mb-0 text-muted small">
+                    El paciente tiene ${ordenes.length} orden(es) registrada(s), pero aún no se han capturado resultados en el sistema para comparar o graficar su evolución.<br>
+                    Ingrese a <strong>Resultados</strong> y complete sus análisis para ver su tendencia clínica.
+                </p>
+            </div>
+        `;
+        modalBody.innerHTML = html;
+        abrirModalHistorialBootstrap();
+        return;
+    }
+
+    // Selector de parámetro a evaluar
+    html += `
+        <div class="card border-0 shadow-sm mb-3">
+            <div class="card-body p-3">
+                <div class="row g-2 align-items-center">
+                    <div class="col-12 col-md-4">
+                        <label class="form-label fw-bold text-primary mb-0 small">
+                            <i class="bi bi-funnel-fill me-1"></i>Seleccionar Parámetro o Examen:
+                        </label>
+                    </div>
+                    <div class="col-12 col-md-8">
+                        <select id="sel-parametro-evolucion" class="form-select form-select-sm border-primary fw-semibold" onchange="renderizarDetalleParametroHistorial(this.value)">
+    `;
+
+    clavesParametros.forEach((clave) => {
+        const cant = porParametro[clave].length;
+        const nombreMostrar = porParametro[clave][0].parametro;
+        const unidad = porParametro[clave][0].unidad ? ` (${porParametro[clave][0].unidad})` : '';
+        html += `<option value="${escapeHTML(clave)}">${escapeHTML(nombreMostrar)}${escapeHTML(unidad)} — ${cant} control(es)</option>`;
+    });
+
+    html += `
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="contenedor-detalle-evolucion"></div>
+    `;
+
+    modalBody.innerHTML = html;
+    abrirModalHistorialBootstrap();
+    renderizarDetalleParametroHistorial(clavesParametros[0]);
+}
+
+function abrirModalHistorialBootstrap() {
+    const modalEl = document.getElementById("modalHistorialEvolutivo");
+    if (modalEl && window.bootstrap) {
+        bootstrap.Modal.getOrCreateInstance(modalEl).show();
+    }
+}
+
+function renderizarDetalleParametroHistorial(clave) {
+    const cont = document.getElementById("contenedor-detalle-evolucion");
+    if (!cont || !window.historialPacienteActual) return;
+
+    const lista = window.historialPacienteActual.porParametro[clave] || [];
+    if (lista.length === 0) {
+        cont.innerHTML = `<div class="text-center text-muted py-4">No hay datos para este parámetro.</div>`;
+        return;
+    }
+
+    const primerDato = lista[0];
+    const ultimoDato = lista[lista.length - 1];
+    const unidad = primerDato.unidad || "";
+    const refTexto = primerDato.referencia || (primerDato.refMin !== null && primerDato.refMax !== null ? `${primerDato.refMin} - ${primerDato.refMax} ${unidad}` : "No definida");
+
+    // Calcular estadísticas para valores numéricos
+    const valoresNum = lista.map(d => d.numVal).filter(v => v !== null);
+    let minHistorico = null;
+    let maxHistorico = null;
+    let promedio = null;
+    let variacionReciente = null;
+
+    if (valoresNum.length > 0) {
+        minHistorico = Math.min(...valoresNum);
+        maxHistorico = Math.max(...valoresNum);
+        promedio = (valoresNum.reduce((a, b) => a + b, 0) / valoresNum.length).toFixed(2);
+
+        if (lista.length >= 2) {
+            const penultimo = lista[lista.length - 2].numVal;
+            const ultimo = ultimoDato.numVal;
+            if (penultimo !== null && ultimo !== null) {
+                variacionReciente = (ultimo - penultimo).toFixed(2);
+            }
+        }
+    }
+
+    // Evaluar estado del último resultado
+    let estadoUltimo = { texto: "REGISTRADO", clase: "bg-secondary text-white", icono: "bi-check-circle" };
+    if (ultimoDato.numVal !== null && ultimoDato.refMin !== null && ultimoDato.refMax !== null) {
+        if (ultimoDato.numVal < ultimoDato.refMin) {
+            estadoUltimo = { texto: "DISMINUIDO / BAJO", clase: "bg-info text-dark", icono: "bi-arrow-down-circle" };
+        } else if (ultimoDato.numVal > ultimoDato.refMax) {
+            estadoUltimo = { texto: "ELEVADO / ALTO", clase: "bg-danger text-white", icono: "bi-arrow-up-circle" };
+        } else {
+            estadoUltimo = { texto: "DENTRO DE RANGO NORMAL", clase: "bg-success text-white", icono: "bi-check-circle" };
+        }
+    }
+
+    let kpiHtml = `
+        <div class="row g-2 mb-3">
+            <div class="col-12 col-md-3">
+                <div class="card bg-white border-0 shadow-sm h-100 p-3">
+                    <small class="text-muted fw-semibold">Último Valor Registrado</small>
+                    <div class="d-flex align-items-baseline gap-2 mt-1">
+                        <span class="fs-4 fw-bold text-primary">${escapeHTML(ultimoDato.valorTexto)}</span>
+                        <small class="text-secondary fw-semibold">${escapeHTML(unidad)}</small>
+                    </div>
+                    <div><span class="badge ${estadoUltimo.clase} mt-1"><i class="bi ${estadoUltimo.icono} me-1"></i>${estadoUltimo.texto}</span></div>
+                    <small class="text-muted mt-1 d-block" style="font-size:0.75rem;">Fecha: ${escapeHTML(ultimoDato.fecha)}</small>
+                </div>
+            </div>
+            <div class="col-12 col-md-3">
+                <div class="card bg-white border-0 shadow-sm h-100 p-3">
+                    <small class="text-muted fw-semibold">Rango de Referencia Normal</small>
+                    <div class="fs-6 fw-bold text-dark mt-1">${escapeHTML(refTexto)}</div>
+                    <small class="text-muted mt-auto" style="font-size:0.75rem;">Método: ${escapeHTML(primerDato.metodo || "Estándar")}</small>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="card bg-white border-0 shadow-sm h-100 p-3">
+                    <small class="text-muted fw-semibold">Variación vs Control Anterior</small>
+                    <div class="fs-5 fw-bold mt-1 ${variacionReciente !== null ? (Number(variacionReciente) > 0 ? 'text-danger' : 'text-success') : 'text-muted'}">
+                        ${variacionReciente !== null ? (Number(variacionReciente) > 0 ? `+${variacionReciente} ▲` : `${variacionReciente} ▼`) : 'Primer control'}
+                    </div>
+                    <small class="text-muted" style="font-size:0.75rem;">${valoresNum.length >= 2 ? 'Diferencia neta' : 'Sin datos previos'}</small>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="card bg-white border-0 shadow-sm h-100 p-3">
+                    <small class="text-muted fw-semibold">Resumen Histórico</small>
+                    <div class="small mt-1">
+                        <div>Promedio: <strong>${promedio !== null ? promedio : '—'} ${escapeHTML(unidad)}</strong></div>
+                        <div class="text-muted" style="font-size:0.75rem;">Mín: ${minHistorico !== null ? minHistorico : '—'} | Máx: ${maxHistorico !== null ? maxHistorico : '—'}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+
+    // Gráfica visual y línea temporal de controles
+    let timelineHtml = `
+        <div class="card border-0 shadow-sm mb-3">
+            <div class="card-header bg-white py-2 border-bottom d-flex justify-content-between align-items-center">
+                <h6 class="fw-bold text-primary mb-0"><i class="bi bi-clock-history me-2"></i>Línea de Tiempo y Curva Evolutiva</h6>
+                <span class="badge bg-light text-muted border">${lista.length} controles</span>
+            </div>
+            <div class="card-body p-3">
+                <div class="row g-3">
+    `;
+
+    const minGrafica = minHistorico !== null && primerDato.refMin !== null ? Math.min(minHistorico, primerDato.refMin) * 0.8 : 0;
+    const maxGrafica = maxHistorico !== null && primerDato.refMax !== null ? Math.max(maxHistorico, primerDato.refMax) * 1.2 : 100;
+    const rangoGrafica = maxGrafica - minGrafica || 1;
+
+    lista.forEach((item, idx) => {
+        let badgeItem = { clase: "badge bg-light text-dark border", texto: "Normal" };
+        let barColor = "bg-primary";
+        let barPct = 50;
+
+        if (item.numVal !== null) {
+            barPct = Math.max(5, Math.min(100, Math.round(((item.numVal - minGrafica) / rangoGrafica) * 100)));
+            if (item.refMin !== null && item.refMax !== null) {
+                if (item.numVal < item.refMin) {
+                    badgeItem = { clase: "badge bg-info text-dark", texto: "Bajo" };
+                    barColor = "bg-info";
+                } else if (item.numVal > item.refMax) {
+                    badgeItem = { clase: "badge bg-danger text-white", texto: "Alto" };
+                    barColor = "bg-danger";
+                } else {
+                    badgeItem = { clase: "badge bg-success text-white", texto: "Normal" };
+                    barColor = "bg-success";
+                }
+            }
+        }
+
+        timelineHtml += `
+            <div class="col-12 col-md-6 col-lg-4">
+                <div class="p-3 rounded border bg-white h-100 shadow-sm">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <span class="badge bg-light text-primary border border-primary-subtle fw-semibold">Control #${idx + 1}</span>
+                        <span class="${badgeItem.clase}">${badgeItem.texto}</span>
+                    </div>
+                    <div class="fs-4 fw-bold text-dark mt-2 mb-1">
+                        ${escapeHTML(item.valorTexto)} <small class="text-secondary fw-semibold fs-6">${escapeHTML(item.unidad)}</small>
+                    </div>
+                    <div class="progress mb-2" style="height: 6px;">
+                        <div class="progress-bar ${barColor}" style="width: ${barPct}%;"></div>
+                    </div>
+                    <div class="d-flex justify-content-between text-muted small" style="font-size:0.75rem;">
+                        <span><i class="bi bi-calendar3 me-1"></i>${escapeHTML(item.fecha)}</span>
+                        <span>Ord: <strong>${escapeHTML(item.nroOrden)}</strong></span>
+                    </div>
+                </div>
+            </div>
+        `;
+    });
+
+    timelineHtml += `
+                </div>
+            </div>
+        </div>
+    `;
+
+    // Tabla comparativa cronológica completa
+    let tablaHtml = `
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white py-2 border-bottom">
+                <h6 class="fw-bold text-dark mb-0"><i class="bi bi-table me-2"></i>Tabla Comparativa Detallada</h6>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>#</th>
+                                <th>Fecha y Hora</th>
+                                <th>N° Orden</th>
+                                <th>Examen</th>
+                                <th>Resultado</th>
+                                <th>Valores Referenciales</th>
+                                <th class="text-center">Estado Clínico</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+    `;
+
+    lista.forEach((item, idx) => {
+        let estadoBadge = `<span class="badge bg-light text-dark border">Registrado</span>`;
+        if (item.numVal !== null && item.refMin !== null && item.refMax !== null) {
+            if (item.numVal < item.refMin) estadoBadge = `<span class="badge bg-info text-dark">Disminuido</span>`;
+            else if (item.numVal > item.refMax) estadoBadge = `<span class="badge bg-danger text-white">Elevado</span>`;
+            else estadoBadge = `<span class="badge bg-success text-white">Normal</span>`;
+        }
+
+        tablaHtml += `
+            <tr>
+                <td class="text-muted fw-bold">${idx + 1}</td>
+                <td><small class="fw-semibold text-secondary">${escapeHTML(item.fecha)}</small></td>
+                <td><strong class="text-primary">${escapeHTML(item.nroOrden)}</strong></td>
+                <td>${escapeHTML(item.examen)}</td>
+                <td><strong class="fs-6 text-dark">${escapeHTML(item.valorTexto)}</strong> <small class="text-muted">${escapeHTML(item.unidad)}</small></td>
+                <td><small class="text-muted">${escapeHTML(item.referencia || (item.refMin !== null ? `${item.refMin} - ${item.refMax}` : '—'))}</small></td>
+                <td class="text-center">${estadoBadge}</td>
+            </tr>
+        `;
+    });
+
+    tablaHtml += `
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    `;
+
+    cont.innerHTML = kpiHtml + timelineHtml + tablaHtml;
+}
+
+function imprimirHistorialEvolutivo() {
+    if (!window.historialPacienteActual) {
+        alert("No hay historial cargado para imprimir.");
+        return;
+    }
+    const select = document.getElementById("sel-parametro-evolucion");
+    const clave = select ? select.value : Object.keys(window.historialPacienteActual.porParametro)[0];
+    const lista = window.historialPacienteActual.porParametro[clave] || [];
+    const p = window.historialPacienteActual.paciente;
+
+    if (lista.length === 0) return;
+
+    let filas = "";
+    lista.forEach((item, idx) => {
+        filas += `
+            <tr>
+                <td style="border:1px solid #ccc; padding:6px; text-align:center;">${idx + 1}</td>
+                <td style="border:1px solid #ccc; padding:6px;">${escapeHTML(item.fecha)}</td>
+                <td style="border:1px solid #ccc; padding:6px; font-weight:bold;">${escapeHTML(item.nroOrden)}</td>
+                <td style="border:1px solid #ccc; padding:6px; font-size:14px; font-weight:bold;">${escapeHTML(item.valorTexto)} ${escapeHTML(item.unidad)}</td>
+                <td style="border:1px solid #ccc; padding:6px;">${escapeHTML(item.referencia || `${item.refMin} - ${item.refMax}`)}</td>
+            </tr>
+        `;
+    });
+
+    const printHTML = `
+        <div style="font-family:Arial, sans-serif; padding:20px; color:#222; max-width:800px; margin:auto;">
+            <div style="text-align:center; border-bottom:2px solid #0d6efd; padding-bottom:10px; margin-bottom:15px;">
+                <h2 style="margin:0; color:#0d6efd;">CENTRO MÉDICO VITAL HEALTH</h2>
+                <div style="font-size:12px; color:#666;">Laboratorio Clínico Especializado | Av. Grau N° 1799 | WhatsApp: 984 089 927</div>
+                <h3 style="margin:10px 0 0; color:#333;">HISTORIAL EVOLUTIVO Y COMPARATIVO DE ANÁLISIS CLÍNICOS</h3>
+            </div>
+            <div style="background:#f8f9fa; border:1px solid #ddd; padding:10px; border-radius:4px; margin-bottom:15px; font-size:13px;">
+                <div><strong>Paciente:</strong> ${escapeHTML(p.nombre)} &nbsp;&nbsp;|&nbsp;&nbsp; <strong>DNI:</strong> ${escapeHTML(p.dni)} &nbsp;&nbsp;|&nbsp;&nbsp; <strong>Edad:</strong> ${escapeHTML(p.edad)} &nbsp;&nbsp;|&nbsp;&nbsp; <strong>Sexo:</strong> ${escapeHTML(p.sexo)}</div>
+                <div style="margin-top:4px;"><strong>Parámetro Analizado:</strong> <span style="color:#0d6efd; font-weight:bold;">${escapeHTML(lista[0].parametro)}</span> &nbsp;&nbsp;|&nbsp;&nbsp; <strong>Unidad:</strong> ${escapeHTML(lista[0].unidad)}</div>
+            </div>
+            <table style="width:100%; border-collapse:collapse; font-size:12px; margin-bottom:20px;">
+                <thead>
+                    <tr style="background:#e9ecef;">
+                        <th style="border:1px solid #ccc; padding:6px;">#</th>
+                        <th style="border:1px solid #ccc; padding:6px;">Fecha / Hora</th>
+                        <th style="border:1px solid #ccc; padding:6px;">N° Orden</th>
+                        <th style="border:1px solid #ccc; padding:6px;">Resultado Obtenido</th>
+                        <th style="border:1px solid #ccc; padding:6px;">Valores de Referencia</th>
+                    </tr>
+                </thead>
+                <tbody>${filas}</tbody>
+            </table>
+            <div style="font-size:11px; color:#666; border-top:1px dashed #aaa; padding-top:10px; text-align:right;">
+                Reporte emitido el ${new Date().toLocaleString("es-PE")} — Centro Médico Vital Health
+            </div>
+        </div>
+    `;
+
+    const ventana = window.open("", "_blank");
+    if (ventana) {
+        ventana.document.write(`<html><head><title>Historial Evolutivo - ${escapeHTML(p.nombre)}</title></head><body onload="window.print();window.close();">${printHTML}</body></html>`);
+        ventana.document.close();
+    }
+}
+window.abrirHistorialEvolutivo = abrirHistorialEvolutivo;
+window.renderizarDetalleParametroHistorial = renderizarDetalleParametroHistorial;
+window.imprimirHistorialEvolutivo = imprimirHistorialEvolutivo;
 
 function abrirEditarPaciente(dni) {
     const pac = (window.listaPacientesCache || []).find(p => String(p.dni) === String(dni));
