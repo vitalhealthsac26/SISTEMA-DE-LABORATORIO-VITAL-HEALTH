@@ -1329,7 +1329,7 @@ function generarEditorFormularioPaternidad(ex, exIdx, orden, guardado) {
                 <div class="card-body p-3">
                     <div class="row g-3">
                         <div class="col-md-6 border-end">
-                            <h6 class="fw-bold text-primary mb-2"><i class="bi bi-person me-1"></i>MENOR EVALUADO(A)</h6>
+                            <h6 class="fw-bold text-primary mb-2"><i class="bi bi-person me-1"></i>MENOR / EXAMINADO(A)</h6>
                             <div class="mb-2">
                                 <label class="form-label small mb-1">Nombre Completo del Menor:</label>
                                 <input type="text" class="form-control form-control-sm fw-bold" id="p-edit-menorNombre" value="${escapeHTML(pData.menorNombre || orden.nombre)}" placeholder="ej. NORMA">
@@ -1379,7 +1379,7 @@ function generarEditorFormularioPaternidad(ex, exIdx, orden, guardado) {
                             <tr>
                                 <th rowspan="2" class="align-middle">Loci</th>
                                 <th rowspan="2" class="align-middle">IP</th>
-                                <th colspan="2" class="bg-primary-subtle text-primary border-bottom-0">MENOR (Tamaño de Alelo)</th>
+                                <th colspan="2" class="bg-primary-subtle text-primary border-bottom-0">MENOR / EXAMINADO(A) (Tamaño de Alelo)</th>
                                 <th colspan="2" class="bg-success-subtle text-success border-bottom-0">PRESUNTO PADRE (Tamaño de Alelo)</th>
                             </tr>
                             <tr>
