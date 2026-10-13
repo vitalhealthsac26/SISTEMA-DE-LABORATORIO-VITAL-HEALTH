@@ -4085,7 +4085,7 @@ function generarBloquePaternidadOficialHTML(ex, orden) {
                                 <span style="font-weight: 700; font-size: 8.5px;">Nombre</span>
                             </th>
                             <th colspan="2" style="border-right: 1.5px solid #000000; text-align: center; padding: 2px 5px; width: 36%; background: #ffffff;">
-                                <span style="font-weight: 800; font-size: 9px; text-transform: uppercase;">MENOR</span><br>
+                                <span style="font-weight: 800; font-size: 9px; text-transform: uppercase;">MENOR / EXAMINADO(A)</span><br>
                                 <span style="font-weight: 800; font-size: 9.5px; text-transform: uppercase;">${menorNombre}</span>
                             </th>
                             <th colspan="2" style="text-align: center; padding: 2px 5px; width: 36%; background: #ffffff;">
