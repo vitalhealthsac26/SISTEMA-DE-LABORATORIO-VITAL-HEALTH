@@ -83,10 +83,12 @@ body { background-color: var(--bg-light); font-family: 'Segoe UI', Tahoma, Genev
 }
 .t-logo {
     display: block;
-    width: 66px;
-    height: 66px;
+    max-width: 190px;
+    max-height: 52px;
+    width: auto;
+    height: auto;
     object-fit: contain;
-    margin: 0 auto 4px auto;
+    margin: 0 auto 6px auto;
 }
 .t-centro { text-align: center; }
 .t-negrita { font-weight: 700; }
@@ -131,7 +133,7 @@ body { background-color: var(--bg-light); font-family: 'Segoe UI', Tahoma, Genev
     body.imprimiendo #zona-impresion { display: block !important; }
     body.imprimiendo { background: #ffffff !important; overflow: visible !important; margin: 0 !important; padding: 0 !important; }
     .ticket-print .ticket-contenido { font-size: 13px; line-height: 1.45; }
-    .ticket-print .t-logo { width: 58px; height: 58px; }
+    .ticket-print .t-logo { max-width: 175px; max-height: 48px; width: auto; height: auto; object-fit: contain; }
     .ticket-print .t-titulo { font-size: 15px; }
     .ticket-print .t-subtitulo { font-size: 13px; }
     .ticket-print .t-dato { font-size: 11.5px; }
@@ -160,7 +162,7 @@ body { background-color: var(--bg-light); font-family: 'Segoe UI', Tahoma, Genev
     margin-bottom: 4px; 
     border-bottom: 1px solid #cbd5e1; 
 }
-.informe-logo { display: block; width: 68px; height: 68px; object-fit: contain; margin: 0 auto 4px auto; }
+.informe-logo, .informe-logo-banner { display: block; max-width: 320px; max-height: 64px; width: auto; height: auto; object-fit: contain; }
 .informe-qr {
     display: block;
     width: 72px;
