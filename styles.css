@@ -302,10 +302,9 @@ body { background-color: var(--bg-light); font-family: 'Segoe UI', Tahoma, Genev
     background: #ffffff;
 }
 /* ========================================================
-   ESTILO EXACTO Y DEFINITIVO PARA INFORME ADN Y PATERNIDAD
+   ESTILO DEFINITIVO PARA TABLA Y REPORTE DE ADN / PATERNIDAD
    ======================================================== */
 
-/* Contenedor principal */
 .adn-paternidad-contenedor {
     font-family: Arial, sans-serif !important;
     color: #000000 !important;
@@ -324,17 +323,34 @@ body { background-color: var(--bg-light); font-family: 'Segoe UI', Tahoma, Genev
     font-size: 11px !important;
 }
 
-/* Bordes internos delgados para celdas y encabezados */
+/* Base general: líneas horizontales sutiles y sin líneas verticales por defecto */
 .adn-tabla-comparativa th,
 .adn-tabla-comparativa td {
-    border: 1px solid #000000 !important; /* Líneas divisorias bien definidas */
+    border-top: 1px solid #d1d5db !important;
+    border-bottom: 1px solid #d1d5db !important;
+    border-left: none !important;
+    border-right: none !important;
     padding: 3px 5px !important;
     text-align: center;
     vertical-align: middle;
     font-size: 11px !important;
 }
 
-/* Encabezados y títulos principales dentro del cuadro */
+/* LÍNEAS VERTICALES EXCLUSIVAS DEL MODELO */
+
+/* 1. División entre Loci/IP y el Menor */
+.adn-tabla-comparativa th:nth-child(2),
+.adn-tabla-comparativa td:nth-child(2) {
+    border-right: 1.5px solid #000000 !important;
+}
+
+/* 2. División entre el Menor y el Presunto Padre */
+.adn-tabla-comparativa th:nth-child(4),
+.adn-tabla-comparativa td:nth-child(4) {
+    border-right: 1.5px solid #000000 !important;
+}
+
+/* Encabezados del cuadro */
 .adn-tabla-comparativa th,
 .adn-th-header {
     background-color: #ffffff !important;
@@ -343,14 +359,19 @@ body { background-color: var(--bg-light); font-family: 'Segoe UI', Tahoma, Genev
     text-transform: uppercase;
 }
 
-/* Nombres de los examinados (NORMA / ENRIQUE, etc.) */
+.adn-th-header {
+    border-top: 1.5px solid #000000 !important;
+    border-bottom: 1.5px solid #000000 !important;
+}
+
+/* Nombres de los examinados */
 .adn-nombre-paciente {
     font-size: 12px !important;
     font-weight: bold !important;
     letter-spacing: 0.5px;
 }
 
-/* Valores y números de los alelos */
+/* Números y marcadores de alelos */
 .adn-tabla-comparativa td {
     font-weight: 600 !important;
     color: #000000 !important;
@@ -400,7 +421,7 @@ body { background-color: var(--bg-light); font-family: 'Segoe UI', Tahoma, Genev
     border-right: none !important;
 }
 
-/* Bloque para exámenes generales estándar */
+/* Estilos de soporte para otros informes */
 .examen-bloque {
     margin-bottom: 12px;
     page-break-inside: avoid !important;
