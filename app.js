@@ -1331,7 +1331,7 @@ function generarEditorFormularioPaternidad(ex, exIdx, orden, guardado) {
                         <div class="col-md-6 border-end">
                             <h6 class="fw-bold text-primary mb-2"><i class="bi bi-person me-1"></i>MENOR / EXAMINADO(A)</h6>
                             <div class="mb-2">
-                                <label class="form-label small mb-1">Nombre Completo del Menor:</label>
+                                <label class="form-label small mb-1">Nombre Completo del Menor / Examinado(a):</label>
                                 <input type="text" class="form-control form-control-sm fw-bold" id="p-edit-menorNombre" value="${escapeHTML(pData.menorNombre || orden.nombre)}" placeholder="ej. NORMA">
                             </div>
                             <div class="row g-2">
