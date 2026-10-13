@@ -1,7 +1,8 @@
 :root { 
-    --sidebar-width: 210px; 
+    --sidebar-width: 220px; 
     --primary-color: #0072bc; 
-    --dark-sidebar: #0f172a; 
+    --dark-sidebar: #0b1526; 
+    --sidebar-header-bg: #111d33;
     --bg-light: #f8fafc; 
 } 
 * { box-sizing: border-box; }
@@ -10,17 +11,41 @@ body { background-color: var(--bg-light); font-family: 'Segoe UI', Tahoma, Genev
 .sidebar { 
     width: var(--sidebar-width); 
     min-height: 100vh; 
-    background-color: var(--dark-sidebar); 
+    background: linear-gradient(180deg, #0e1e38 0%, #091322 100%); 
     color: #ffffff; 
     flex-shrink: 0; 
     display: flex; 
     flex-direction: column; 
     justify-content: space-between; 
     transition: all 0.25s ease-in-out; 
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.25);
     z-index: 1040; 
 }
-.sidebar-header { background-color: #09101d; padding: 12px 10px !important; }
-.sidebar-logo { max-width: 100% !important; max-height: 52px !important; height: auto !important; width: auto !important; object-fit: contain; display: block; margin: 0 auto 6px auto; }
+.sidebar-header { 
+    background: linear-gradient(180deg, #162646 0%, #0e1e38 100%); 
+    padding: 14px 10px 12px 10px !important; 
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12) !important;
+}
+.sidebar-logo-container {
+    background: #ffffff;
+    border-radius: 8px;
+    padding: 6px 10px;
+    margin: 4px auto 8px auto;
+    max-width: 92%;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.sidebar-logo { 
+    max-width: 100% !important; 
+    max-height: 48px !important; 
+    height: auto !important; 
+    width: auto !important; 
+    object-fit: contain; 
+    display: block; 
+    margin: 0 auto; 
+}
 .sidebar .nav-link { 
     color: #94a3b8; 
     padding: 9px 12px; 
@@ -214,6 +239,73 @@ body { background-color: var(--bg-light); font-family: 'Segoe UI', Tahoma, Genev
 .dato-rotulo::after { content: ":"; }
 .dato-valor { font-size: 10px; font-weight: 600; color: #0f172a; min-width: 0; word-break: break-word; }
 
+/* ========================================================
+   FORMATO ESPECIALIZADO: INFORME DE PRUEBA DE ADN (PATERNIDAD)
+   Idéntico al PDF de laboratorio con trazabilidad pericial
+   ======================================================== */
+.adn-paternidad-contenedor {
+    font-family: Arial, 'Helvetica Neue', Helvetica, sans-serif !important;
+    color: #000000 !important;
+    width: 100%;
+    margin: 0 auto;
+    font-size: 10px;
+    line-height: 1.25;
+}
+.adn-tabla-comparativa {
+    width: 100%;
+    border-collapse: collapse;
+    border: 1.5px solid #000000;
+    margin-bottom: 6px;
+    font-size: 9.5px;
+}
+.adn-tabla-comparativa th,
+.adn-tabla-comparativa td {
+    border: 1px solid #000000;
+    padding: 2.2px 4px;
+    text-align: center;
+    vertical-align: middle;
+}
+.adn-th-header {
+    background-color: #ffffff;
+    font-weight: 700;
+    color: #000000;
+    font-size: 9.5px;
+    text-transform: uppercase;
+}
+.adn-bloque-interpretacion {
+    border: 1.5px solid #000000;
+    padding: 6px 8px;
+    margin-bottom: 6px;
+    font-size: 9.5px;
+    line-height: 1.35;
+    background: #ffffff;
+}
+.adn-bloque-globales {
+    border: 1.5px solid #000000;
+    margin-bottom: 4px;
+    display: flex;
+    background: #ffffff;
+}
+.adn-globales-col-izq {
+    flex: 1 1 58%;
+    border-right: 1.5px solid #000000;
+    padding: 6px 8px;
+}
+.adn-globales-col-der {
+    flex: 1 1 42%;
+    display: flex;
+}
+.adn-subcol-personal {
+    flex: 1 1 50%;
+    padding: 4px;
+    font-size: 8px;
+    text-align: center;
+    border-right: 1px solid #000000;
+}
+.adn-subcol-personal:last-child {
+    border-right: none;
+}
+
 /* Bloque individual de cada examen (no se rompe por la mitad) */
 .examen-bloque {
     margin-bottom: 12px;
@@ -397,6 +489,11 @@ body { background-color: var(--bg-light); font-family: 'Segoe UI', Tahoma, Genev
         display: flex !important;
         flex-direction: column !important;
         justify-content: space-between !important;
+    }
+
+    .informe-pagina-paternidad {
+        justify-content: flex-start !important;
+        padding: 5mm 9mm 3mm 9mm !important;
     }
 
     .informe-pagina-a4:not(:last-child) {
