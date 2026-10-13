@@ -16,7 +16,6 @@ let db = null;
 let auth = null;
 let iniciado = false;
 let suscrito = false;
-let aplicandoRemoto = false;
 
 function limpiar(objeto) {
     return JSON.parse(JSON.stringify(objeto));
@@ -47,7 +46,8 @@ function nubeIniciar() {
                 const correo = document.getElementById("nube-correo");
                 if (correo) correo.textContent = usuario.email || "sesión iniciada";
             }
-            sincronizarTodo();
+            sincronizarTodoEnTiempoReal();
+            sincronizarConfiguracionInicial();
         } else if (login) {
             login.classList.remove("d-none");
         }
@@ -71,109 +71,172 @@ window.nubeCerrarSesion = function () {
     if (auth) signOut(auth);
 };
 
-async function sincronizarTodo() {
-    if (aplicandoRemoto || window.bloquearSincronizacion || !db) return;
-    aplicandoRemoto = true;
+// Carga única para configuración general (logo, etc.)
+async function sincronizarConfiguracionInicial() {
+    if (!db) return;
     try {
-        if (typeof window.ordenesRegistradas === "undefined") window.ordenesRegistradas = [];
-        if (typeof ordenesRegistradas === "undefined") {
-            var ordenesRegistradas = window.ordenesRegistradas;
-        }
-
-        const snapOrd = await getDocs(collection(db, "ordenes"));
-        snapOrd.forEach(d => {
-            const remota = d.data();
-            const idOrdenStr = String(d.id);
-            if (window.ordenesEliminadas && window.ordenesEliminadas.includes(idOrdenStr)) return;
-            
-            const local = ordenesRegistradas.find(o => String(o.nroOrden) === idOrdenStr);
-            if (!local) ordenesRegistradas.push(remota);
-            else if ((remota.en || 0) > (local.en || 0)) Object.assign(local, remota);
-        });
-        ordenesRegistradas.sort((a, b) => (b.en || 0) - (a.en || 0));
-
-        const snapCat = await getDocs(collection(db, "catalogo"));
-        snapCat.forEach(d => {
-            const remoto = d.data();
-            const idCodStr = String(d.id);
-            const eliminadosExamenes = JSON.parse(localStorage.getItem("vital_examenes_eliminados") || "[]");
-            if (eliminadosExamenes.includes(idCodStr)) return;
-
-            const idx = examenesCatalogo.findIndex(e => String(e.codigo) === idCodStr);
-            if (idx === -1) examenesCatalogo.push(remoto);
-            else if ((remoto.en || 0) > (examenesCatalogo[idx].en || 0)) examenesCatalogo[idx] = remoto;
-        });
-
-        const snapCaja = await getDocs(collection(db, "caja"));
-        let nuevaCaja = [];
-        snapCaja.forEach(d => {
-            const idMovStr = String(d.id);
-            const eliminadosCaja = JSON.parse(localStorage.getItem("vital_caja_eliminados") || "[]");
-            if (eliminadosCaja.includes(idMovStr)) return;
-
-            const remota = d.data();
-            remota.id = idMovStr;
-            nuevaCaja.push(remota);
-        });
-        cajaMovimientos = mergePorClave(cajaMovimientos.concat(nuevaCaja), m => m.id);
-        cajaMovimientos = cajaMovimientos.filter(m => !JSON.parse(localStorage.getItem("vital_caja_eliminados") || "[]").includes(String(m.id)));
-        cajaMovimientos.sort((a, b) => (b.en || 0) - (a.en || 0));
-        
-        const snapPac = await getDocs(collection(db, "pacientes"));
-        snapPac.forEach(d => {
-            const remota = d.data();
-            if (!window.pacientesRegistrados) window.pacientesRegistrados = [];
-            const norm = (typeof normalizarPaciente === "function") ? normalizarPaciente(remota) : remota;
-            const clave = String(norm.dni || d.id);
-            if (typeof pacienteEliminado === "function" && pacienteEliminado(clave)) return;
-            
-            const idx = window.pacientesRegistrados.findIndex(p => (p.dni && String(p.dni) === clave) || String(p.id) === d.id);
-            if (idx === -1) window.pacientesRegistrados.push(norm);
-            else window.pacientesRegistrados[idx] = Object.assign({}, window.pacientesRegistrados[idx], norm);
-        });
-
-        const snapCot = await getDocs(collection(db, "cotizaciones"));
-        let nuevasCot = [];
-        snapCot.forEach(d => {
-            const remota = d.data();
-            const idCotStr = String(d.id);
-            const eliminadosCot = JSON.parse(localStorage.getItem("vital_cotizaciones_eliminadas") || "[]");
-            if (eliminadosCot.includes(idCotStr)) return;
-
-            if (!window.cotizacionesGuardadas) window.cotizacionesGuardadas = [];
-            const norm = (typeof estandarizarCotizacion === "function") ? estandarizarCotizacion(remota) : remota;
-            norm.id = idCotStr;
-            nuevasCot.push(norm);
-        });
-        window.cotizacionesGuardadas = mergePorClave((window.cotizacionesGuardadas || []).concat(nuevasCot), c => c.id);
-        window.cotizacionesGuardadas = window.cotizacionesGuardadas.filter(c => !JSON.parse(localStorage.getItem("vital_cotizaciones_eliminadas") || "[]").includes(String(c.id)));
-
-        try {
-            const snapConf = await getDocs(collection(db, "configuracion"));
-            snapConf.forEach(d => {
-                if (d.id === "general") {
-                    const remota = d.data();
-                    if (remota && remota.logoBase64) {
-                        localStorage.setItem("vital_logo_custom", remota.logoBase64);
-                        window.VITAL_LOGO_CUSTOM = remota.logoBase64;
-                        const sideImg = document.getElementById("sidebar-logo-img");
-                        if (sideImg) sideImg.src = remota.logoBase64;
-                    }
+        const snapConf = await getDocs(collection(db, "configuracion"));
+        snapConf.forEach(d => {
+            if (d.id === "general") {
+                const remota = d.data();
+                if (remota && remota.logoBase64) {
+                    localStorage.setItem("vital_logo_custom", remota.logoBase64);
+                    window.VITAL_LOGO_CUSTOM = remota.logoBase64;
+                    const sideImg = document.getElementById("sidebar-logo-img");
+                    if (sideImg) sideImg.src = remota.logoBase64;
                 }
-            });
-        } catch (eConf) {
-            // Documento de configuración opcional
-        }
+            }
+        });
+    } catch (eConf) {
+        // Documento de configuración opcional
+    }
+}
+
+// Sincronización en tiempo real con onSnapshot para que los cambios y eliminaciones se reflejen al instante
+function sincronizarTodoEnTiempoReal() {
+    if (suscrito || !db) return;
+    suscrito = true;
+
+    // 1. Órdenes
+    onSnapshot(collection(db, "ordenes"), (snapshot) => {
+        if (typeof window.ordenesRegistradas === "undefined") window.ordenesRegistradas = [];
+        
+        snapshot.docChanges().forEach((change) => {
+            const remota = change.doc.data();
+            const idOrdenStr = String(change.doc.id);
+            const eliminadas = window.ordenesEliminadas || [];
+
+            if (change.type === "added" || change.type === "modified") {
+                if (eliminadas.includes(idOrdenStr)) return;
+                const idx = ordenesRegistradas.findIndex(o => String(o.nroOrden) === idOrdenStr);
+                if (idx === -1) {
+                    ordenesRegistradas.push(remota);
+                } else if ((remota.en || 0) >= (ordenesRegistradas[idx].en || 0)) {
+                    Object.assign(ordenesRegistradas[idx], remota);
+                }
+            }
+            if (change.type === "removed") {
+                ordenesRegistradas = ordenesRegistradas.filter(o => String(o.nroOrden) !== idOrdenStr);
+            }
+        });
+
+        ordenesRegistradas.sort((a, b) => (b.en || 0) - (a.en || 0));
+        persistirDatos();
+        if (typeof cargarOrdenes === "function") cargarOrdenes();
+        if (typeof actualizarTotalesCaja === "function") actualizarTotalesCaja();
+    });
+
+    // 2. Catálogo de Exámenes
+    onSnapshot(collection(db, "catalogo"), (snapshot) => {
+        if (typeof examenesCatalogo === "undefined") return;
+
+        snapshot.docChanges().forEach((change) => {
+            const remoto = change.doc.data();
+            const idCodStr = String(change.doc.id);
+            const eliminadosExamenes = JSON.parse(localStorage.getItem("vital_examenes_eliminados") || "[]");
+
+            if (change.type === "added" || change.type === "modified") {
+                if (eliminadosExamenes.includes(idCodStr)) return;
+                const idx = examenesCatalogo.findIndex(e => String(e.codigo) === idCodStr);
+                if (idx === -1) {
+                    examenesCatalogo.push(remoto);
+                } else if ((remoto.en || 0) >= (examenesCatalogo[idx].en || 0)) {
+                    examenesCatalogo[idx] = remoto;
+                }
+            }
+            if (change.type === "removed") {
+                examenesCatalogo = examenesCatalogo.filter(e => String(e.codigo) !== idCodStr);
+            }
+        });
 
         persistirDatos();
+        if (typeof renderizarTablaCatalogo === "function") renderizarTablaCatalogo();
+    });
+
+    // 3. Caja (Movimientos)
+    onSnapshot(collection(db, "caja"), (snapshot) => {
+        if (typeof cajaMovimientos === "undefined") cajaMovimientos = [];
+
+        snapshot.docChanges().forEach((change) => {
+            const remota = change.doc.data();
+            const idMovStr = String(change.doc.id);
+            remota.id = idMovStr;
+            const eliminadosCaja = JSON.parse(localStorage.getItem("vital_caja_eliminados") || "[]");
+
+            if (change.type === "added" || change.type === "modified") {
+                if (eliminadosCaja.includes(idMovStr)) return;
+                const idx = cajaMovimientos.findIndex(m => String(m.id) === idMovStr);
+                if (idx === -1) {
+                    cajaMovimientos.push(remota);
+                } else {
+                    Object.assign(cajaMovimientos[idx], remota);
+                }
+            }
+            if (change.type === "removed") {
+                cajaMovimientos = cajaMovimientos.filter(m => String(m.id) !== idMovStr);
+            }
+        });
+
+        cajaMovimientos.sort((a, b) => (b.en || 0) - (a.en || 0));
+        persistirDatos();
         if (typeof actualizarTotalesCaja === "function") actualizarTotalesCaja();
+    });
+
+    // 4. Pacientes
+    onSnapshot(collection(db, "pacientes"), (snapshot) => {
+        if (!window.pacientesRegistrados) window.pacientesRegistrados = [];
+
+        snapshot.docChanges().forEach((change) => {
+            const remota = change.doc.data();
+            const norm = (typeof normalizarPaciente === "function") ? normalizarPaciente(remota) : remota;
+            const clave = String(norm.dni || change.doc.id);
+            if (typeof pacienteEliminado === "function" && pacienteEliminado(clave)) return;
+
+            if (change.type === "added" || change.type === "modified") {
+                const idx = window.pacientesRegistrados.findIndex(p => (p.dni && String(p.dni) === clave) || String(p.id) === change.doc.id);
+                if (idx === -1) {
+                    window.pacientesRegistrados.push(norm);
+                } else {
+                    window.pacientesRegistrados[idx] = Object.assign({}, window.pacientesRegistrados[idx], norm);
+                }
+            }
+            if (change.type === "removed") {
+                window.pacientesRegistrados = window.pacientesRegistrados.filter(p => String(p.dni) !== clave && String(p.id) !== change.doc.id);
+            }
+        });
+
+        persistirDatos();
+        if (typeof cargarPacientes === "function") cargarPacientes();
+    });
+
+    // 5. Cotizaciones
+    onSnapshot(collection(db, "cotizaciones"), (snapshot) => {
+        if (!window.cotizacionesGuardadas) window.cotizacionesGuardadas = [];
+
+        snapshot.docChanges().forEach((change) => {
+            const remota = change.doc.data();
+            const idCotStr = String(change.doc.id);
+            const eliminadosCot = JSON.parse(localStorage.getItem("vital_cotizaciones_eliminadas") || "[]");
+
+            if (change.type === "added" || change.type === "modified") {
+                if (eliminadosCot.includes(idCotStr)) return;
+                const norm = (typeof estandarizarCotizacion === "function") ? estandarizarCotizacion(remota) : remota;
+                norm.id = idCotStr;
+                const idx = window.cotizacionesGuardadas.findIndex(c => String(c.id) === idCotStr);
+                if (idx === -1) {
+                    window.cotizacionesGuardadas.push(norm);
+                } else {
+                    Object.assign(window.cotizacionesGuardadas[idx], norm);
+                }
+            }
+            if (change.type === "removed") {
+                window.cotizacionesGuardadas = window.cotizacionesGuardadas.filter(c => String(c.id) !== idCotStr);
+            }
+        });
+
+        persistirDatos();
         if (typeof cargarCotizaciones === "function") cargarCotizaciones();
-        if (typeof cargarOrdenes === "function") cargarOrdenes();
-    } catch (error) {
-        console.error("No se pudo sincronizar con la nube:", error);
-    } finally {
-        aplicandoRemoto = false;
-    }
+    });
 }
 
 window.nubeGuardarConfiguracion = function (conf) {
