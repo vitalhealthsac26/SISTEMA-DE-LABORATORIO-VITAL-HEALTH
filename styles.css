@@ -380,10 +380,10 @@ body { background-color: var(--bg-light); font-family: 'Segoe UI', Tahoma, Genev
 /* Bloque inferior de Interpretación */
 .adn-bloque-interpretacion {
     border: 1.5px solid #000000 !important;
-    padding: 10px 12px !important;
+    padding: 12px 14px !important;
     margin-bottom: 8px;
-    font-size: 12.5px !important; /* Aumentado de 10.5px a 12.5px */
-    line-height: 1.45;
+    font-size: 13.5px !important; /* Tamaño mínimo de 13.5px para el cuerpo */
+    line-height: 1.5;
     background: #ffffff;
     text-align: justify;
     color: #000000 !important;
@@ -392,7 +392,7 @@ body { background-color: var(--bg-light); font-family: 'Segoe UI', Tahoma, Genev
 .adn-bloque-interpretacion u,
 .adn-bloque-interpretacion strong,
 .adn-bloque-interpretacion b {
-    font-size: 13px !important;
+    font-size: 14.5px !important;
     font-weight: bold !important;
 }
 
@@ -408,26 +408,60 @@ body { background-color: var(--bg-light); font-family: 'Segoe UI', Tahoma, Genev
 .adn-globales-col-izq {
     flex: 1 1 58%;
     border-right: 1.5px solid #000000 !important;
-    padding: 10px 12px !important;
-    font-size: 12px !important; /* Aumentado de 10.5px a 12px */
+    padding: 12px 14px !important;
+    font-size: 13.5px !important; /* Tamaño mínimo general de 13.5px */
     color: #000000 !important;
-    line-height: 1.4;
+    line-height: 1.5;
 }
 
-/* Título "RESULTADOS GLOBALES" y textos/números en negrita */
+/* Título "RESULTADOS GLOBALES" */
 .adn-globales-col-izq h4,
 .adn-globales-col-izq .titulo-globales {
-    font-size: 14px !important;
+    font-size: 16px !important;
     font-weight: bold !important;
     text-align: center;
-    margin-bottom: 8px;
+    margin-bottom: 10px;
     text-transform: uppercase;
 }
 
-.adn-globales-col-izq strong,
-.adn-globales-col-izq b {
-    font-size: 13px !important; /* Aumenta el tamaño de los números y porcentajes */
+/* Etiqueta del texto "ÍNDICE DE PATERNIDAD ACUMULATIVO:" */
+.adn-globales-col-izq .label-indice,
+.adn-globales-col-izq p:nth-of-type(1) {
+    font-size: 13.5px !important;
     font-weight: bold !important;
+}
+
+/* Respuesta/Valor del Índice (ej: 1,321,629,527) -> TAMAÑO 15 */
+.adn-globales-col-izq .valor-indice,
+.adn-globales-col-izq .indice-valor,
+.adn-globales-col-izq p:nth-of-type(1) span,
+.adn-globales-col-izq p:nth-of-type(1) strong {
+    font-size: 15px !important;
+    font-weight: bold !important;
+}
+
+/* Etiqueta del texto "PROBABILIDAD DE PATERNIDAD ACUMULATIVA:" */
+.adn-globales-col-izq .label-probabilidad,
+.adn-globales-col-izq p:nth-of-type(2) {
+    font-size: 13.5px !important;
+    font-weight: bold !important;
+}
+
+/* Respuesta/Valor de la Probabilidad (ej: 99.9999992%) -> TAMAÑO 17 */
+.adn-globales-col-izq .valor-probabilidad,
+.adn-globales-col-izq .probabilidad-valor,
+.adn-globales-col-izq p:nth-of-type(2) span,
+.adn-globales-col-izq p:nth-of-type(2) strong {
+    font-size: 17px !important;
+    font-weight: bold !important;
+}
+
+/* Nota inferior sobre la muestra */
+.adn-globales-col-izq .nota-laboratorio,
+.adn-globales-col-izq small {
+    font-size: 11.5px !important;
+    display: block;
+    margin-top: 6px;
 }
 
 /* Columna derecha: Sección de Firmas y Sellos */
@@ -439,7 +473,7 @@ body { background-color: var(--bg-light); font-family: 'Segoe UI', Tahoma, Genev
 .adn-subcol-personal {
     flex: 1 1 50%;
     padding: 6px 4px;
-    font-size: 9px !important; /* Ligeramente más legible para los encabezados de firma */
+    font-size: 10px !important;
     font-weight: bold;
     text-align: center;
     border-right: 1.5px solid #000000 !important;
@@ -448,71 +482,6 @@ body { background-color: var(--bg-light); font-family: 'Segoe UI', Tahoma, Genev
 
 .adn-subcol-personal:last-child {
     border-right: none !important;
-}
-/* Estilos de soporte para otros informes */
-.examen-bloque {
-    margin-bottom: 12px;
-    page-break-inside: avoid !important;
-    break-inside: avoid !important;
-}
-
-.examen-bloque h3 {
-    background-color: #f1f5f9;
-    padding: 6px 10px;
-    font-size: 13px !important;
-    color: #1e293b;
-    border-left: 4px solid #2563eb;
-    margin-bottom: 6px;
-    font-weight: 700;
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
-}
-
-.informe-tabla { 
-    width: 100%; 
-    border-collapse: collapse; 
-    font-size: 11px !important;
-    margin-bottom: 6px; 
-}
-
-.informe-tabla th,
-.informe-tabla td { 
-    border: 0; 
-    border-bottom: 1px solid #e2e8f0; 
-    padding: 4px 6px; 
-    text-align: left; 
-    vertical-align: top; 
-}
-
-.informe-tabla thead th {
-    border-bottom: 1.5px solid #0072bc;
-    background-color: #f8fafc;
-    color: #334155;
-    font-size: 10px !important;
-    text-transform: uppercase;
-    letter-spacing: .5px;
-    padding-top: 5px;
-    padding-bottom: 5px;
-    font-weight: 700;
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
-}
-
-.informe-tabla tr.seccion-fila td {
-    background-color: #e2e8f0 !important;
-    font-weight: 700;
-    color: #0f172a;
-    padding: 5px 6px;
-    font-size: 11px !important;
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
-}
-
-.informe-nota { 
-    font-size: 9.5px !important; 
-    font-style: italic; 
-    color: #64748b; 
-    margin: 4px 0; 
 }
 /* Firma de la bióloga (en todas las hojas de resultados) */
 .bloque-firma-completo {
