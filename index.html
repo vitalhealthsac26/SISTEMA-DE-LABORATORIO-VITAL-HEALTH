@@ -793,107 +793,94 @@
                         </div>
                     </div>
 
-                    <!-- Pestañas o Selector de Acción -->
-                    <ul class="nav nav-pills nav-fill mb-3" id="pills-pago-tab" role="tablist">
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link active py-1 px-2 fw-semibold small" id="tab-abono-hoy" data-bs-toggle="pill" data-bs-target="#panel-abono-hoy" type="button" role="tab">
-                                <i class="bi bi-wallet2 me-1"></i>Abonar / Cancelar Hoy
-                            </button>
-                        </li>
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link py-1 px-2 fw-semibold small" id="tab-modificar-orden" data-bs-toggle="pill" data-bs-target="#panel-modificar-orden" type="button" role="tab">
-                                <i class="bi bi-pencil-square me-1"></i>Modificar Deuda / Orden Pasada
-                            </button>
-                        </li>
-                    </ul>
+                    <div class="alert alert-primary py-2 px-3 small mb-3">
+                        <i class="bi bi-pencil-square me-1"></i><strong>Modificación Directa de Pago y Deuda:</strong> Puedes escribir directamente cuánto pagó el paciente o cuánto debe. El sistema calcula la diferencia automáticamente y actualiza la orden y el ticket sin sumar pagos erróneos.
+                    </div>
 
-                    <div class="tab-content" id="pills-pago-tabContent">
-                        <!-- PANEL 1: ABONAR O CANCELAR HOY -->
-                        <div class="tab-pane fade show active" id="panel-abono-hoy" role="tabpanel">
-                            <div class="alert alert-info py-2 small mb-3">
-                                <i class="bi bi-info-circle me-1"></i>Utilice esta opción cuando el paciente acuda hoy a dejar un abono o cancelar su saldo pendiente. Esto registrará un ingreso en la caja de hoy.
+                    <!-- Campos principales editables en tiempo real con cálculo bidireccional -->
+                    <div class="card border p-3 bg-white shadow-sm mb-3">
+                        <div class="row g-3">
+                            <div class="col-12 col-md-4">
+                                <label class="form-label small fw-bold mb-1 text-dark" for="mod-pago-total">
+                                    <i class="bi bi-tag-fill text-secondary me-1"></i>Total de la Orden:
+                                </label>
+                                <div class="input-group input-group-sm">
+                                    <span class="input-group-text bg-light fw-bold">S/</span>
+                                    <input type="number" step="0.01" min="0" id="mod-pago-total" class="form-control fw-bold" oninput="alCambiarTotalEnModal()">
+                                </div>
+                                <small class="text-muted" style="font-size: 11px;">Monto total a cobrar</small>
                             </div>
-                            <div class="row g-2 mb-2">
-                                <div class="col-6">
-                                    <label class="form-label small text-muted mb-1">Total de la Orden:</label>
-                                    <div class="input-group input-group-sm">
-                                        <span class="input-group-text">S/</span>
-                                        <input type="text" id="abono-total-display" class="form-control bg-light fw-bold" readonly>
-                                    </div>
+
+                            <div class="col-12 col-md-4">
+                                <label class="form-label small fw-bold mb-1 text-success" for="mod-pago-acuenta">
+                                    <i class="bi bi-cash-coin me-1"></i>Pagó (A Cuenta):
+                                </label>
+                                <div class="input-group input-group-sm">
+                                    <span class="input-group-text bg-light fw-bold text-success">S/</span>
+                                    <input type="number" step="0.01" min="0" id="mod-pago-acuenta" class="form-control fw-bold text-success" oninput="alCambiarACuentaEnModal()">
                                 </div>
-                                <div class="col-6">
-                                    <label class="form-label small text-muted mb-1">Saldo que Debe Actualmente:</label>
-                                    <div class="input-group input-group-sm">
-                                        <span class="input-group-text">S/</span>
-                                        <input type="text" id="abono-deuda-display" class="form-control bg-light fw-bold text-danger" readonly>
-                                    </div>
-                                </div>
+                                <small class="text-muted" style="font-size: 11px;">Lo que realmente pagó</small>
                             </div>
-                            <div class="row g-2 mb-3">
-                                <div class="col-6">
-                                    <label class="form-label small fw-bold mb-1">Monto que Abona Hoy (S/):</label>
-                                    <input type="number" step="0.01" min="0.01" id="abono-monto-ingreso" class="form-control form-control-sm fw-bold text-success" placeholder="0.00">
+
+                            <div class="col-12 col-md-4">
+                                <label class="form-label small fw-bold mb-1 text-danger" for="mod-pago-saldo">
+                                    <i class="bi bi-exclamation-triangle-fill me-1"></i>Debe Actualmente:
+                                </label>
+                                <div class="input-group input-group-sm">
+                                    <span class="input-group-text bg-light fw-bold text-danger">S/</span>
+                                    <input type="number" step="0.01" min="0" id="mod-pago-saldo" class="form-control fw-bold text-danger" oninput="alCambiarSaldoEnModal()">
                                 </div>
-                                <div class="col-6">
-                                    <label class="form-label small fw-bold mb-1">Método de Pago:</label>
-                                    <select id="abono-metodo-pago" class="form-select form-select-sm">
-                                        <option value="Efectivo">Efectivo</option>
-                                        <option value="Yape">Yape</option>
-                                        <option value="Plin">Plin</option>
-                                        <option value="Tarjeta / Transferencia">Tarjeta / Transferencia</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="d-grid gap-2">
-                                <button type="button" class="btn btn-success fw-bold" onclick="ejecutarAbonoCajaHoy()">
-                                    <i class="bi bi-check2-circle me-1"></i>Registrar Abono en Caja y Actualizar Saldo
-                                </button>
+                                <small class="text-muted" style="font-size: 11px;">Saldo restante pendiente</small>
                             </div>
                         </div>
 
-                        <!-- PANEL 2: MODIFICAR ORDEN PASADA / DECLARAR DEUDA RETROACTIVA -->
-                        <div class="tab-pane fade" id="panel-modificar-orden" role="tabpanel">
-                            <div class="alert alert-warning py-2 small mb-3">
-                                <i class="bi bi-clock-history me-1"></i><strong>Para órdenes de ayer o días anteriores:</strong> Si olvidó registrar que el paciente no pagó completo, ajuste aquí el total o el monto a cuenta pagado.
-                            </div>
-                            <div class="row g-2 mb-2">
-                                <div class="col-6">
-                                    <label class="form-label small fw-bold mb-1">Total de la Orden (S/):</label>
-                                    <input type="number" step="0.01" min="0" id="mod-pago-total" class="form-control form-control-sm fw-bold" oninput="recalcularSaldoEnModalModificar()">
-                                </div>
-                                <div class="col-6">
-                                    <label class="form-label small fw-bold mb-1">Monto Pagado / A Cuenta (S/):</label>
-                                    <input type="number" step="0.01" min="0" id="mod-pago-acuenta" class="form-control form-control-sm fw-bold text-primary" oninput="recalcularSaldoEnModalModificar()">
-                                </div>
-                            </div>
-                            <div class="row g-2 mb-3">
-                                <div class="col-6">
-                                    <label class="form-label small text-muted mb-1">Saldo Resultante (Deuda):</label>
-                                    <div class="input-group input-group-sm">
-                                        <span class="input-group-text">S/</span>
-                                        <input type="text" id="mod-pago-saldo" class="form-control form-control-sm bg-light fw-bold" readonly>
-                                    </div>
-                                </div>
-                                <div class="col-6">
-                                    <label class="form-label small fw-bold mb-1">Método de Pago:</label>
-                                    <select id="mod-pago-metodo" class="form-select form-select-sm">
-                                        <option value="Efectivo">Efectivo</option>
-                                        <option value="Yape">Yape</option>
-                                        <option value="Plin">Plin</option>
-                                        <option value="Tarjeta / Transferencia">Tarjeta / Transferencia</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label small mb-1">Observación o Nota de Pago (Opcional):</label>
-                                <input type="text" id="mod-pago-nota" class="form-control form-control-sm" placeholder="ej. Pagó 600 soles, cancela al recoger resultados">
-                            </div>
-                            <div class="d-grid gap-2">
-                                <button type="button" class="btn btn-primary fw-bold" onclick="guardarAjusteRetroactivoDeuda()">
-                                    <i class="bi bi-save me-1"></i>Guardar Modificación de Orden y Deuda
-                                </button>
-                            </div>
+                        <!-- Botones de Acción Rápida -->
+                        <div class="d-flex flex-wrap gap-2 mt-3 pt-2 border-top align-items-center">
+                            <span class="small text-muted me-1">Atajos:</span>
+                            <button type="button" class="btn btn-sm btn-outline-success py-1 px-2 fw-semibold" onclick="fijarPagoCompletoModal()">
+                                <i class="bi bi-check2-all me-1"></i>Pagó Todo (Deuda S/ 0)
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-primary py-1 px-2 fw-semibold" onclick="fijarMitadModal()">
+                                <i class="bi bi-pie-chart-fill me-1"></i>50% Adelanto
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-danger py-1 px-2 fw-semibold" onclick="fijarNadaModal()">
+                                <i class="bi bi-x-circle me-1"></i>No Pagó Nada (Debe Todo)
+                            </button>
                         </div>
+                    </div>
+
+                    <!-- Método de pago y Notas -->
+                    <div class="row g-2 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold mb-1">Método de Pago:</label>
+                            <select id="mod-pago-metodo" class="form-select form-select-sm">
+                                <option value="Efectivo">Efectivo</option>
+                                <option value="Yape">Yape</option>
+                                <option value="Plin">Plin</option>
+                                <option value="Tarjeta / Transferencia">Tarjeta / Transferencia</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold mb-1">Observación o Nota (Opcional):</label>
+                            <input type="text" id="mod-pago-nota" class="form-control form-control-sm" placeholder="ej. Pagó 600 soles, cancela al recoger resultados">
+                        </div>
+                    </div>
+
+                    <!-- Opción de Sincronización con Caja -->
+                    <div class="form-check form-switch p-2 border rounded bg-light mb-3">
+                        <input class="form-check-input ms-0 me-2" type="checkbox" id="mod-pago-sync-caja" checked>
+                        <label class="form-check-label small fw-semibold text-dark" for="mod-pago-sync-caja" style="cursor: pointer;">
+                            <i class="bi bi-cash-stack me-1 text-primary"></i>Sincronizar y corregir el cobro en el Arqueo de Caja con este monto pagado
+                        </label>
+                    </div>
+
+                    <!-- Lista de Pagos registrados en Caja de esta Orden -->
+                    <div id="contenedor-movimientos-caja-orden" class="mb-3"></div>
+
+                    <div class="d-grid gap-2">
+                        <button type="button" class="btn btn-primary btn-lg fw-bold shadow-sm" onclick="guardarAjusteRetroactivoDeuda()">
+                            <i class="bi bi-save me-2"></i>Guardar Modificación de Orden y Deuda
+                        </button>
                     </div>
                 </div>
                 <div class="modal-footer py-2 bg-light d-flex justify-content-between">
