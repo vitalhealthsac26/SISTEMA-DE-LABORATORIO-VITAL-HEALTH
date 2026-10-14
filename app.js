@@ -2457,7 +2457,8 @@ function guardarResultados(nroOrden, silencioso = false) {
     if (!orden || !editor) return false;
 
     const grupos = editor.querySelectorAll("[data-ex]");
-    if (!grupos.length) return false;
+    const cardPaternidad = editor.querySelector("[data-paternidad-card='true']");
+    if (!grupos.length && !cardPaternidad) return false;
 
     const porExamen = {};
     grupos.forEach(fila => {
@@ -2486,7 +2487,6 @@ function guardarResultados(nroOrden, silencioso = false) {
     });
 
     // Si la orden incluye la prueba de paternidad y se editó con el formulario especializado
-    const cardPaternidad = editor.querySelector("[data-paternidad-card='true']");
     let datosPaternidadGuardar = null;
     if (cardPaternidad) {
         const valP = id => {
@@ -5130,19 +5130,13 @@ function generarBloquePaternidadOficialHTML(ex, orden) {
         const p1Val = escapeHTML(l.p1 ?? '');
         const p2Val = escapeHTML(l.p2 ?? '');
 
-        const esAmelogenina = /amelogen/i.test(l.locus || '');
-
         filasLociHTML += `
             <tr style="height: 18px; border-bottom: 0.5px solid #000000;">
                 <td style="font-weight: 700; text-align: left; padding: 1.5px 5px; font-size: 8.5px; border-right: 1px solid #000000;">${locusNom}</td>
                 <td style="font-weight: 700; text-align: center; padding: 1.5px 3px; font-size: 8.5px; border-right: 1.5px solid #000000;">${ipVal}</td>
-                ${esAmelogenina ? `
-                <td colspan="2" style="text-align: center; padding: 1.5px 3px; font-size: 8.5px; width: 36%; border-right: 1.5px solid #000000;">${m1Val}</td>
-                ` : `
-                <td style="text-align: center; padding: 1.5px 3px; font-size: 8.5px; width: 18%; border-right: 0.5px solid #777777;">${m1Val}</td>
+                <td style="text-align: center; padding: 1.5px 3px; font-size: 8.5px; width: 18%;">${m1Val}</td>
                 <td style="text-align: center; padding: 1.5px 3px; font-size: 8.5px; width: 18%; border-right: 1.5px solid #000000;">${m2Val}</td>
-                `}
-                <td style="text-align: center; padding: 1.5px 3px; font-size: 8.5px; width: 18%; border-right: 0.5px solid #777777;">${p1Val}</td>
+                <td style="text-align: center; padding: 1.5px 3px; font-size: 8.5px; width: 18%;">${p1Val}</td>
                 <td style="text-align: center; padding: 1.5px 3px; font-size: 8.5px; width: 18%;">${p2Val}</td>
             </tr>
         `;
@@ -5239,7 +5233,7 @@ function generarBloquePaternidadOficialHTML(ex, orden) {
                 </table>
 
                 <!-- CUADRO DE INTERPRETACIÓN PERICIAL -->
-                <div style="border: 1.5px solid #000000; padding: 4px 6px; margin-bottom: 5px; font-size: 8.5px; line-height: 1.3; background: #ffffff;">
+                <div style="border: 1.5px solid #000000; padding: 5px 7px; margin-bottom: 5px; font-size: 10px; line-height: 1.35; background: #ffffff;">
                     <div style="font-weight: 700; margin-bottom: 2px;">Interpretación:</div>
                     <div style="text-align: justify; color: #000000;">
                         ${interpretacion}
@@ -5248,18 +5242,18 @@ function generarBloquePaternidadOficialHTML(ex, orden) {
 
                 <!-- CUADRO DE RESULTADOS GLOBALES -->
                 <div style="border: 1.5px solid #000000; padding: 5px 8px; margin-bottom: 4px; background: #ffffff;">
-                    <div style="text-align: center; font-weight: 800; font-size: 10px; margin-bottom: 3px; letter-spacing: 0.5px;">
+                    <div style="text-align: center; font-weight: 800; font-size: 11.5px; margin-bottom: 4px; letter-spacing: 0.5px;">
                         RESULTADOS GLOBALES
                     </div>
-                    <div style="font-size: 9px; margin-bottom: 3px;">
+                    <div style="font-size: 10px; margin-bottom: 3px;">
                         <span style="font-weight: 700;">ÍNDICE DE PATERNIDAD ACUMULATIVO:</span> 
-                        <span style="font-weight: 800; font-size: 13px;">${ipc}</span>
+                        <span style="font-weight: 800; font-size: 14.5px;">${ipc}</span>
                     </div>
-                    <div style="font-size: 9px; margin-bottom: 4px;">
+                    <div style="font-size: 10px; margin-bottom: 4px;">
                         <span style="font-weight: 700;">PROBABILIDAD DE PATERNIDAD ACUMULATIVA:</span> 
-                        <span style="font-weight: 800; font-size: 13px;">${prob}</span>
+                        <span style="font-weight: 800; font-size: 14.5px;">${prob}</span>
                     </div>
-                    <div style="font-size: 7.5px; color: #222222; line-height: 1.25;">
+                    <div style="font-size: 8.5px; color: #222222; line-height: 1.25;">
                         ${notaLab}
                     </div>
                 </div>
