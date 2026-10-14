@@ -3,7 +3,7 @@
 // ============================================================
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import {
-    getFirestore, collection, getDocs, doc, setDoc, deleteDoc, onSnapshot, query, where
+    getFirestore, collection, getDocs, doc, setDoc, deleteDoc, onSnapshot
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import {
     getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut
@@ -16,6 +16,7 @@ let db = null;
 let auth = null;
 let iniciado = false;
 let suscrito = false;
+let aplicandoRemoto = false;
 
 function limpiar(objeto) {
     return JSON.parse(JSON.stringify(objeto));
@@ -46,8 +47,7 @@ function nubeIniciar() {
                 const correo = document.getElementById("nube-correo");
                 if (correo) correo.textContent = usuario.email || "sesión iniciada";
             }
-            sincronizarTodoEnTiempoReal();
-            sincronizarConfiguracionInicial();
+            sincronizarTodo();
         } else if (login) {
             login.classList.remove("d-none");
         }
@@ -71,172 +71,147 @@ window.nubeCerrarSesion = function () {
     if (auth) signOut(auth);
 };
 
-// Carga única para configuración general (logo, etc.)
-async function sincronizarConfiguracionInicial() {
-    if (!db) return;
+async function sincronizarTodo() {
+    if (aplicandoRemoto || window.bloquearSincronizacion || !db) return;
+    aplicandoRemoto = true;
     try {
-        const snapConf = await getDocs(collection(db, "configuracion"));
-        snapConf.forEach(d => {
-            if (d.id === "general") {
-                const remota = d.data();
-                if (remota && remota.logoBase64) {
-                    localStorage.setItem("vital_logo_custom", remota.logoBase64);
-                    window.VITAL_LOGO_CUSTOM = remota.logoBase64;
-                    const sideImg = document.getElementById("sidebar-logo-img");
-                    if (sideImg) sideImg.src = remota.logoBase64;
-                }
-            }
-        });
-    } catch (eConf) {
-        // Documento de configuración opcional
-    }
-}
-
-// Sincronización en tiempo real con onSnapshot para que los cambios y eliminaciones se reflejen al instante
-function sincronizarTodoEnTiempoReal() {
-    if (suscrito || !db) return;
-    suscrito = true;
-
-    // 1. Órdenes
-    onSnapshot(collection(db, "ordenes"), (snapshot) => {
         if (typeof window.ordenesRegistradas === "undefined") window.ordenesRegistradas = [];
-        
-        snapshot.docChanges().forEach((change) => {
-            const remota = change.doc.data();
-            const idOrdenStr = String(change.doc.id);
-            const eliminadas = window.ordenesEliminadas || [];
+        const ordenesLocales = window.ordenesRegistradas || [];
+        const snapOrd = await getDocs(collection(db, "ordenes"));
+        let ordenesActualizadas = [...ordenesLocales];
 
-            if (change.type === "added" || change.type === "modified") {
-                if (eliminadas.includes(idOrdenStr)) return;
-                const idx = ordenesRegistradas.findIndex(o => String(o.nroOrden) === idOrdenStr);
-                if (idx === -1) {
-                    ordenesRegistradas.push(remota);
-                } else if ((remota.en || 0) >= (ordenesRegistradas[idx].en || 0)) {
-                    Object.assign(ordenesRegistradas[idx], remota);
-                }
-            }
-            if (change.type === "removed") {
-                ordenesRegistradas = ordenesRegistradas.filter(o => String(o.nroOrden) !== idOrdenStr);
-            }
+        snapOrd.forEach(d => {
+            const remota = d.data();
+            const idOrdenStr = String(d.id);
+            if (window.ordenesEliminadas && window.ordenesEliminadas.includes(idOrdenStr)) return;
+            
+            const local = ordenesActualizadas.find(o => String(o.nroOrden) === idOrdenStr);
+            if (!local) ordenesActualizadas.push(remota);
+            else if ((remota.en || 0) > (local.en || 0)) Object.assign(local, remota);
         });
+        ordenesActualizadas.sort((a, b) => (b.en || 0) - (a.en || 0));
 
-        ordenesRegistradas.sort((a, b) => (b.en || 0) - (a.en || 0));
-        persistirDatos();
-        if (typeof cargarOrdenes === "function") cargarOrdenes();
-        if (typeof actualizarTotalesCaja === "function") actualizarTotalesCaja();
-    });
+        if (typeof window.actualizarOrdenesDesdeRemoto === "function") {
+            window.actualizarOrdenesDesdeRemoto(ordenesActualizadas);
+        } else {
+            window.ordenesRegistradas = ordenesActualizadas;
+        }
 
-    // 2. Catálogo de Exámenes
-    onSnapshot(collection(db, "catalogo"), (snapshot) => {
-        if (typeof examenesCatalogo === "undefined") return;
-
-        snapshot.docChanges().forEach((change) => {
-            const remoto = change.doc.data();
-            const idCodStr = String(change.doc.id);
+        const snapCat = await getDocs(collection(db, "catalogo"));
+        const catalogoLocal = window.examenesCatalogo || [];
+        snapCat.forEach(d => {
+            const remoto = d.data();
+            const idCodStr = String(d.id);
             const eliminadosExamenes = JSON.parse(localStorage.getItem("vital_examenes_eliminados") || "[]");
+            if (eliminadosExamenes.includes(idCodStr)) return;
 
-            if (change.type === "added" || change.type === "modified") {
-                if (eliminadosExamenes.includes(idCodStr)) return;
-                const idx = examenesCatalogo.findIndex(e => String(e.codigo) === idCodStr);
-                if (idx === -1) {
-                    examenesCatalogo.push(remoto);
-                } else if ((remoto.en || 0) >= (examenesCatalogo[idx].en || 0)) {
-                    examenesCatalogo[idx] = remoto;
-                }
-            }
-            if (change.type === "removed") {
-                examenesCatalogo = examenesCatalogo.filter(e => String(e.codigo) !== idCodStr);
-            }
+            const idx = catalogoLocal.findIndex(e => String(e.codigo) === idCodStr);
+            if (idx === -1) catalogoLocal.push(remoto);
+            else if ((remoto.en || 0) > (catalogoLocal[idx].en || 0)) catalogoLocal[idx] = remoto;
         });
 
-        persistirDatos();
-        if (typeof renderizarTablaCatalogo === "function") renderizarTablaCatalogo();
-    });
+        const snapCaja = await getDocs(collection(db, "caja"));
+        const eliminadosCaja = JSON.parse(localStorage.getItem("vital_caja_eliminados") || "[]");
+        const ordenesEliminadas = window.ordenesEliminadas || JSON.parse(localStorage.getItem("vital_ordenes_eliminadas") || "[]");
+        const nrosOrdenesActivas = new Set((window.ordenesRegistradas || []).map(o => String(o.nroOrden)).filter(Boolean));
 
-    // 3. Caja (Movimientos)
-    onSnapshot(collection(db, "caja"), (snapshot) => {
-        if (typeof cajaMovimientos === "undefined") cajaMovimientos = [];
-
-        snapshot.docChanges().forEach((change) => {
-            const remota = change.doc.data();
-            const idMovStr = String(change.doc.id);
+        let nuevaCaja = [];
+        for (const d of snapCaja.docs) {
+            const idMovStr = String(d.id);
+            const remota = d.data();
             remota.id = idMovStr;
-            const eliminadosCaja = JSON.parse(localStorage.getItem("vital_caja_eliminados") || "[]");
+            const nroOrdStr = String(remota.nroOrden || "");
 
-            if (change.type === "added" || change.type === "modified") {
-                if (eliminadosCaja.includes(idMovStr)) return;
-                const idx = cajaMovimientos.findIndex(m => String(m.id) === idMovStr);
-                if (idx === -1) {
-                    cajaMovimientos.push(remota);
-                } else {
-                    Object.assign(cajaMovimientos[idx], remota);
+            // Validación estricta: sólo cobros de órdenes que existan actualmente
+            const esEliminado = eliminadosCaja.includes(idMovStr);
+            const ordenFueEliminada = nroOrdStr && ordenesEliminadas.includes(nroOrdStr);
+            const ordenInexistente = nroOrdStr && !nrosOrdenesActivas.has(nroOrdStr);
+            const sinOrden = !nroOrdStr;
+
+            if (esEliminado || ordenFueEliminada || ordenInexistente || sinOrden) {
+                // Eliminar de Firestore para que ningún dispositivo vuelva a descargarlo
+                try {
+                    await deleteDoc(doc(db, "caja", idMovStr));
+                } catch (e) {
+                    console.error("Error purgando cobro inválido en Firestore:", e);
                 }
+                continue;
             }
-            if (change.type === "removed") {
-                cajaMovimientos = cajaMovimientos.filter(m => String(m.id) !== idMovStr);
-            }
+
+            nuevaCaja.push(remota);
+        }
+
+        const mergeFn = window.mergePorClave || function(list, fn) {
+            const m = new Map();
+            (list || []).forEach(x => { const k = fn(x); if (!m.has(k)) m.set(k, x); });
+            return Array.from(m.values());
+        };
+
+        const cajaActual = window.cajaMovimientos || [];
+        const cajaCombinada = mergeFn(cajaActual.concat(nuevaCaja), m => m.id);
+        cajaCombinada.sort((a, b) => (b.en || 0) - (a.en || 0));
+
+        if (typeof window.actualizarCajaDesdeRemoto === "function") {
+            window.actualizarCajaDesdeRemoto(cajaCombinada);
+        } else {
+            window.cajaMovimientos = cajaCombinada;
+        }
+        
+        const snapPac = await getDocs(collection(db, "pacientes"));
+        snapPac.forEach(d => {
+            const remota = d.data();
+            if (!window.pacientesRegistrados) window.pacientesRegistrados = [];
+            const norm = (typeof normalizarPaciente === "function") ? normalizarPaciente(remota) : remota;
+            const clave = String(norm.dni || d.id);
+            if (typeof pacienteEliminado === "function" && pacienteEliminado(clave)) return;
+            
+            const idx = window.pacientesRegistrados.findIndex(p => (p.dni && String(p.dni) === clave) || String(p.id) === d.id);
+            if (idx === -1) window.pacientesRegistrados.push(norm);
+            else window.pacientesRegistrados[idx] = Object.assign({}, window.pacientesRegistrados[idx], norm);
         });
 
-        cajaMovimientos.sort((a, b) => (b.en || 0) - (a.en || 0));
+        const snapCot = await getDocs(collection(db, "cotizaciones"));
+        let nuevasCot = [];
+        snapCot.forEach(d => {
+            const remota = d.data();
+            const idCotStr = String(d.id);
+            const eliminadosCot = JSON.parse(localStorage.getItem("vital_cotizaciones_eliminadas") || "[]");
+            if (eliminadosCot.includes(idCotStr)) return;
+
+            if (!window.cotizacionesGuardadas) window.cotizacionesGuardadas = [];
+            const norm = (typeof estandarizarCotizacion === "function") ? estandarizarCotizacion(remota) : remota;
+            norm.id = idCotStr;
+            nuevasCot.push(norm);
+        });
+        window.cotizacionesGuardadas = mergePorClave((window.cotizacionesGuardadas || []).concat(nuevasCot), c => c.id);
+        window.cotizacionesGuardadas = window.cotizacionesGuardadas.filter(c => !JSON.parse(localStorage.getItem("vital_cotizaciones_eliminadas") || "[]").includes(String(c.id)));
+
+        try {
+            const snapConf = await getDocs(collection(db, "configuracion"));
+            snapConf.forEach(d => {
+                if (d.id === "general") {
+                    const remota = d.data();
+                    if (remota && remota.logoBase64) {
+                        localStorage.setItem("vital_logo_custom", remota.logoBase64);
+                        window.VITAL_LOGO_CUSTOM = remota.logoBase64;
+                        const sideImg = document.getElementById("sidebar-logo-img");
+                        if (sideImg) sideImg.src = remota.logoBase64;
+                    }
+                }
+            });
+        } catch (eConf) {
+            // Documento de configuración opcional
+        }
+
         persistirDatos();
         if (typeof actualizarTotalesCaja === "function") actualizarTotalesCaja();
-    });
-
-    // 4. Pacientes
-    onSnapshot(collection(db, "pacientes"), (snapshot) => {
-        if (!window.pacientesRegistrados) window.pacientesRegistrados = [];
-
-        snapshot.docChanges().forEach((change) => {
-            const remota = change.doc.data();
-            const norm = (typeof normalizarPaciente === "function") ? normalizarPaciente(remota) : remota;
-            const clave = String(norm.dni || change.doc.id);
-            if (typeof pacienteEliminado === "function" && pacienteEliminado(clave)) return;
-
-            if (change.type === "added" || change.type === "modified") {
-                const idx = window.pacientesRegistrados.findIndex(p => (p.dni && String(p.dni) === clave) || String(p.id) === change.doc.id);
-                if (idx === -1) {
-                    window.pacientesRegistrados.push(norm);
-                } else {
-                    window.pacientesRegistrados[idx] = Object.assign({}, window.pacientesRegistrados[idx], norm);
-                }
-            }
-            if (change.type === "removed") {
-                window.pacientesRegistrados = window.pacientesRegistrados.filter(p => String(p.dni) !== clave && String(p.id) !== change.doc.id);
-            }
-        });
-
-        persistirDatos();
-        if (typeof cargarPacientes === "function") cargarPacientes();
-    });
-
-    // 5. Cotizaciones
-    onSnapshot(collection(db, "cotizaciones"), (snapshot) => {
-        if (!window.cotizacionesGuardadas) window.cotizacionesGuardadas = [];
-
-        snapshot.docChanges().forEach((change) => {
-            const remota = change.doc.data();
-            const idCotStr = String(change.doc.id);
-            const eliminadosCot = JSON.parse(localStorage.getItem("vital_cotizaciones_eliminadas") || "[]");
-
-            if (change.type === "added" || change.type === "modified") {
-                if (eliminadosCot.includes(idCotStr)) return;
-                const norm = (typeof estandarizarCotizacion === "function") ? estandarizarCotizacion(remota) : remota;
-                norm.id = idCotStr;
-                const idx = window.cotizacionesGuardadas.findIndex(c => String(c.id) === idCotStr);
-                if (idx === -1) {
-                    window.cotizacionesGuardadas.push(norm);
-                } else {
-                    Object.assign(window.cotizacionesGuardadas[idx], norm);
-                }
-            }
-            if (change.type === "removed") {
-                window.cotizacionesGuardadas = window.cotizacionesGuardadas.filter(c => String(c.id) !== idCotStr);
-            }
-        });
-
-        persistirDatos();
         if (typeof cargarCotizaciones === "function") cargarCotizaciones();
-    });
+        if (typeof cargarOrdenes === "function") cargarOrdenes();
+    } catch (error) {
+        console.error("No se pudo sincronizar con la nube:", error);
+    } finally {
+        aplicandoRemoto = false;
+    }
 }
 
 window.nubeGuardarConfiguracion = function (conf) {
@@ -277,23 +252,10 @@ window.nubeGuardarCotizacion = function (cotizacion) {
         .catch(error => console.error("No se pudo subir la cotización a la nube:", error));
 };
 
-// ELIMINAR ORDEN EN CASCADA (Borra también su movimiento de caja vinculado)
-window.nubeEliminarOrden = async function (nroOrden) {
+window.nubeEliminarOrden = function (nroOrden) {
     if (!db || !auth || !auth.currentUser) return;
-    const idOrdenStr = String(nroOrden);
-    try {
-        // 1. Borrar la orden de Firestore
-        await deleteDoc(doc(db, "ordenes", idOrdenStr));
-
-        // 2. Buscar y borrar el movimiento de caja asociado a esta orden (por nroOrden o referencia)
-        const qCaja = query(collection(db, "caja"), where("nroOrden", "==", idOrdenStr));
-        const snapCaja = await getDocs(qCaja);
-        snapCaja.forEach(async (docCaja) => {
-            await deleteDoc(doc(db, "caja", docCaja.id));
-        });
-    } catch (error) {
-        console.error("No se pudo eliminar la orden o su movimiento de caja en cascada:", error);
-    }
+    deleteDoc(doc(db, "ordenes", String(nroOrden)))
+        .catch(error => console.error("No se pudo eliminar la orden de la nube:", error));
 };
 
 window.nubeEliminarMovimiento = async function (idMovimiento) {
@@ -307,37 +269,12 @@ window.nubeEliminarExamen = function (codigoExamen) {
         .catch(error => console.error("No se pudo eliminar el examen de la nube:", error));
 };
 
-// ELIMINAR PACIENTE EN CASCADA (Borra también todas las órdenes vinculadas a su DNI)
-window.nubeEliminarPaciente = async function (paciente) {
+window.nubeEliminarPaciente = function (paciente) {
     if (!db || !auth || !auth.currentUser) return;
     const idDoc = String(paciente.dni || paciente.id);
     if (!idDoc) return;
-
-    try {
-        // 1. Borrar al paciente de Firestore
-        await deleteDoc(doc(db, "pacientes", idDoc));
-
-        // 2. Si el paciente tiene DNI, buscar y borrar todas sus órdenes asociadas
-        if (paciente.dni) {
-            const qOrdenes = query(collection(db, "ordenes"), where("dni", "==", paciente.dni));
-            const snapOrdenes = await getDocs(qOrdenes);
-            
-            snapOrdenes.forEach(async (docOrden) => {
-                const ordenId = docOrden.id;
-                // Borrar orden
-                await deleteDoc(doc(db, "ordenes", ordenId));
-
-                // Borrar también el movimiento de caja de cada orden eliminada en cascada
-                const qCajaOrden = query(collection(db, "caja"), where("nroOrden", "==", ordenId));
-                const snapCajaOrden = await getDocs(qCajaOrden);
-                snapCajaOrden.forEach(async (docCaja) => {
-                    await deleteDoc(doc(db, "caja", docCaja.id));
-                });
-            });
-        }
-    } catch (error) {
-        console.error("No se pudo eliminar el paciente y sus dependencias de la nube:", error);
-    }
+    deleteDoc(doc(db, "pacientes", idDoc))
+        .catch(error => console.error("No se pudo eliminar el paciente de la nube:", error));
 };
 
 window.nubeEliminarCotizacion = async function (idCotizacion) {
@@ -345,6 +282,7 @@ window.nubeEliminarCotizacion = async function (idCotizacion) {
     deleteDoc(doc(db, "cotizaciones", String(idCotizacion))).catch(e => console.error(e));
 };
 
+window.nubeSincronizarTodo = sincronizarTodo;
 window.nubeIniciar = nubeIniciar;
 if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", () => nubeIniciar());
