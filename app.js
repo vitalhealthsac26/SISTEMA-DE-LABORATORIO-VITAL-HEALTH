@@ -5237,59 +5237,40 @@ function generarBloquePaternidadOficialHTML(ex, orden) {
             </table>
 
             <!-- CUADRO DE INTERPRETACIÓN PERICIAL -->
-            <div style="border: 1.5px solid #000000; padding: 5px 8px; margin-bottom: 5px; font-size: 8.5px; line-height: 1.3; background: #ffffff;">
-                <div style="font-weight: 700; margin-bottom: 2px; text-decoration: underline;">Interpretación:</div>
-                <div style="text-align: justify; color: #000000;">
-                    ${interpretacion}
+                <div style="border: 1.5px solid #000000; padding: 4px 6px; margin-bottom: 5px; font-size: 8.5px; line-height: 1.3; background: #ffffff;">
+                    <div style="font-weight: 700; margin-bottom: 2px; text-decoration: underline;">Interpretación:</div>
+                    <div style="font-weight: 700; margin-bottom: 2px;">Interpretación:</div>
+                    <div style="text-align: justify; color: #000000;">
+                        ${interpretacion}
+                    </div>
                 </div>
-            </div>
 
-            <!-- CUADRO DE RESULTADOS GLOBALES Y PERSONAL (SIN FIRMAS, TAL CUAL EL FORMATO DE ENTREGA) -->
-            <div style="border: 1.5px solid #000000; display: flex; margin-bottom: 3px; background: #ffffff;">
-                <!-- COLUMNA IZQUIERDA: RESULTADOS GLOBALES -->
-                <div style="flex: 1 1 58%; border-right: 1.5px solid #000000; padding: 5px 8px;">
+                <!-- CUADRO DE RESULTADOS GLOBALES -->
+                <div style="border: 1.5px solid #000000; padding: 5px 8px; margin-bottom: 4px; background: #ffffff;">
                     <div style="text-align: center; font-weight: 800; font-size: 10px; margin-bottom: 3px; letter-spacing: 0.5px;">
                         RESULTADOS GLOBALES
                     </div>
                     <div style="font-size: 8.5px; margin-bottom: 2px;">
+                    <div style="font-size: 9px; margin-bottom: 3px;">
                         <span style="font-weight: 700;">ÍNDICE DE PATERNIDAD ACUMULATIVO:</span> 
                         <span style="font-weight: 800; font-family: monospace;">${ipc}</span>
+                        <span style="font-weight: 800; font-size: 13px;">${ipc}</span>
                     </div>
                     <div style="font-size: 8.5px; margin-bottom: 4px;">
+                    <div style="font-size: 9px; margin-bottom: 4px;">
                         <span style="font-weight: 700;">PROBABILIDAD DE PATERNIDAD ACUMULATIVA:</span> 
                         <span style="font-weight: 800; font-family: monospace;">${prob}</span>
+                        <span style="font-weight: 800; font-size: 13px;">${prob}</span>
                     </div>
-                    <div style="font-size: 7.5px; color: #222222; line-height: 1.25; margin-top: 3px;">
+                    <div style="font-size: 7.5px; color: #222222; line-height: 1.25;">
                         ${notaLab}
-                    </div>
-                </div>
-
-                <!-- COLUMNA DERECHA: RECUADROS DE PERSONAL (SIN FIRMAS) -->
-                <div style="flex: 1 1 42%; display: flex;">
-                    <div style="flex: 1 1 50%; border-right: 1px solid #000000; padding: 4px; text-align: center; display: flex; flex-direction: column; justify-content: space-between;">
-                        <div style="font-weight: 700; font-size: 7px; line-height: 1.1; text-transform: uppercase;">
-                            PERSONAL A CARGO DE LA TOMA DE LA MUESTRA
-                        </div>
-                        <div style="height: 48px; display: flex; align-items: flex-end; justify-content: center;">
-                            <div style="width: 85%; border-top: 0.8px dashed #888888; font-size: 6.5px; color: #666666; padding-top: 1px;">Conforme</div>
-                        </div>
-                    </div>
-                    <div style="flex: 1 1 50%; padding: 4px; text-align: center; display: flex; flex-direction: column; justify-content: space-between;">
-                        <div style="font-weight: 700; font-size: 7px; line-height: 1.1; text-transform: uppercase;">
-                            PERSONAL A CARGO DEL ANALISIS DE LA MUESTRA
-                        </div>
-                        <div style="height: 48px; display: flex; align-items: flex-end; justify-content: center;">
-                            <div style="width: 85%; border-top: 0.8px dashed #888888; font-size: 6.5px; color: #666666; padding-top: 1px;">Conforme</div>
-                        </div>
                     </div>
                 </div>
             </div>
 
-            <!-- PIE DISCRETO SEDES -->
-            <div style="display: flex; justify-content: space-between; font-size: 7.5px; color: #888888; padding: 1px 4px 0 4px;">
-                <span>Santiago de Surco (Sede Central, Lima)</span>
-                <span>Yanahuara, Arequipa</span>
-                <span>Piura, Piura</span>
+            <!-- SU PIE DE PÁGINA QUE SIEMPRE LE PONES A LOS RESULTADOS -->
+            <div style="flex: 0 0 auto; margin-top: auto;">
+                ${pieHabitual}
             </div>
         </div>
     `;
