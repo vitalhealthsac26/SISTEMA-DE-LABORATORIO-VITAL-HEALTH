@@ -328,6 +328,8 @@ let ordenesRegistradas = JSON.parse(localStorage.getItem("vital_ordenes") || "[]
 let cajaMovimientos = JSON.parse(localStorage.getItem("vital_caja") || "[]");
 window.pacientesRegistrados = JSON.parse(localStorage.getItem("vital_pacientes") || "[]");
 window.cotizacionesGuardadas = JSON.parse(localStorage.getItem("vital_cotizaciones") || "[]");
+window.ordenesRegistradas = ordenesRegistradas;
+window.cajaMovimientos = cajaMovimientos;
 
 // ==========================================
 // CLAVES CANÓNICAS DE ALMACENAMIENTO
@@ -483,8 +485,18 @@ function normalizarCotizacion(c) {
 // ==========================================
 // PERSISTENCIA AUTOMÁTICA
 // ==========================================
+function sincronizarGlobals() {
+    window.ordenesRegistradas = ordenesRegistradas;
+    window.cajaMovimientos = cajaMovimientos;
+    window.examenesCatalogo = examenesCatalogo;
+    window.mergePorClave = mergePorClave;
+    window.persistirDatos = persistirDatos;
+}
+window.sincronizarGlobals = sincronizarGlobals;
+
 function persistirDatos() {
     try {
+        sincronizarGlobals();
         localStorage.setItem(KEY_ORDENES, JSON.stringify(ordenesRegistradas || []));
         localStorage.setItem(KEY_CAJA, JSON.stringify(cajaMovimientos || []));
         localStorage.setItem(KEY_CATALOGO, JSON.stringify(examenesCatalogo || []));
@@ -511,6 +523,12 @@ function cargarDatosGuardados() {
     cajaMovimientos = mergePorClave(caja, m => m.id);
     cajaMovimientos.sort((a, b) => (b.en || 0) - (a.en || 0));
 
+    sincronizarGlobals();
+    // Purgar inmediatamente cobros huérfanos o eliminados para que no reaparezcan
+    if (typeof purgarMovimientosCajaInvalidos === "function") {
+        purgarMovimientosCajaInvalidos(false);
+    }
+
     let cat = examenesCatalogo.concat(leerJSON("vital_catalogo", [])).concat(leerJSON("examenesCatalogo", []));
     let catFusionado = mergePorClave(cat, c => c.codigo);
     examenesCatalogo = catFusionado.filter(e => !window.examenesEliminados.includes(String(e.codigo)));
@@ -523,6 +541,8 @@ function cargarDatosGuardados() {
     let cot = (window.cotizacionesGuardadas || []).concat(leerJSON("vital_cotizaciones", []));
     cot = cot.map(estandarizarCotizacion);
     window.cotizacionesGuardadas = mergePorClave(cot, c => c.id);
+
+    sincronizarGlobals();
 }
 
 function pacienteEliminado(dni) {
@@ -1482,6 +1502,25 @@ function eliminarOrden(nroOrden) {
             localStorage.setItem("vital_ordenes_eliminadas", JSON.stringify(window.ordenesEliminadas));
         }
         ordenesRegistradas = ordenesRegistradas.filter(o => String(o.nroOrden) !== idOrden);
+
+        // Depurar inmediatamente de Caja todos los cobros asociados a esta orden eliminada
+        const movsOrden = (cajaMovimientos || []).filter(m => String(m.nroOrden) === idOrden);
+        if (movsOrden.length > 0) {
+            let eliminados = JSON.parse(localStorage.getItem("vital_caja_eliminados") || "[]");
+            movsOrden.forEach(m => {
+                const mid = String(m.id);
+                if (!eliminados.includes(mid)) eliminados.push(mid);
+                if (typeof nubeEliminarMovimiento === "function") nubeEliminarMovimiento(mid);
+            });
+            localStorage.setItem("vital_caja_eliminados", JSON.stringify(eliminados));
+            if (!window.cajaEliminados) window.cajaEliminados = [];
+            eliminados.forEach(id => {
+                if (!window.cajaEliminados.includes(id)) window.cajaEliminados.push(id);
+            });
+            cajaMovimientos = cajaMovimientos.filter(m => String(m.nroOrden) !== idOrden);
+        }
+
+        sincronizarGlobals();
         persistirDatos();
         if (typeof nubeEliminarOrden === "function") nubeEliminarOrden(idOrden);
         cargarOrdenes();
@@ -2709,6 +2748,140 @@ function eliminarExamenCatalogo(codigo) {
 // Variable global de filtro de fecha para caja (por defecto fecha de hoy en formato YYYY-MM-DD)
 window.fechaSeleccionadaCaja = null;
 
+// Depuración estricta de caja: SOLO muestra los pagos correspondientes a las órdenes actualmente vigentes
+function purgarMovimientosCajaInvalidos(notificar = false) {
+    if (!window.cajaEliminados) {
+        window.cajaEliminados = leerJSON("vital_caja_eliminados", []);
+    }
+    if (!window.ordenesEliminadas) {
+        window.ordenesEliminadas = leerJSON("vital_ordenes_eliminadas", []);
+    }
+
+    const mapaOrdenesActivas = new Map();
+    (ordenesRegistradas || []).forEach(o => {
+        if (o && o.nroOrden && !window.ordenesEliminadas.includes(String(o.nroOrden))) {
+            mapaOrdenesActivas.set(String(o.nroOrden), o);
+        }
+    });
+
+    let eliminadosSet = new Set((window.cajaEliminados || []).map(String));
+    let eliminadosNuevos = false;
+    let cantEliminados = 0;
+
+    // Agrupar movimientos por orden para validar consistencia de montos
+    const acumuladoPorOrden = {};
+    const cajaLimpia = [];
+
+    (cajaMovimientos || []).forEach(m => {
+        if (!m) return;
+        const idMovStr = String(m.id || "");
+        const nroOrdStr = String(m.nroOrden || "");
+
+        // 1. Descartar si el movimiento fue eliminado manualmente
+        if (idMovStr && eliminadosSet.has(idMovStr)) {
+            cantEliminados++;
+            if (typeof nubeEliminarMovimiento === "function" && idMovStr) {
+                nubeEliminarMovimiento(idMovStr);
+            }
+            return;
+        }
+
+        // 2. Descartar si no tiene orden asociada, o si la orden fue eliminada, o ya no existe
+        if (!nroOrdStr || window.ordenesEliminadas.includes(nroOrdStr) || !mapaOrdenesActivas.has(nroOrdStr)) {
+            cantEliminados++;
+            if (idMovStr && !eliminadosSet.has(idMovStr)) {
+                eliminadosSet.add(idMovStr);
+                eliminadosNuevos = true;
+            }
+            if (typeof nubeEliminarMovimiento === "function" && idMovStr) {
+                nubeEliminarMovimiento(idMovStr);
+            }
+            return;
+        }
+
+        const orden = mapaOrdenesActivas.get(nroOrdStr);
+        const montoMov = Number(m.monto || 0);
+        const aCuentaOrd = Number(orden.aCuenta || 0);
+
+        // 3. Si la orden registra aCuenta = 0 (el paciente no ha pagado nada), descartar cobros huérfanos
+        if (aCuentaOrd <= 0.009 && montoMov > 0) {
+            cantEliminados++;
+            if (idMovStr && !eliminadosSet.has(idMovStr)) {
+                eliminadosSet.add(idMovStr);
+                eliminadosNuevos = true;
+            }
+            if (typeof nubeEliminarMovimiento === "function" && idMovStr) {
+                nubeEliminarMovimiento(idMovStr);
+            }
+            return;
+        }
+
+        // 4. Si la suma de pagos en caja para esta orden supera el aCuenta real registrado, descartar el excedente duplicado
+        const acumuladoActual = acumuladoPorOrden[nroOrdStr] || 0;
+        if (acumuladoActual + montoMov > aCuentaOrd + 0.01) {
+            cantEliminados++;
+            if (idMovStr && !eliminadosSet.has(idMovStr)) {
+                eliminadosSet.add(idMovStr);
+                eliminadosNuevos = true;
+            }
+            if (typeof nubeEliminarMovimiento === "function" && idMovStr) {
+                nubeEliminarMovimiento(idMovStr);
+            }
+            return;
+        }
+
+        acumuladoPorOrden[nroOrdStr] = acumuladoActual + montoMov;
+        cajaLimpia.push(m);
+    });
+
+    if (eliminadosNuevos) {
+        window.cajaEliminados = Array.from(eliminadosSet);
+        localStorage.setItem("vital_caja_eliminados", JSON.stringify(window.cajaEliminados));
+    }
+
+    cajaMovimientos = cajaLimpia;
+    sincronizarGlobals();
+    persistirDatos();
+
+    if (notificar) {
+        alert(`✅ Caja sincronizada correctamente:\n\n• Se depuraron ${cantEliminados} movimientos huérfanos, duplicados o eliminados.\n• La caja muestra únicamente los pagos vigentes de las órdenes registradas.`);
+    }
+
+    return cantEliminados;
+}
+window.purgarMovimientosCajaInvalidos = purgarMovimientosCajaInvalidos;
+
+function purgarYSincronizarCajaConOrdenes(notificar = false) {
+    const cantEliminados = purgarMovimientosCajaInvalidos(false);
+    actualizarTotalesCaja();
+    if (typeof window.nubeSincronizarTodo === "function") {
+        window.nubeSincronizarTodo().catch(e => console.error("Error en sincronización con nube:", e));
+    }
+    if (notificar) {
+        alert(`✅ Sincronización de Caja completada:\n\n• Se validaron todas las órdenes vigentes.\n• Se limpiaron cobros huérfanos o eliminados (${cantEliminados} detectados).\n• La caja ahora refleja exclusivamente los pagos de las órdenes que existen actualmente en el sistema.\n• Los cambios se enviaron a la nube para reflejarse en todos los dispositivos.`);
+    }
+}
+window.purgarYSincronizarCajaConOrdenes = purgarYSincronizarCajaConOrdenes;
+
+function actualizarCajaDesdeRemoto(nuevaCaja) {
+    cajaMovimientos = nuevaCaja || [];
+    sincronizarGlobals();
+    purgarMovimientosCajaInvalidos(false);
+    persistirDatos();
+    actualizarTotalesCaja();
+}
+window.actualizarCajaDesdeRemoto = actualizarCajaDesdeRemoto;
+
+function actualizarOrdenesDesdeRemoto(nuevasOrdenes) {
+    ordenesRegistradas = nuevasOrdenes || [];
+    sincronizarGlobals();
+    purgarMovimientosCajaInvalidos(false);
+    persistirDatos();
+    cargarOrdenes();
+    actualizarTotalesCaja();
+}
+window.actualizarOrdenesDesdeRemoto = actualizarOrdenesDesdeRemoto;
+
 function obtenerFechaISO(fechaStrOEn) {
     if (!fechaStrOEn) return "";
     if (typeof fechaStrOEn === "string" && /^\d{4}-\d{2}-\d{2}$/.test(fechaStrOEn)) return fechaStrOEn;
@@ -2721,11 +2894,13 @@ function obtenerFechaISO(fechaStrOEn) {
 }
 
 function filtrarCajaPorFecha(fechaValor) {
+    purgarMovimientosCajaInvalidos(false);
     window.fechaSeleccionadaCaja = fechaValor || null;
     actualizarTotalesCaja();
 }
 
 function cargarCajaHoy() {
+    purgarMovimientosCajaInvalidos(false);
     const hoyStr = obtenerFechaISO(new Date());
     window.fechaSeleccionadaCaja = hoyStr;
     const inputFecha = document.getElementById("filtro-caja-fecha");
@@ -2734,6 +2909,7 @@ function cargarCajaHoy() {
 }
 
 function verTodosLosCobrosCaja() {
+    purgarMovimientosCajaInvalidos(false);
     window.fechaSeleccionadaCaja = "todos";
     const inputFecha = document.getElementById("filtro-caja-fecha");
     if (inputFecha) inputFecha.value = "";
@@ -2787,6 +2963,7 @@ function normalizarMovimientoCaja(m) {
 }
 
 function actualizarTotalesCaja() {
+    purgarMovimientosCajaInvalidos(false);
     // Si no hay fecha elegida, fijar hoy en el input
     const inputFecha = document.getElementById("filtro-caja-fecha");
     const hoyISO = obtenerFechaISO(new Date());
