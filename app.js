@@ -5182,27 +5182,28 @@ function generarBloquePaternidadOficialHTML(ex, orden) {
 
             <!-- CUADRO COMPARATIVO COMPLETO (IDENTICO AL PDF) -->
             <table class="adn-tabla-comparativa" style="width: 100%; border-collapse: collapse; border: 1.5px solid #000000; font-size: 8.5px; margin-bottom: 5px;">
-                <thead>
-                    <!-- FILA 1: CASO Y NOMBRES -->
-                    <tr style="border-bottom: 1.5px solid #000000;">
-                        <th colspan="2" style="border-right: 1.5px solid #000000; text-align: left; padding: 2px 5px; width: 28%; background: #ffffff;">
-                            <span style="font-weight: 700; font-size: 8.5px;">Caso: ${codigoCaso}</span><br>
-                            <span style="font-weight: 700; font-size: 8.5px;">Nombre</span>
-                        </th>
-                        <th colspan="2" style="border-right: 1.5px solid #000000; text-align: center; padding: 2px 5px; width: 36%; background: #ffffff;">
-                            <span style="font-weight: 800; font-size: 9px; text-transform: uppercase;">MENOR</span><br>
-                            <span style="font-weight: 800; font-size: 9.5px; text-transform: uppercase;">${menorNombre}</span>
-                        </th>
-                        <th colspan="2" style="text-align: center; padding: 2px 5px; width: 36%; background: #ffffff;">
-                            <span style="font-weight: 800; font-size: 9px; text-transform: uppercase;">PRESUNTO PADRE</span><br>
-                            <span style="font-weight: 800; font-size: 9.5px; text-transform: uppercase;">${padreNombre}</span>
-                        </th>
-                    </tr>
-                    <!-- FILA 2: TIPO DE MUESTRAS -->
-                    <tr style="border-bottom: 1px solid #000000;">
-                        <th colspan="2" style="border-right: 1.5px solid #000000; text-align: left; padding: 1.5px 5px; font-weight: 700; background: #ffffff;">
-                            Tipo de muestras
-                        </th>
+                    <thead>
+                        <!-- FILA 1: CASO Y NOMBRES -->
+                        <tr style="border-bottom: 1.5px solid #000000;">
+                            <th colspan="2" style="border-right: 1.5px solid #000000; text-align: left; padding: 2px 5px; width: 28%; background: #ffffff;">
+                                <span style="font-weight: 700; font-size: 8.5px;">Caso: ${codigoCaso}</span><br>
+                                <span style="font-weight: 700; font-size: 8.5px;">Nombre</span>
+                            </th>
+                            <th colspan="2" style="border-right: 1.5px solid #000000; text-align: center; padding: 2px 5px; width: 36%; background: #ffffff;">
+                                <span style="font-weight: 800; font-size: 9px; text-transform: uppercase;">MENOR</span><br>
+                                <span style="font-weight: 800; font-size: 9px; text-transform: uppercase;">MENOR / EXAMINADO(A)</span><br>
+                                <span style="font-weight: 800; font-size: 9.5px; text-transform: uppercase;">${menorNombre}</span>
+                            </th>
+                            <th colspan="2" style="text-align: center; padding: 2px 5px; width: 36%; background: #ffffff;">
+                                <span style="font-weight: 800; font-size: 9px; text-transform: uppercase;">PRESUNTO PADRE</span><br>
+                                <span style="font-weight: 800; font-size: 9.5px; text-transform: uppercase;">${padreNombre}</span>
+                            </th>
+                        </tr>
+                        <!-- FILA 2: TIPO DE MUESTRAS -->
+                        <tr style="border-bottom: 1px solid #000000;">
+                            <th colspan="2" style="border-right: 1.5px solid #000000; text-align: left; padding: 1.5px 5px; font-weight: 700; background: #ffffff;">
+                                Tipo de muestras
+                            </th>
                         <th colspan="2" style="border-right: 1.5px solid #000000; text-align: center; padding: 1.5px 5px; font-weight: normal; background: #ffffff;">
                             ${menorMuestra}
                         </th>
