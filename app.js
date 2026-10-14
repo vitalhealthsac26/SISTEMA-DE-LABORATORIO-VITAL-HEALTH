@@ -256,9 +256,9 @@ const BASE_VALORES_REFERENCIALES = {
   { id: 'fecha_emision', nombre: 'Fecha de emisión', valor: '', unidad: '', referencia: 'Fecha de informe', metodo: '-' },
   { id: 'tecnologia', nombre: 'Metodología / Plataforma', valor: 'Análisis realizado con el Spectrum Compact CE System / VersaPlex™ 27PY System / GeneMarker®HID Software', unidad: '', referencia: 'Plataforma de alta resolución', metodo: 'PCR Multiplex / Electroforesis Capilar' },
   { id: 'caso_titulo', nombre: 'Caso / Referencia', valor: 'PAV-2609', unidad: '', referencia: 'Nro de Caso', metodo: '-' },
-  { id: 'menor_nombre', nombre: 'Nombre MENOR / EXAMINADO(A)', valor: '', unidad: '', referencia: 'Hijo(a) evaluado(a)', metodo: '-' },
-  { id: 'menor_tipo_muestra', nombre: 'Tipo de muestra MENOR / EXAMINADO(A)', valor: 'Bucal', unidad: '', referencia: 'Hisopado Bucal', metodo: '-' },
-  { id: 'menor_prueba_nro', nombre: 'Prueba N° MENOR / EXAMINADO(A)', valor: '2609-20', unidad: '', referencia: 'Identificador muestra', metodo: '-' },
+  { id: 'menor_nombre', nombre: 'Nombre MENOR', valor: '', unidad: '', referencia: 'Hijo(a) evaluado(a)', metodo: '-' },
+  { id: 'menor_tipo_muestra', nombre: 'Tipo de muestra MENOR', valor: 'Bucal', unidad: '', referencia: 'Hisopado Bucal', metodo: '-' },
+  { id: 'menor_prueba_nro', nombre: 'Prueba N° MENOR', valor: '2609-20', unidad: '', referencia: 'Identificador muestra', metodo: '-' },
   { id: 'padre_nombre', nombre: 'Nombre PRESUNTO PADRE', valor: '', unidad: '', referencia: 'Presunto Padre evaluado', metodo: '-' },
   { id: 'padre_tipo_muestra', nombre: 'Tipo de muestra PRESUNTO PADRE', valor: 'Bucal', unidad: '', referencia: 'Hisopado Bucal', metodo: '-' },
   { id: 'padre_prueba_nro', nombre: 'Prueba N° PRESUNTO PADRE', valor: '2609-30', unidad: '', referencia: 'Identificador muestra', metodo: '-' },
@@ -853,6 +853,12 @@ function renderizarTablaSeleccionados() {
     if (examenesSeleccionados.length === 0) {
         tbody.innerHTML = `<tr id="empty-row"><td colspan="6" class="text-center text-muted py-4">No hay exámenes agregados.</td></tr>`;
         if (totalEl) totalEl.textContent = "0.00";
+        const inputACuenta = document.getElementById("orden-monto-acuenta");
+        if (inputACuenta) {
+            inputACuenta.value = "0.00";
+            delete inputACuenta.dataset.modificadoManual;
+        }
+        actualizarCalculoSaldoNuevaOrden(false);
         return;
     }
 
@@ -872,7 +878,51 @@ function renderizarTablaSeleccionados() {
         tbody.appendChild(tr);
     });
     if (totalEl) totalEl.textContent = total.toFixed(2);
+
+    const inputACuenta = document.getElementById("orden-monto-acuenta");
+    if (inputACuenta && (!inputACuenta.dataset.modificadoManual || inputACuenta.value === "" || inputACuenta.value === "0.00")) {
+        inputACuenta.value = total.toFixed(2);
+    }
+    actualizarCalculoSaldoNuevaOrden(false);
 }
+
+function actualizarCalculoSaldoNuevaOrden(porUsuario = false) {
+    const totalEl = document.getElementById("total-cobrar");
+    const total = totalEl ? (parseFloat(totalEl.textContent) || 0) : 0;
+    const inputACuenta = document.getElementById("orden-monto-acuenta");
+    const badgeSaldo = document.getElementById("badge-saldo-nueva-orden");
+    if (!badgeSaldo) return;
+
+    if (porUsuario && inputACuenta) {
+        inputACuenta.dataset.modificadoManual = "true";
+    }
+
+    let aCuenta = (inputACuenta && inputACuenta.value.trim() !== "") ? parseFloat(inputACuenta.value) : total;
+    if (isNaN(aCuenta) || aCuenta < 0) aCuenta = 0;
+
+    const saldo = Math.max(0, total - aCuenta);
+
+    if (saldo > 0.009) {
+        badgeSaldo.className = "badge bg-danger fs-6 py-2 px-3 shadow-sm";
+        badgeSaldo.innerHTML = `<i class="bi bi-exclamation-triangle-fill me-1"></i>Debe: S/ ${saldo.toFixed(2)}`;
+    } else {
+        badgeSaldo.className = "badge bg-success fs-6 py-2 px-3 shadow-sm";
+        badgeSaldo.innerHTML = `<i class="bi bi-check-circle-fill me-1"></i>S/ 0.00 (Pagado)`;
+    }
+}
+window.actualizarCalculoSaldoNuevaOrden = actualizarCalculoSaldoNuevaOrden;
+
+function establecerPagoCompletoNuevaOrden() {
+    const totalEl = document.getElementById("total-cobrar");
+    const total = totalEl ? (parseFloat(totalEl.textContent) || 0) : 0;
+    const inputACuenta = document.getElementById("orden-monto-acuenta");
+    if (inputACuenta) {
+        inputACuenta.value = total.toFixed(2);
+        delete inputACuenta.dataset.modificadoManual;
+    }
+    actualizarCalculoSaldoNuevaOrden(false);
+}
+window.establecerPagoCompletoNuevaOrden = establecerPagoCompletoNuevaOrden;
 
 // ==========================================
 // REGISTRAR ORDEN Y TICKET
@@ -901,11 +951,23 @@ function guardarOrdenGenerarTicket() {
     const nroOrden = "ORD-" + Math.floor(100000 + Math.random() * 900000);
     const fechaHora = new Date().toLocaleString();
 
+    const inputACuenta = document.getElementById("orden-monto-acuenta");
+    let aCuenta = (inputACuenta && inputACuenta.value.trim() !== "") ? parseFloat(inputACuenta.value) : total;
+    if (isNaN(aCuenta) || aCuenta < 0) aCuenta = total;
+    if (aCuenta > total) aCuenta = total;
+    const saldoPendiente = Math.max(0, total - aCuenta);
+    const estadoPago = saldoPendiente > 0.009 ? "Pendiente" : "Pagado";
+
     const nuevaOrden = {
         nroOrden, fechaHora, dni, nombre, sexo, fechaNacimiento, edad,
         celular: celularPaciente, doctor, metodoPago,
         examenes: examenesSeleccionados.map(i => ({ ...i })),
-        total, estado: "Pendiente", en: Date.now()
+        total,
+        aCuenta,
+        saldoPendiente,
+        estadoPago,
+        estado: "Pendiente",
+        en: Date.now()
     };
 
     ordenesRegistradas.unshift(nuevaOrden);
@@ -920,7 +982,8 @@ function guardarOrdenGenerarTicket() {
         dni,
         paciente: nombre,
         metodoPago,
-        monto: total,
+        monto: aCuenta,
+        concepto: saldoPendiente > 0.009 ? `Pago a cuenta orden ${nroOrden} (Resta S/ ${saldoPendiente.toFixed(2)})` : `Pago completo orden ${nroOrden}`,
         en: Date.now()
     };
     cajaMovimientos.unshift(movimiento);
@@ -937,6 +1000,11 @@ function guardarOrdenGenerarTicket() {
     const form = document.getElementById("form-paciente");
     if (form) form.reset();
     setVal("pac-edad", "");
+    if (inputACuenta) {
+        inputACuenta.value = "0.00";
+        delete inputACuenta.dataset.modificadoManual;
+    }
+    actualizarCalculoSaldoNuevaOrden(false);
     examenesSeleccionados = [];
     renderizarTablaSeleccionados();
 
@@ -957,14 +1025,46 @@ function cargarOrdenes() {
         return;
     }
     ordenes.forEach(ord => {
+        const totalOrd = Number(ord.total || 0);
+        const aCuentaOrd = ord.aCuenta !== undefined ? Number(ord.aCuenta) : totalOrd;
+        const saldoOrd = ord.saldoPendiente !== undefined ? Number(ord.saldoPendiente) : Math.max(0, totalOrd - aCuentaOrd);
+        const tieneDeuda = saldoOrd > 0.009;
+
+        const badgeClinico = `<span class="badge ${ord.resultados && ord.resultados.length ? 'bg-primary' : 'bg-secondary'}">${escapeHTML(ord.estado || (ord.resultados && ord.resultados.length ? 'Completado' : 'Pendiente'))}</span>`;
+        
+        let badgePago = "";
+        if (tieneDeuda) {
+            badgePago = `
+                <div class="mt-1">
+                    <span class="badge bg-danger text-white py-1 px-2" style="cursor: pointer; font-size: 0.76rem;" onclick="abrirModalGestionPago('${escapeHTML(ord.nroOrden)}')" title="Haga clic para cobrar o modificar pago">
+                        <i class="bi bi-exclamation-triangle-fill me-1"></i>Debe: S/ ${saldoOrd.toFixed(2)}
+                    </span>
+                </div>
+            `;
+        } else {
+            badgePago = `
+                <div class="mt-1">
+                    <span class="badge bg-success-subtle text-success border border-success-subtle py-1 px-2" style="font-size: 0.74rem;">
+                        <i class="bi bi-check-circle-fill me-1"></i>Pagado (S/ ${totalOrd.toFixed(2)})
+                    </span>
+                </div>
+            `;
+        }
+
         const tr = document.createElement("tr");
         tr.innerHTML = `
             <td class="fw-bold text-primary">${escapeHTML(ord.nroOrden)}</td>
             <td>${escapeHTML(ord.fechaHora)}</td>
             <td>${escapeHTML(ord.dni)}</td>
             <td>${escapeHTML(ord.nombre)}</td>
-            <td><span class="badge bg-warning text-dark">${escapeHTML(ord.estado || "Pendiente")}</span></td>
+            <td>
+                ${badgeClinico}
+                ${badgePago}
+            </td>
             <td class="text-end px-3">
+                <button class="btn btn-sm ${tieneDeuda ? 'btn-danger text-white fw-bold' : 'btn-outline-secondary'} me-1" title="Gestionar Pago / Cobrar Saldo / Modificar Deuda" onclick="abrirModalGestionPago('${ord.nroOrden}')">
+                    <i class="bi bi-cash-stack"></i> ${tieneDeuda ? 'Cobrar' : 'Pago'}
+                </button>
                 <button class="btn btn-sm btn-outline-success me-1 text-success" title="Enviar mensaje por WhatsApp al paciente" onclick="enviarResultadoWhatsApp('${ord.nroOrden}')">
                     <i class="bi bi-whatsapp"></i>
                 </button>
@@ -978,6 +1078,215 @@ function cargarOrdenes() {
         tbody.appendChild(tr);
     });
 }
+
+// ==========================================
+// GESTIÓN DE COBRO, SALDO Y DEUDA DE ÓRDENES
+// ==========================================
+function abrirModalGestionPago(nroOrden) {
+    const orden = (ordenesRegistradas || []).find(o => String(o.nroOrden) === String(nroOrden));
+    if (!orden) {
+        alert("No se encontró la orden especificada.");
+        return;
+    }
+
+    const totalOrd = Number(orden.total || 0);
+    const aCuentaOrd = orden.aCuenta !== undefined ? Number(orden.aCuenta) : totalOrd;
+    const saldoOrd = orden.saldoPendiente !== undefined ? Number(orden.saldoPendiente) : Math.max(0, totalOrd - aCuentaOrd);
+    const tieneDeuda = saldoOrd > 0.009;
+
+    const elNro = document.getElementById("modal-pago-nroOrden");
+    if (elNro) elNro.value = orden.nroOrden;
+
+    const elSub = document.getElementById("modal-pago-subtitulo");
+    if (elSub) elSub.textContent = `Orden: ${orden.nroOrden} | Fecha: ${orden.fechaHora || ''}`;
+
+    const elPac = document.getElementById("modal-pago-paciente");
+    if (elPac) elPac.textContent = orden.nombre || "Paciente";
+
+    const elDet = document.getElementById("modal-pago-paciente-detalles");
+    if (elDet) elDet.textContent = `DNI: ${orden.dni || '—'} | Tel: ${orden.celular || '—'} | Médico: ${orden.doctor || 'Particular'}`;
+
+    const badgeEstado = document.getElementById("modal-pago-badge-estado");
+    if (badgeEstado) {
+        if (tieneDeuda) {
+            badgeEstado.className = "badge bg-danger fs-6 py-2 px-3";
+            badgeEstado.innerHTML = `<i class="bi bi-exclamation-triangle-fill me-1"></i>Debe: S/ ${saldoOrd.toFixed(2)}`;
+        } else {
+            badgeEstado.className = "badge bg-success fs-6 py-2 px-3";
+            badgeEstado.innerHTML = `<i class="bi bi-check-circle-fill me-1"></i>Pagado Completo`;
+        }
+    }
+
+    // Tab 1: Abono hoy
+    const elTotDisp = document.getElementById("abono-total-display");
+    if (elTotDisp) elTotDisp.value = totalOrd.toFixed(2);
+
+    const elDeuDisp = document.getElementById("abono-deuda-display");
+    if (elDeuDisp) elDeuDisp.value = saldoOrd.toFixed(2);
+
+    const elAbonoMonto = document.getElementById("abono-monto-ingreso");
+    if (elAbonoMonto) elAbonoMonto.value = tieneDeuda ? saldoOrd.toFixed(2) : "";
+
+    const elAbonoMet = document.getElementById("abono-metodo-pago");
+    if (elAbonoMet) elAbonoMet.value = orden.metodoPago || "Efectivo";
+
+    // Tab 2: Modificar orden pasada / retroactivo
+    const elModTot = document.getElementById("mod-pago-total");
+    if (elModTot) elModTot.value = totalOrd.toFixed(2);
+
+    const elModAcu = document.getElementById("mod-pago-acuenta");
+    if (elModAcu) elModAcu.value = aCuentaOrd.toFixed(2);
+
+    const elModSal = document.getElementById("mod-pago-saldo");
+    if (elModSal) elModSal.value = saldoOrd.toFixed(2);
+
+    const elModMet = document.getElementById("mod-pago-metodo");
+    if (elModMet) elModMet.value = orden.metodoPago || "Efectivo";
+
+    const elModNot = document.getElementById("mod-pago-nota");
+    if (elModNot) elModNot.value = orden.notaPago || "";
+
+    const modalEl = document.getElementById("modalGestionPago");
+    if (modalEl && window.bootstrap) {
+        bootstrap.Modal.getOrCreateInstance(modalEl).show();
+    }
+}
+window.abrirModalGestionPago = abrirModalGestionPago;
+
+function recalcularSaldoEnModalModificar() {
+    const elTot = document.getElementById("mod-pago-total");
+    const elAcu = document.getElementById("mod-pago-acuenta");
+    const elSal = document.getElementById("mod-pago-saldo");
+    if (!elSal) return;
+
+    const tot = elTot ? (parseFloat(elTot.value) || 0) : 0;
+    const acu = elAcu ? (parseFloat(elAcu.value) || 0) : 0;
+    const sal = Math.max(0, tot - acu);
+    elSal.value = sal.toFixed(2);
+}
+window.recalcularSaldoEnModalModificar = recalcularSaldoEnModalModificar;
+
+function ejecutarAbonoCajaHoy() {
+    const nroOrden = val("modal-pago-nroOrden");
+    const orden = (ordenesRegistradas || []).find(o => String(o.nroOrden) === String(nroOrden));
+    if (!orden) {
+        alert("Orden no válida.");
+        return;
+    }
+
+    const inputMonto = document.getElementById("abono-monto-ingreso");
+    const montoAbono = inputMonto ? parseFloat(inputMonto.value) : 0;
+
+    if (isNaN(montoAbono) || montoAbono <= 0) {
+        alert("Por favor ingrese un monto de abono válido mayor a 0.");
+        return;
+    }
+
+    const totalOrd = Number(orden.total || 0);
+    const aCuentaPrevia = orden.aCuenta !== undefined ? Number(orden.aCuenta) : totalOrd;
+    const nuevoACuenta = aCuentaPrevia + montoAbono;
+    const nuevoSaldo = Math.max(0, totalOrd - nuevoACuenta);
+    const metodo = val("abono-metodo-pago") || "Efectivo";
+
+    orden.aCuenta = nuevoACuenta;
+    orden.saldoPendiente = nuevoSaldo;
+    orden.estadoPago = nuevoSaldo > 0.009 ? "Pendiente" : "Pagado";
+
+    // Registrar ingreso en caja de hoy
+    const ahora = new Date();
+    const movAbono = {
+        id: `${Date.now()}-${orden.nroOrden}-abono`,
+        fecha: ahora.toISOString().split("T")[0],
+        fechaVisual: ahora.toLocaleDateString("es-PE"),
+        hora: ahora.toLocaleTimeString(),
+        nroOrden: orden.nroOrden,
+        dni: orden.dni,
+        paciente: orden.nombre,
+        metodoPago: metodo,
+        monto: montoAbono,
+        concepto: nuevoSaldo <= 0.009 ? `Cancelación total de saldo orden ${orden.nroOrden}` : `Abono a saldo de orden ${orden.nroOrden} (Resta S/ ${nuevoSaldo.toFixed(2)})`,
+        en: Date.now()
+    };
+    cajaMovimientos.unshift(movAbono);
+
+    persistirDatos();
+    actualizarTotalesCaja();
+    cargarOrdenes();
+    window.nubeGuardarOrden?.(orden);
+    window.nubeGuardarMovimiento?.(movAbono);
+
+    // Si la pantalla de resultados estaba abierta con esta orden, refrescarla
+    const secResultados = document.getElementById("sec-resultados");
+    if (secResultados && !secResultados.classList.contains("d-none")) {
+        const editor = document.getElementById("resultados-editor");
+        if (editor && editor.innerHTML.includes(orden.nroOrden)) {
+            abrirResultados(orden.nroOrden);
+        }
+    }
+
+    const modalEl = document.getElementById("modalGestionPago");
+    if (modalEl && window.bootstrap) {
+        bootstrap.Modal.getInstance(modalEl)?.hide();
+    }
+
+    alert(`¡Abono registrado con éxito!\n\nPaciente: ${orden.nombre}\nMonto abonado hoy: S/ ${montoAbono.toFixed(2)}\nSaldo restante por pagar: S/ ${nuevoSaldo.toFixed(2)}`);
+}
+window.ejecutarAbonoCajaHoy = ejecutarAbonoCajaHoy;
+
+function guardarAjusteRetroactivoDeuda() {
+    const nroOrden = val("modal-pago-nroOrden");
+    const orden = (ordenesRegistradas || []).find(o => String(o.nroOrden) === String(nroOrden));
+    if (!orden) {
+        alert("Orden no válida.");
+        return;
+    }
+
+    const inputTot = document.getElementById("mod-pago-total");
+    const inputAcu = document.getElementById("mod-pago-acuenta");
+    const nuevoTotal = inputTot ? parseFloat(inputTot.value) : Number(orden.total || 0);
+    const nuevoACuenta = inputAcu ? parseFloat(inputAcu.value) : 0;
+
+    if (isNaN(nuevoTotal) || nuevoTotal < 0) {
+        alert("El total debe ser un número válido.");
+        return;
+    }
+    if (isNaN(nuevoACuenta) || nuevoACuenta < 0) {
+        alert("El monto a cuenta debe ser un número válido.");
+        return;
+    }
+
+    const nuevoSaldo = Math.max(0, nuevoTotal - nuevoACuenta);
+    const metodo = val("mod-pago-metodo") || orden.metodoPago || "Efectivo";
+    const nota = val("mod-pago-nota") || "";
+
+    orden.total = nuevoTotal;
+    orden.aCuenta = nuevoACuenta;
+    orden.saldoPendiente = nuevoSaldo;
+    orden.estadoPago = nuevoSaldo > 0.009 ? "Pendiente" : "Pagado";
+    orden.metodoPago = metodo;
+    orden.notaPago = nota;
+
+    persistirDatos();
+    cargarOrdenes();
+    window.nubeGuardarOrden?.(orden);
+
+    // Si la pantalla de resultados estaba abierta con esta orden, refrescarla
+    const secResultados = document.getElementById("sec-resultados");
+    if (secResultados && !secResultados.classList.contains("d-none")) {
+        const editor = document.getElementById("resultados-editor");
+        if (editor && editor.innerHTML.includes(orden.nroOrden)) {
+            abrirResultados(orden.nroOrden);
+        }
+    }
+
+    const modalEl = document.getElementById("modalGestionPago");
+    if (modalEl && window.bootstrap) {
+        bootstrap.Modal.getInstance(modalEl)?.hide();
+    }
+
+    alert(`¡Orden ${orden.nroOrden} actualizada correctamente!\n\nTotal: S/ ${nuevoTotal.toFixed(2)}\nPagado / A cuenta: S/ ${nuevoACuenta.toFixed(2)}\nSaldo pendiente (Deuda): S/ ${nuevoSaldo.toFixed(2)}\n\nEl sistema alertará esta deuda cuando se capturen o impriman los resultados.`);
+}
+window.guardarAjusteRetroactivoDeuda = guardarAjusteRetroactivoDeuda;
 
 function enviarResultadoWhatsApp(nroOrden) {
     const orden = (ordenesRegistradas || []).find(o => String(o.nroOrden) === String(nroOrden));
@@ -1299,15 +1608,19 @@ function generarEditorFormularioPaternidad(ex, exIdx, orden, guardado) {
                 </div>
                 <div class="card-body p-3">
                     <div class="row g-2 mb-2">
-                        <div class="col-md-4">
+                        <div class="col-md-3">
                             <label class="form-label small fw-bold mb-1">Código de caso:</label>
                             <input type="text" class="form-control form-control-sm" id="p-edit-codigoCaso" value="${escapeHTML(pData.codigoCaso)}" placeholder="ej. PAV-2609">
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-3">
+                            <label class="form-label small fw-bold mb-1">Convenio / Sede:</label>
+                            <input type="text" class="form-control form-control-sm" id="p-edit-convenio" value="${escapeHTML(pData.convenio)}" placeholder="ej. CONVENIO - PIURA">
+                        </div>
+                        <div class="col-md-3">
                             <label class="form-label small fw-bold mb-1">Fecha de atención:</label>
                             <input type="text" class="form-control form-control-sm" id="p-edit-fechaAtencion" value="${escapeHTML(pData.fechaAtencion)}" placeholder="DD/MM/AA">
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-3">
                             <label class="form-label small fw-bold mb-1">Fecha de emisión:</label>
                             <input type="text" class="form-control form-control-sm" id="p-edit-fechaEmision" value="${escapeHTML(pData.fechaEmision)}" placeholder="DD/MM/AA">
                         </div>
@@ -1329,9 +1642,9 @@ function generarEditorFormularioPaternidad(ex, exIdx, orden, guardado) {
                 <div class="card-body p-3">
                     <div class="row g-3">
                         <div class="col-md-6 border-end">
-                            <h6 class="fw-bold text-primary mb-2"><i class="bi bi-person me-1"></i>MENOR / EXAMINADO(A)</h6>
+                            <h6 class="fw-bold text-primary mb-2"><i class="bi bi-person me-1"></i>MENOR EVALUADO(A)</h6>
                             <div class="mb-2">
-                                <label class="form-label small mb-1">Nombre Completo del Menor / Examinado(a):</label>
+                                <label class="form-label small mb-1">Nombre Completo del Menor:</label>
                                 <input type="text" class="form-control form-control-sm fw-bold" id="p-edit-menorNombre" value="${escapeHTML(pData.menorNombre || orden.nombre)}" placeholder="ej. NORMA">
                             </div>
                             <div class="row g-2">
@@ -1379,7 +1692,7 @@ function generarEditorFormularioPaternidad(ex, exIdx, orden, guardado) {
                             <tr>
                                 <th rowspan="2" class="align-middle">Loci</th>
                                 <th rowspan="2" class="align-middle">IP</th>
-                                <th colspan="2" class="bg-primary-subtle text-primary border-bottom-0">MENOR / EXAMINADO(A) (Tamaño de Alelo)</th>
+                                <th colspan="2" class="bg-primary-subtle text-primary border-bottom-0">MENOR (Tamaño de Alelo)</th>
                                 <th colspan="2" class="bg-success-subtle text-success border-bottom-0">PRESUNTO PADRE (Tamaño de Alelo)</th>
                             </tr>
                             <tr>
@@ -1442,17 +1755,52 @@ function abrirResultados(nroOrden) {
     const editor = document.getElementById("resultados-editor");
     if (!editor) return;
 
+    const totalOrd = Number(orden.total || 0);
+    const aCuentaOrd = orden.aCuenta !== undefined ? Number(orden.aCuenta) : totalOrd;
+    const saldoOrd = orden.saldoPendiente !== undefined ? Number(orden.saldoPendiente) : Math.max(0, totalOrd - aCuentaOrd);
+    const tieneDeuda = saldoOrd > 0.009;
+
+    let bannerAlertaDeuda = "";
+    if (tieneDeuda) {
+        bannerAlertaDeuda = `
+            <div class="alert alert-danger border border-danger border-2 shadow-sm p-3 mb-3 rounded-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
+                <div class="d-flex align-items-center gap-3">
+                    <span class="fs-1 text-danger"><i class="bi bi-exclamation-octagon-fill"></i></span>
+                    <div>
+                        <h5 class="fw-bold text-danger mb-1"><i class="bi bi-bell-fill me-1"></i>ALERTA DE COBRO: PACIENTE CON SALDO PENDIENTE</h5>
+                        <div class="fs-6 text-dark">
+                            El paciente <strong>${escapeHTML(orden.nombre)}</strong> (DNI: ${escapeHTML(orden.dni)}) aún debe:
+                            <span class="badge bg-danger fs-6 px-2 py-1 ms-1">S/ ${saldoOrd.toFixed(2)}</span>
+                            <span class="text-muted ms-2">(Total: S/ ${totalOrd.toFixed(2)} | A cuenta abonado: S/ ${aCuentaOrd.toFixed(2)})</span>
+                        </div>
+                        <small class="text-danger fw-semibold">
+                            ⚠️ Por favor, solicite el cobro del saldo pendiente antes de entregar o emitir los resultados finales.
+                        </small>
+                    </div>
+                </div>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-danger fw-bold shadow-sm px-3 py-2" onclick="abrirModalGestionPago('${escapeHTML(orden.nroOrden)}')">
+                        <i class="bi bi-cash-stack me-1"></i> Cobrar / Saldar Deuda Ahora
+                    </button>
+                </div>
+            </div>
+        `;
+    }
+
     let html = `
+        ${bannerAlertaDeuda}
         <div class="alert alert-secondary d-flex justify-content-between align-items-center flex-wrap gap-2 small py-2 mb-3">
             <div>
                 <strong>Orden:</strong> ${escapeHTML(orden.nroOrden)} | <strong>Paciente:</strong> ${escapeHTML(orden.nombre)} (${escapeHTML(orden.dni)})
                 <span class="badge bg-primary-subtle text-primary border border-primary-subtle ms-2">Sexo: ${escapeHTML(orden.sexo || "—")}</span>
                 <span class="badge bg-secondary-subtle text-secondary border ms-1">Edad: ${escapeHTML(orden.edad || "—")}</span>
+                ${tieneDeuda ? `<span class="badge bg-danger ms-2" style="cursor:pointer;" onclick="abrirModalGestionPago('${escapeHTML(orden.nroOrden)}')"><i class="bi bi-exclamation-triangle-fill me-1"></i>Debe S/ ${saldoOrd.toFixed(2)}</span>` : `<span class="badge bg-success-subtle text-success border ms-2"><i class="bi bi-check-circle-fill me-1"></i>Pagado</span>`}
                 <span class="text-muted ms-2 d-block d-md-inline mt-1 mt-md-0">
                     <i class="bi bi-arrow-down-up me-1 text-primary"></i>Organiza el orden o usa los atajos rápidos de variación por sexo/edad.
                 </span>
             </div>
             <div class="d-flex gap-2 flex-wrap align-items-center">
+                <button class="btn ${tieneDeuda ? 'btn-danger text-white fw-bold' : 'btn-outline-secondary'} btn-sm" onclick="abrirModalGestionPago('${orden.nroOrden}')" title="Ver / gestionar pagos de esta orden"><i class="bi bi-cash-stack me-1"></i> ${tieneDeuda ? 'Cobrar Deuda' : 'Cobro'}</button>
                 <button class="btn btn-outline-info btn-sm fw-semibold" onclick="abrirHistorialEvolutivo('${orden.dni}')" title="Ver Historial Evolutivo y Comparativa del Paciente"><i class="bi bi-graph-up me-1"></i> Evolución</button>
                 <div class="form-check form-switch ms-1 me-1 mb-0 py-1 px-2 border rounded bg-white shadow-sm" title="Activar para omitir la firma física o de la bióloga en el informe impreso y en el PDF">
                     <input class="form-check-input ms-0 me-1" type="checkbox" id="check-ocultar-firma-${orden.nroOrden}" ${debeOcultarFirma(orden) ? 'checked' : ''} onchange="cambiarOcultarFirma('${orden.nroOrden}', this.checked)">
@@ -1710,9 +2058,8 @@ function guardarResultados(nroOrden, silencioso = false) {
     const editor = document.getElementById("resultados-editor");
     if (!orden || !editor) return false;
 
-    const cardPaternidad = editor.querySelector("[data-paternidad-card='true']");
     const grupos = editor.querySelectorAll("[data-ex]");
-    if (!grupos.length && !cardPaternidad) return false;
+    if (!grupos.length) return false;
 
     const porExamen = {};
     grupos.forEach(fila => {
@@ -1741,6 +2088,7 @@ function guardarResultados(nroOrden, silencioso = false) {
     });
 
     // Si la orden incluye la prueba de paternidad y se editó con el formulario especializado
+    const cardPaternidad = editor.querySelector("[data-paternidad-card='true']");
     let datosPaternidadGuardar = null;
     if (cardPaternidad) {
         const valP = id => {
@@ -3712,8 +4060,16 @@ function construirTicketHTML(orden) {
             <div class="t-linea"></div>
             ${lineas}
             <div class="t-linea"></div>
-            <div class="t-row t-negrita t-total"><span>TOTAL S/</span><span>${Number(orden.total).toFixed(2)}</span></div>
-            <div class="t-row"><span>Pago:</span><span>${escapeHTML(orden.metodoPago)}</span></div>
+            <div class="t-row t-negrita t-total"><span>TOTAL S/</span><span>${Number(orden.total || 0).toFixed(2)}</span></div>
+            ${(orden.saldoPendiente !== undefined ? Number(orden.saldoPendiente) : Math.max(0, Number(orden.total || 0) - Number(orden.aCuenta !== undefined ? orden.aCuenta : orden.total || 0))) > 0.009 ? `
+                <div class="t-row t-negrita"><span>A CUENTA S/:</span><span>${Number(orden.aCuenta || 0).toFixed(2)}</span></div>
+                <div class="t-row t-negrita" style="font-weight: 800; font-size: 13px;"><span>SALDO A PAGAR:</span><span>S/ ${Number(orden.saldoPendiente).toFixed(2)}</span></div>
+                <div class="t-row"><span style="color:#b91c1c; font-weight: 700;">ESTADO:</span><span style="color:#b91c1c; font-weight: 800;">PENDIENTE</span></div>
+            ` : `
+                <div class="t-row"><span>A CUENTA:</span><span>S/ ${Number(orden.aCuenta !== undefined ? orden.aCuenta : orden.total || 0).toFixed(2)} (PAGADO)</span></div>
+            `}
+            <div class="t-row"><span>Pago:</span><span>${escapeHTML(orden.metodoPago || 'Efectivo')}</span></div>
+            ${orden.notaPago ? `<div class="t-row"><small style="font-size: 9px;">Nota: ${escapeHTML(orden.notaPago)}</small></div>` : ''}
             <div class="t-linea-doble"></div>
             <div class="t-centro t-obs">¡Gracias por su preferencia!</div>
             <div class="t-centro t-obs">Conserve este ticket para recoger sus resultados</div>
@@ -4001,10 +4357,9 @@ function generarBloquePaternidadOficialHTML(ex, orden) {
     const guardado = (orden.resultados || []).find(r => r.codigo === ex.codigo);
     const pData = extraerDatosPaternidadDeOrden(orden, guardado);
 
-    const cabeceraHabitual = construirCabeceraInformeHTML();
-    const pieHabitual = construirPieInformeHTML();
-
+    const logoSrc = obtenerLogoSrc();
     const codigoCaso = escapeHTML(pData.codigoCaso || orden.nroOrden || 'PAV-2609');
+    const convenio = escapeHTML(pData.convenio || 'CONVENIO - PIURA');
     const fechaAtencion = escapeHTML(pData.fechaAtencion || (orden.fechaHora ? String(orden.fechaHora).split(',')[0].trim() : '-'));
     const fechaEmision = escapeHTML(pData.fechaEmision || new Date().toLocaleDateString('es-PE', { day: '2-digit', month: '2-digit', year: '2-digit' }));
     const tecnologia = escapeHTML(pData.tecnologia || 'Análisis realizado con el Spectrum Compact CE System / VersaPlex™ 27PY System / GeneMarker®HID Software');
@@ -4041,125 +4396,153 @@ function generarBloquePaternidadOficialHTML(ex, orden) {
     });
 
     return `
-        <div class="adn-paternidad-contenedor" style="font-family: Arial, Helvetica, sans-serif; color: #000000; width: 100%; box-sizing: border-box; margin: 0 auto; line-height: 1.25; display: flex; flex-direction: column; justify-content: space-between; min-height: 275mm; page-break-inside: avoid; break-inside: avoid;">
-            <div style="flex: 0 0 auto;">
-                <!-- ENCABEZADO HABITUAL CON LOGO Y CÓDIGO QR -->
-                ${cabeceraHabitual}
+        <div class="adn-paternidad-contenedor" style="font-family: Arial, Helvetica, sans-serif; color: #000000; width: 100%; box-sizing: border-box; margin: 0 auto; line-height: 1.25; page-break-inside: avoid; break-inside: avoid;">
+            
+            <!-- ENCABEZADO SUPERIOR: LOGO VITAL HEALTH, TITULO Y METADATOS -->
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px;">
+                <div style="flex: 0 0 35%; display: flex; align-items: center;">
+                    <img src="${logoSrc}" alt="Vital Health" style="max-height: 52px; max-width: 210px; object-fit: contain; display: block;" onerror="this.style.display='none'">
+                </div>
+                <div style="flex: 1 1 auto; text-align: center; padding: 0 8px;">
+                    <div style="font-size: 15px; font-weight: 800; letter-spacing: 0.5px; color: #000000; text-transform: none;">Informe de prueba de ADN</div>
+                    <div style="font-size: 9px; font-weight: 700; color: #111111; margin-top: 1px;">Solo para conocimiento propio</div>
+                </div>
+                <div style="flex: 0 0 28%; text-align: right; font-size: 8.5px;">
+                    <div style="font-weight: 800; color: #000000;">${convenio}</div>
+                    <div style="color: #444444; margin-top: 3px; font-size: 8px;">Página 1 / 1</div>
+                </div>
             </div>
 
-            <div style="flex: 1 1 auto;">
-                <!-- TÍTULO -->
-                <div style="text-align: center; margin: 4px 0 3px 0;">
-                    <div style="font-size: 15px; font-weight: 800; letter-spacing: 0.5px; color: #000000;">Informe de prueba de ADN</div>
-                    <div style="font-size: 9.5px; font-weight: 700; color: #111111; margin-top: 1px;">Solo para conocimiento propio</div>
+            <!-- CUADRO DE DATOS DE CASO (FONDO VERDE PASTEL SUAVE COMO EL PDF) -->
+            <div style="background-color: #e2f0d9; border: 1px solid #b7d7a8; padding: 4px 8px; margin-bottom: 5px; font-size: 9px;">
+                <div style="display: flex; margin-bottom: 1px;">
+                    <span style="width: 140px; font-weight: 700; color: #1f3864;">Código de caso</span>
+                    <span style="font-weight: 700; color: #000000;">${codigoCaso}</span>
                 </div>
-
-                <!-- CUADRO DE DATOS DE CASO (SIN CONVENIO) -->
-                <div style="background-color: #e2f0d9; border: 1px solid #b7d7a8; padding: 4px 8px; margin-bottom: 5px; font-size: 9px; line-height: 1.35;">
-                    <div style="display: flex; margin-bottom: 1px;">
-                        <span style="width: 140px; font-weight: 700; color: #1f3864;">Código de caso</span>
-                        <span style="font-weight: 700; color: #000000;">${codigoCaso}</span>
-                    </div>
-                    <div style="display: flex; margin-bottom: 1px;">
-                        <span style="width: 140px; font-weight: 700; color: #1f3864;">Fecha de atención</span>
-                        <span style="font-weight: 700; color: #000000;">${fechaAtencion}</span>
-                    </div>
-                    <div style="display: flex;">
-                        <span style="width: 140px; font-weight: 700; color: #1f3864;">Fecha de emisión</span>
-                        <span style="font-weight: 700; color: #000000;">${fechaEmision}</span>
-                    </div>
+                <div style="display: flex; margin-bottom: 1px;">
+                    <span style="width: 140px; font-weight: 700; color: #1f3864;">Fecha de atención</span>
+                    <span style="font-weight: 700; color: #000000;">${fechaAtencion}</span>
                 </div>
-
-                <!-- SUBTÍTULO TECNOLOGÍA EXACTA -->
-                <div style="text-align: center; font-size: 7.8px; font-weight: 700; color: #000000; margin-bottom: 3px; letter-spacing: 0.2px;">
-                    ${tecnologia}
+                <div style="display: flex;">
+                    <span style="width: 140px; font-weight: 700; color: #1f3864;">Fecha de emisión</span>
+                    <span style="font-weight: 700; color: #000000;">${fechaEmision}</span>
                 </div>
-
-                <!-- CUADRO COMPARATIVO COMPLETO (IDENTICO AL PDF) -->
-                <table class="adn-tabla-comparativa" style="width: 100%; border-collapse: collapse; border: 1.5px solid #000000; font-size: 8.5px; margin-bottom: 5px;">
-                    <thead>
-                        <!-- FILA 1: CASO Y NOMBRES -->
-                        <tr style="border-bottom: 1.5px solid #000000;">
-                            <th colspan="2" style="border-right: 1.5px solid #000000; text-align: left; padding: 2px 5px; width: 28%; background: #ffffff;">
-                                <span style="font-weight: 700; font-size: 8.5px;">Caso: ${codigoCaso}</span><br>
-                                <span style="font-weight: 700; font-size: 8.5px;">Nombre</span>
-                            </th>
-                            <th colspan="2" style="border-right: 1.5px solid #000000; text-align: center; padding: 2px 5px; width: 36%; background: #ffffff;">
-                                <span style="font-weight: 800; font-size: 9px; text-transform: uppercase;">MENOR / EXAMINADO(A)</span><br>
-                                <span style="font-weight: 800; font-size: 9.5px; text-transform: uppercase;">${menorNombre}</span>
-                            </th>
-                            <th colspan="2" style="text-align: center; padding: 2px 5px; width: 36%; background: #ffffff;">
-                                <span style="font-weight: 800; font-size: 9px; text-transform: uppercase;">PRESUNTO PADRE</span><br>
-                                <span style="font-weight: 800; font-size: 9.5px; text-transform: uppercase;">${padreNombre}</span>
-                            </th>
-                        </tr>
-                        <!-- FILA 2: TIPO DE MUESTRAS -->
-                        <tr style="border-bottom: 1px solid #000000;">
-                            <th colspan="2" style="border-right: 1.5px solid #000000; text-align: left; padding: 1.5px 5px; font-weight: 700; background: #ffffff;">
-                                Tipo de muestras
-                            </th>
-                            <th colspan="2" style="border-right: 1.5px solid #000000; text-align: center; padding: 1.5px 5px; font-weight: normal; background: #ffffff;">
-                                ${menorMuestra}
-                            </th>
-                            <th colspan="2" style="text-align: center; padding: 1.5px 5px; font-weight: normal; background: #ffffff;">
-                                ${padreMuestra}
-                            </th>
-                        </tr>
-                        <!-- FILA 3: PRUEBA N° -->
-                        <tr style="border-bottom: 1.5px solid #000000;">
-                            <th colspan="2" style="border-right: 1.5px solid #000000; text-align: left; padding: 1.5px 5px; font-weight: 700; background: #ffffff;">
-                                Prueba N°
-                            </th>
-                            <th colspan="2" style="border-right: 1.5px solid #000000; text-align: center; padding: 1.5px 5px; font-weight: 700; background: #ffffff;">
-                                ${menorPrueba}
-                            </th>
-                            <th colspan="2" style="text-align: center; padding: 1.5px 5px; font-weight: 700; background: #ffffff;">
-                                ${padrePrueba}
-                            </th>
-                        </tr>
-                        <!-- FILA 4: CABECERA TAMAÑO DE ALELO -->
-                        <tr style="border-bottom: 1.5px solid #000000; background-color: #ffffff;">
-                            <th style="border-right: 1px solid #000000; width: 16%; padding: 2px 4px; text-align: left; font-weight: 700; font-size: 8.5px;">Loci</th>
-                            <th style="border-right: 1.5px solid #000000; width: 12%; padding: 2px 4px; text-align: center; font-weight: 700; font-size: 8.5px;">IP</th>
-                            <th colspan="2" style="border-right: 1.5px solid #000000; width: 36%; padding: 2px 4px; text-align: center; font-weight: 700; font-size: 8px;">Tamaño de Alelo</th>
-                            <th colspan="2" style="width: 36%; padding: 2px 4px; text-align: center; font-weight: 700; font-size: 8px;">Tamaño de Alelo</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${filasLociHTML}
-                    </tbody>
-                </table>
-
-                <!-- CUADRO DE INTERPRETACIÓN PERICIAL -->
-<div style="border: 1.5px solid #000000; padding: 5px 8px; margin-bottom: 4px; font-size: 11.5px; line-height: 1.3; background: #ffffff;">
-    <div style="font-weight: 700; margin-bottom: 2px; font-size: 11.5px;">Interpretación:</div>
-    <div style="text-align: justify; color: #000000; font-size: 11.5px;">
-        ${interpretacion}
-    </div>
-</div>
-
-<!-- CUADRO DE RESULTADOS GLOBALES -->
-<div style="border: 1.5px solid #000000; padding: 6px 10px; margin-bottom: 4px; background: #ffffff;">
-    <div style="text-align: center; font-weight: 800; font-size: 13px; margin-bottom: 4px; letter-spacing: 0.5px; text-transform: uppercase;">
-        RESULTADOS GLOBALES
-    </div>
-    <div style="font-size: 11.5px; margin-bottom: 3px; line-height: 1.3;">
-        <span style="font-weight: 700;">ÍNDICE DE PATERNIDAD ACUMULATIVO:</span> 
-        <span style="font-weight: 800; font-family: Arial, sans-serif; font-size: 13.5px;">${ipc}</span>
-    </div>
-    <div style="font-size: 11.5px; margin-bottom: 4px; line-height: 1.3;">
-        <span style="font-weight: 700;">PROBABILIDAD DE PATERNIDAD ACUMULATIVA:</span> 
-        <span style="font-weight: 800; font-family: Arial, sans-serif; font-size: 14.5px;">${prob}</span>
-    </div>
-    <div style="font-size: 9.5px; color: #000000; line-height: 1.2;">
-        ${notaLab}
-    </div>
-</div>
             </div>
 
-            <!-- SU PIE DE PÁGINA QUE SIEMPRE LE PONES A LOS RESULTADOS -->
-            <div style="flex: 0 0 auto; margin-top: auto;">
-                ${pieHabitual}
+            <!-- SUBTÍTULO TECNOLOGÍA EXACTA -->
+            <div style="text-align: center; font-size: 7.8px; font-weight: 700; color: #000000; margin-bottom: 3px; letter-spacing: 0.2px;">
+                ${tecnologia}
+            </div>
+
+            <!-- CUADRO COMPARATIVO COMPLETO (IDENTICO AL PDF) -->
+            <table class="adn-tabla-comparativa" style="width: 100%; border-collapse: collapse; border: 1.5px solid #000000; font-size: 8.5px; margin-bottom: 5px;">
+                <thead>
+                    <!-- FILA 1: CASO Y NOMBRES -->
+                    <tr style="border-bottom: 1.5px solid #000000;">
+                        <th colspan="2" style="border-right: 1.5px solid #000000; text-align: left; padding: 2px 5px; width: 28%; background: #ffffff;">
+                            <span style="font-weight: 700; font-size: 8.5px;">Caso: ${codigoCaso}</span><br>
+                            <span style="font-weight: 700; font-size: 8.5px;">Nombre</span>
+                        </th>
+                        <th colspan="2" style="border-right: 1.5px solid #000000; text-align: center; padding: 2px 5px; width: 36%; background: #ffffff;">
+                            <span style="font-weight: 800; font-size: 9px; text-transform: uppercase;">MENOR</span><br>
+                            <span style="font-weight: 800; font-size: 9.5px; text-transform: uppercase;">${menorNombre}</span>
+                        </th>
+                        <th colspan="2" style="text-align: center; padding: 2px 5px; width: 36%; background: #ffffff;">
+                            <span style="font-weight: 800; font-size: 9px; text-transform: uppercase;">PRESUNTO PADRE</span><br>
+                            <span style="font-weight: 800; font-size: 9.5px; text-transform: uppercase;">${padreNombre}</span>
+                        </th>
+                    </tr>
+                    <!-- FILA 2: TIPO DE MUESTRAS -->
+                    <tr style="border-bottom: 1px solid #000000;">
+                        <th colspan="2" style="border-right: 1.5px solid #000000; text-align: left; padding: 1.5px 5px; font-weight: 700; background: #ffffff;">
+                            Tipo de muestras
+                        </th>
+                        <th colspan="2" style="border-right: 1.5px solid #000000; text-align: center; padding: 1.5px 5px; font-weight: normal; background: #ffffff;">
+                            ${menorMuestra}
+                        </th>
+                        <th colspan="2" style="text-align: center; padding: 1.5px 5px; font-weight: normal; background: #ffffff;">
+                            ${padreMuestra}
+                        </th>
+                    </tr>
+                    <!-- FILA 3: PRUEBA N° -->
+                    <tr style="border-bottom: 1.5px solid #000000;">
+                        <th colspan="2" style="border-right: 1.5px solid #000000; text-align: left; padding: 1.5px 5px; font-weight: 700; background: #ffffff;">
+                            Prueba N°
+                        </th>
+                        <th colspan="2" style="border-right: 1.5px solid #000000; text-align: center; padding: 1.5px 5px; font-weight: 700; background: #ffffff;">
+                            ${menorPrueba}
+                        </th>
+                        <th colspan="2" style="text-align: center; padding: 1.5px 5px; font-weight: 700; background: #ffffff;">
+                            ${padrePrueba}
+                        </th>
+                    </tr>
+                    <!-- FILA 4: CABECERA TAMAÑO DE ALELO -->
+                    <tr style="border-bottom: 1.5px solid #000000; background-color: #ffffff;">
+                        <th style="border-right: 1px solid #000000; width: 16%; padding: 2px 4px; text-align: left; font-weight: 700; font-size: 8.5px;">Loci</th>
+                        <th style="border-right: 1.5px solid #000000; width: 12%; padding: 2px 4px; text-align: center; font-weight: 700; font-size: 8.5px;">IP</th>
+                        <th colspan="2" style="border-right: 1.5px solid #000000; width: 36%; padding: 2px 4px; text-align: center; font-weight: 700; font-size: 8px;">Tamaño de Alelo</th>
+                        <th colspan="2" style="width: 36%; padding: 2px 4px; text-align: center; font-weight: 700; font-size: 8px;">Tamaño de Alelo</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${filasLociHTML}
+                </tbody>
+            </table>
+
+            <!-- CUADRO DE INTERPRETACIÓN PERICIAL -->
+            <div style="border: 1.5px solid #000000; padding: 5px 8px; margin-bottom: 5px; font-size: 8.5px; line-height: 1.3; background: #ffffff;">
+                <div style="font-weight: 700; margin-bottom: 2px; text-decoration: underline;">Interpretación:</div>
+                <div style="text-align: justify; color: #000000;">
+                    ${interpretacion}
+                </div>
+            </div>
+
+            <!-- CUADRO DE RESULTADOS GLOBALES Y PERSONAL (SIN FIRMAS, TAL CUAL EL FORMATO DE ENTREGA) -->
+            <div style="border: 1.5px solid #000000; display: flex; margin-bottom: 3px; background: #ffffff;">
+                <!-- COLUMNA IZQUIERDA: RESULTADOS GLOBALES -->
+                <div style="flex: 1 1 58%; border-right: 1.5px solid #000000; padding: 5px 8px;">
+                    <div style="text-align: center; font-weight: 800; font-size: 10px; margin-bottom: 3px; letter-spacing: 0.5px;">
+                        RESULTADOS GLOBALES
+                    </div>
+                    <div style="font-size: 8.5px; margin-bottom: 2px;">
+                        <span style="font-weight: 700;">ÍNDICE DE PATERNIDAD ACUMULATIVO:</span> 
+                        <span style="font-weight: 800; font-family: monospace;">${ipc}</span>
+                    </div>
+                    <div style="font-size: 8.5px; margin-bottom: 4px;">
+                        <span style="font-weight: 700;">PROBABILIDAD DE PATERNIDAD ACUMULATIVA:</span> 
+                        <span style="font-weight: 800; font-family: monospace;">${prob}</span>
+                    </div>
+                    <div style="font-size: 7.5px; color: #222222; line-height: 1.25; margin-top: 3px;">
+                        ${notaLab}
+                    </div>
+                </div>
+
+                <!-- COLUMNA DERECHA: RECUADROS DE PERSONAL (SIN FIRMAS) -->
+                <div style="flex: 1 1 42%; display: flex;">
+                    <div style="flex: 1 1 50%; border-right: 1px solid #000000; padding: 4px; text-align: center; display: flex; flex-direction: column; justify-content: space-between;">
+                        <div style="font-weight: 700; font-size: 7px; line-height: 1.1; text-transform: uppercase;">
+                            PERSONAL A CARGO DE LA TOMA DE LA MUESTRA
+                        </div>
+                        <div style="height: 48px; display: flex; align-items: flex-end; justify-content: center;">
+                            <div style="width: 85%; border-top: 0.8px dashed #888888; font-size: 6.5px; color: #666666; padding-top: 1px;">Conforme</div>
+                        </div>
+                    </div>
+                    <div style="flex: 1 1 50%; padding: 4px; text-align: center; display: flex; flex-direction: column; justify-content: space-between;">
+                        <div style="font-weight: 700; font-size: 7px; line-height: 1.1; text-transform: uppercase;">
+                            PERSONAL A CARGO DEL ANALISIS DE LA MUESTRA
+                        </div>
+                        <div style="height: 48px; display: flex; align-items: flex-end; justify-content: center;">
+                            <div style="width: 85%; border-top: 0.8px dashed #888888; font-size: 6.5px; color: #666666; padding-top: 1px;">Conforme</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PIE DISCRETO SEDES -->
+            <div style="display: flex; justify-content: space-between; font-size: 7.5px; color: #888888; padding: 1px 4px 0 4px;">
+                <span>Santiago de Surco (Sede Central, Lima)</span>
+                <span>Yanahuara, Arequipa</span>
+                <span>Piura, Piura</span>
             </div>
         </div>
     `;
@@ -4395,6 +4778,13 @@ function construirInformeHTML(orden) {
 function imprimirInforme(nroOrden) {
     const orden = (ordenesRegistradas || []).find(o => o.nroOrden === nroOrden);
     if (!orden) return;
+
+    const saldoOrd = orden.saldoPendiente !== undefined ? Number(orden.saldoPendiente) : Math.max(0, Number(orden.total || 0) - Number(orden.aCuenta !== undefined ? orden.aCuenta : orden.total || 0));
+    if (saldoOrd > 0.009) {
+        const continuar = confirm(`⚠️ ATENCIÓN DE CAJA: El paciente ${orden.nombre} tiene un saldo pendiente de pago de S/ ${saldoOrd.toFixed(2)}.\n\n¿Desea continuar con la emisión del informe de todas maneras?`);
+        if (!continuar) return;
+    }
+
     if (!orden.resultados || !orden.resultados.length) {
         const guardado = guardarResultados(nroOrden, true);
         if (!guardado) {
@@ -4442,6 +4832,13 @@ function esperarImagenes(contenedor) {
 async function descargarInformePDF(nroOrden) {
     const orden = (ordenesRegistradas || []).find(o => o.nroOrden === nroOrden);
     if (!orden) return;
+
+    const saldoOrd = orden.saldoPendiente !== undefined ? Number(orden.saldoPendiente) : Math.max(0, Number(orden.total || 0) - Number(orden.aCuenta !== undefined ? orden.aCuenta : orden.total || 0));
+    if (saldoOrd > 0.009) {
+        const continuar = confirm(`⚠️ ATENCIÓN DE CAJA: El paciente ${orden.nombre} tiene un saldo pendiente de pago de S/ ${saldoOrd.toFixed(2)}.\n\n¿Desea continuar con la descarga del PDF de todas maneras?`);
+        if (!continuar) return;
+    }
+
     if (!orden.resultados || !orden.resultados.length) {
         const guardado = guardarResultados(nroOrden, true);
         if (!guardado) {
