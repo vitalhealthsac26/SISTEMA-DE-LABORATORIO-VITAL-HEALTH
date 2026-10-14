@@ -260,11 +260,17 @@ body { background-color: var(--bg-light); font-family: 'Segoe UI', Tahoma, Genev
 }
 .adn-tabla-comparativa th,
 .adn-tabla-comparativa td {
-    border: 1px solid #000000;
+    border: none;
+    border-bottom: 1px solid #000000;
     padding: 2.2px 4px;
     text-align: center;
     vertical-align: middle;
 }
+/* PATERNIDAD: únicas líneas verticales internas del cuerpo de loci.
+   Sin estas reglas el borde general pintaba líneas entre los alelos. */
+.adn-tabla-comparativa tbody td:nth-child(1) { border-right: 1px solid #000000; }
+.adn-tabla-comparativa tbody td:nth-child(2) { border-right: 1.5px solid #000000; }
+.adn-tabla-comparativa tbody td:nth-child(4) { border-right: 1.5px solid #000000; }
 .adn-th-header {
     background-color: #ffffff;
     font-weight: 700;
