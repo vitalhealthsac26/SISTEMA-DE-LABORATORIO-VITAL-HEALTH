@@ -898,6 +898,20 @@ function guardarOrdenGenerarTicket() {
     }
 
     const total = examenesSeleccionados.reduce((acc, item) => acc + (item.cantidad * item.precio), 0);
+    
+    // 1. Leemos cuánto está abonando (A cuenta) del input de tu HTML. Si no existe o está vacío, paga al contado (total).
+    const inputACuenta = document.getElementById("pac-acuenta");
+    const aCuenta = inputACuenta ? (parseFloat(inputACuenta.value) || 0) : total;
+    
+    // 2. Calculamos la deuda restante evitando números negativos
+    const saldoPendiente = Math.max(0, total - aCuenta); 
+    
+    // 3. Determinamos el estado del pago
+    let estadoPago = 'PAGADO';
+    if (saldoPendiente > 0) {
+        estadoPago = aCuenta > 0 ? 'DEBE' : 'PENDIENTE';
+    }
+
     const nroOrden = "ORD-" + Math.floor(100000 + Math.random() * 900000);
     const fechaHora = new Date().toLocaleString();
 
@@ -905,7 +919,12 @@ function guardarOrdenGenerarTicket() {
         nroOrden, fechaHora, dni, nombre, sexo, fechaNacimiento, edad,
         celular: celularPaciente, doctor, metodoPago,
         examenes: examenesSeleccionados.map(i => ({ ...i })),
-        total, estado: "Pendiente", en: Date.now()
+        total, 
+        aCuenta,         // 👈 Guardamos cuánto abonó
+        saldoPendiente,  // 👈 Guardamos la deuda pendiente
+        estadoPago,      // 👈 Guardamos el estado ('PAGADO', 'DEBE' o 'PENDIENTE')
+        estado: "Pendiente", 
+        en: Date.now()
     };
 
     ordenesRegistradas.unshift(nuevaOrden);
@@ -920,7 +939,7 @@ function guardarOrdenGenerarTicket() {
         dni,
         paciente: nombre,
         metodoPago,
-        monto: total,
+        monto: aCuenta, // 👈 Registramos en caja solo el dinero que entró físicamente (el a cuenta)
         en: Date.now()
     };
     cajaMovimientos.unshift(movimiento);
@@ -937,6 +956,10 @@ function guardarOrdenGenerarTicket() {
     const form = document.getElementById("form-paciente");
     if (form) form.reset();
     setVal("pac-edad", "");
+    
+    // Limpiamos también el input de "A cuenta" si existiera en tu formulario
+    if (inputACuenta) inputACuenta.value = ""; 
+
     examenesSeleccionados = [];
     renderizarTablaSeleccionados();
 
@@ -944,6 +967,81 @@ function guardarOrdenGenerarTicket() {
     mostrarTicket(nuevaOrden);
 }
 
+// ==========================================
+// PAGAR / SALDAR DEUDA PENDIENTE POSTERIORMENTE
+// ==========================================
+function pagarSaldoPendiente(nroOrden) {
+    // 1. Buscamos la orden en tus registros locales
+    const orden = ordenesRegistradas.find(o => o.nroOrden === nroOrden);
+    if (!orden) {
+        alert("No se encontró la orden.");
+        return;
+    }
+
+    if (orden.saldoPendiente <= 0) {
+        alert("Esta orden ya se encuentra totalmente pagada.");
+        return;
+    }
+
+    // 2. Ventana emergente para ingresar el abono o pago total del saldo
+    const montoACancelar = prompt(
+        `Paciente: ${orden.nombre}\n` +
+        `Total: S/ ${orden.total.toFixed(2)}\n` +
+        `Ya pagó (A cuenta): S/ ${orden.aCuenta.toFixed(2)}\n` +
+        `Saldo Pendiente actual: S/ ${orden.saldoPendiente.toFixed(2)}\n\n` +
+        `Ingrese el monto que el paciente está pagando ahora:`, 
+        orden.saldoPendiente
+    );
+
+    if (montoACancelar === null) return; // Si canceló la ventana
+
+    const abono = parseFloat(montoACancelar);
+    if (isNaN(abono) || abono <= 0) {
+        alert("Por favor, ingrese un monto válido.");
+        return;
+    }
+
+    if (abono > orden.saldoPendiente) {
+        alert("El monto ingresado es mayor al saldo pendiente.");
+        return;
+    }
+
+    // 3. Actualizamos los valores de la orden
+    orden.aCuenta += abono;
+    orden.saldoPendiente = Math.max(0, orden.total - orden.aCuenta);
+    
+    if (orden.saldoPendiente === 0) {
+        orden.estadoPago = 'PAGADO';
+    } else {
+        orden.estadoPago = 'DEBE';
+    }
+
+    // 4. Registramos el ingreso de este abono en la caja del día
+    const ahora = new Date();
+    const movimiento = {
+        id: `${Date.now()}-PAGO-SALDO-${nroOrden}`,
+        fecha: ahora.toISOString().split("T")[0],
+        fechaVisual: ahora.toLocaleDateString("es-PE"),
+        hora: ahora.toLocaleTimeString(),
+        nroOrden,
+        dni: orden.dni,
+        paciente: orden.nombre,
+        metodoPago: orden.metodoPago || "Efectivo",
+        monto: abono, 
+        en: Date.now()
+    };
+    cajaMovimientos.unshift(movimiento);
+
+    // 5. Guardamos cambios localmente, actualizamos totales, la nube y lanzamos la alerta
+    persistirDatos();
+    actualizarTotalesCaja();
+    cargarOrdenes(); 
+    
+    window.nubeGuardarOrden?.(orden);
+    window.nubeGuardarMovimiento?.(movimiento);
+
+    alert(`✅ Pago registrado con éxito. Nuevo saldo pendiente: S/ ${orden.saldoPendiente.toFixed(2)}`);
+}
 // ==========================================
 // GESTIÓN DE ÓRDENES
 // ==========================================
