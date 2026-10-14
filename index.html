@@ -670,8 +670,11 @@
                                     <span class="input-group-text bg-light fw-semibold text-secondary"><i class="bi bi-calendar-event me-1"></i>Fecha:</span>
                                     <input type="date" id="filtro-caja-fecha" class="form-control form-control-sm" onchange="filtrarCajaPorFecha(this.value)">
                                     <button class="btn btn-outline-secondary btn-sm" type="button" onclick="cargarCajaHoy()" title="Ver los cobros de hoy">Hoy</button>
-                                    <button class="btn btn-outline-secondary btn-sm" type="button" onclick="verTodosLosCobrosCaja()" title="Ver histórico completo">Todos</button>
+                                    <button class="btn btn-outline-secondary btn-sm" type="button" onclick="verTodosLosCobrosCaja()" title="Ver pagos de todas las órdenes vigentes">Todos</button>
                                 </div>
+                                <button class="btn btn-sm btn-outline-primary fw-semibold" type="button" onclick="purgarYSincronizarCajaConOrdenes(true)" title="Depurar y sincronizar caja solo con pagos de órdenes actuales">
+                                    <i class="bi bi-arrow-repeat me-1"></i>Sincronizar con Órdenes
+                                </button>
                                 <button class="btn btn-sm btn-outline-success fw-semibold" onclick="exportarCierreCajaExcel()">
                                     <i class="bi bi-download me-1"></i>Descargar Excel
                                 </button>
