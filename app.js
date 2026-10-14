@@ -444,7 +444,18 @@ function estandarizarCotizacion(c) {
     const p = c.paciente || {};
     let id = c.id != null ? String(c.id) : (c.nroCotizacion ? String(c.nroCotizacion) : "cot_" + Date.now() + "_" + Math.floor(Math.random() * 1000));
     const examenes = (c.examenes || []).map(normalizarExamenCot);
-    const total = c.total != null ? numeroTexto(c.total) : examenes.reduce((a, e) => a + e.importe, 0);
+    const subtotal = c.subtotal != null ? numeroTexto(c.subtotal) : examenes.reduce((a, e) => a + (e.importe || 0), 0);
+    const descuentoTipo = c.descuentoTipo === "S/" ? "S/" : "%";
+    const descuentoValor = c.descuentoValor != null ? numeroTexto(c.descuentoValor) : 0;
+    let montoDescuento = c.montoDescuento != null ? numeroTexto(c.montoDescuento) : 0;
+    if (montoDescuento === 0 && descuentoValor > 0) {
+        if (descuentoTipo === "%") {
+            montoDescuento = (subtotal * Math.min(100, Math.max(0, descuentoValor))) / 100;
+        } else {
+            montoDescuento = Math.min(subtotal, Math.max(0, descuentoValor));
+        }
+    }
+    const total = c.total != null ? numeroTexto(c.total) : Math.max(0, subtotal - montoDescuento);
     return {
         id,
         nroCotizacion: c.nroCotizacion || ("COT-" + id.replace(/\D/g, "").slice(-4) || "0001"),
@@ -460,6 +471,10 @@ function estandarizarCotizacion(c) {
             sexo: p.sexo || c.sexo || "MASCULINO"
         },
         examenes,
+        subtotal,
+        descuentoTipo,
+        descuentoValor,
+        montoDescuento,
         total
     };
 }
@@ -478,6 +493,10 @@ function normalizarCotizacion(c) {
         celular: s.paciente.celular,
         sexo: s.paciente.sexo,
         examenes: s.examenes,
+        subtotal: s.subtotal,
+        descuentoTipo: s.descuentoTipo,
+        descuentoValor: s.descuentoValor,
+        montoDescuento: s.montoDescuento,
         total: s.total
     };
 }
@@ -867,11 +886,13 @@ function renderizarTablaSeleccionados() {
     const tabla = document.getElementById("tabla-examenes-seleccionados");
     if (!tabla) return;
     const tbody = tabla.querySelector("tbody");
-    const totalEl = document.getElementById("total-cobrar");
     tbody.innerHTML = "";
 
     if (examenesSeleccionados.length === 0) {
         tbody.innerHTML = `<tr id="empty-row"><td colspan="6" class="text-center text-muted py-4">No hay exámenes agregados.</td></tr>`;
+        const subtotalEl = document.getElementById("subtotal-cobrar");
+        const totalEl = document.getElementById("total-cobrar");
+        if (subtotalEl) subtotalEl.textContent = "0.00";
         if (totalEl) totalEl.textContent = "0.00";
         const inputACuenta = document.getElementById("orden-monto-acuenta");
         if (inputACuenta) {
@@ -882,10 +903,8 @@ function renderizarTablaSeleccionados() {
         return;
     }
 
-    let total = 0;
     examenesSeleccionados.forEach(item => {
         const importe = item.cantidad * item.precio;
-        total += importe;
         const tr = document.createElement("tr");
         tr.innerHTML = `
             <td>${escapeHTML(item.codigo)}</td>
@@ -897,14 +916,40 @@ function renderizarTablaSeleccionados() {
         `;
         tbody.appendChild(tr);
     });
-    if (totalEl) totalEl.textContent = total.toFixed(2);
+
+    actualizarCalculoDescuentoRecepcion();
+}
+
+function actualizarCalculoDescuentoRecepcion() {
+    const subtotal = examenesSeleccionados.reduce((acc, item) => acc + (item.cantidad * item.precio), 0);
+    const subtotalEl = document.getElementById("subtotal-cobrar");
+    if (subtotalEl) subtotalEl.textContent = subtotal.toFixed(2);
+
+    const tipoDescEl = document.getElementById("orden-descuento-tipo");
+    const valDescEl = document.getElementById("orden-descuento-valor");
+    const tipo = tipoDescEl ? tipoDescEl.value : "%";
+    const valNum = valDescEl ? (parseFloat(valDescEl.value) || 0) : 0;
+
+    let montoDescuento = 0;
+    if (valNum > 0) {
+        if (tipo === "%") {
+            montoDescuento = subtotal * (valNum / 100);
+        } else {
+            montoDescuento = Math.min(subtotal, valNum);
+        }
+    }
+    const totalNeto = Math.max(0, subtotal - montoDescuento);
+
+    const totalEl = document.getElementById("total-cobrar");
+    if (totalEl) totalEl.textContent = totalNeto.toFixed(2);
 
     const inputACuenta = document.getElementById("orden-monto-acuenta");
     if (inputACuenta && (!inputACuenta.dataset.modificadoManual || inputACuenta.value === "" || inputACuenta.value === "0.00")) {
-        inputACuenta.value = total.toFixed(2);
+        inputACuenta.value = totalNeto.toFixed(2);
     }
     actualizarCalculoSaldoNuevaOrden(false);
 }
+window.actualizarCalculoDescuentoRecepcion = actualizarCalculoDescuentoRecepcion;
 
 function actualizarCalculoSaldoNuevaOrden(porUsuario = false) {
     const totalEl = document.getElementById("total-cobrar");
@@ -967,7 +1012,21 @@ function guardarOrdenGenerarTicket() {
         return;
     }
 
-    const total = examenesSeleccionados.reduce((acc, item) => acc + (item.cantidad * item.precio), 0);
+    const subtotal = examenesSeleccionados.reduce((acc, item) => acc + (item.cantidad * item.precio), 0);
+    const tipoDescEl = document.getElementById("orden-descuento-tipo");
+    const valDescEl = document.getElementById("orden-descuento-valor");
+    const descuentoTipo = tipoDescEl ? tipoDescEl.value : "%";
+    const descuentoValor = valDescEl ? (parseFloat(valDescEl.value) || 0) : 0;
+    let montoDescuento = 0;
+    if (descuentoValor > 0) {
+        if (descuentoTipo === "%") {
+            montoDescuento = subtotal * (descuentoValor / 100);
+        } else {
+            montoDescuento = Math.min(subtotal, descuentoValor);
+        }
+    }
+    const total = Math.max(0, subtotal - montoDescuento);
+
     const nroOrden = "ORD-" + Math.floor(100000 + Math.random() * 900000);
     const fechaHora = new Date().toLocaleString();
 
@@ -978,35 +1037,44 @@ function guardarOrdenGenerarTicket() {
     const saldoPendiente = Math.max(0, total - aCuenta);
     const estadoPago = saldoPendiente > 0.009 ? "Pendiente" : "Pagado";
 
+    const hoyLocalISO = obtenerFechaISO(new Date());
     const nuevaOrden = {
         nroOrden, fechaHora, dni, nombre, sexo, fechaNacimiento, edad,
         celular: celularPaciente, doctor, metodoPago,
         examenes: examenesSeleccionados.map(i => ({ ...i })),
+        subtotal,
+        descuentoTipo,
+        descuentoValor,
+        montoDescuento,
         total,
         aCuenta,
         saldoPendiente,
         estadoPago,
         estado: "Pendiente",
+        fechaISO: hoyLocalISO,
         en: Date.now()
     };
 
     ordenesRegistradas.unshift(nuevaOrden);
 
     const ahora = new Date();
-    const movimiento = {
-        id: `${Date.now()}-${nroOrden}`,
-        fecha: ahora.toISOString().split("T")[0],
-        fechaVisual: ahora.toLocaleDateString("es-PE"),
-        hora: ahora.toLocaleTimeString(),
-        nroOrden,
-        dni,
-        paciente: nombre,
-        metodoPago,
-        monto: aCuenta,
-        concepto: saldoPendiente > 0.009 ? `Pago a cuenta orden ${nroOrden} (Resta S/ ${saldoPendiente.toFixed(2)})` : `Pago completo orden ${nroOrden}`,
-        en: Date.now()
-    };
-    cajaMovimientos.unshift(movimiento);
+    let movimiento = null;
+    if (aCuenta > 0.009) {
+        movimiento = {
+            id: `${Date.now()}-${nroOrden}`,
+            fecha: hoyLocalISO,
+            fechaVisual: ahora.toLocaleDateString("es-PE"),
+            hora: ahora.toLocaleTimeString(),
+            nroOrden,
+            dni,
+            paciente: nombre,
+            metodoPago,
+            monto: aCuenta,
+            concepto: saldoPendiente > 0.009 ? `Pago a cuenta orden ${nroOrden} (Resta S/ ${saldoPendiente.toFixed(2)})` : `Pago completo orden ${nroOrden}`,
+            en: Date.now()
+        };
+        cajaMovimientos.unshift(movimiento);
+    }
 
     registrarPacienteDesdeOrden(nuevaOrden);
 
@@ -1015,11 +1083,13 @@ function guardarOrdenGenerarTicket() {
     cargarOrdenes();
     cargarPacientes();
     window.nubeGuardarOrden?.(nuevaOrden);
-    window.nubeGuardarMovimiento?.(movimiento);
+    if (movimiento) window.nubeGuardarMovimiento?.(movimiento);
 
     const form = document.getElementById("form-paciente");
     if (form) form.reset();
     setVal("pac-edad", "");
+    if (valDescEl) valDescEl.value = "";
+    if (tipoDescEl) tipoDescEl.value = "%";
     if (inputACuenta) {
         inputACuenta.value = "0.00";
         delete inputACuenta.dataset.modificadoManual;
@@ -1033,15 +1103,120 @@ function guardarOrdenGenerarTicket() {
 }
 
 // ==========================================
-// GESTIÓN DE ÓRDENES
+// GESTIÓN Y FILTROS DE ÓRDENES
 // ==========================================
+window.filtroFechaOrdenes = null;
+window.filtroBusquedaOrdenes = "";
+
+function cambiarFechaFiltroOrdenes(fechaValor) {
+    window.filtroFechaOrdenes = fechaValor || "todas";
+    filtrarOrdenes();
+}
+window.cambiarFechaFiltroOrdenes = cambiarFechaFiltroOrdenes;
+
+function filtrarOrdenesHoy() {
+    const hoyISO = obtenerFechaISO(new Date());
+    window.filtroFechaOrdenes = hoyISO;
+    const inputFecha = document.getElementById("filtro-ordenes-fecha");
+    if (inputFecha) inputFecha.value = hoyISO;
+    filtrarOrdenes();
+}
+window.filtrarOrdenesHoy = filtrarOrdenesHoy;
+
+function filtrarOrdenesTodas() {
+    window.filtroFechaOrdenes = "todas";
+    const inputFecha = document.getElementById("filtro-ordenes-fecha");
+    if (inputFecha) inputFecha.value = "";
+    filtrarOrdenes();
+}
+window.filtrarOrdenesTodas = filtrarOrdenesTodas;
+
+function filtrarOrdenes() {
+    const inputBusqueda = document.getElementById("filtro-ordenes-busqueda");
+    const inputFecha = document.getElementById("filtro-ordenes-fecha");
+    const texto = inputBusqueda ? inputBusqueda.value.trim().toLowerCase() : "";
+    window.filtroBusquedaOrdenes = texto;
+
+    const hoyISO = obtenerFechaISO(new Date());
+    if (window.filtroFechaOrdenes === null) {
+        window.filtroFechaOrdenes = hoyISO;
+        if (inputFecha && !inputFecha.value) inputFecha.value = hoyISO;
+    }
+
+    const fechaFiltro = window.filtroFechaOrdenes;
+    let lista = (ordenesRegistradas || []).filter(o => o && o.nroOrden && !window.ordenesEliminadas?.includes(String(o.nroOrden)));
+
+    // 1. Filtrar por fecha
+    if (fechaFiltro && fechaFiltro !== "todas") {
+        lista = lista.filter(ord => {
+            const fOrd = obtenerFechaISO(ord.fechaISO || ord.fechaHora || ord.en);
+            return fOrd === fechaFiltro;
+        });
+    }
+
+    // 2. Filtrar por texto (paciente, DNI, orden, médico)
+    if (texto) {
+        lista = lista.filter(ord => {
+            return String(ord.nombre || "").toLowerCase().includes(texto) ||
+                   String(ord.dni || "").toLowerCase().includes(texto) ||
+                   String(ord.nroOrden || "").toLowerCase().includes(texto) ||
+                   String(ord.doctor || "").toLowerCase().includes(texto);
+        });
+    }
+
+    const badgeContador = document.getElementById("contador-ordenes-filtradas");
+    if (badgeContador) {
+        let etiqueta = "";
+        if (fechaFiltro === "todas") {
+            etiqueta = `Mostrando histórico completo (${lista.length} órdenes)`;
+        } else if (fechaFiltro === hoyISO) {
+            etiqueta = `Mostrando órdenes de hoy (${lista.length} órdenes)`;
+        } else {
+            const partes = fechaFiltro.split("-").reverse().join("/");
+            etiqueta = `Mostrando órdenes del ${partes} (${lista.length} órdenes)`;
+        }
+        if (texto) etiqueta += ` • Búsqueda: "${texto}"`;
+        badgeContador.textContent = etiqueta;
+    }
+
+    renderizarTablaOrdenes(lista);
+}
+window.filtrarOrdenes = filtrarOrdenes;
+
 function cargarOrdenes() {
+    const inputFecha = document.getElementById("filtro-ordenes-fecha");
+    const hoyISO = obtenerFechaISO(new Date());
+    if (window.filtroFechaOrdenes === null) {
+        window.filtroFechaOrdenes = hoyISO;
+    }
+    if (inputFecha && window.filtroFechaOrdenes !== "todas" && !inputFecha.value) {
+        inputFecha.value = window.filtroFechaOrdenes;
+    }
+    filtrarOrdenes();
+}
+
+function renderizarTablaOrdenes(ordenes) {
     const tbody = document.getElementById('lista-ordenes-body');
     if (!tbody) return;
     tbody.innerHTML = "";
-    const ordenes = ordenesRegistradas || [];
-    if (ordenes.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="6" class="text-center text-muted py-4">No hay órdenes registradas.</td></tr>`;
+    if (!ordenes || ordenes.length === 0) {
+        const fechaFiltro = window.filtroFechaOrdenes;
+        const texto = window.filtroBusquedaOrdenes;
+        const hoyISO = obtenerFechaISO(new Date());
+        let msg = "No se encontraron órdenes para la fecha seleccionada.";
+        if (fechaFiltro === "todas") {
+            msg = "No se encontraron órdenes en el historial.";
+        } else if (fechaFiltro === hoyISO) {
+            msg = `No hay órdenes registradas para hoy (${new Date().toLocaleDateString("es-PE")}).`;
+        }
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="6" class="text-center text-muted py-4">
+                    <i class="bi bi-info-circle me-1"></i>${escapeHTML(msg)}${texto ? ` (Búsqueda: "${escapeHTML(texto)}")` : ''}
+                    ${fechaFiltro !== 'todas' ? `<div class="mt-2"><button type="button" class="btn btn-sm btn-outline-primary" onclick="filtrarOrdenesTodas()"><i class="bi bi-collection me-1"></i>Ver todas las órdenes registradas</button></div>` : ''}
+                </td>
+            </tr>
+        `;
         return;
     }
     ordenes.forEach(ord => {
@@ -2749,6 +2924,29 @@ function eliminarExamenCatalogo(codigo) {
 window.fechaSeleccionadaCaja = null;
 
 // Depuración estricta de caja: SOLO muestra los pagos correspondientes a las órdenes actualmente vigentes
+// Obtiene el monto real pagado / abonado de una orden
+function obtenerMontoPagadoOrden(orden) {
+    if (!orden) return 0;
+    const total = Number(orden.total || 0);
+    if (orden.aCuenta !== undefined && orden.aCuenta !== null && String(orden.aCuenta).trim() !== "") {
+        const val = Number(orden.aCuenta);
+        return isNaN(val) ? 0 : Math.max(0, val);
+    }
+    if (orden.saldoPendiente !== undefined && orden.saldoPendiente !== null && String(orden.saldoPendiente).trim() !== "") {
+        const saldo = Number(orden.saldoPendiente);
+        return Math.max(0, total - (isNaN(saldo) ? 0 : saldo));
+    }
+    // Si la orden no tiene campo de saldo (orden creada sin abono parcial previo), se considera pagada completa
+    return total;
+}
+window.obtenerMontoPagadoOrden = obtenerMontoPagadoOrden;
+
+function normalizarClaveOrden(nro) {
+    if (!nro) return "";
+    return String(nro).trim().toUpperCase();
+}
+
+// Depuración y reconciliación estricta de caja: muestra con total precisión los pagos de órdenes vigentes
 function purgarMovimientosCajaInvalidos(notificar = false) {
     if (!window.cajaEliminados) {
         window.cajaEliminados = leerJSON("vital_caja_eliminados", []);
@@ -2759,40 +2957,27 @@ function purgarMovimientosCajaInvalidos(notificar = false) {
 
     const mapaOrdenesActivas = new Map();
     (ordenesRegistradas || []).forEach(o => {
-        if (o && o.nroOrden && !window.ordenesEliminadas.includes(String(o.nroOrden))) {
-            mapaOrdenesActivas.set(String(o.nroOrden), o);
-        }
+        if (!o || !o.nroOrden) return;
+        const nroNorm = normalizarClaveOrden(o.nroOrden);
+        if (window.ordenesEliminadas.includes(nroNorm)) return;
+        mapaOrdenesActivas.set(nroNorm, o);
+        const sinPrefijo = nroNorm.replace(/^ORD-/, "");
+        mapaOrdenesActivas.set(sinPrefijo, o);
+        mapaOrdenesActivas.set("ORD-" + sinPrefijo, o);
     });
 
-    let eliminadosSet = new Set((window.cajaEliminados || []).map(String));
-    let eliminadosNuevos = false;
     let cantEliminados = 0;
-
-    // Agrupar movimientos por orden para validar consistencia de montos
     const acumuladoPorOrden = {};
     const cajaLimpia = [];
 
     (cajaMovimientos || []).forEach(m => {
         if (!m) return;
         const idMovStr = String(m.id || "");
-        const nroOrdStr = String(m.nroOrden || "");
+        const nroOrdStr = normalizarClaveOrden(m.nroOrden);
 
-        // 1. Descartar si el movimiento fue eliminado manualmente
-        if (idMovStr && eliminadosSet.has(idMovStr)) {
-            cantEliminados++;
-            if (typeof nubeEliminarMovimiento === "function" && idMovStr) {
-                nubeEliminarMovimiento(idMovStr);
-            }
-            return;
-        }
-
-        // 2. Descartar si no tiene orden asociada, o si la orden fue eliminada, o ya no existe
+        // 1. Descartar si el cobro no tiene orden o si la orden fue eliminada / ya no existe
         if (!nroOrdStr || window.ordenesEliminadas.includes(nroOrdStr) || !mapaOrdenesActivas.has(nroOrdStr)) {
             cantEliminados++;
-            if (idMovStr && !eliminadosSet.has(idMovStr)) {
-                eliminadosSet.add(idMovStr);
-                eliminadosNuevos = true;
-            }
             if (typeof nubeEliminarMovimiento === "function" && idMovStr) {
                 nubeEliminarMovimiento(idMovStr);
             }
@@ -2801,50 +2986,109 @@ function purgarMovimientosCajaInvalidos(notificar = false) {
 
         const orden = mapaOrdenesActivas.get(nroOrdStr);
         const montoMov = Number(m.monto || 0);
-        const aCuentaOrd = Number(orden.aCuenta || 0);
+        const montoPagadoOrd = obtenerMontoPagadoOrden(orden);
 
-        // 3. Si la orden registra aCuenta = 0 (el paciente no ha pagado nada), descartar cobros huérfanos
-        if (aCuentaOrd <= 0.009 && montoMov > 0) {
+        // 2. Si la orden registra pago 0 (no ha pagado nada), descartar cobros residuales
+        if (montoPagadoOrd <= 0.009 && montoMov > 0) {
             cantEliminados++;
-            if (idMovStr && !eliminadosSet.has(idMovStr)) {
-                eliminadosSet.add(idMovStr);
-                eliminadosNuevos = true;
-            }
             if (typeof nubeEliminarMovimiento === "function" && idMovStr) {
                 nubeEliminarMovimiento(idMovStr);
             }
             return;
         }
 
-        // 4. Si la suma de pagos en caja para esta orden supera el aCuenta real registrado, descartar el excedente duplicado
-        const acumuladoActual = acumuladoPorOrden[nroOrdStr] || 0;
-        if (acumuladoActual + montoMov > aCuentaOrd + 0.01) {
+        // 3. Si la suma de pagos en caja para esta orden supera el monto real pagado, descartar excedente
+        const claveUnica = normalizarClaveOrden(orden.nroOrden);
+        const acumuladoActual = acumuladoPorOrden[claveUnica] || 0;
+        if (acumuladoActual + montoMov > montoPagadoOrd + 0.05) {
             cantEliminados++;
-            if (idMovStr && !eliminadosSet.has(idMovStr)) {
-                eliminadosSet.add(idMovStr);
-                eliminadosNuevos = true;
-            }
             if (typeof nubeEliminarMovimiento === "function" && idMovStr) {
                 nubeEliminarMovimiento(idMovStr);
             }
             return;
         }
 
-        acumuladoPorOrden[nroOrdStr] = acumuladoActual + montoMov;
+        acumuladoPorOrden[claveUnica] = acumuladoActual + montoMov;
         cajaLimpia.push(m);
     });
 
-    if (eliminadosNuevos) {
-        window.cajaEliminados = Array.from(eliminadosSet);
-        localStorage.setItem("vital_caja_eliminados", JSON.stringify(window.cajaEliminados));
-    }
+    // Reconciliación: Toda orden activa con pago registrado DEBE figurar en caja
+    const ordenesProcesadas = new Set();
+    mapaOrdenesActivas.forEach(orden => {
+        const claveUnica = normalizarClaveOrden(orden.nroOrden);
+        if (ordenesProcesadas.has(claveUnica)) return;
+        ordenesProcesadas.add(claveUnica);
+
+        const totalOrd = Number(orden.total || 0);
+        const montoPagadoOrd = obtenerMontoPagadoOrden(orden);
+        const saldoOrd = Math.max(0, totalOrd - montoPagadoOrd);
+
+        // Mantener consistencia de estado en la orden
+        orden.aCuenta = montoPagadoOrd;
+        orden.saldoPendiente = saldoOrd;
+        orden.estadoPago = saldoOrd > 0.009 ? "Pendiente" : "Pagado";
+
+        const pagadoActualmenteEnCaja = acumuladoPorOrden[claveUnica] || 0;
+
+        // Si la orden tiene un monto pagado real, pero no tiene movimiento en caja (o quedó incompleto)
+        if (montoPagadoOrd > 0.009 && pagadoActualmenteEnCaja < 0.009) {
+            let fechaISO = "";
+            let fechaVisual = "";
+            let hora = "";
+
+            if (orden.fechaISO) {
+                fechaISO = obtenerFechaISO(orden.fechaISO);
+            }
+            if (!fechaISO && orden.fechaHora) {
+                fechaISO = obtenerFechaISO(orden.fechaHora);
+                const partes = String(orden.fechaHora).split(/,\s*/);
+                fechaVisual = partes[0] || "";
+                hora = partes[1] || "";
+            }
+            if (!fechaISO && orden.en) {
+                fechaISO = obtenerFechaISO(orden.en);
+                const d = new Date(orden.en);
+                if (!isNaN(d.getTime())) {
+                    fechaVisual = d.toLocaleDateString("es-PE");
+                    hora = d.toLocaleTimeString();
+                }
+            }
+            if (!fechaISO) {
+                fechaISO = obtenerFechaISO(new Date());
+                fechaVisual = new Date().toLocaleDateString("es-PE");
+                hora = new Date().toLocaleTimeString();
+            }
+
+            const mov = {
+                id: 'mov_' + claveUnica + '_' + (orden.en || Date.now()),
+                fecha: fechaISO,
+                fechaVisual: fechaVisual || fechaISO,
+                hora: hora || "-",
+                nroOrden: orden.nroOrden,
+                dni: orden.dni || "-",
+                paciente: orden.nombre || "Cliente General",
+                metodoPago: orden.metodoPago || "Efectivo",
+                monto: montoPagadoOrd,
+                concepto: saldoOrd > 0.009 ? `Pago a cuenta orden ${orden.nroOrden} (Resta S/ ${saldoOrd.toFixed(2)})` : `Pago completo orden ${orden.nroOrden}`,
+                en: orden.en || Date.now()
+            };
+
+            cajaLimpia.push(mov);
+            acumuladoPorOrden[claveUnica] = montoPagadoOrd;
+            if (typeof nubeGuardarMovimiento === "function") {
+                nubeGuardarMovimiento(mov);
+            }
+        }
+    });
+
+    cajaLimpia.sort((a, b) => (b.en || 0) - (a.en || 0));
 
     cajaMovimientos = cajaLimpia;
     sincronizarGlobals();
     persistirDatos();
 
     if (notificar) {
-        alert(`✅ Caja sincronizada correctamente:\n\n• Se depuraron ${cantEliminados} movimientos huérfanos, duplicados o eliminados.\n• La caja muestra únicamente los pagos vigentes de las órdenes registradas.`);
+        alert(`✅ Caja sincronizada correctamente:\n\n• Se validaron todas las órdenes registradas.\n• La caja muestra los cobros vigentes de las órdenes actuales.`);
     }
 
     return cantEliminados;
@@ -2858,7 +3102,7 @@ function purgarYSincronizarCajaConOrdenes(notificar = false) {
         window.nubeSincronizarTodo().catch(e => console.error("Error en sincronización con nube:", e));
     }
     if (notificar) {
-        alert(`✅ Sincronización de Caja completada:\n\n• Se validaron todas las órdenes vigentes.\n• Se limpiaron cobros huérfanos o eliminados (${cantEliminados} detectados).\n• La caja ahora refleja exclusivamente los pagos de las órdenes que existen actualmente en el sistema.\n• Los cambios se enviaron a la nube para reflejarse en todos los dispositivos.`);
+        alert(`✅ Sincronización de Caja completada:\n\n• Se validaron todas las órdenes vigentes.\n• Se limpiaron cobros huérfanos o eliminados (${cantEliminados} depurados).\n• La caja ahora refleja exclusivamente los pagos de las órdenes que existen actualmente en el sistema.\n• Los cambios se enviaron a la nube para reflejarse en todos los dispositivos.`);
     }
 }
 window.purgarYSincronizarCajaConOrdenes = purgarYSincronizarCajaConOrdenes;
@@ -2884,7 +3128,43 @@ window.actualizarOrdenesDesdeRemoto = actualizarOrdenesDesdeRemoto;
 
 function obtenerFechaISO(fechaStrOEn) {
     if (!fechaStrOEn) return "";
-    if (typeof fechaStrOEn === "string" && /^\d{4}-\d{2}-\d{2}$/.test(fechaStrOEn)) return fechaStrOEn;
+    if (typeof fechaStrOEn === "number") {
+        const d = new Date(fechaStrOEn);
+        if (isNaN(d.getTime())) return "";
+        const anio = d.getFullYear();
+        const mes = String(d.getMonth() + 1).padStart(2, "0");
+        const dia = String(d.getDate()).padStart(2, "0");
+        return `${anio}-${mes}-${dia}`;
+    }
+    if (typeof fechaStrOEn === "string") {
+        const str = fechaStrOEn.trim();
+        if (/^\d{4}-\d{2}-\d{2}$/.test(str)) return str;
+        // Soporte completo para formato peruano DD/MM/YYYY o DD-MM-YYYY o estadounidense MM/DD/YYYY
+        const match = str.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})/);
+        if (match) {
+            let part1 = parseInt(match[1], 10);
+            let part2 = parseInt(match[2], 10);
+            const anio = match[3];
+            let dia, mes;
+            if (part2 > 12 && part1 <= 12) {
+                // Formato MM/DD/YYYY
+                mes = String(part1).padStart(2, "0");
+                dia = String(part2).padStart(2, "0");
+            } else {
+                // Formato estándar DD/MM/YYYY
+                dia = String(part1).padStart(2, "0");
+                mes = String(part2).padStart(2, "0");
+            }
+            return `${anio}-${mes}-${dia}`;
+        }
+        const d = new Date(str);
+        if (!isNaN(d.getTime())) {
+            const anio = d.getFullYear();
+            const mes = String(d.getMonth() + 1).padStart(2, "0");
+            const dia = String(d.getDate()).padStart(2, "0");
+            return `${anio}-${mes}-${dia}`;
+        }
+    }
     const d = new Date(fechaStrOEn);
     if (isNaN(d.getTime())) return "";
     const anio = d.getFullYear();
@@ -2892,62 +3172,53 @@ function obtenerFechaISO(fechaStrOEn) {
     const dia = String(d.getDate()).padStart(2, "0");
     return `${anio}-${mes}-${dia}`;
 }
+window.obtenerFechaISO = obtenerFechaISO;
 
 function filtrarCajaPorFecha(fechaValor) {
-    purgarMovimientosCajaInvalidos(false);
     window.fechaSeleccionadaCaja = fechaValor || null;
     actualizarTotalesCaja();
 }
+window.filtrarCajaPorFecha = filtrarCajaPorFecha;
 
 function cargarCajaHoy() {
-    purgarMovimientosCajaInvalidos(false);
     const hoyStr = obtenerFechaISO(new Date());
     window.fechaSeleccionadaCaja = hoyStr;
     const inputFecha = document.getElementById("filtro-caja-fecha");
     if (inputFecha) inputFecha.value = hoyStr;
     actualizarTotalesCaja();
 }
+window.cargarCajaHoy = cargarCajaHoy;
 
 function verTodosLosCobrosCaja() {
-    purgarMovimientosCajaInvalidos(false);
     window.fechaSeleccionadaCaja = "todos";
     const inputFecha = document.getElementById("filtro-caja-fecha");
     if (inputFecha) inputFecha.value = "";
     actualizarTotalesCaja();
 }
+window.verTodosLosCobrosCaja = verTodosLosCobrosCaja;
 
 // Normaliza un movimiento de caja asegurando fecha, hora, DNI y paciente
 function normalizarMovimientoCaja(m) {
     if (!m) return {};
-    let fechaISO = m.fecha ? obtenerFechaISO(m.fecha) : "";
-    let hora = m.hora || "";
-    let dni = m.dni || "";
-    let fechaVisual = m.fechaVisual || "";
+    let fechaISO = "";
+    if (m.fecha) fechaISO = obtenerFechaISO(m.fecha);
+    if (!fechaISO && m.en) fechaISO = obtenerFechaISO(m.en);
+    if (!fechaISO && m.nroOrden) {
+        const ord = (ordenesRegistradas || []).find(o => normalizarClaveOrden(o.nroOrden) === normalizarClaveOrden(m.nroOrden));
+        if (ord) fechaISO = obtenerFechaISO(ord.fechaISO || ord.fechaHora || ord.en);
+    }
+    if (!fechaISO) fechaISO = obtenerFechaISO(new Date());
 
-    // Si falta fecha o DNI, intentar resolver desde su timestamp o desde la orden registrada
-    if (!fechaISO && m.en) {
-        fechaISO = obtenerFechaISO(m.en);
+    let fechaVisual = m.fechaVisual || "";
+    if (!fechaVisual && fechaISO) {
+        const partes = fechaISO.split("-");
+        if (partes.length === 3) fechaVisual = `${partes[2]}/${partes[1]}/${partes[0]}`;
+    }
+
+    let hora = m.hora || "";
+    if (!hora && m.en) {
         const d = new Date(m.en);
-        if (!isNaN(d.getTime())) {
-            fechaVisual = d.toLocaleDateString("es-PE");
-            if (!hora) hora = d.toLocaleTimeString();
-        }
-    }
-    if ((!dni || !fechaISO) && m.nroOrden) {
-        const ord = (ordenesRegistradas || []).find(o => String(o.nroOrden) === String(m.nroOrden));
-        if (ord) {
-            if (!dni) dni = ord.dni || "";
-            if (!fechaISO && ord.fechaHora) {
-                fechaISO = obtenerFechaISO(ord.fechaHora);
-                const partes = String(ord.fechaHora).split(", ");
-                if (!fechaVisual && partes[0]) fechaVisual = partes[0];
-                if (!hora && partes[1]) hora = partes[1];
-            }
-        }
-    }
-    if (!fechaISO) {
-        fechaISO = obtenerFechaISO(new Date());
-        if (!fechaVisual) fechaVisual = new Date().toLocaleDateString("es-PE");
+        if (!isNaN(d.getTime())) hora = d.toLocaleTimeString();
     }
 
     return {
@@ -2955,15 +3226,17 @@ function normalizarMovimientoCaja(m) {
         fecha: fechaISO,
         fechaVisual: fechaVisual || fechaISO,
         hora: hora || "-",
-        dni: dni || "-",
+        dni: m.dni || "-",
         paciente: m.paciente || "Cliente General",
         metodoPago: m.metodoPago || "Efectivo",
         monto: Number(m.monto || 0)
     };
 }
+window.normalizarMovimientoCaja = normalizarMovimientoCaja;
 
 function actualizarTotalesCaja() {
     purgarMovimientosCajaInvalidos(false);
+
     // Si no hay fecha elegida, fijar hoy en el input
     const inputFecha = document.getElementById("filtro-caja-fecha");
     const hoyISO = obtenerFechaISO(new Date());
@@ -2984,7 +3257,7 @@ function actualizarTotalesCaja() {
             ? `Mostrando cobros de hoy (${new Date().toLocaleDateString("es-PE")})` 
             : `Mostrando cobros del día: ${fechaFiltro.split("-").reverse().join("/")}`;
     } else if (fechaFiltro === "todos") {
-        textoSubtitulo = "Mostrando histórico completo de cobros";
+        textoSubtitulo = `Mostrando histórico completo de cobros (${movimientosNormalizados.length} movimientos)`;
     }
 
     const subEl = document.getElementById("caja-subtitulo-fecha");
@@ -3427,22 +3700,53 @@ function eliminarExamenCotizacion(codigo) {
     renderizarTablaCotizacion();
 }
 
+function calcularTotalCotizacion() {
+    const subtotal = listaCotizacionInd.reduce((acc, i) => acc + (Number(i.cantidad || 1) * Number(i.precio || 0)), 0);
+    const tipoDescEl = document.getElementById("cot-descuento-tipo");
+    const valDescEl = document.getElementById("cot-descuento-valor");
+    const tipo = tipoDescEl ? tipoDescEl.value : "%";
+    const valor = valDescEl ? (parseFloat(valDescEl.value) || 0) : 0;
+
+    let montoDescuento = 0;
+    if (valor > 0) {
+        if (tipo === "%") {
+            const porc = Math.min(100, Math.max(0, valor));
+            montoDescuento = (subtotal * porc) / 100;
+        } else {
+            montoDescuento = Math.min(subtotal, Math.max(0, valor));
+        }
+    }
+    montoDescuento = Math.round(montoDescuento * 100) / 100;
+    const total = Math.max(0, Math.round((subtotal - montoDescuento) * 100) / 100);
+
+    const elSub = document.getElementById("subtotal-cotizacion");
+    if (elSub) elSub.textContent = subtotal.toFixed(2);
+
+    const elDesc = document.getElementById("etiqueta-descuento-cotizacion");
+    if (elDesc) {
+        elDesc.textContent = `- S/ ${montoDescuento.toFixed(2)}${valor > 0 && tipo === '%' ? ` (${valor}%)` : ''}`;
+    }
+
+    const elTot = document.getElementById("total-cotizacion");
+    if (elTot) elTot.textContent = total.toFixed(2);
+
+    return { subtotal, descuentoTipo: tipo, descuentoValor: valor, montoDescuento, total };
+}
+window.calcularTotalCotizacion = calcularTotalCotizacion;
+
 function renderizarTablaCotizacion() {
     const tabla = document.getElementById("tabla-cotizacion-independiente");
     if (!tabla) return;
     const tbody = tabla.querySelector("tbody");
-    const totalEl = document.getElementById("total-cotizacion");
     tbody.innerHTML = "";
 
     if (listaCotizacionInd.length === 0) {
         tbody.innerHTML = `<tr id="empty-row-cotizacion"><td colspan="6" class="text-center text-muted py-4">No hay exámenes agregados para cotizar.</td></tr>`;
-        if (totalEl) totalEl.textContent = "0.00";
+        calcularTotalCotizacion();
         return;
     }
-    let total = 0;
     listaCotizacionInd.forEach(item => {
         const importe = item.cantidad * item.precio;
-        total += importe;
         const tr = document.createElement("tr");
         tr.innerHTML = `
             <td>${escapeHTML(item.codigo)}</td>
@@ -3454,7 +3758,7 @@ function renderizarTablaCotizacion() {
         `;
         tbody.appendChild(tr);
     });
-    if (totalEl) totalEl.textContent = total.toFixed(2);
+    calcularTotalCotizacion();
 }
 
 function guardarCotizacion() {
@@ -3468,7 +3772,7 @@ function guardarCotizacion() {
         return;
     }
 
-    const total = listaCotizacionInd.reduce((a, i) => a + i.cantidad * i.precio, 0);
+    const calculo = calcularTotalCotizacion();
     const cotizacion = {
         id: currentCotizacionId || ("cot_" + Date.now()),
         nroCotizacion: currentCotizacionId
@@ -3486,7 +3790,12 @@ function guardarCotizacion() {
             sexo: val("sexo") || "MASCULINO"
         },
         examenes: listaCotizacionInd.map(i => ({ codigo: i.codigo, nombre: i.nombre, cantidad: i.cantidad, precio: i.precio, importe: i.cantidad * i.precio })),
-        total
+        subtotal: calculo.subtotal,
+        descuentoTipo: calculo.descuentoTipo,
+        descuentoValor: calculo.descuentoValor,
+        montoDescuento: calculo.montoDescuento,
+        total: calculo.total,
+        en: Date.now()
     };
 
     if (!window.cotizacionesGuardadas) window.cotizacionesGuardadas = [];
@@ -3660,6 +3969,8 @@ function cargarCotizacion(id) {
     setVal("celular", n.celular);
     setVal("sexo", n.sexo || "MASCULINO");
     setVal("tipo-convenio-cotizacion", n.convenio || "Particular");
+    setVal("cot-descuento-tipo", n.descuentoTipo || "%");
+    setVal("cot-descuento-valor", n.descuentoValor > 0 ? n.descuentoValor : "");
 
     listaCotizacionInd = (n.examenes || []).map(e => ({ codigo: e.codigo, nombre: e.nombre, cantidad: e.cantidad, precio: e.precio }));
     renderizarTablaCotizacion();
@@ -3704,11 +4015,19 @@ function pasarCotizacionARecepcion() {
             });
         }
     });
+
+    // Transferir descuento a admisión
+    const tipoDesc = val("cot-descuento-tipo") || "%";
+    const valDesc = parseFloat(val("cot-descuento-valor")) || 0;
+    setVal("orden-descuento-tipo", tipoDesc);
+    setVal("orden-descuento-valor", valDesc > 0 ? valDesc : "");
+
     listaCotizacionInd = [];
     renderizarTablaCotizacion();
     renderizarTablaSeleccionados();
+    actualizarCalculoDescuentoRecepcion();
     showSection('recepcion');
-    alert("Cotización pasada a admisión.");
+    alert("Cotización transferida a Admisión / Recepción con descuentos y exámenes calculados.");
 }
 
 function pasarCotizacionARecepcionDesde(id) {
@@ -3730,9 +4049,17 @@ function pasarCotizacionARecepcionDesde(id) {
             unidad: catalogo ? catalogo.unidad || "" : "", referencia: catalogo ? catalogo.referencia || "" : ""
         };
     });
+
+    // Transferir descuento
+    const tipoDesc = n.descuentoTipo || "%";
+    const valDesc = n.descuentoValor || (n.montoDescuento > 0 ? n.montoDescuento : 0);
+    setVal("orden-descuento-tipo", tipoDesc);
+    setVal("orden-descuento-valor", valDesc > 0 ? valDesc : "");
+
     renderizarTablaSeleccionados();
+    actualizarCalculoDescuentoRecepcion();
     showSection('recepcion');
-    alert(`Cotización ${n.nroCotizacion} transferida a Recepción.`);
+    alert(`Cotización ${n.nroCotizacion} transferida a Admisión / Recepción con descuentos y exámenes calculados.`);
 }
 
 function normalizarCotizacionParaTicket(c) {
@@ -3747,6 +4074,10 @@ function normalizarCotizacionParaTicket(c) {
             fechaNacimiento: n.fechaNacimiento, edad: n.edad, celular: n.celular
         },
         examenes: n.examenes.map(e => ({ nombre: e.nombre, cantidad: e.cantidad, precioUnit: e.precio, importe: e.importe })),
+        subtotal: n.subtotal,
+        descuentoTipo: n.descuentoTipo,
+        descuentoValor: n.descuentoValor,
+        montoDescuento: n.montoDescuento,
         total: n.total
     };
 }
@@ -3757,6 +4088,7 @@ function imprimirCotizacionGuardada(id) {
 }
 function imprimirCotizacion() {
     if (listaCotizacionInd.length === 0) return;
+    const calc = calcularTotalCotizacion();
     const cotActual = {
         id: currentCotizacionId || Date.now(),
         nroCotizacion: currentCotizacionId
@@ -3769,7 +4101,11 @@ function imprimirCotizacion() {
             fechaNacimiento: val("fechaNacimiento"), edad: val("edad"), celular: val("celular")
         },
         examenes: listaCotizacionInd.map(i => ({ nombre: i.nombre, cantidad: i.cantidad, precioUnit: i.precio, importe: i.cantidad * i.precio })),
-        total: listaCotizacionInd.reduce((a, i) => a + i.cantidad * i.precio, 0)
+        subtotal: calc.subtotal,
+        descuentoTipo: calc.descuentoTipo,
+        descuentoValor: calc.descuentoValor,
+        montoDescuento: calc.montoDescuento,
+        total: calc.total
     };
     mostrarTicketCotizacion(cotActual);
 }
@@ -4501,6 +4837,18 @@ function construirTicketCotizacionHTML(cot) {
             <div class="t-linea"></div>
             ${lineas}
             <div class="t-linea"></div>
+            ${(() => {
+                const subT = Number(cot.subtotal || (Number(cot.total || 0) + Number(cot.montoDescuento || 0)));
+                const descM = Number(cot.montoDescuento || 0);
+                if (descM > 0.009) {
+                    const tipoD = cot.descuentoTipo === '%' ? `(${cot.descuentoValor || ''}%)` : 'S/';
+                    return `
+                        <div class="t-row"><span>SUBTOTAL S/:</span><span>${subT.toFixed(2)}</span></div>
+                        <div class="t-row" style="color: #b91c1c; font-weight: 700;"><span>DESCUENTO ${tipoD}:</span><span>- S/ ${descM.toFixed(2)}</span></div>
+                    `;
+                }
+                return '';
+            })()}
             <div class="t-row t-negrita t-total"><span>TOTAL S/</span><span>${Number(cot.total || 0).toFixed(2)}</span></div>
             <div class="t-row"><span>Tipo:</span><span>${escapeHTML(cot.convenio || 'Particular')}</span></div>
             <div class="t-linea-doble"></div>
