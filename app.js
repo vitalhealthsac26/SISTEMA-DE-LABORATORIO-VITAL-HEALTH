@@ -300,6 +300,9 @@ const BASE_VALORES_REFERENCIALES = {
 ]
 };
 
+// ==========================================
+// 1. TUS EXÁMENES DETALLADOS PRINCIPALES
+// ==========================================
 let examenesCatalogo = [
   { codigo: "593", nombre: "HEMOGRAMA COMPLETO AUTOMATIZADO", unidad: "", refMin: "", refMax: "", referencia: "Leucocitos: 4500-10000 | Hb: H 13.5-17.5, M 12.0-15.5", precio: 25.00 },
   { codigo: "864", nombre: "PERFIL HEPATICO", unidad: "", refMin: "", refMax: "", referencia: "Bilirrubinas, Transaminasas, Fosfatasa", precio: 85.00 },
@@ -311,18 +314,62 @@ let examenesCatalogo = [
   { codigo: "34", nombre: "ACIDO URICO", unidad: "mg/dL", refMin: 1.1, refMax: 5.4, referencia: "Hombres: 3.40 - 7.00 | Mujeres: 2.40 - 5.70 | Niños: 2.00 - 5.50", precio: 15.00 },
   { codigo: "459", nombre: "EXAMEN COMPLETO DE ORINA", unidad: "", refMin: "", refMax: "", referencia: "Física, Química, Microscópico", precio: 15.00 },
   { codigo: "1050", nombre: "UROCULTIVO Y ANTIBIOGRAMA", unidad: "", refMin: "", refMax: "", referencia: "Física, Microscópico, Cultivo y Antibiograma", precio: 35.00 },
-  { codigo: "658", nombre: "T4 LIBRE (TIROXINA LIBRE FT4)", unidad: "ng/dL", refMin: 0.90, refMax: 1.70, referencia: "Adultos: 0.90 - 1.70 | Niños: 4 a 30 días: 0.83 - 3.09 | 1 a 12 meses: 0.48 - 2.34 | 1 a 6 años: 0.65 - 1.75 | 7 a 11 años: 0.90 - 1.67 | 12 a 19 años: 0.93 - 1.60", metodo: "Ensayo de electroquimioluminiscencia (ECLIA)", precio: 45.00 },
-  { codigo: "659", nombre: "TSH ULTRASENSIBLE", unidad: "uUI / mL", refMin: 0.27, refMax: 4.20, referencia: "Adultos: 0.27 - 4.2 | Niños: 4 a 30 días: 0.43 - 16.0 | 1 a 12 meses: 0.62 - 8.0 | 1 a 6 años: 0.54 - 4.5 | 7 a 11 años: 0.66 - 4.14 | 12 a 19 años: 0.53 - 3.59", metodo: "Ensayo de electroquimioluminiscencia (ECLIA)", precio: 45.00 },
-  { codigo: "750", nombre: "PROTEINA C REACTIVA - CUANTITATIVA", unidad: "mg/dL", refMin: 0, refMax: 10, referencia: "Normal: Menor 10 | Leve a Moderado: 10.0 - 40.0 | Moderado a Severo: 40.0 - 200.0 | Severo: > 200.0", metodo: "Inmunoturbidimetría", precio: 35.00 },
-  { codigo: "990", nombre: "PRUEBA DE PATERNIDAD INFORMATIVA", unidad: "", refMin: "", refMax: "", referencia: "Probabilidad: > 99.999% (Inclusión) | 0.00% (Exclusión)", metodo: "Extracción de ADN y PCR Multiplex de marcadores STR (Electroforesis Capilar)", tubo: "Hisopado bucal / Tubo lila (EDTA)", precio: 750.00 }
+  { codigo: "658", nombre: "T4 LIBRE (TIROXINA LIBRE FT4)", unidad: "ng/dL", refMin: 0.90, refMax: 1.70, referencia: "Adultos: 0.90 - 1.70...", metodo: "Ensayo de electroquimioluminiscencia (ECLIA)", precio: 45.00 },
+  { codigo: "659", nombre: "TSH ULTRASENSIBLE", unidad: "uUI / mL", refMin: 0.27, refMax: 4.20, referencia: "Adultos: 0.27 - 4.2...", metodo: "Ensayo de electroquimioluminiscencia (ECLIA)", precio: 45.00 },
+  { codigo: "750", nombre: "PROTEINA C REACTIVA - CUANTITATIVA", unidad: "mg/dL", refMin: 0, refMax: 10, referencia: "Normal: Menor 10...", metodo: "Inmunoturbidimetría", precio: 35.00 },
+  { codigo: "990", nombre: "PRUEBA DE PATERNIDAD INFORMATIVA", unidad: "", refMin: "", refMax: "", referencia: "Probabilidad: > 99.999%", metodo: "Extracción de ADN y PCR Multiplex...", precio: 750.00 }
 ];
 
 // ==========================================
-// ESTADO GLOBAL EN MEMORIA
+// 2. CARGA AUTOMÁTICA DESDE productos.json
 // ==========================================
-let examenesSeleccionados = [];          // Carrito de Recepción / Admisión
-let listaCotizacionInd = [];             // Carrito del módulo de Cotización
-let currentCotizacionId = null;          // Id de la cotización que se está editando
+async function cargarProductosJson() {
+    try {
+        const respuesta = await fetch('productos.json');
+        if (!respuesta.ok) throw new Error('No se pudo acceder a productos.json');
+        
+        const listaProductos = await respuesta.json();
+        
+        listaProductos.forEach(prod => {
+            const codigoStr = String(prod.Codigo || "").trim();
+            const nombreStr = String(prod.Nombre || "").trim();
+            const precioNum = Number(prod.Precio || 0);
+
+            if (codigoStr && nombreStr) {
+                // Revisamos si ya existe en los 14 principales para no duplicarlo ni sobreescribir su configuración avanzada
+                const yaExiste = examenesCatalogo.find(e => String(e.codigo) === codigoStr);
+                
+                if (!yaExiste) {
+                    // Le inyectamos automáticamente las propiedades vacías o por defecto que necesita tu app
+                    examenesCatalogo.push({
+                        codigo: codigoStr,
+                        nombre: nombreStr,
+                        unidad: "",
+                        refMin: "",
+                        refMax: "",
+                        referencia: "Según criterio clínico",
+                        precio: precioNum
+                    });
+                }
+            }
+        });
+        
+        console.log(`✅ Catálogo unificado correctamente. Total de exámenes disponibles: ${examenesCatalogo.length}`);
+        
+    } catch (error) {
+        console.error("❌ Error cargando el archivo productos.json:", error);
+    }
+}
+
+// Ejecutamos la función de carga al iniciar la app
+cargarProductosJson();
+
+// ==========================================
+// ESTADO GLOBAL EN MEMORIA (Tus variables actuales)
+// ==========================================
+let examenesSeleccionados = [];
+let listaCotizacionInd = [];
+let currentCotizacionId = null;
 
 let ordenesRegistradas = JSON.parse(localStorage.getItem("vital_ordenes") || "[]");
 let cajaMovimientos = JSON.parse(localStorage.getItem("vital_caja") || "[]");
@@ -331,9 +378,6 @@ window.cotizacionesGuardadas = JSON.parse(localStorage.getItem("vital_cotizacion
 window.ordenesRegistradas = ordenesRegistradas;
 window.cajaMovimientos = cajaMovimientos;
 
-// ==========================================
-// CLAVES CANÓNICAS DE ALMACENAMIENTO
-// ==========================================
 const KEY_ORDENES = "vital_ordenes";
 const KEY_CAJA = "vital_caja";
 const KEY_CATALOGO = "vital_catalogo";
