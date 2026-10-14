@@ -113,23 +113,31 @@ async function sincronizarTodo() {
         const snapCaja = await getDocs(collection(db, "caja"));
         const eliminadosCaja = JSON.parse(localStorage.getItem("vital_caja_eliminados") || "[]");
         const ordenesEliminadas = window.ordenesEliminadas || JSON.parse(localStorage.getItem("vital_ordenes_eliminadas") || "[]");
-        const nrosOrdenesActivas = new Set((window.ordenesRegistradas || []).map(o => String(o.nroOrden)).filter(Boolean));
+        const nrosOrdenesActivas = new Set();
+        (window.ordenesRegistradas || []).forEach(o => {
+            if (o && o.nroOrden) {
+                const s = String(o.nroOrden).trim().toUpperCase();
+                nrosOrdenesActivas.add(s);
+                const sinPrefijo = s.replace(/^ORD-/, "");
+                nrosOrdenesActivas.add(sinPrefijo);
+                nrosOrdenesActivas.add("ORD-" + sinPrefijo);
+            }
+        });
 
         let nuevaCaja = [];
         for (const d of snapCaja.docs) {
             const idMovStr = String(d.id);
             const remota = d.data();
             remota.id = idMovStr;
-            const nroOrdStr = String(remota.nroOrden || "");
+            const nroOrdNorm = String(remota.nroOrden || "").trim().toUpperCase();
 
             // Validación estricta: sólo cobros de órdenes que existan actualmente
-            const esEliminado = eliminadosCaja.includes(idMovStr);
-            const ordenFueEliminada = nroOrdStr && ordenesEliminadas.includes(nroOrdStr);
-            const ordenInexistente = nroOrdStr && !nrosOrdenesActivas.has(nroOrdStr);
-            const sinOrden = !nroOrdStr;
+            const ordenFueEliminada = nroOrdNorm && (ordenesEliminadas.includes(nroOrdNorm) || ordenesEliminadas.includes(nroOrdNorm.replace(/^ORD-/, "")));
+            const ordenInexistente = nroOrdNorm && !nrosOrdenesActivas.has(nroOrdNorm);
+            const sinOrden = !nroOrdNorm;
 
-            if (esEliminado || ordenFueEliminada || ordenInexistente || sinOrden) {
-                // Eliminar de Firestore para que ningún dispositivo vuelva a descargarlo
+            if (ordenFueEliminada || ordenInexistente || sinOrden) {
+                // Eliminar cobro huérfano de Firestore
                 try {
                     await deleteDoc(doc(db, "caja", idMovStr));
                 } catch (e) {
