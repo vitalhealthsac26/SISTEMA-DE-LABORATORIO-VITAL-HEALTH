@@ -1061,7 +1061,11 @@ function cargarOrdenes() {
             <td>${escapeHTML(ord.fechaHora)}</td>
             <td>${escapeHTML(ord.dni)}</td>
             <td>${escapeHTML(ord.nombre)}</td>
-            <td><span class="badge bg-warning text-dark">${escapeHTML(ord.estado || "Pendiente")}</span></td>
+            <td>
+                <div>${badgeDeuda}</div>
+                <div><span class="badge bg-warning text-dark">${escapeHTML(ord.estado || "Pendiente")}</span></div>
+                <small class="text-muted" style="font-size: 0.75rem;">Total: S/ ${Number(ord.total || 0).toFixed(2)} | A cuenta: S/ ${Number(ord.aCuenta || ord.total || 0).toFixed(2)}</small>
+            </td>
             <td class="text-end px-3">
                 <button class="btn btn-sm btn-outline-success me-1 text-success" title="Enviar mensaje por WhatsApp al paciente" onclick="enviarResultadoWhatsApp('${ord.nroOrden}')">
                     <i class="bi bi-whatsapp"></i>
@@ -1070,12 +1074,13 @@ function cargarOrdenes() {
                 ${ord.resultados ? `<button class="btn btn-sm btn-outline-primary me-1" title="Imprimir informe de resultados" onclick="imprimirInforme('${ord.nroOrden}')"><i class="bi bi-printer"></i> Informe</button>` : ""}
                 ${ord.resultados ? `<button class="btn btn-sm btn-outline-danger me-1" title="Descargar informe en PDF" onclick="descargarInformePDF('${ord.nroOrden}')"><i class="bi bi-file-earmark-pdf"></i> PDF</button>` : ""}
                 <button class="btn btn-sm btn-outline-primary me-1" onclick="abrirResultados('${ord.nroOrden}')" title="Resultados"><i class="bi bi-file-earmark-medical"></i> Resultados</button>
+                ${botonCobrar}
                 <button class="btn btn-sm btn-outline-danger" onclick="eliminarOrden('${ord.nroOrden}')" title="Eliminar Orden"><i class="bi bi-trash"></i></button>
             </td>
         `;
         tbody.appendChild(tr);
     });
-}
+}}
 
 function enviarResultadoWhatsApp(nroOrden) {
     const orden = (ordenesRegistradas || []).find(o => String(o.nroOrden) === String(nroOrden));
