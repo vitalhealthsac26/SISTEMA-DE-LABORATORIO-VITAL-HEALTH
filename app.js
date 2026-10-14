@@ -5132,7 +5132,7 @@ function generarBloquePaternidadOficialHTML(ex, orden) {
 
         filasLociHTML += `
             <tr style="height: 20px; border-bottom: 0.5px solid #000000;">
-                <td style="font-weight: 700; text-align: left; padding: 1.5px 5px; font-size: 10px; border-right: 1px solid #000000;">${locusNom}</td>
+                <td style="font-weight: 700; text-align: left; padding: 1.5px 5px; font-size: 10px;">${locusNom}</td>
                 <td style="font-weight: 700; text-align: center; padding: 1.5px 3px; font-size: 10px; border-right: 1.5px solid #000000;">${ipVal}</td>
                 <td style="text-align: center; padding: 1.5px 3px; font-size: 10px; width: 18%;">${m1Val}</td>
                 <td style="text-align: center; padding: 1.5px 3px; font-size: 10px; width: 18%; border-right: 1.5px solid #000000;">${m2Val}</td>
@@ -5157,7 +5157,7 @@ function generarBloquePaternidadOficialHTML(ex, orden) {
                 </div>
 
                 <!-- CUADRO DE DATOS DE CASO (SIN CONVENIO) -->
-                <div style="background-color: #e2f0d9; border: 1px solid #b7d7a8; padding: 4px 8px; margin-bottom: 5px; font-size: 9px; line-height: 1.35;">
+                <div style="background-color: #e2f0d9; border: 1px solid #b7d7a8; padding: 5px 9px; margin-bottom: 5px; font-size: 11px; line-height: 1.4;">
                     <div style="display: flex; margin-bottom: 1px;">
                         <span style="width: 140px; font-weight: 700; color: #1f3864;">Código de caso</span>
                         <span style="font-weight: 700; color: #000000;">${codigoCaso}</span>
@@ -5221,7 +5221,7 @@ function generarBloquePaternidadOficialHTML(ex, orden) {
                         </tr>
                         <!-- FILA 4: CABECERA TAMAÑO DE ALELO -->
                         <tr style="border-bottom: 1.5px solid #000000; background-color: #ffffff;">
-                            <th style="border-right: 1px solid #000000; width: 16%; padding: 2px 4px; text-align: left; font-weight: 700; font-size: 10px;">Loci</th>
+                            <th style="width: 16%; padding: 2px 4px; text-align: left; font-weight: 700; font-size: 10px;">Loci</th>
                             <th style="border-right: 1.5px solid #000000; width: 12%; padding: 2px 4px; text-align: center; font-weight: 700; font-size: 10px;">IP</th>
                             <th colspan="2" style="border-right: 1.5px solid #000000; width: 36%; padding: 2px 4px; text-align: center; font-weight: 700; font-size: 9.5px;">Tamaño de Alelo</th>
                             <th colspan="2" style="width: 36%; padding: 2px 4px; text-align: center; font-weight: 700; font-size: 9.5px;">Tamaño de Alelo</th>
