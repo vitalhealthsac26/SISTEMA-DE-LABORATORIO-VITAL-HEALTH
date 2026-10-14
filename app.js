@@ -1090,9 +1090,20 @@ function abrirModalGestionPago(nroOrden) {
     }
 
     const totalOrd = Number(orden.total || 0);
-    const aCuentaOrd = orden.aCuenta !== undefined ? Number(orden.aCuenta) : totalOrd;
-    const saldoOrd = orden.saldoPendiente !== undefined ? Number(orden.saldoPendiente) : Math.max(0, totalOrd - aCuentaOrd);
-    const tieneDeuda = saldoOrd > 0.009;
+    // Si la orden tenía un aCuenta inflado artificialmente, corregir valor base
+    let aCuentaOrd = orden.aCuenta !== undefined ? Number(orden.aCuenta) : totalOrd;
+    let saldoOrd = orden.saldoPendiente !== undefined ? Number(orden.saldoPendiente) : Math.max(0, totalOrd - aCuentaOrd);
+    
+    // Si por error previo aCuenta superaba el total, normalizar
+    if (aCuentaOrd > totalOrd && totalOrd > 0) {
+        // Consultar los cobros reales en caja
+        const movsOrden = (cajaMovimientos || []).filter(m => String(m.nroOrden) === String(orden.nroOrden));
+        const sumaCaja = movsOrden.reduce((acc, m) => acc + Number(m.monto || 0), 0);
+        if (sumaCaja <= totalOrd && sumaCaja > 0) {
+            aCuentaOrd = sumaCaja;
+            saldoOrd = Math.max(0, totalOrd - aCuentaOrd);
+        }
+    }
 
     const elNro = document.getElementById("modal-pago-nroOrden");
     if (elNro) elNro.value = orden.nroOrden;
@@ -1106,45 +1117,26 @@ function abrirModalGestionPago(nroOrden) {
     const elDet = document.getElementById("modal-pago-paciente-detalles");
     if (elDet) elDet.textContent = `DNI: ${orden.dni || '—'} | Tel: ${orden.celular || '—'} | Médico: ${orden.doctor || 'Particular'}`;
 
-    const badgeEstado = document.getElementById("modal-pago-badge-estado");
-    if (badgeEstado) {
-        if (tieneDeuda) {
-            badgeEstado.className = "badge bg-danger fs-6 py-2 px-3";
-            badgeEstado.innerHTML = `<i class="bi bi-exclamation-triangle-fill me-1"></i>Debe: S/ ${saldoOrd.toFixed(2)}`;
-        } else {
-            badgeEstado.className = "badge bg-success fs-6 py-2 px-3";
-            badgeEstado.innerHTML = `<i class="bi bi-check-circle-fill me-1"></i>Pagado Completo`;
-        }
-    }
+    // Campos principales editables
+    const elTot = document.getElementById("mod-pago-total");
+    if (elTot) elTot.value = totalOrd.toFixed(2);
 
-    // Tab 1: Abono hoy
-    const elTotDisp = document.getElementById("abono-total-display");
-    if (elTotDisp) elTotDisp.value = totalOrd.toFixed(2);
+    const elAcu = document.getElementById("mod-pago-acuenta");
+    if (elAcu) elAcu.value = aCuentaOrd.toFixed(2);
 
-    const elDeuDisp = document.getElementById("abono-deuda-display");
-    if (elDeuDisp) elDeuDisp.value = saldoOrd.toFixed(2);
+    const elSal = document.getElementById("mod-pago-saldo");
+    if (elSal) elSal.value = saldoOrd.toFixed(2);
 
-    const elAbonoMonto = document.getElementById("abono-monto-ingreso");
-    if (elAbonoMonto) elAbonoMonto.value = tieneDeuda ? saldoOrd.toFixed(2) : "";
+    const elMet = document.getElementById("mod-pago-metodo");
+    if (elMet) elMet.value = orden.metodoPago || "Efectivo";
 
-    const elAbonoMet = document.getElementById("abono-metodo-pago");
-    if (elAbonoMet) elAbonoMet.value = orden.metodoPago || "Efectivo";
+    const elNot = document.getElementById("mod-pago-nota");
+    if (elNot) elNot.value = orden.notaPago || "";
 
-    // Tab 2: Modificar orden pasada / retroactivo
-    const elModTot = document.getElementById("mod-pago-total");
-    if (elModTot) elModTot.value = totalOrd.toFixed(2);
+    actualizarBadgeModal(saldoOrd);
 
-    const elModAcu = document.getElementById("mod-pago-acuenta");
-    if (elModAcu) elModAcu.value = aCuentaOrd.toFixed(2);
-
-    const elModSal = document.getElementById("mod-pago-saldo");
-    if (elModSal) elModSal.value = saldoOrd.toFixed(2);
-
-    const elModMet = document.getElementById("mod-pago-metodo");
-    if (elModMet) elModMet.value = orden.metodoPago || "Efectivo";
-
-    const elModNot = document.getElementById("mod-pago-nota");
-    if (elModNot) elModNot.value = orden.notaPago || "";
+    // Listar los movimientos registrados en Caja para esta orden
+    renderizarMovimientosCajaOrdenEnModal(orden.nroOrden);
 
     const modalEl = document.getElementById("modalGestionPago");
     if (modalEl && window.bootstrap) {
@@ -1153,85 +1145,173 @@ function abrirModalGestionPago(nroOrden) {
 }
 window.abrirModalGestionPago = abrirModalGestionPago;
 
-function recalcularSaldoEnModalModificar() {
+function renderizarMovimientosCajaOrdenEnModal(nroOrden) {
+    const contenedor = document.getElementById("contenedor-movimientos-caja-orden");
+    if (!contenedor) return;
+    
+    const movsDeEstaOrden = (cajaMovimientos || []).filter(m => String(m.nroOrden) === String(nroOrden));
+    if (movsDeEstaOrden.length === 0) {
+        contenedor.innerHTML = `
+            <div class="p-2 border rounded bg-light text-muted small">
+                <i class="bi bi-info-circle me-1"></i>No hay registros de cobro en el Arqueo de Caja para esta orden.
+            </div>
+        `;
+        return;
+    }
+
+    let sumaCaja = 0;
+    let filas = "";
+    movsDeEstaOrden.forEach(m => {
+        const montoM = Number(m.monto || 0);
+        sumaCaja += montoM;
+        filas += `
+            <div class="d-flex justify-content-between align-items-center py-1 border-bottom small">
+                <div>
+                    <span class="fw-bold text-dark">${escapeHTML(m.fechaVisual || m.fecha)}</span>
+                    <span class="text-muted ms-1">${escapeHTML(m.hora || '')}</span>
+                    <span class="badge bg-light text-dark border ms-1">${escapeHTML(m.metodoPago || 'Efectivo')}</span>
+                    ${m.concepto ? `<span class="text-secondary ms-1">(${escapeHTML(m.concepto)})</span>` : ''}
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                    <span class="fw-bold text-success">S/ ${montoM.toFixed(2)}</span>
+                    <button type="button" class="btn btn-xs btn-outline-danger py-0 px-2" title="Eliminar este cobro de caja si fue duplicado o erróneo" onclick="eliminarMovimientoCajaDesdeModal('${escapeHTML(m.id)}', '${escapeHTML(nroOrden)}')">
+                        <i class="bi bi-trash me-1"></i>Eliminar cobro
+                    </button>
+                </div>
+            </div>
+        `;
+    });
+
+    const orden = (ordenesRegistradas || []).find(o => String(o.nroOrden) === String(nroOrden));
+    const totalOrd = orden ? Number(orden.total || 0) : 0;
+    const tieneExceso = sumaCaja > totalOrd && totalOrd > 0;
+
+    contenedor.innerHTML = `
+        <div class="border rounded p-2 bg-light shadow-sm">
+            <div class="d-flex justify-content-between align-items-center mb-1 pb-1 border-bottom flex-wrap gap-1">
+                <strong class="small text-secondary"><i class="bi bi-cash-stack me-1"></i>Cobros registrados en Arqueo de Caja:</strong>
+                <span class="badge ${tieneExceso ? 'bg-danger' : 'bg-primary'} fs-7">
+                    ${tieneExceso ? '⚠️ Cobros en caja superan el total: S/ ' : 'Total en caja: S/ '}${sumaCaja.toFixed(2)}
+                </span>
+            </div>
+            ${filas}
+            ${tieneExceso ? `
+                <div class="text-danger small mt-1">
+                    <i class="bi bi-exclamation-circle-fill me-1"></i>Hay cobros adicionales que suman más de S/ ${totalOrd.toFixed(2)}. Puedes eliminar el cobro extra con el botón del tacho, o al presionar "Guardar" se corregirá automáticamente.
+                </div>
+            ` : ''}
+        </div>
+    `;
+}
+
+function eliminarMovimientoCajaDesdeModal(idMovimiento, nroOrden) {
+    if (eliminarMovimientoCaja(idMovimiento)) {
+        // Refrescar los campos del modal con los nuevos valores recalculados
+        const orden = (ordenesRegistradas || []).find(o => String(o.nroOrden) === String(nroOrden));
+        if (orden) {
+            const elTot = document.getElementById("mod-pago-total");
+            const elAcu = document.getElementById("mod-pago-acuenta");
+            const elSal = document.getElementById("mod-pago-saldo");
+            if (elTot) elTot.value = Number(orden.total || 0).toFixed(2);
+            if (elAcu) elAcu.value = Number(orden.aCuenta || 0).toFixed(2);
+            if (elSal) elSal.value = Number(orden.saldoPendiente || 0).toFixed(2);
+            actualizarBadgeModal(orden.saldoPendiente);
+        }
+        renderizarMovimientosCajaOrdenEnModal(nroOrden);
+    }
+}
+window.eliminarMovimientoCajaDesdeModal = eliminarMovimientoCajaDesdeModal;
+
+// Cálculos bidireccionales en tiempo real
+function alCambiarTotalEnModal() {
     const elTot = document.getElementById("mod-pago-total");
     const elAcu = document.getElementById("mod-pago-acuenta");
     const elSal = document.getElementById("mod-pago-saldo");
-    if (!elSal) return;
+    if (!elTot || !elAcu || !elSal) return;
 
-    const tot = elTot ? (parseFloat(elTot.value) || 0) : 0;
-    const acu = elAcu ? (parseFloat(elAcu.value) || 0) : 0;
+    const tot = parseFloat(elTot.value) || 0;
+    const acu = parseFloat(elAcu.value) || 0;
     const sal = Math.max(0, tot - acu);
     elSal.value = sal.toFixed(2);
+    actualizarBadgeModal(sal);
 }
-window.recalcularSaldoEnModalModificar = recalcularSaldoEnModalModificar;
+window.alCambiarTotalEnModal = alCambiarTotalEnModal;
 
-function ejecutarAbonoCajaHoy() {
-    const nroOrden = val("modal-pago-nroOrden");
-    const orden = (ordenesRegistradas || []).find(o => String(o.nroOrden) === String(nroOrden));
-    if (!orden) {
-        alert("Orden no válida.");
-        return;
-    }
+function alCambiarACuentaEnModal() {
+    const elTot = document.getElementById("mod-pago-total");
+    const elAcu = document.getElementById("mod-pago-acuenta");
+    const elSal = document.getElementById("mod-pago-saldo");
+    if (!elTot || !elAcu || !elSal) return;
 
-    const inputMonto = document.getElementById("abono-monto-ingreso");
-    const montoAbono = inputMonto ? parseFloat(inputMonto.value) : 0;
-
-    if (isNaN(montoAbono) || montoAbono <= 0) {
-        alert("Por favor ingrese un monto de abono válido mayor a 0.");
-        return;
-    }
-
-    const totalOrd = Number(orden.total || 0);
-    const aCuentaPrevia = orden.aCuenta !== undefined ? Number(orden.aCuenta) : totalOrd;
-    const nuevoACuenta = aCuentaPrevia + montoAbono;
-    const nuevoSaldo = Math.max(0, totalOrd - nuevoACuenta);
-    const metodo = val("abono-metodo-pago") || "Efectivo";
-
-    orden.aCuenta = nuevoACuenta;
-    orden.saldoPendiente = nuevoSaldo;
-    orden.estadoPago = nuevoSaldo > 0.009 ? "Pendiente" : "Pagado";
-
-    // Registrar ingreso en caja de hoy
-    const ahora = new Date();
-    const movAbono = {
-        id: `${Date.now()}-${orden.nroOrden}-abono`,
-        fecha: ahora.toISOString().split("T")[0],
-        fechaVisual: ahora.toLocaleDateString("es-PE"),
-        hora: ahora.toLocaleTimeString(),
-        nroOrden: orden.nroOrden,
-        dni: orden.dni,
-        paciente: orden.nombre,
-        metodoPago: metodo,
-        monto: montoAbono,
-        concepto: nuevoSaldo <= 0.009 ? `Cancelación total de saldo orden ${orden.nroOrden}` : `Abono a saldo de orden ${orden.nroOrden} (Resta S/ ${nuevoSaldo.toFixed(2)})`,
-        en: Date.now()
-    };
-    cajaMovimientos.unshift(movAbono);
-
-    persistirDatos();
-    actualizarTotalesCaja();
-    cargarOrdenes();
-    window.nubeGuardarOrden?.(orden);
-    window.nubeGuardarMovimiento?.(movAbono);
-
-    // Si la pantalla de resultados estaba abierta con esta orden, refrescarla
-    const secResultados = document.getElementById("sec-resultados");
-    if (secResultados && !secResultados.classList.contains("d-none")) {
-        const editor = document.getElementById("resultados-editor");
-        if (editor && editor.innerHTML.includes(orden.nroOrden)) {
-            abrirResultados(orden.nroOrden);
-        }
-    }
-
-    const modalEl = document.getElementById("modalGestionPago");
-    if (modalEl && window.bootstrap) {
-        bootstrap.Modal.getInstance(modalEl)?.hide();
-    }
-
-    alert(`¡Abono registrado con éxito!\n\nPaciente: ${orden.nombre}\nMonto abonado hoy: S/ ${montoAbono.toFixed(2)}\nSaldo restante por pagar: S/ ${nuevoSaldo.toFixed(2)}`);
+    const tot = parseFloat(elTot.value) || 0;
+    const acu = parseFloat(elAcu.value) || 0;
+    const sal = Math.max(0, tot - acu);
+    elSal.value = sal.toFixed(2);
+    actualizarBadgeModal(sal);
 }
-window.ejecutarAbonoCajaHoy = ejecutarAbonoCajaHoy;
+window.alCambiarACuentaEnModal = alCambiarACuentaEnModal;
+
+function alCambiarSaldoEnModal() {
+    const elTot = document.getElementById("mod-pago-total");
+    const elAcu = document.getElementById("mod-pago-acuenta");
+    const elSal = document.getElementById("mod-pago-saldo");
+    if (!elTot || !elAcu || !elSal) return;
+
+    const tot = parseFloat(elTot.value) || 0;
+    const sal = parseFloat(elSal.value) || 0;
+    const acu = Math.max(0, tot - sal);
+    elAcu.value = acu.toFixed(2);
+    actualizarBadgeModal(sal);
+}
+window.alCambiarSaldoEnModal = alCambiarSaldoEnModal;
+
+function fijarPagoCompletoModal() {
+    const elTot = document.getElementById("mod-pago-total");
+    const elAcu = document.getElementById("mod-pago-acuenta");
+    const elSal = document.getElementById("mod-pago-saldo");
+    const tot = elTot ? (parseFloat(elTot.value) || 0) : 0;
+    if (elAcu) elAcu.value = tot.toFixed(2);
+    if (elSal) elSal.value = "0.00";
+    actualizarBadgeModal(0);
+}
+window.fijarPagoCompletoModal = fijarPagoCompletoModal;
+
+function fijarMitadModal() {
+    const elTot = document.getElementById("mod-pago-total");
+    const elAcu = document.getElementById("mod-pago-acuenta");
+    const elSal = document.getElementById("mod-pago-saldo");
+    const tot = elTot ? (parseFloat(elTot.value) || 0) : 0;
+    const mitad = Math.round((tot / 2) * 100) / 100;
+    const resta = Math.max(0, tot - mitad);
+    if (elAcu) elAcu.value = mitad.toFixed(2);
+    if (elSal) elSal.value = resta.toFixed(2);
+    actualizarBadgeModal(resta);
+}
+window.fijarMitadModal = fijarMitadModal;
+
+function fijarNadaModal() {
+    const elTot = document.getElementById("mod-pago-total");
+    const elAcu = document.getElementById("mod-pago-acuenta");
+    const elSal = document.getElementById("mod-pago-saldo");
+    const tot = elTot ? (parseFloat(elTot.value) || 0) : 0;
+    if (elAcu) elAcu.value = "0.00";
+    if (elSal) elSal.value = tot.toFixed(2);
+    actualizarBadgeModal(tot);
+}
+window.fijarNadaModal = fijarNadaModal;
+
+function actualizarBadgeModal(saldo) {
+    const badge = document.getElementById("modal-pago-badge-estado");
+    if (!badge) return;
+    const s = parseFloat(saldo) || 0;
+    if (s > 0.009) {
+        badge.className = "badge bg-danger fs-6 py-2 px-3 shadow-sm";
+        badge.innerHTML = `<i class="bi bi-exclamation-triangle-fill me-1"></i>Debe: S/ ${s.toFixed(2)}`;
+    } else {
+        badge.className = "badge bg-success fs-6 py-2 px-3 shadow-sm";
+        badge.innerHTML = `<i class="bi bi-check-circle-fill me-1"></i>Pagado Completo`;
+    }
+}
 
 function guardarAjusteRetroactivoDeuda() {
     const nroOrden = val("modal-pago-nroOrden");
@@ -1243,21 +1323,29 @@ function guardarAjusteRetroactivoDeuda() {
 
     const inputTot = document.getElementById("mod-pago-total");
     const inputAcu = document.getElementById("mod-pago-acuenta");
-    const nuevoTotal = inputTot ? parseFloat(inputTot.value) : Number(orden.total || 0);
-    const nuevoACuenta = inputAcu ? parseFloat(inputAcu.value) : 0;
+    const inputSal = document.getElementById("mod-pago-saldo");
+
+    let nuevoTotal = inputTot ? parseFloat(inputTot.value) : Number(orden.total || 0);
+    let nuevoACuenta = inputAcu ? parseFloat(inputAcu.value) : 0;
 
     if (isNaN(nuevoTotal) || nuevoTotal < 0) {
-        alert("El total debe ser un número válido.");
+        alert("El total debe ser un número válido mayor o igual a 0.");
         return;
     }
     if (isNaN(nuevoACuenta) || nuevoACuenta < 0) {
-        alert("El monto a cuenta debe ser un número válido.");
-        return;
+        nuevoACuenta = 0;
     }
 
-    const nuevoSaldo = Math.max(0, nuevoTotal - nuevoACuenta);
+    // El saldo siempre es exactamente Total - ACuenta
+    let nuevoSaldo = Math.max(0, nuevoTotal - nuevoACuenta);
+    if (inputSal && Math.abs((parseFloat(inputSal.value) || 0) - nuevoSaldo) > 0.01) {
+        nuevoSaldo = Math.max(0, parseFloat(inputSal.value) || 0);
+        nuevoACuenta = Math.max(0, nuevoTotal - nuevoSaldo);
+    }
+
     const metodo = val("mod-pago-metodo") || orden.metodoPago || "Efectivo";
     const nota = val("mod-pago-nota") || "";
+    const syncCaja = document.getElementById("mod-pago-sync-caja")?.checked ?? true;
 
     orden.total = nuevoTotal;
     orden.aCuenta = nuevoACuenta;
@@ -1266,7 +1354,51 @@ function guardarAjusteRetroactivoDeuda() {
     orden.metodoPago = metodo;
     orden.notaPago = nota;
 
+    // Sincronización inteligente con Arqueo de Caja
+    if (syncCaja) {
+        const movsOrden = (cajaMovimientos || []).filter(m => String(m.nroOrden) === String(orden.nroOrden));
+        if (movsOrden.length > 0) {
+            // El primer movimiento se actualiza al monto real pagado
+            movsOrden[0].monto = nuevoACuenta;
+            movsOrden[0].metodoPago = metodo;
+            movsOrden[0].concepto = nuevoSaldo > 0.009 
+                ? `Pago a cuenta orden ${orden.nroOrden} (Resta S/ ${nuevoSaldo.toFixed(2)})` 
+                : `Pago completo orden ${orden.nroOrden}`;
+            window.nubeGuardarMovimiento?.(movsOrden[0]);
+
+            // Eliminar cobros adicionales duplicados para que la caja no quede inflada con 1800
+            for (let i = 1; i < movsOrden.length; i++) {
+                const extraId = String(movsOrden[i].id);
+                cajaMovimientos = cajaMovimientos.filter(m => String(m.id) !== extraId);
+                let eliminados = JSON.parse(localStorage.getItem("vital_caja_eliminados") || "[]");
+                if (!eliminados.includes(extraId)) {
+                    eliminados.push(extraId);
+                    localStorage.setItem("vital_caja_eliminados", JSON.stringify(eliminados));
+                }
+                if (typeof nubeEliminarMovimiento === "function") nubeEliminarMovimiento(extraId);
+            }
+        } else if (nuevoACuenta > 0) {
+            const ahora = new Date();
+            const nuevoMov = {
+                id: `${Date.now()}-${orden.nroOrden}`,
+                fecha: ahora.toISOString().split("T")[0],
+                fechaVisual: ahora.toLocaleDateString("es-PE"),
+                hora: ahora.toLocaleTimeString(),
+                nroOrden: orden.nroOrden,
+                dni: orden.dni,
+                paciente: orden.nombre,
+                metodoPago: metodo,
+                monto: nuevoACuenta,
+                concepto: nuevoSaldo > 0.009 ? `Pago a cuenta orden ${orden.nroOrden} (Resta S/ ${nuevoSaldo.toFixed(2)})` : `Pago completo orden ${orden.nroOrden}`,
+                en: Date.now()
+            };
+            cajaMovimientos.unshift(nuevoMov);
+            window.nubeGuardarMovimiento?.(nuevoMov);
+        }
+    }
+
     persistirDatos();
+    actualizarTotalesCaja();
     cargarOrdenes();
     window.nubeGuardarOrden?.(orden);
 
@@ -1279,12 +1411,19 @@ function guardarAjusteRetroactivoDeuda() {
         }
     }
 
+    // Actualizar el ticket en memoria y pantalla de inmediato
+    window._ticketActual = orden;
+    const cuerpoTicket = document.getElementById("modal-ticket-body");
+    if (cuerpoTicket && cuerpoTicket.innerHTML.includes(orden.nroOrden)) {
+        cuerpoTicket.innerHTML = `<div class="ticket-visual">${construirTicketHTML(orden)}</div>`;
+    }
+
     const modalEl = document.getElementById("modalGestionPago");
     if (modalEl && window.bootstrap) {
         bootstrap.Modal.getInstance(modalEl)?.hide();
     }
 
-    alert(`¡Orden ${orden.nroOrden} actualizada correctamente!\n\nTotal: S/ ${nuevoTotal.toFixed(2)}\nPagado / A cuenta: S/ ${nuevoACuenta.toFixed(2)}\nSaldo pendiente (Deuda): S/ ${nuevoSaldo.toFixed(2)}\n\nEl sistema alertará esta deuda cuando se capturen o impriman los resultados.`);
+    alert(`✅ Orden ${orden.nroOrden} actualizada exitosamente:\n\n• Total: S/ ${nuevoTotal.toFixed(2)}\n• Monto Pagado (A Cuenta): S/ ${nuevoACuenta.toFixed(2)}\n• Deuda Actual (Saldo): S/ ${nuevoSaldo.toFixed(2)}\n• Estado: ${nuevoSaldo > 0.009 ? 'PENDIENTE DE PAGO' : 'PAGADO COMPLETO'}\n\nLos cambios quedaron sincronizados en la orden, ticket y arqueo de caja.`);
 }
 window.guardarAjusteRetroactivoDeuda = guardarAjusteRetroactivoDeuda;
 
@@ -3016,18 +3155,46 @@ function imprimirCierreCajaTicket() {
 }
 
 function eliminarMovimientoCaja(idMovimiento) {
-    if (confirm("¿Deseas eliminar este movimiento de caja?")) {
+    if (confirm("¿Deseas eliminar este movimiento de cobro de caja?")) {
         const idMovStr = String(idMovimiento);
+        const mov = (cajaMovimientos || []).find(m => String(m.id) === idMovStr);
         let eliminados = JSON.parse(localStorage.getItem("vital_caja_eliminados") || "[]");
         if (!eliminados.includes(idMovStr)) {
             eliminados.push(idMovStr);
             localStorage.setItem("vital_caja_eliminados", JSON.stringify(eliminados));
         }
         cajaMovimientos = cajaMovimientos.filter(m => String(m.id) !== idMovStr);
+
+        // ¡ACTUALIZACIÓN AUTOMÁTICA DE LA ORDEN Y SU TICKET!
+        if (mov && mov.nroOrden) {
+            const orden = (ordenesRegistradas || []).find(o => String(o.nroOrden) === String(mov.nroOrden));
+            if (orden) {
+                // Calcular la suma de los cobros que quedan en caja para esta orden
+                const pagosRestantesEnCaja = cajaMovimientos
+                    .filter(m => String(m.nroOrden) === String(orden.nroOrden))
+                    .reduce((acc, m) => acc + Number(m.monto || 0), 0);
+                
+                orden.aCuenta = Math.max(0, pagosRestantesEnCaja);
+                orden.saldoPendiente = Math.max(0, Number(orden.total || 0) - orden.aCuenta);
+                orden.estadoPago = orden.saldoPendiente > 0.009 ? "Pendiente" : "Pagado";
+                window.nubeGuardarOrden?.(orden);
+                cargarOrdenes();
+
+                // Si el ticket en pantalla estaba mostrando esta orden, actualizarlo de inmediato
+                if (window._ticketActual && String(window._ticketActual.nroOrden) === String(orden.nroOrden)) {
+                    window._ticketActual = orden;
+                    const cuerpo = document.getElementById("modal-ticket-body");
+                    if (cuerpo) cuerpo.innerHTML = `<div class="ticket-visual">${construirTicketHTML(orden)}</div>`;
+                }
+            }
+        }
+
         persistirDatos();
         actualizarTotalesCaja();
         if (typeof nubeEliminarMovimiento === "function") nubeEliminarMovimiento(idMovStr);
+        return true;
     }
+    return false;
 }
 
 // ==========================================
@@ -4061,13 +4228,22 @@ function construirTicketHTML(orden) {
             ${lineas}
             <div class="t-linea"></div>
             <div class="t-row t-negrita t-total"><span>TOTAL S/</span><span>${Number(orden.total || 0).toFixed(2)}</span></div>
-            ${(orden.saldoPendiente !== undefined ? Number(orden.saldoPendiente) : Math.max(0, Number(orden.total || 0) - Number(orden.aCuenta !== undefined ? orden.aCuenta : orden.total || 0))) > 0.009 ? `
-                <div class="t-row t-negrita"><span>A CUENTA S/:</span><span>${Number(orden.aCuenta || 0).toFixed(2)}</span></div>
-                <div class="t-row t-negrita" style="font-weight: 800; font-size: 13px;"><span>SALDO A PAGAR:</span><span>S/ ${Number(orden.saldoPendiente).toFixed(2)}</span></div>
-                <div class="t-row"><span style="color:#b91c1c; font-weight: 700;">ESTADO:</span><span style="color:#b91c1c; font-weight: 800;">PENDIENTE</span></div>
-            ` : `
-                <div class="t-row"><span>A CUENTA:</span><span>S/ ${Number(orden.aCuenta !== undefined ? orden.aCuenta : orden.total || 0).toFixed(2)} (PAGADO)</span></div>
-            `}
+            ${(() => {
+                const totT = Number(orden.total || 0);
+                const acuT = orden.aCuenta !== undefined ? Number(orden.aCuenta) : totT;
+                const salT = orden.saldoPendiente !== undefined ? Number(orden.saldoPendiente) : Math.max(0, totT - acuT);
+                if (salT > 0.009) {
+                    return `
+                        <div class="t-row t-negrita"><span>A CUENTA S/:</span><span>${acuT.toFixed(2)}</span></div>
+                        <div class="t-row t-negrita" style="font-weight: 800; font-size: 13px;"><span>SALDO A PAGAR:</span><span>S/ ${salT.toFixed(2)}</span></div>
+                        <div class="t-row"><span style="color:#b91c1c; font-weight: 700;">ESTADO:</span><span style="color:#b91c1c; font-weight: 800;">PENDIENTE</span></div>
+                    `;
+                } else {
+                    return `
+                        <div class="t-row"><span>A CUENTA:</span><span>S/ ${totT.toFixed(2)} (PAGADO)</span></div>
+                    `;
+                }
+            })()}
             <div class="t-row"><span>Pago:</span><span>${escapeHTML(orden.metodoPago || 'Efectivo')}</span></div>
             ${orden.notaPago ? `<div class="t-row"><small style="font-size: 9px;">Nota: ${escapeHTML(orden.notaPago)}</small></div>` : ''}
             <div class="t-linea-doble"></div>
