@@ -2040,7 +2040,7 @@ function generarEditorFormularioPaternidad(ex, exIdx, orden, guardado) {
                 <div class="card-body p-3">
                     <div class="row g-3">
                         <div class="col-md-6 border-end">
-                            <h6 class="fw-bold text-primary mb-2"><i class="bi bi-person me-1"></i>MENOR EVALUADO(A)</h6>
+                            <h6 class="fw-bold text-primary mb-2"><i class="bi bi-person me-1"></i>MENOR / EXAMINADO(A)</h6>
                             <div class="mb-2">
                                 <label class="form-label small mb-1">Nombre Completo del Menor:</label>
                                 <input type="text" class="form-control form-control-sm fw-bold" id="p-edit-menorNombre" value="${escapeHTML(pData.menorNombre || orden.nombre)}" placeholder="ej. NORMA">
@@ -5103,9 +5103,10 @@ function generarBloquePaternidadOficialHTML(ex, orden) {
     const guardado = (orden.resultados || []).find(r => r.codigo === ex.codigo);
     const pData = extraerDatosPaternidadDeOrden(orden, guardado);
 
-    const logoSrc = obtenerLogoSrc();
+    const cabeceraHabitual = construirCabeceraInformeHTML();
+    const pieHabitual = construirPieInformeHTML();
+
     const codigoCaso = escapeHTML(pData.codigoCaso || orden.nroOrden || 'PAV-2609');
-    const convenio = escapeHTML(pData.convenio || 'CONVENIO - PIURA');
     const fechaAtencion = escapeHTML(pData.fechaAtencion || (orden.fechaHora ? String(orden.fechaHora).split(',')[0].trim() : '-'));
     const fechaEmision = escapeHTML(pData.fechaEmision || new Date().toLocaleDateString('es-PE', { day: '2-digit', month: '2-digit', year: '2-digit' }));
     const tecnologia = escapeHTML(pData.tecnologia || 'Análisis realizado con el Spectrum Compact CE System / VersaPlex™ 27PY System / GeneMarker®HID Software');
@@ -5129,12 +5130,18 @@ function generarBloquePaternidadOficialHTML(ex, orden) {
         const p1Val = escapeHTML(l.p1 ?? '');
         const p2Val = escapeHTML(l.p2 ?? '');
 
+        const esAmelogenina = /amelogen/i.test(l.locus || '');
+
         filasLociHTML += `
             <tr style="height: 18px; border-bottom: 0.5px solid #000000;">
                 <td style="font-weight: 700; text-align: left; padding: 1.5px 5px; font-size: 8.5px; border-right: 1px solid #000000;">${locusNom}</td>
                 <td style="font-weight: 700; text-align: center; padding: 1.5px 3px; font-size: 8.5px; border-right: 1.5px solid #000000;">${ipVal}</td>
+                ${esAmelogenina ? `
+                <td colspan="2" style="text-align: center; padding: 1.5px 3px; font-size: 8.5px; width: 36%; border-right: 1.5px solid #000000;">${m1Val}</td>
+                ` : `
                 <td style="text-align: center; padding: 1.5px 3px; font-size: 8.5px; width: 18%; border-right: 0.5px solid #777777;">${m1Val}</td>
                 <td style="text-align: center; padding: 1.5px 3px; font-size: 8.5px; width: 18%; border-right: 1.5px solid #000000;">${m2Val}</td>
+                `}
                 <td style="text-align: center; padding: 1.5px 3px; font-size: 8.5px; width: 18%; border-right: 0.5px solid #777777;">${p1Val}</td>
                 <td style="text-align: center; padding: 1.5px 3px; font-size: 8.5px; width: 18%;">${p2Val}</td>
             </tr>
@@ -5142,46 +5149,42 @@ function generarBloquePaternidadOficialHTML(ex, orden) {
     });
 
     return `
-        <div class="adn-paternidad-contenedor" style="font-family: Arial, Helvetica, sans-serif; color: #000000; width: 100%; box-sizing: border-box; margin: 0 auto; line-height: 1.25; page-break-inside: avoid; break-inside: avoid;">
-            
-            <!-- ENCABEZADO SUPERIOR: LOGO VITAL HEALTH, TITULO Y METADATOS -->
-            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px;">
-                <div style="flex: 0 0 35%; display: flex; align-items: center;">
-                    <img src="${logoSrc}" alt="Vital Health" style="max-height: 52px; max-width: 210px; object-fit: contain; display: block;" onerror="this.style.display='none'">
-                </div>
-                <div style="flex: 1 1 auto; text-align: center; padding: 0 8px;">
-                    <div style="font-size: 15px; font-weight: 800; letter-spacing: 0.5px; color: #000000; text-transform: none;">Informe de prueba de ADN</div>
-                    <div style="font-size: 9px; font-weight: 700; color: #111111; margin-top: 1px;">Solo para conocimiento propio</div>
-                </div>
-                <div style="flex: 0 0 28%; text-align: right; font-size: 8.5px;">
-                    <div style="font-weight: 800; color: #000000;">${convenio}</div>
-                    <div style="color: #444444; margin-top: 3px; font-size: 8px;">Página 1 / 1</div>
-                </div>
+        <div class="adn-paternidad-contenedor" style="font-family: Arial, Helvetica, sans-serif; color: #000000; width: 100%; box-sizing: border-box; margin: 0 auto; line-height: 1.25; display: flex; flex-direction: column; justify-content: space-between; min-height: 275mm; page-break-inside: avoid; break-inside: avoid;">
+            <div style="flex: 0 0 auto;">
+                <!-- ENCABEZADO HABITUAL CON LOGO Y CÓDIGO QR -->
+                ${cabeceraHabitual}
             </div>
 
-            <!-- CUADRO DE DATOS DE CASO (FONDO VERDE PASTEL SUAVE COMO EL PDF) -->
-            <div style="background-color: #e2f0d9; border: 1px solid #b7d7a8; padding: 4px 8px; margin-bottom: 5px; font-size: 9px;">
-                <div style="display: flex; margin-bottom: 1px;">
-                    <span style="width: 140px; font-weight: 700; color: #1f3864;">Código de caso</span>
-                    <span style="font-weight: 700; color: #000000;">${codigoCaso}</span>
+            <div style="flex: 1 1 auto;">
+                <!-- TÍTULO -->
+                <div style="text-align: center; margin: 4px 0 3px 0;">
+                    <div style="font-size: 15px; font-weight: 800; letter-spacing: 0.5px; color: #000000;">Informe de prueba de ADN</div>
+                    <div style="font-size: 9.5px; font-weight: 700; color: #111111; margin-top: 1px;">Solo para conocimiento propio</div>
                 </div>
-                <div style="display: flex; margin-bottom: 1px;">
-                    <span style="width: 140px; font-weight: 700; color: #1f3864;">Fecha de atención</span>
-                    <span style="font-weight: 700; color: #000000;">${fechaAtencion}</span>
-                </div>
-                <div style="display: flex;">
-                    <span style="width: 140px; font-weight: 700; color: #1f3864;">Fecha de emisión</span>
-                    <span style="font-weight: 700; color: #000000;">${fechaEmision}</span>
-                </div>
-            </div>
 
-            <!-- SUBTÍTULO TECNOLOGÍA EXACTA -->
-            <div style="text-align: center; font-size: 7.8px; font-weight: 700; color: #000000; margin-bottom: 3px; letter-spacing: 0.2px;">
-                ${tecnologia}
-            </div>
+                <!-- CUADRO DE DATOS DE CASO (SIN CONVENIO) -->
+                <div style="background-color: #e2f0d9; border: 1px solid #b7d7a8; padding: 4px 8px; margin-bottom: 5px; font-size: 9px; line-height: 1.35;">
+                    <div style="display: flex; margin-bottom: 1px;">
+                        <span style="width: 140px; font-weight: 700; color: #1f3864;">Código de caso</span>
+                        <span style="font-weight: 700; color: #000000;">${codigoCaso}</span>
+                    </div>
+                    <div style="display: flex; margin-bottom: 1px;">
+                        <span style="width: 140px; font-weight: 700; color: #1f3864;">Fecha de atención</span>
+                        <span style="font-weight: 700; color: #000000;">${fechaAtencion}</span>
+                    </div>
+                    <div style="display: flex;">
+                        <span style="width: 140px; font-weight: 700; color: #1f3864;">Fecha de emisión</span>
+                        <span style="font-weight: 700; color: #000000;">${fechaEmision}</span>
+                    </div>
+                </div>
 
-            <!-- CUADRO COMPARATIVO COMPLETO (IDENTICO AL PDF) -->
-            <table class="adn-tabla-comparativa" style="width: 100%; border-collapse: collapse; border: 1.5px solid #000000; font-size: 8.5px; margin-bottom: 5px;">
+                <!-- SUBTÍTULO TECNOLOGÍA EXACTA -->
+                <div style="text-align: center; font-size: 7.8px; font-weight: 700; color: #000000; margin-bottom: 3px; letter-spacing: 0.2px;">
+                    ${tecnologia}
+                </div>
+
+                <!-- CUADRO COMPARATIVO COMPLETO (IDENTICO AL PDF) -->
+                <table class="adn-tabla-comparativa" style="width: 100%; border-collapse: collapse; border: 1.5px solid #000000; font-size: 8.5px; margin-bottom: 5px;">
                     <thead>
                         <!-- FILA 1: CASO Y NOMBRES -->
                         <tr style="border-bottom: 1.5px solid #000000;">
@@ -5190,7 +5193,6 @@ function generarBloquePaternidadOficialHTML(ex, orden) {
                                 <span style="font-weight: 700; font-size: 8.5px;">Nombre</span>
                             </th>
                             <th colspan="2" style="border-right: 1.5px solid #000000; text-align: center; padding: 2px 5px; width: 36%; background: #ffffff;">
-                                <span style="font-weight: 800; font-size: 9px; text-transform: uppercase;">MENOR</span><br>
                                 <span style="font-weight: 800; font-size: 9px; text-transform: uppercase;">MENOR / EXAMINADO(A)</span><br>
                                 <span style="font-weight: 800; font-size: 9.5px; text-transform: uppercase;">${menorNombre}</span>
                             </th>
@@ -5204,41 +5206,40 @@ function generarBloquePaternidadOficialHTML(ex, orden) {
                             <th colspan="2" style="border-right: 1.5px solid #000000; text-align: left; padding: 1.5px 5px; font-weight: 700; background: #ffffff;">
                                 Tipo de muestras
                             </th>
-                        <th colspan="2" style="border-right: 1.5px solid #000000; text-align: center; padding: 1.5px 5px; font-weight: normal; background: #ffffff;">
-                            ${menorMuestra}
-                        </th>
-                        <th colspan="2" style="text-align: center; padding: 1.5px 5px; font-weight: normal; background: #ffffff;">
-                            ${padreMuestra}
-                        </th>
-                    </tr>
-                    <!-- FILA 3: PRUEBA N° -->
-                    <tr style="border-bottom: 1.5px solid #000000;">
-                        <th colspan="2" style="border-right: 1.5px solid #000000; text-align: left; padding: 1.5px 5px; font-weight: 700; background: #ffffff;">
-                            Prueba N°
-                        </th>
-                        <th colspan="2" style="border-right: 1.5px solid #000000; text-align: center; padding: 1.5px 5px; font-weight: 700; background: #ffffff;">
-                            ${menorPrueba}
-                        </th>
-                        <th colspan="2" style="text-align: center; padding: 1.5px 5px; font-weight: 700; background: #ffffff;">
-                            ${padrePrueba}
-                        </th>
-                    </tr>
-                    <!-- FILA 4: CABECERA TAMAÑO DE ALELO -->
-                    <tr style="border-bottom: 1.5px solid #000000; background-color: #ffffff;">
-                        <th style="border-right: 1px solid #000000; width: 16%; padding: 2px 4px; text-align: left; font-weight: 700; font-size: 8.5px;">Loci</th>
-                        <th style="border-right: 1.5px solid #000000; width: 12%; padding: 2px 4px; text-align: center; font-weight: 700; font-size: 8.5px;">IP</th>
-                        <th colspan="2" style="border-right: 1.5px solid #000000; width: 36%; padding: 2px 4px; text-align: center; font-weight: 700; font-size: 8px;">Tamaño de Alelo</th>
-                        <th colspan="2" style="width: 36%; padding: 2px 4px; text-align: center; font-weight: 700; font-size: 8px;">Tamaño de Alelo</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${filasLociHTML}
-                </tbody>
-            </table>
+                            <th colspan="2" style="border-right: 1.5px solid #000000; text-align: center; padding: 1.5px 5px; font-weight: normal; background: #ffffff;">
+                                ${menorMuestra}
+                            </th>
+                            <th colspan="2" style="text-align: center; padding: 1.5px 5px; font-weight: normal; background: #ffffff;">
+                                ${padreMuestra}
+                            </th>
+                        </tr>
+                        <!-- FILA 3: PRUEBA N° -->
+                        <tr style="border-bottom: 1.5px solid #000000;">
+                            <th colspan="2" style="border-right: 1.5px solid #000000; text-align: left; padding: 1.5px 5px; font-weight: 700; background: #ffffff;">
+                                Prueba N°
+                            </th>
+                            <th colspan="2" style="border-right: 1.5px solid #000000; text-align: center; padding: 1.5px 5px; font-weight: 700; background: #ffffff;">
+                                ${menorPrueba}
+                            </th>
+                            <th colspan="2" style="text-align: center; padding: 1.5px 5px; font-weight: 700; background: #ffffff;">
+                                ${padrePrueba}
+                            </th>
+                        </tr>
+                        <!-- FILA 4: CABECERA TAMAÑO DE ALELO -->
+                        <tr style="border-bottom: 1.5px solid #000000; background-color: #ffffff;">
+                            <th style="border-right: 1px solid #000000; width: 16%; padding: 2px 4px; text-align: left; font-weight: 700; font-size: 8.5px;">Loci</th>
+                            <th style="border-right: 1.5px solid #000000; width: 12%; padding: 2px 4px; text-align: center; font-weight: 700; font-size: 8.5px;">IP</th>
+                            <th colspan="2" style="border-right: 1.5px solid #000000; width: 36%; padding: 2px 4px; text-align: center; font-weight: 700; font-size: 8px;">Tamaño de Alelo</th>
+                            <th colspan="2" style="width: 36%; padding: 2px 4px; text-align: center; font-weight: 700; font-size: 8px;">Tamaño de Alelo</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${filasLociHTML}
+                    </tbody>
+                </table>
 
-            <!-- CUADRO DE INTERPRETACIÓN PERICIAL -->
+                <!-- CUADRO DE INTERPRETACIÓN PERICIAL -->
                 <div style="border: 1.5px solid #000000; padding: 4px 6px; margin-bottom: 5px; font-size: 8.5px; line-height: 1.3; background: #ffffff;">
-                    <div style="font-weight: 700; margin-bottom: 2px; text-decoration: underline;">Interpretación:</div>
                     <div style="font-weight: 700; margin-bottom: 2px;">Interpretación:</div>
                     <div style="text-align: justify; color: #000000;">
                         ${interpretacion}
@@ -5250,16 +5251,12 @@ function generarBloquePaternidadOficialHTML(ex, orden) {
                     <div style="text-align: center; font-weight: 800; font-size: 10px; margin-bottom: 3px; letter-spacing: 0.5px;">
                         RESULTADOS GLOBALES
                     </div>
-                    <div style="font-size: 8.5px; margin-bottom: 2px;">
                     <div style="font-size: 9px; margin-bottom: 3px;">
                         <span style="font-weight: 700;">ÍNDICE DE PATERNIDAD ACUMULATIVO:</span> 
-                        <span style="font-weight: 800; font-family: monospace;">${ipc}</span>
                         <span style="font-weight: 800; font-size: 13px;">${ipc}</span>
                     </div>
-                    <div style="font-size: 8.5px; margin-bottom: 4px;">
                     <div style="font-size: 9px; margin-bottom: 4px;">
                         <span style="font-weight: 700;">PROBABILIDAD DE PATERNIDAD ACUMULATIVA:</span> 
-                        <span style="font-weight: 800; font-family: monospace;">${prob}</span>
                         <span style="font-weight: 800; font-size: 13px;">${prob}</span>
                     </div>
                     <div style="font-size: 7.5px; color: #222222; line-height: 1.25;">
