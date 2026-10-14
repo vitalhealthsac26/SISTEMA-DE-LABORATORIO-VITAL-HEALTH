@@ -5131,13 +5131,13 @@ function generarBloquePaternidadOficialHTML(ex, orden) {
         const p2Val = escapeHTML(l.p2 ?? '');
 
         filasLociHTML += `
-            <tr style="height: 18px; border-bottom: 0.5px solid #000000;">
-                <td style="font-weight: 700; text-align: left; padding: 1.5px 5px; font-size: 8.5px; border-right: 1px solid #000000;">${locusNom}</td>
-                <td style="font-weight: 700; text-align: center; padding: 1.5px 3px; font-size: 8.5px; border-right: 1.5px solid #000000;">${ipVal}</td>
-                <td style="text-align: center; padding: 1.5px 3px; font-size: 8.5px; width: 18%;">${m1Val}</td>
-                <td style="text-align: center; padding: 1.5px 3px; font-size: 8.5px; width: 18%; border-right: 1.5px solid #000000;">${m2Val}</td>
-                <td style="text-align: center; padding: 1.5px 3px; font-size: 8.5px; width: 18%;">${p1Val}</td>
-                <td style="text-align: center; padding: 1.5px 3px; font-size: 8.5px; width: 18%;">${p2Val}</td>
+            <tr style="height: 20px; border-bottom: 0.5px solid #000000;">
+                <td style="font-weight: 700; text-align: left; padding: 1.5px 5px; font-size: 10px; border-right: 1px solid #000000;">${locusNom}</td>
+                <td style="font-weight: 700; text-align: center; padding: 1.5px 3px; font-size: 10px; border-right: 1.5px solid #000000;">${ipVal}</td>
+                <td style="text-align: center; padding: 1.5px 3px; font-size: 10px; width: 18%;">${m1Val}</td>
+                <td style="text-align: center; padding: 1.5px 3px; font-size: 10px; width: 18%; border-right: 1.5px solid #000000;">${m2Val}</td>
+                <td style="text-align: center; padding: 1.5px 3px; font-size: 10px; width: 18%;">${p1Val}</td>
+                <td style="text-align: center; padding: 1.5px 3px; font-size: 10px; width: 18%;">${p2Val}</td>
             </tr>
         `;
     });
@@ -5178,21 +5178,21 @@ function generarBloquePaternidadOficialHTML(ex, orden) {
                 </div>
 
                 <!-- CUADRO COMPARATIVO COMPLETO (IDENTICO AL PDF) -->
-                <table class="adn-tabla-comparativa" style="width: 100%; border-collapse: collapse; border: 1.5px solid #000000; font-size: 8.5px; margin-bottom: 5px;">
+                <table class="adn-tabla-comparativa" style="width: 100%; border-collapse: collapse; border: 1.5px solid #000000; font-size: 10px; margin-bottom: 5px;">
                     <thead>
                         <!-- FILA 1: CASO Y NOMBRES -->
                         <tr style="border-bottom: 1.5px solid #000000;">
                             <th colspan="2" style="border-right: 1.5px solid #000000; text-align: left; padding: 2px 5px; width: 28%; background: #ffffff;">
-                                <span style="font-weight: 700; font-size: 8.5px;">Caso: ${codigoCaso}</span><br>
-                                <span style="font-weight: 700; font-size: 8.5px;">Nombre</span>
+                                <span style="font-weight: 700; font-size: 10px;">Caso: ${codigoCaso}</span><br>
+                                <span style="font-weight: 700; font-size: 10px;">Nombre</span>
                             </th>
                             <th colspan="2" style="border-right: 1.5px solid #000000; text-align: center; padding: 2px 5px; width: 36%; background: #ffffff;">
-                                <span style="font-weight: 800; font-size: 9px; text-transform: uppercase;">MENOR / EXAMINADO(A)</span><br>
-                                <span style="font-weight: 800; font-size: 9.5px; text-transform: uppercase;">${menorNombre}</span>
+                                <span style="font-weight: 800; font-size: 10px; text-transform: uppercase;">MENOR / EXAMINADO(A)</span><br>
+                                <span style="font-weight: 800; font-size: 11px; text-transform: uppercase;">${menorNombre}</span>
                             </th>
                             <th colspan="2" style="text-align: center; padding: 2px 5px; width: 36%; background: #ffffff;">
-                                <span style="font-weight: 800; font-size: 9px; text-transform: uppercase;">PRESUNTO PADRE</span><br>
-                                <span style="font-weight: 800; font-size: 9.5px; text-transform: uppercase;">${padreNombre}</span>
+                                <span style="font-weight: 800; font-size: 10px; text-transform: uppercase;">PRESUNTO PADRE</span><br>
+                                <span style="font-weight: 800; font-size: 11px; text-transform: uppercase;">${padreNombre}</span>
                             </th>
                         </tr>
                         <!-- FILA 2: TIPO DE MUESTRAS -->
@@ -5221,10 +5221,10 @@ function generarBloquePaternidadOficialHTML(ex, orden) {
                         </tr>
                         <!-- FILA 4: CABECERA TAMAÑO DE ALELO -->
                         <tr style="border-bottom: 1.5px solid #000000; background-color: #ffffff;">
-                            <th style="border-right: 1px solid #000000; width: 16%; padding: 2px 4px; text-align: left; font-weight: 700; font-size: 8.5px;">Loci</th>
-                            <th style="border-right: 1.5px solid #000000; width: 12%; padding: 2px 4px; text-align: center; font-weight: 700; font-size: 8.5px;">IP</th>
-                            <th colspan="2" style="border-right: 1.5px solid #000000; width: 36%; padding: 2px 4px; text-align: center; font-weight: 700; font-size: 8px;">Tamaño de Alelo</th>
-                            <th colspan="2" style="width: 36%; padding: 2px 4px; text-align: center; font-weight: 700; font-size: 8px;">Tamaño de Alelo</th>
+                            <th style="border-right: 1px solid #000000; width: 16%; padding: 2px 4px; text-align: left; font-weight: 700; font-size: 10px;">Loci</th>
+                            <th style="border-right: 1.5px solid #000000; width: 12%; padding: 2px 4px; text-align: center; font-weight: 700; font-size: 10px;">IP</th>
+                            <th colspan="2" style="border-right: 1.5px solid #000000; width: 36%; padding: 2px 4px; text-align: center; font-weight: 700; font-size: 9.5px;">Tamaño de Alelo</th>
+                            <th colspan="2" style="width: 36%; padding: 2px 4px; text-align: center; font-weight: 700; font-size: 9.5px;">Tamaño de Alelo</th>
                         </tr>
                     </thead>
                     <tbody>
