@@ -1916,6 +1916,7 @@ function extraerDatosPaternidadDeOrden(orden, guardado) {
         padreTipoMuestra: 'Bucal',
         padrePruebaNro: '2609-30',
         interpretacion: 'El presunto padre no es excluído como el padre biológico del niño(a) examinado(a). Basándose en los resultados de los análisis obtenidos de los loci de ADN listados, la probabilidad de paternidad es de 99.99999992 %. Esta probabilidad de paternidad fue calculada en comparación con un individuo al azar de la población Hispanica , no analizados ni relacionados (asume una probabilidad previa igual a 0.50).',
+        interpretacion: 'El presunto padre no es excluído como el padre biológico de la persona examinada. Basándose en los resultados de los análisis obtenidos de los loci de ADN listados, la probabilidad de paternidad es de 99.99999992 %. Esta probabilidad de paternidad fue calculada en comparación con un individuo al azar de la población Hispanica , no analizados ni relacionados (asume una probabilidad previa igual a 0.50).',
         ipcAcumulado: '1,321,629,527',
         probabilidadAcumulada: '99.99999992%',
         notaLaboratorio: 'Basado en las muestras recibidas de laboratorio VITAL HEALTH el cual provee los nombres de las partes probadas que aparecen en este reporte.',
