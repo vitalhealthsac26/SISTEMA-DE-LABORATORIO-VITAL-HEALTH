@@ -2357,10 +2357,6 @@ function generarBloquePaternidadLegalOficialHTML(ex, orden) {
                             <span style="font-weight: 700; color: #000000;">${fechaEmision}</span>
                         </div>
                     </div>
-                    <div style="text-align: right;">
-                        <div style="font-weight: 800; font-size: 11px; color: #000000; letter-spacing: 0.5px;">${convenio}</div>
-                        <div style="font-size: 10px; font-weight: 700; color: #334155; margin-top: 3px;">Página 1 / 1</div>
-                    </div>
                 </div>
 
                 <!-- SUBTÍTULO TECNOLOGÍA EXACTA -->
