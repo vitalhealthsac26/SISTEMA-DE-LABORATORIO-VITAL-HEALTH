@@ -320,8 +320,8 @@ body { background-color: var(--bg-light); font-family: 'Segoe UI', Tahoma, Genev
     color: #000000 !important;
     width: 100%;
     margin: 0 auto;
-    font-size: 14.5px;
-    line-height: 1.4;
+    font-size: 14px;
+    line-height: 1.35;
 }
 .adn-tabla-comparativa-legal {
     width: 100%;
@@ -340,14 +340,14 @@ body { background-color: var(--bg-light); font-family: 'Segoe UI', Tahoma, Genev
 }
 .adn-tabla-comparativa-legal thead th {
     border-bottom: 1.5px solid #000000;
-    font-size: 13px; /* ⬅️ Encabezados de la tabla más claros */
+    font-size: 13px;
 }
-/* Separadores verticales exactos del cuadro legal: Col 1 (IP), Madre, Menor */
+/* Separadores verticales exactos del cuadro legal: Col 1 (IP), Madre, Menor, Padre */
 .adn-tabla-comparativa-legal tbody td:nth-child(2) { border-right: 1.5px solid #000000; }
 .adn-tabla-comparativa-legal tbody td:nth-child(4) { border-right: 1.5px solid #000000; }
 .adn-tabla-comparativa-legal tbody td:nth-child(6) { border-right: 1.5px solid #000000; }
 
-/* Bloque individual de cada examen (no se rompe por la mitad) */
+/* Bloque individual de cada examen */
 .examen-bloque {
     margin-bottom: 12px;
     page-break-inside: avoid !important;
@@ -369,7 +369,7 @@ body { background-color: var(--bg-light); font-family: 'Segoe UI', Tahoma, Genev
 .informe-tabla { 
     width: 100%; 
     border-collapse: collapse; 
-    font-size: 13px; 
+    font-size: 13.5px; 
     margin-bottom: 4px; 
 }
 .informe-tabla th,
@@ -384,7 +384,7 @@ body { background-color: var(--bg-light); font-family: 'Segoe UI', Tahoma, Genev
     border-bottom: 1.5px solid #0072bc;
     background-color: #f8fafc;
     color: #475569;
-    font-size: 11px;
+    font-size: 12px;
     text-transform: uppercase;
     letter-spacing: .5px;
     padding-top: 4px;
@@ -402,9 +402,49 @@ body { background-color: var(--bg-light); font-family: 'Segoe UI', Tahoma, Genev
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
 }
-.informe-nota { font-size: 14.5px; font-style: italic; color: #64748b; margin: 4px 0; }
 
-/* Firma de la bióloga (en todas las hojas de resultados) */
+/* ⬅️ Aumentado y unificado para que la interpretación y notas tengan buen tamaño */
+.informe-nota, 
+.adn-bloque-interpretacion-legal { 
+    font-size: 13.5px !important; 
+    line-height: 1.4 !important;
+    font-style: normal; 
+    color: #000000; 
+    margin: 4px 0; 
+    border: 1.5px solid #000000;
+    padding: 6px 8px;
+    background: #ffffff;
+}
+
+/* Resultados globales y firmas inferiores con tamaño idéntico al informativo */
+.adn-bloque-globales-legal {
+    border: 1.5px solid #000000;
+    margin-bottom: 4px;
+    display: flex;
+    background: #ffffff;
+}
+.adn-globales-col-izq-legal {
+    flex: 1 1 58%;
+    border-right: 1.5px solid #000000;
+    padding: 6px 8px;
+    font-size: 12.5px;
+}
+.adn-globales-col-der-legal {
+    flex: 1 1 42%;
+    display: flex;
+}
+.adn-subcol-personal-legal {
+    flex: 1 1 50%;
+    padding: 4px;
+    font-size: 10.5px;
+    text-align: center;
+    border-right: 1px solid #000000;
+}
+.adn-subcol-personal-legal:last-child {
+    border-right: none;
+}
+
+/* Firma de la bióloga */
 .bloque-firma-completo {
     page-break-inside: avoid !important;
     break-inside: avoid !important;
@@ -419,20 +459,20 @@ body { background-color: var(--bg-light); font-family: 'Segoe UI', Tahoma, Genev
 }
 .informe-firma-img { height: 72px; max-height: 72px; object-fit: contain; display: block; margin: 0 auto 2px auto; }
 .informe-firma-linea { width: 220px; border-top: 1.5px solid #0f172a; margin: 0 auto 3px auto; }
-.informe-firma-nombre { font-weight: 700; font-size: 10.5px; color: #0f172a; }
-.informe-firma-det { font-weight: 700; font-size: 8.5px; color: #0f172a; }
+.informe-firma-nombre { font-weight: 700; font-size: 11px; color: #0f172a; }
+.informe-firma-det { font-weight: 700; font-size: 9.5px; color: #0f172a; }
 
 /* Pie de página del centro médico */
 .informe-pie-fijo {
     border-top: 1px solid #0072bc;
     margin-top: 4px;
     padding-top: 4px;
-    font-size: 8.5px;
+    font-size: 9px;
     color: #000;
     background: #ffffff;
     width: 100%;
 }
-.informe-pie-fijo strong { color: #0f172a; font-size: 9px; }
+.informe-pie-fijo strong { color: #0f172a; font-size: 9.5px; }
 
 /* =========================================================
    PAGINACIÓN INTELIGENTE (A4 PARA IMPRESIÓN Y PDF)
