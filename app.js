@@ -2280,7 +2280,6 @@ function generarBloquePaternidadLegalOficialHTML(ex, orden) {
     const pieHabitual = construirPieInformeHTML();
 
     const codigoCaso = escapeHTML(pData.codigoCaso || orden.nroOrden || 'PAV-2610');
-    const convenio = escapeHTML(pData.convenio || 'CONVENIO - PIURA');
     const fechaAtencion = escapeHTML(pData.fechaAtencion || (orden.fechaHora ? String(orden.fechaHora).split(',')[0].trim() : '13/10/26'));
     const fechaEmision = escapeHTML(pData.fechaEmision || new Date().toLocaleDateString('es-PE', { day: '2-digit', month: '2-digit', year: '2-digit' }));
     const tecnologia = escapeHTML(pData.tecnologia || 'Análisis realizado con el Spectrum Compact CE System / VersaPlex™ 27PY System / GeneMarker®HID Software');
