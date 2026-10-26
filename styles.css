@@ -320,7 +320,7 @@ body { background-color: var(--bg-light); font-family: 'Segoe UI', Tahoma, Genev
     color: #000000 !important;
     width: 100%;
     margin: 0 auto;
-    font-size: 9.5px;
+    font-size: 10px;
     line-height: 1.25;
 }
 .adn-tabla-comparativa-legal {
@@ -328,7 +328,7 @@ body { background-color: var(--bg-light); font-family: 'Segoe UI', Tahoma, Genev
     border-collapse: collapse;
     border: 1.5px solid #000000;
     margin-bottom: 4px;
-    font-size: 9.2px;
+    font-size: 9.5px;
 }
 .adn-tabla-comparativa-legal th,
 .adn-tabla-comparativa-legal td {
