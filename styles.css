@@ -402,7 +402,7 @@ body { background-color: var(--bg-light); font-family: 'Segoe UI', Tahoma, Genev
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
 }
-.informe-nota { font-size: 13px; font-style: italic; color: #64748b; margin: 4px 0; }
+.informe-nota { font-size: 14.5px; font-style: italic; color: #64748b; margin: 4px 0; }
 
 /* Firma de la bióloga (en todas las hojas de resultados) */
 .bloque-firma-completo {
