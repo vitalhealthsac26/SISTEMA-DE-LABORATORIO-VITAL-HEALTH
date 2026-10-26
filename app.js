@@ -2553,7 +2553,6 @@ const LOCI_PATERNIDAD_DEFECTO = [
 function extraerDatosPaternidadDeOrden(orden, guardado) {
     const d = {
         codigoCaso: 'PAV-2609',
-        convenio: 'CONVENIO - PIURA',
         fechaAtencion: '',
         fechaEmision: new Date().toLocaleDateString('es-PE', { day: '2-digit', month: '2-digit', year: '2-digit' }),
         tecnologia: 'Análisis realizado con el Spectrum Compact CE System / VersaPlex™ 27PY System / GeneMarker®HID Software',
