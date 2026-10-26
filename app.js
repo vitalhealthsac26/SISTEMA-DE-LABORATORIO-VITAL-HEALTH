@@ -2094,10 +2094,6 @@ function generarEditorFormularioPaternidadLegal(ex, exIdx, orden, guardado) {
                             <input type="text" class="form-control form-control-sm" id="pl-edit-codigoCaso" value="${escapeHTML(pData.codigoCaso)}" placeholder="ej. PAV-2610">
                         </div>
                         <div class="col-md-3">
-                            <label class="form-label small fw-bold mb-1">Convenio / Sede:</label>
-                            <input type="text" class="form-control form-control-sm" id="pl-edit-convenio" value="${escapeHTML(pData.convenio)}" placeholder="ej. CONVENIO - PIURA">
-                        </div>
-                        <div class="col-md-3">
                             <label class="form-label small fw-bold mb-1">Fecha de atención:</label>
                             <input type="text" class="form-control form-control-sm" id="pl-edit-fechaAtencion" value="${escapeHTML(pData.fechaAtencion)}" placeholder="DD/MM/AA">
                         </div>
