@@ -2487,14 +2487,6 @@ function generarBloquePaternidadLegalOficialHTML(ex, orden) {
                 </div>
             </div>
 
-            <!-- SEDES Y PIE DE PÁGINA HABITUAL DE VITAL HEALTH -->
-            <div style="flex: 0 0 auto; margin-top: auto;">
-                <div style="display: flex; justify-content: space-between; font-size: 7.5px; color: #94a3b8; padding: 1px 4px; margin-bottom: 1px;">
-                    <span>Santiago de Surco (Sede Central, Lima)</span>
-                    <span>Los Olivos (Sede Lima Norte)</span>
-                    <span>Yanahuara, Arequipa</span>
-                    <span>Piura, Piura</span>
-                </div>
                 ${pieHabitual}
             </div>
         </div>
