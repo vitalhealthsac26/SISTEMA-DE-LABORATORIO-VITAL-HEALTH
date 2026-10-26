@@ -398,6 +398,128 @@ body { background-color: var(--bg-light); font-family: 'Segoe UI', Tahoma, Genev
 }
 .informe-pie-fijo strong { color: #0f172a; font-size: 9px; }
 
+/* ========================================================
+   FORMATO ESPECIALIZADO: PRUEBA DE PATERNIDAD LEGAL
+   Idéntico al PDF pericial con cuadro de 4 columnas (Madre, Menor y Padre) y sello/firma
+   ======================================================== */
+.adn-paternidad-legal-contenedor {
+    font-family: Arial, 'Helvetica Neue', Helvetica, sans-serif !important;
+    color: #000000 !important;
+    width: 100%;
+    margin: 0 auto;
+    font-size: 9.5px;
+    line-height: 1.25;
+}
+.adn-tabla-comparativa-legal {
+    width: 100%;
+    border-collapse: collapse;
+    border: 1.5px solid #000000;
+    margin-bottom: 4px;
+    font-size: 9.2px;
+}
+.adn-tabla-comparativa-legal th,
+.adn-tabla-comparativa-legal td {
+    border: none;
+    border-bottom: 0.5px solid #000000;
+    padding: 1.5px 3px;
+    text-align: center;
+    vertical-align: middle;
+}
+.adn-tabla-comparativa-legal thead th {
+    border-bottom: 1.5px solid #000000;
+}
+/* Separadores verticales exactos del cuadro legal: Col 1 (IP), Madre, Menor */
+.adn-tabla-comparativa-legal tbody td:nth-child(2) { border-right: 1.5px solid #000000; }
+.adn-tabla-comparativa-legal tbody td:nth-child(4) { border-right: 1.5px solid #000000; }
+.adn-tabla-comparativa-legal tbody td:nth-child(6) { border-right: 1.5px solid #000000; }
+
+/* Bloque individual de cada examen (no se rompe por la mitad) */
+.examen-bloque {
+    margin-bottom: 12px;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+}
+
+.examen-bloque h3 {
+    background-color: #f1f5f9;
+    padding: 5px 8px;
+    font-size: 12.5px;
+    color: #1e293b;
+    border-left: 4px solid #2563eb;
+    margin-bottom: 4px;
+    font-weight: 700;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+}
+
+.informe-tabla { 
+    width: 100%; 
+    border-collapse: collapse; 
+    font-size: 10.5px; 
+    margin-bottom: 4px; 
+}
+.informe-tabla th,
+.informe-tabla td { 
+    border: 0; 
+    border-bottom: 1px solid #e2e8f0; 
+    padding: 3.5px 6px; 
+    text-align: left; 
+    vertical-align: top; 
+}
+.informe-tabla thead th {
+    border-bottom: 1.5px solid #0072bc;
+    background-color: #f8fafc;
+    color: #475569;
+    font-size: 8.5px;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    padding-top: 4px;
+    padding-bottom: 4px;
+    font-weight: 700;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+}
+.informe-tabla tr.seccion-fila td {
+    background-color: #e2e8f0 !important;
+    font-weight: 700;
+    color: #0f172a;
+    padding: 4px 6px;
+    font-size: 10.5px;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+}
+.informe-nota { font-size: 9px; font-style: italic; color: #64748b; margin: 4px 0; }
+
+/* Firma de la bióloga (en todas las hojas de resultados) */
+.bloque-firma-completo {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+    margin-top: auto;
+    padding-top: 4px;
+}
+.informe-firma { 
+    margin-top: 4px; 
+    text-align: center; 
+    page-break-inside: avoid !important; 
+    break-inside: avoid !important;
+}
+.informe-firma-img { height: 72px; max-height: 72px; object-fit: contain; display: block; margin: 0 auto 2px auto; }
+.informe-firma-linea { width: 220px; border-top: 1.5px solid #0f172a; margin: 0 auto 3px auto; }
+.informe-firma-nombre { font-weight: 700; font-size: 10.5px; color: #0f172a; }
+.informe-firma-det { font-weight: 700; font-size: 8.5px; color: #0f172a; }
+
+/* Pie de página del centro médico */
+.informe-pie-fijo {
+    border-top: 1px solid #0072bc;
+    margin-top: 4px;
+    padding-top: 4px;
+    font-size: 8.5px;
+    color: #000;
+    background: #ffffff;
+    width: 100%;
+}
+.informe-pie-fijo strong { color: #0f172a; font-size: 9px; }
+
 /* =========================================================
    PAGINACIÓN INTELIGENTE (A4 PARA IMPRESIÓN Y PDF)
    ========================================================= */
