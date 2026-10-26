@@ -371,6 +371,7 @@ let examenesCatalogo = [
   { codigo: "658", nombre: "T4 LIBRE (TIROXINA LIBRE FT4)", unidad: "ng/dL", refMin: 0.90, refMax: 1.70, referencia: "Adultos: 0.90 - 1.70...", metodo: "Ensayo de electroquimioluminiscencia (ECLIA)", precio: 45.00 },
   { codigo: "659", nombre: "TSH ULTRASENSIBLE", unidad: "uUI / mL", refMin: 0.27, refMax: 4.20, referencia: "Adultos: 0.27 - 4.2...", metodo: "Ensayo de electroquimioluminiscencia (ECLIA)", precio: 45.00 },
   { codigo: "750", nombre: "PROTEINA C REACTIVA - CUANTITATIVA", unidad: "mg/dL", refMin: 0, refMax: 10, referencia: "Normal: Menor 10...", metodo: "Inmunoturbidimetría", precio: 35.00 },
+  { codigo: "935", nombre: "PRUEBA DE PATERNIDAD LEGAL", unidad: "", refMin: "", refMax: "", referencia: "Exclusión: 0% / Inclusión: > 99.999%", metodo: "Análisis realizado con el Spectrum Compact CE System / VersaPlex™ 27PY System / GeneMarker®HID Software", precio: 1200.00 },
   { codigo: "990", nombre: "PRUEBA DE PATERNIDAD INFORMATIVA", unidad: "", refMin: "", refMax: "", referencia: "Probabilidad: > 99.999%", metodo: "Extracción de ADN y PCR Multiplex...", precio: 750.00 }
 ];
 
