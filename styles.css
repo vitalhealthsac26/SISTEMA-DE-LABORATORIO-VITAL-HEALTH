@@ -320,15 +320,15 @@ body { background-color: var(--bg-light); font-family: 'Segoe UI', Tahoma, Genev
     color: #000000 !important;
     width: 100%;
     margin: 0 auto;
-    font-size: 10px;
-    line-height: 1.25;
+    font-size: 13px;
+    line-height: 1.35;
 }
 .adn-tabla-comparativa-legal {
     width: 100%;
     border-collapse: collapse;
     border: 1.5px solid #000000;
     margin-bottom: 4px;
-    font-size: 9.5px;
+    font-size: 12px;
 }
 .adn-tabla-comparativa-legal th,
 .adn-tabla-comparativa-legal td {
@@ -356,7 +356,7 @@ body { background-color: var(--bg-light); font-family: 'Segoe UI', Tahoma, Genev
 .examen-bloque h3 {
     background-color: #f1f5f9;
     padding: 5px 8px;
-    font-size: 12.5px;
+    font-size: 16px;
     color: #1e293b;
     border-left: 4px solid #2563eb;
     margin-bottom: 4px;
@@ -368,7 +368,7 @@ body { background-color: var(--bg-light); font-family: 'Segoe UI', Tahoma, Genev
 .informe-tabla { 
     width: 100%; 
     border-collapse: collapse; 
-    font-size: 10.5px; 
+    font-size: 13px; 
     margin-bottom: 4px; 
 }
 .informe-tabla th,
@@ -383,7 +383,7 @@ body { background-color: var(--bg-light); font-family: 'Segoe UI', Tahoma, Genev
     border-bottom: 1.5px solid #0072bc;
     background-color: #f8fafc;
     color: #475569;
-    font-size: 8.5px;
+    font-size: 11px;
     text-transform: uppercase;
     letter-spacing: .5px;
     padding-top: 4px;
@@ -397,11 +397,11 @@ body { background-color: var(--bg-light); font-family: 'Segoe UI', Tahoma, Genev
     font-weight: 700;
     color: #0f172a;
     padding: 4px 6px;
-    font-size: 12px;
+    font-size: 15px;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
 }
-.informe-nota { font-size: 9px; font-style: italic; color: #64748b; margin: 4px 0; }
+.informe-nota { font-size: 11px; font-style: italic; color: #64748b; margin: 4px 0; }
 
 /* Firma de la bióloga (en todas las hojas de resultados) */
 .bloque-firma-completo {
