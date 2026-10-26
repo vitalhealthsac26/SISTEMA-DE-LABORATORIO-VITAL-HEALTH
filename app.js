@@ -306,7 +306,7 @@ const BASE_VALORES_REFERENCIALES = {
 "PRUEBA DE PATERNIDAD INFORMATIVA": [
   // --- IDENTIFICACIÓN DEL CASO Y MUESTRAS ---
   { nombre: "Datos del Caso y Participantes", esSeccion: true },
-  { id: 'codigo_caso', nombre: 'Código de caso', valor: 'PAV-2609', unidad: '', referencia: 'CONVENIO - PIURA', metodo: '-' },
+  { id: 'codigo_caso', nombre: 'Código de caso', valor: 'PAV-2609', unidad: '', metodo: '-' },
   { id: 'fecha_atencion', nombre: 'Fecha de atención', valor: '', unidad: '', referencia: 'Fecha de toma', metodo: '-' },
   { id: 'fecha_emision', nombre: 'Fecha de emisión', valor: '', unidad: '', referencia: 'Fecha de informe', metodo: '-' },
   { id: 'tecnologia', nombre: 'Metodología / Plataforma', valor: 'Análisis realizado con el Spectrum Compact CE System / VersaPlex™ 27PY System / GeneMarker®HID Software', unidad: '', referencia: 'Plataforma de alta resolución', metodo: 'PCR Multiplex / Electroforesis Capilar' },
