@@ -3282,7 +3282,7 @@ function guardarResultados(nroOrden, silencioso = false) {
             // Formatear indicadores sintéticos para compatibilidad universal
             const indPaternidad = [
                 { nombre: "Datos del Caso y Participantes", esSeccion: true },
-                { id: 'codigo_caso', nombre: 'Código de caso', resultado: datosPaternidadGuardar.codigoCaso, referencia: datosPaternidadGuardar.convenio },
+                { id: 'codigo_caso', nombre: 'Código de caso', resultado: datosPaternidadGuardar.codigoCaso },
                 { id: 'fecha_atencion', nombre: 'Fecha de atención', resultado: datosPaternidadGuardar.fechaAtencion, referencia: 'Fecha de atención' },
                 { id: 'fecha_emision', nombre: 'Fecha de emisión', resultado: datosPaternidadGuardar.fechaEmision, referencia: 'Fecha de emisión' },
                 { id: 'menor_nombre', nombre: 'Nombre MENOR', resultado: datosPaternidadGuardar.menorNombre, referencia: `Prueba: ${datosPaternidadGuardar.menorPruebaNro}` },
