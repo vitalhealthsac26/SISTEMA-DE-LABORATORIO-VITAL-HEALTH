@@ -2195,12 +2195,12 @@ function generarEditorFormularioPaternidadLegal(ex, exIdx, orden, guardado) {
             <!-- CUADRO COMPARATIVO DE LOCI / IP / TAMAÑO DE ALELO -->
             <div class="card mb-3 border">
                 <div class="card-header bg-dark text-white py-2 d-flex justify-content-between align-items-center">
-                    <span class="fw-bold"><i class="bi bi-table me-1"></i>3. Cuadro Comparativo de Marcadores STR (24 Loci con IP y Alelos)</span>
-                    <small class="opacity-75">Orden idéntico al PDF pericial de 4 columnas</small>
+                    <span class="fw-bold" style="font-size: 1.1rem;"><i class="bi bi-table me-1"></i>3. Cuadro Comparativo de Marcadores STR (24 Loci con IP y Alelos)</span>
+                    <small class="opacity-75" style="font-size: 0.9rem;">Orden idéntico al PDF pericial de 4 columnas</small>
                 </div>
                 <div class="table-responsive p-0">
-                    <table class="table table-bordered table-sm align-middle mb-0" id="tabla-editor-loci-paternidad-legal">
-                        <thead class="table-light text-center" style="font-size: 0.8rem;">
+                    <table class="table table-bordered align-middle mb-0" id="tabla-editor-loci-paternidad-legal">
+                        <thead class="table-light text-center" style="font-size: 1.05rem;">
                             <tr>
                                 <th rowspan="2" class="align-middle" style="width: 14%;">Loci</th>
                                 <th rowspan="2" class="align-middle" style="width: 10%;">IP</th>
@@ -2209,12 +2209,12 @@ function generarEditorFormularioPaternidadLegal(ex, exIdx, orden, guardado) {
                                 <th colspan="2" class="bg-success-subtle text-success border-bottom-0" style="width: 26%;">PRESUNTO PADRE</th>
                             </tr>
                             <tr>
-                                <th class="py-1" style="font-size: 0.72rem;">Alelo 1</th>
-                                <th class="py-1" style="font-size: 0.72rem;">Alelo 2</th>
-                                <th class="bg-primary-subtle text-primary py-1" style="font-size: 0.72rem;">Alelo 1</th>
-                                <th class="bg-primary-subtle text-primary py-1" style="font-size: 0.72rem;">Alelo 2</th>
-                                <th class="bg-success-subtle text-success py-1" style="font-size: 0.72rem;">Alelo 1</th>
-                                <th class="bg-success-subtle text-success py-1" style="font-size: 0.72rem;">Alelo 2</th>
+                                <th class="py-1" style="font-size: 0.95rem;">Alelo 1</th>
+                                <th class="py-1" style="font-size: 0.95rem;">Alelo 2</th>
+                                <th class="bg-primary-subtle text-primary py-1" style="font-size: 0.95rem;">Alelo 1</th>
+                                <th class="bg-primary-subtle text-primary py-1" style="font-size: 0.95rem;">Alelo 2</th>
+                                <th class="bg-success-subtle text-success py-1" style="font-size: 0.95rem;">Alelo 1</th>
+                                <th class="bg-success-subtle text-success py-1" style="font-size: 0.95rem;">Alelo 2</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -2226,48 +2226,48 @@ function generarEditorFormularioPaternidadLegal(ex, exIdx, orden, guardado) {
 
             <!-- INTERPRETACIÓN Y RESULTADOS GLOBALES -->
             <div class="card mb-2 border bg-light">
-                <div class="card-header bg-white py-2 fw-bold text-dark border-bottom">
+                <div class="card-header bg-white py-2 fw-bold text-dark border-bottom" style="font-size: 1.1rem;">
                     <i class="bi bi-file-earmark-check me-1 text-success"></i>4. Interpretación y Resultados Globales Bioestadísticos
                 </div>
                 <div class="card-body p-3">
                     <div class="mb-3">
-                        <label class="form-label small fw-bold mb-1">Interpretación (Texto debajo del cuadro):</label>
-                        <textarea class="form-control form-control-sm" id="pl-edit-interpretacion" rows="3">${escapeHTML(pData.interpretacion)}</textarea>
+                        <label class="form-label fw-bold mb-1" style="font-size: 1rem;">Interpretación (Texto debajo del cuadro):</label>
+                        <textarea class="form-control" id="pl-edit-interpretacion" rows="3" style="font-size: 1rem;">${escapeHTML(pData.interpretacion)}</textarea>
                     </div>
 
                     <div class="row g-2 mb-3">
                         <div class="col-md-6">
-                            <label class="form-label small fw-bold mb-1">ÍNDICE DE PATERNIDAD ACUMULATIVO (IPC):</label>
-                            <input type="text" class="form-control form-control-sm fw-bold font-monospace" id="pl-edit-ipcAcumulado" value="${escapeHTML(pData.ipcAcumulado)}">
+                            <label class="form-label fw-bold mb-1" style="font-size: 1rem;">ÍNDICE DE PATERNIDAD ACUMULATIVO (IPC):</label>
+                            <input type="text" class="form-control fw-bold font-monospace" id="pl-edit-ipcAcumulado" value="${escapeHTML(pData.ipcAcumulado)}" style="font-size: 1.1rem;">
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label small fw-bold mb-1">PROBABILIDAD DE PATERNIDAD ACUMULATIVA (%):</label>
-                            <input type="text" class="form-control form-control-sm fw-bold font-monospace text-success" id="pl-edit-probabilidadAcumulada" value="${escapeHTML(pData.probabilidadAcumulada)}">
+                            <label class="form-label fw-bold mb-1" style="font-size: 1rem;">PROBABILIDAD DE PATERNIDAD ACUMULATIVA (%):</label>
+                            <input type="text" class="form-control fw-bold font-monospace text-success" id="pl-edit-probabilidadAcumulada" value="${escapeHTML(pData.probabilidadAcumulada)}" style="font-size: 1.1rem;">
                         </div>
                     </div>
 
                     <div class="row g-2 mb-3">
                         <div class="col-12">
-                            <label class="form-label small fw-bold mb-1">Nota de procedencia de muestra:</label>
-                            <input type="text" class="form-control form-control-sm" id="pl-edit-notaLaboratorio" value="${escapeHTML(pData.notaLaboratorio)}">
+                            <label class="form-label fw-bold mb-1" style="font-size: 1rem;">Nota de procedencia de muestra:</label>
+                            <input type="text" class="form-control" id="pl-edit-notaLaboratorio" value="${escapeHTML(pData.notaLaboratorio)}" style="font-size: 1rem;">
                         </div>
                     </div>
 
                     <!-- VISTA PREVIA DE LOS CUADROS DE FIRMAS Y SELLOS LEGALES -->
                     <div class="card border">
-                        <div class="card-header bg-white py-1 px-2 border-bottom small fw-bold text-secondary">
+                        <div class="card-header bg-white py-1 px-2 border-bottom fw-bold text-secondary" style="font-size: 1rem;">
                             <i class="bi bi-shield-check me-1 text-success"></i>Diseño Oficial del Pie Legal (Resultados Globales + Toma de Muestra + Análisis con Sello y Firma):
                         </div>
                         <div class="card-body p-2 bg-white">
                             <div class="row g-2 align-items-center">
                                 <div class="col-md-4 border-end text-center p-2">
-                                    <span class="badge bg-light text-dark border d-block py-1 mb-1">PERSONAL A CARGO DE LA TOMA</span>
-                                    <small class="text-muted d-block" style="font-size: 11px;">Recuadro reglamentario para firma física y sello del personal de toma de muestra.</small>
+                                    <span class="badge bg-light text-dark border d-block py-1 mb-1" style="font-size: 0.9rem;">PERSONAL A CARGO DE LA TOMA</span>
+                                    <span class="text-muted d-block" style="font-size: 0.95rem;">Recuadro reglamentario para firma física y sello del personal de toma de muestra.</span>
                                 </div>
                                 <div class="col-md-8 text-center p-2">
-                                    <span class="badge bg-light text-dark border d-block py-1 mb-1">PERSONAL A CARGO DEL ANALISIS DE LA MUESTRA</span>
-                                    <img src="sello-firma-biologo-legal.png" alt="Sello y Firma del Biólogo Genetista" style="max-height: 60px; object-fit: contain; margin-top: 4px;" onerror="this.src='./sello-firma-biologo-legal.png'">
-                                    <div class="small fw-semibold text-dark mt-1">Christian Emilio Cancho Ccaico — Biólogo genetista C.B.P. 14529</div>
+                                    <span class="badge bg-light text-dark border d-block py-1 mb-1" style="font-size: 0.9rem;">PERSONAL A CARGO DEL ANALISIS DE LA MUESTRA</span>
+                                    <img src="sello-firma-biologo-legal.png" alt="Sello y Firma del Biólogo Genetista" style="max-height: 70px; object-fit: contain; margin-top: 4px;" onerror="this.src='./sello-firma-biologo-legal.png'">
+                                    <div class="fw-bold text-dark mt-1" style="font-size: 1.05rem;">Christian Emilio Cancho Ccaico — Biólogo genetista C.B.P. 14529</div>
                                 </div>
                             </div>
                         </div>
