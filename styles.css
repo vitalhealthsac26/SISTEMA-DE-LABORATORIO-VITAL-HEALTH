@@ -371,7 +371,7 @@ body { background-color: var(--bg-light); font-family: 'Segoe UI', Tahoma, Genev
 /* ⬅️ INTERPRETACIÓN LIMPIA Y EN SU LUGAR */
 .informe-nota, 
 .adn-bloque-interpretacion-legal { 
-    font-size: 11px !important; 
+    font-size: 13px !important; 
     line-height: 1.3 !important;
     font-style: normal; 
     color: #000000; 
@@ -393,7 +393,7 @@ body { background-color: var(--bg-light); font-family: 'Segoe UI', Tahoma, Genev
     flex: 1 1 58%;
     border-right: 1.5px solid #000000;
     padding: 4px 6px;
-    font-size: 11px !important;
+    font-size: 13px !important;
 }
 
 .adn-globales-col-der-legal {
