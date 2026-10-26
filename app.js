@@ -3168,7 +3168,6 @@ function guardarResultados(nroOrden, silencioso = false) {
 
         datosPaternidadLegalGuardar = {
             codigoCaso: valPL("pl-edit-codigoCaso"),
-            convenio: valPL("pl-edit-convenio"),
             fechaAtencion: valPL("pl-edit-fechaAtencion"),
             fechaEmision: valPL("pl-edit-fechaEmision"),
             tecnologia: valPL("pl-edit-tecnologia"),
