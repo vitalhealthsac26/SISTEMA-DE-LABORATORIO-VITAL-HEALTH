@@ -3244,7 +3244,7 @@ function guardarResultados(nroOrden, silencioso = false) {
         if (esPatLegal && datosPaternidadLegalGuardar) {
             const indPaternidadLegal = [
                 { nombre: "Datos del Caso y Participantes", esSeccion: true },
-                { id: 'codigo_caso', nombre: 'Código de caso', resultado: datosPaternidadLegalGuardar.codigoCaso, referencia: datosPaternidadLegalGuardar.convenio },
+                { id: 'codigo_caso', nombre: 'Código de caso', resultado: datosPaternidadLegalGuardar.codigoCaso },
                 { id: 'fecha_atencion', nombre: 'Fecha de atención', resultado: datosPaternidadLegalGuardar.fechaAtencion, referencia: 'Fecha de atención' },
                 { id: 'fecha_emision', nombre: 'Fecha de emisión', resultado: datosPaternidadLegalGuardar.fechaEmision, referencia: 'Fecha de emisión' },
                 { id: 'madre_nombre', nombre: 'Nombre MADRE BIOLÓGICA', resultado: datosPaternidadLegalGuardar.madreNombre, referencia: `Prueba: ${datosPaternidadLegalGuardar.madrePruebaNro}` },
