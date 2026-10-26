@@ -248,6 +248,7 @@ const BASE_VALORES_REFERENCIALES = {
   { id: 'igm', nombre: 'Banda IgM', valor: '', unidad: 'S/U', referencia: 'No Reactivo' }
 ],
 
+
 "PRUEBA DE PATERNIDAD LEGAL": [
   // --- IDENTIFICACIÓN DEL CASO Y MUESTRAS ---
   { nombre: "Datos del Caso y Participantes", esSeccion: true },
@@ -301,7 +302,7 @@ const BASE_VALORES_REFERENCIALES = {
   { id: 'probabilidad_acumulada', nombre: 'PROBABILIDAD DE PATERNIDAD ACUMULATIVA', valor: '0%', unidad: '%', referencia: 'Probabilidad Essen-Möller', metodo: '-' },
   { id: 'nota_laboratorio', nombre: 'Nota de procedencia de muestra', valor: 'Basado en las muestras recibidas de labotatorio VITAL HEALTH el cual provee los nombres de las partes probadas que aparecen en este reporte.', unidad: '', referencia: 'Constancia de recepción', metodo: '-' }
 ],
-    
+
 "PRUEBA DE PATERNIDAD INFORMATIVA": [
   // --- IDENTIFICACIÓN DEL CASO Y MUESTRAS ---
   { nombre: "Datos del Caso y Participantes", esSeccion: true },
@@ -1902,14 +1903,614 @@ function obtenerIndicadoresParaOrden(ex) {
     return obtenerPlantillaIndicadores(ex.nombre, ex.codigo);
 }
 
+
 function esExamenPaternidad(exOItem) {
     if (!exOItem) return false;
     const nom = String(exOItem.nombre || "").toUpperCase()
         .normalize("NFD").replace(/[\u0300-\u036f]/g, "");
     const cod = String(exOItem.codigo || "");
-    return nom.includes("PATERNIDAD") || nom.includes("ADN") || nom.includes("FILIACION") || cod === "990";
+    return nom.includes("PATERNIDAD") || nom.includes("ADN") || nom.includes("FILIACION") || cod === "990" || cod === "934" || cod === "935";
 }
 window.esExamenPaternidad = esExamenPaternidad;
+
+function esExamenPaternidadLegal(exOItem) {
+    if (!exOItem) return false;
+    const nom = String(exOItem.nombre || "").toUpperCase()
+        .normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    const cod = String(exOItem.codigo || "");
+    return (nom.includes("LEGAL") && (nom.includes("PATERNIDAD") || nom.includes("ADN") || nom.includes("FILIACION"))) || cod === "935";
+}
+window.esExamenPaternidadLegal = esExamenPaternidadLegal;
+
+// Lista de los 24 Loci STR canónicos para la Prueba Legal (del PDF Spectrum Compact CE)
+const LOCI_PATERNIDAD_LEGAL_DEFECTO = [
+    { locus: 'D3S1358', ip: '0.00', m1: '15', m2: '16', hijo1: '15', hijo2: '16', p1: '14', p2: '18' },
+    { locus: 'D1S1656', ip: '3.63', m1: '14', m2: '', hijo1: '14', hijo2: '15', p1: '14', p2: '15' },
+    { locus: 'D2S441', ip: '1.67', m1: '10', m2: '14', hijo1: '11', hijo2: '14', p1: '10', p2: '11' },
+    { locus: 'D10S1248', ip: '0.00', m1: '15', m2: '', hijo1: '15', hijo2: '', p1: '13', p2: '14' },
+    { locus: 'D13S317', ip: '0.00', m1: '9', m2: '13', hijo1: '9', hijo2: '13', p1: '11', p2: '12' },
+    { locus: 'Penta E', ip: '0.00', m1: '14', m2: '16', hijo1: '5', hijo2: '16', p1: '12', p2: '15' },
+    { locus: 'D16S539', ip: '2.34', m1: '10', m2: '12', hijo1: '10', hijo2: '12', p1: '10', p2: '12' },
+    { locus: 'D18S51', ip: '0.00', m1: '14', m2: '17', hijo1: '15', hijo2: '17', p1: '16', p2: '' },
+    { locus: 'D2S1338', ip: '0.00', m1: '17', m2: '23', hijo1: '23', hijo2: '24', p1: '17', p2: '23' },
+    { locus: 'CSF1PO', ip: '0.00', m1: '12', m2: '', hijo1: '12', hijo2: '13', p1: '12', p2: '' },
+    { locus: 'Penta D', ip: '0.00', m1: '11', m2: '13', hijo1: '11', hijo2: '12', p1: '10', p2: '' },
+    { locus: 'TH01', ip: '0.00', m1: '7', m2: '', hijo1: '6', hijo2: '7', p1: '7', p2: '9.3' },
+    { locus: 'vWA', ip: '2.03', m1: '16', m2: '', hijo1: '16', hijo2: '17', p1: '16', p2: '17' },
+    { locus: 'D21S11', ip: '0.00', m1: '29', m2: '31.2', hijo1: '29', hijo2: '33.2', p1: '29', p2: '32.2' },
+    { locus: 'D7S820', ip: '0.00', m1: '10', m2: '', hijo1: '10', hijo2: '12', p1: '11', p2: '' },
+    { locus: 'D5S818', ip: '0.00', m1: '11', m2: '', hijo1: '11', hijo2: '', p1: '12', p2: '' },
+    { locus: 'TPOX', ip: '1.35', m1: '8', m2: '11', hijo1: '8', hijo2: '11', p1: '8', p2: '11' },
+    { locus: 'D8S1179', ip: '3.87', m1: '11', m2: '14', hijo1: '12', hijo2: '14', p1: '12', p2: '15' },
+    { locus: 'D12S391', ip: '0.00', m1: '19', m2: '20', hijo1: '19', hijo2: '23', p1: '18', p2: '21' },
+    { locus: 'D19S433', ip: '0.00', m1: '13', m2: '15.2', hijo1: '12.2', hijo2: '13', p1: '13', p2: '' },
+    { locus: 'D6S1043', ip: '11.79', m1: '14', m2: '18', hijo1: '18', hijo2: '21.3', p1: '12', p2: '21.3' },
+    { locus: 'D22S1045', ip: '1.43', m1: '16', m2: '', hijo1: '16', hijo2: '', p1: '15', p2: '16' },
+    { locus: 'FGA', ip: '0.00', m1: '20', m2: '22', hijo1: '20', hijo2: '21', p1: '24', p2: '27' },
+    { locus: 'Amelogenina', ip: '', m1: 'X', m2: '', hijo1: 'X', hijo2: '', p1: 'X', p2: 'Y' }
+];
+
+function extraerDatosPaternidadLegalDeOrden(orden, guardado) {
+    const d = {
+        codigoCaso: 'PAV-2610',
+        convenio: 'CONVENIO - PIURA',
+        fechaAtencion: '13/10/26',
+        fechaEmision: '26/10/26',
+        tecnologia: 'Análisis realizado con el Spectrum Compact CE System / VersaPlex™ 27PY System / GeneMarker®HID Software',
+        casoTitulo: 'PAT-2610',
+        madreNombre: 'ESTRELLA LUCERO CASTRO ALFARO',
+        madreTipoMuestra: 'Bucal / Sangre',
+        madrePruebaNro: '2610-10',
+        menorNombre: 'AITANA LUCERO',
+        menorCui: 'CUI:94778406',
+        menorTipoMuestra: 'Bucal / Sangre',
+        menorPruebaNro: '2610-20',
+        padreNombre: 'DIONEL GOMEZ PEÑA',
+        padreTipoMuestra: 'Bucal / Sangre',
+        padrePruebaNro: '2610-30',
+        interpretacion: 'El presunto padre es excluído como padre biológico del niño (a). Examinado (a). Esta conclusión es basada en los alelos no correspondientes observados en los loci listados con un IP igual a 0. Al presunto padre le faltan los marcadores genéticos que deben ser contrubuídos al niño (a) por el padre biológico. La probabilidad de paternidad es de 0%.',
+        ipcAcumulado: '0',
+        probabilidadAcumulada: '0%',
+        notaLaboratorio: 'Basado en las muestras recibidas de labotatorio VITAL HEALTH el cual provee los nombres de las partes probadas que aparecen en este reporte.',
+        loci: JSON.parse(JSON.stringify(LOCI_PATERNIDAD_LEGAL_DEFECTO))
+    };
+
+    if (orden && orden.fechaHora) {
+        const partesF = String(orden.fechaHora).split(',')[0].trim();
+        if (partesF) d.fechaAtencion = partesF;
+    }
+
+    if (guardado && guardado.datosPaternidadLegal) {
+        return Object.assign(d, guardado.datosPaternidadLegal);
+    }
+
+    if (guardado && Array.isArray(guardado.indicadores) && guardado.indicadores.length) {
+        guardado.indicadores.forEach(ind => {
+            const nom = String(ind.nombre || '').toUpperCase();
+            if (nom.includes('CODIGO DE CASO') && ind.resultado) d.codigoCaso = ind.resultado;
+            if (nom.includes('CONVENIO') && ind.resultado) d.convenio = ind.resultado;
+            if (nom.includes('FECHA DE ATENCION') && ind.resultado) d.fechaAtencion = ind.resultado;
+            if (nom.includes('FECHA DE EMISION') && ind.resultado) d.fechaEmision = ind.resultado;
+            if (nom.includes('NOMBRE MADRE') && ind.resultado) d.madreNombre = ind.resultado;
+            if (nom.includes('NOMBRE MENOR') && ind.resultado) d.menorNombre = ind.resultado;
+            if (nom.includes('CUI') && ind.resultado) d.menorCui = ind.resultado;
+            if (nom.includes('NOMBRE PRESUNTO PADRE') && ind.resultado) d.padreNombre = ind.resultado;
+            if (nom.includes('INTERPRETACION') && ind.resultado) d.interpretacion = ind.resultado;
+            if (nom.includes('INDICE DE PATERNIDAD ACUMULATIVO') && ind.resultado) d.ipcAcumulado = ind.resultado;
+            if (nom.includes('PROBABILIDAD DE PATERNIDAD ACUMULATIVA') && ind.resultado) d.probabilidadAcumulada = ind.resultado;
+        });
+    }
+
+    return d;
+}
+
+window.cargarPlantillaPaternidadLegalExclusion = function() {
+    const elInter = document.getElementById("pl-edit-interpretacion");
+    const elIpc = document.getElementById("pl-edit-ipcAcumulado");
+    const elProb = document.getElementById("pl-edit-probabilidadAcumulada");
+    if (elInter) elInter.value = "El presunto padre es excluído como padre biológico del niño (a). Examinado (a). Esta conclusión es basada en los alelos no correspondientes observados en los loci listados con un IP igual a 0. Al presunto padre le faltan los marcadores genéticos que deben ser contrubuídos al niño (a) por el padre biológico. La probabilidad de paternidad es de 0%.";
+    if (elIpc) elIpc.value = "0";
+    if (elProb) elProb.value = "0%";
+    alert("Se aplicó la plantilla de EXCLUSIÓN DE PATERNIDAD (0%).");
+};
+
+window.cargarPlantillaPaternidadLegalInclusion = function() {
+    const elInter = document.getElementById("pl-edit-interpretacion");
+    const elIpc = document.getElementById("pl-edit-ipcAcumulado");
+    const elProb = document.getElementById("pl-edit-probabilidadAcumulada");
+    if (elInter) elInter.value = "El presunto padre no es excluído como el padre biológico del niño(a) examinado(a). Basándose en los resultados de los análisis obtenidos de los loci de ADN listados, la probabilidad de paternidad es de 99.99999992 %. Esta probabilidad de paternidad fue calculada en comparación con un individuo al azar de la población Hispanica , no analizados ni relacionados (asume una probabilidad previa igual a 0.50).";
+    if (elIpc) elIpc.value = "1,321,629,527";
+    if (elProb) elProb.value = "99.99999992%";
+    alert("Se aplicó la plantilla de INCLUSIÓN DE PATERNIDAD (>99.999%).");
+};
+
+function generarEditorFormularioPaternidadLegal(ex, exIdx, orden, guardado) {
+    const pData = extraerDatosPaternidadLegalDeOrden(orden, guardado);
+
+    let filasLoci = '';
+    (pData.loci || LOCI_PATERNIDAD_LEGAL_DEFECTO).forEach((item, lIdx) => {
+        filasLoci += `
+            <tr data-pl-locus-row="${lIdx}">
+                <td class="text-center bg-light fw-bold" style="width: 14%;">
+                    <input type="text" class="form-control form-control-sm text-center fw-bold py-1" data-pl-campo="locus" value="${escapeHTML(item.locus)}">
+                </td>
+                <td style="width: 10%;">
+                    <input type="text" class="form-control form-control-sm text-center py-1 fw-bold" data-pl-campo="ip" placeholder="IP" value="${escapeHTML(item.ip ?? '')}">
+                </td>
+                <td style="width: 12%;">
+                    <input type="text" class="form-control form-control-sm text-center py-1 font-monospace" data-pl-campo="m1" placeholder="Alelo 1" value="${escapeHTML(item.m1 ?? '')}">
+                </td>
+                <td style="width: 12%;">
+                    <input type="text" class="form-control form-control-sm text-center py-1 font-monospace" data-pl-campo="m2" placeholder="Alelo 2" value="${escapeHTML(item.m2 ?? '')}">
+                </td>
+                <td style="width: 13%;">
+                    <input type="text" class="form-control form-control-sm text-center py-1 font-monospace bg-primary-subtle" data-pl-campo="hijo1" placeholder="Alelo 1" value="${escapeHTML(item.hijo1 ?? '')}">
+                </td>
+                <td style="width: 13%;">
+                    <input type="text" class="form-control form-control-sm text-center py-1 font-monospace bg-primary-subtle" data-pl-campo="hijo2" placeholder="Alelo 2" value="${escapeHTML(item.hijo2 ?? '')}">
+                </td>
+                <td style="width: 13%;">
+                    <input type="text" class="form-control form-control-sm text-center py-1 font-monospace bg-success-subtle fw-semibold" data-pl-campo="p1" placeholder="Alelo 1" value="${escapeHTML(item.p1 ?? '')}">
+                </td>
+                <td style="width: 13%;">
+                    <input type="text" class="form-control form-control-sm text-center py-1 font-monospace bg-success-subtle fw-semibold" data-pl-campo="p2" placeholder="Alelo 2" value="${escapeHTML(item.p2 ?? '')}">
+                </td>
+            </tr>
+        `;
+    });
+
+    return `
+        <div class="list-group-item mb-3 shadow-sm border border-success border-2 rounded card-examen-arrastrable p-3 bg-white" 
+             draggable="false" 
+             data-ex-card-idx="${exIdx}"
+             data-paternidad-legal-card="true">
+            <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom flex-wrap gap-2 bg-success-subtle p-2 rounded">
+                <div class="d-flex align-items-center gap-2">
+                    <span class="badge bg-success text-white fs-6 px-2 py-1">
+                        <i class="bi bi-file-earmark-check-fill me-1"></i>PRUEBA DE PATERNIDAD LEGAL (FORMATO OFICIAL)
+                    </span>
+                    <span class="badge bg-primary text-white border fw-semibold">
+                        <i class="bi bi-patch-check-fill me-1"></i>Con Sello y Firma Pericial (C.B.P. 14529)
+                    </span>
+                </div>
+                <div class="d-flex gap-2">
+                    <button type="button" class="btn btn-sm btn-outline-danger fw-semibold bg-white shadow-sm" onclick="cargarPlantillaPaternidadLegalExclusion()">
+                        <i class="bi bi-x-circle me-1"></i>Plantilla Exclusión (0%)
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-success fw-semibold bg-white shadow-sm" onclick="cargarPlantillaPaternidadLegalInclusion()">
+                        <i class="bi bi-check-circle me-1"></i>Plantilla Inclusión (>99.999%)
+                    </button>
+                </div>
+            </div>
+
+            <!-- ENCABEZADO PERICIAL Y FECHAS -->
+            <div class="card mb-3 border bg-light">
+                <div class="card-header bg-white py-2 fw-bold text-dark border-bottom d-flex justify-content-between">
+                    <span><i class="bi bi-folder2-open me-1 text-success"></i>1. Identificación del Caso, Convenio y Fechas</span>
+                    <small class="text-muted">Aparece en la parte superior del informe</small>
+                </div>
+                <div class="card-body p-3">
+                    <div class="row g-2 mb-2">
+                        <div class="col-md-3">
+                            <label class="form-label small fw-bold mb-1">Código de caso:</label>
+                            <input type="text" class="form-control form-control-sm" id="pl-edit-codigoCaso" value="${escapeHTML(pData.codigoCaso)}" placeholder="ej. PAV-2610">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label small fw-bold mb-1">Convenio / Sede:</label>
+                            <input type="text" class="form-control form-control-sm" id="pl-edit-convenio" value="${escapeHTML(pData.convenio)}" placeholder="ej. CONVENIO - PIURA">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label small fw-bold mb-1">Fecha de atención:</label>
+                            <input type="text" class="form-control form-control-sm" id="pl-edit-fechaAtencion" value="${escapeHTML(pData.fechaAtencion)}" placeholder="DD/MM/AA">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label small fw-bold mb-1">Fecha de emisión:</label>
+                            <input type="text" class="form-control form-control-sm" id="pl-edit-fechaEmision" value="${escapeHTML(pData.fechaEmision)}" placeholder="DD/MM/AA">
+                        </div>
+                    </div>
+                    <div class="row g-2">
+                        <div class="col-md-4">
+                            <label class="form-label small fw-bold mb-1">Caso / Referencia Tabla:</label>
+                            <input type="text" class="form-control form-control-sm bg-white" id="pl-edit-casoTitulo" value="${escapeHTML(pData.casoTitulo || 'PAT-2610')}">
+                        </div>
+                        <div class="col-md-8">
+                            <label class="form-label small fw-bold mb-1">Texto de Tecnología / Plataforma (encima del cuadro):</label>
+                            <input type="text" class="form-control form-control-sm bg-white" id="pl-edit-tecnologia" value="${escapeHTML(pData.tecnologia)}">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PARTICIPANTES Y MUESTRAS (3 PARTES: MADRE, MENOR Y PRESUNTO PADRE) -->
+            <div class="card mb-3 border bg-light">
+                <div class="card-header bg-white py-2 fw-bold text-dark border-bottom">
+                    <i class="bi bi-people me-1 text-success"></i>2. Datos de los Participantes y Muestras (Madre, Menor y Presunto Padre)
+                </div>
+                <div class="card-body p-3">
+                    <div class="row g-3">
+                        <!-- MADRE BIOLÓGICA -->
+                        <div class="col-md-4 border-end">
+                            <h6 class="fw-bold text-secondary mb-2"><i class="bi bi-gender-female me-1"></i>MADRE BIOLÓGICA</h6>
+                            <div class="mb-2">
+                                <label class="form-label small mb-1">Nombre Completo de la Madre:</label>
+                                <input type="text" class="form-control form-control-sm fw-bold" id="pl-edit-madreNombre" value="${escapeHTML(pData.madreNombre)}" placeholder="ej. ESTRELLA LUCERO CASTRO ALFARO">
+                            </div>
+                            <div class="row g-2">
+                                <div class="col-6">
+                                    <label class="form-label small mb-1">Tipo de muestra:</label>
+                                    <input type="text" class="form-control form-control-sm" id="pl-edit-madreTipoMuestra" value="${escapeHTML(pData.madreTipoMuestra)}" placeholder="Bucal / Sangre">
+                                </div>
+                                <div class="col-6">
+                                    <label class="form-label small mb-1">Prueba N°:</label>
+                                    <input type="text" class="form-control form-control-sm" id="pl-edit-madrePruebaNro" value="${escapeHTML(pData.madrePruebaNro)}" placeholder="2610-10">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- MENOR -->
+                        <div class="col-md-4 border-end">
+                            <h6 class="fw-bold text-primary mb-2"><i class="bi bi-person me-1"></i>MENOR</h6>
+                            <div class="mb-2">
+                                <label class="form-label small mb-1">Nombre Completo del Menor:</label>
+                                <input type="text" class="form-control form-control-sm fw-bold" id="pl-edit-menorNombre" value="${escapeHTML(pData.menorNombre || orden.nombre)}" placeholder="ej. AITANA LUCERO">
+                            </div>
+                            <div class="mb-2">
+                                <label class="form-label small mb-1">CUI / DNI del Menor:</label>
+                                <input type="text" class="form-control form-control-sm" id="pl-edit-menorCui" value="${escapeHTML(pData.menorCui)}" placeholder="CUI:94778406">
+                            </div>
+                            <div class="row g-2">
+                                <div class="col-6">
+                                    <label class="form-label small mb-1">Tipo de muestra:</label>
+                                    <input type="text" class="form-control form-control-sm" id="pl-edit-menorTipoMuestra" value="${escapeHTML(pData.menorTipoMuestra)}" placeholder="Bucal / Sangre">
+                                </div>
+                                <div class="col-6">
+                                    <label class="form-label small mb-1">Prueba N°:</label>
+                                    <input type="text" class="form-control form-control-sm" id="pl-edit-menorPruebaNro" value="${escapeHTML(pData.menorPruebaNro)}" placeholder="2610-20">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- PRESUNTO PADRE -->
+                        <div class="col-md-4">
+                            <h6 class="fw-bold text-success mb-2"><i class="bi bi-person-badge me-1"></i>PRESUNTO PADRE</h6>
+                            <div class="mb-2">
+                                <label class="form-label small mb-1">Nombre Completo del Presunto Padre:</label>
+                                <input type="text" class="form-control form-control-sm fw-bold" id="pl-edit-padreNombre" value="${escapeHTML(pData.padreNombre)}" placeholder="ej. DIONEL GOMEZ PEÑA">
+                            </div>
+                            <div class="row g-2 mt-4">
+                                <div class="col-6">
+                                    <label class="form-label small mb-1">Tipo de muestra:</label>
+                                    <input type="text" class="form-control form-control-sm" id="pl-edit-padreTipoMuestra" value="${escapeHTML(pData.padreTipoMuestra)}" placeholder="Bucal / Sangre">
+                                </div>
+                                <div class="col-6">
+                                    <label class="form-label small mb-1">Prueba N°:</label>
+                                    <input type="text" class="form-control form-control-sm" id="pl-edit-padrePruebaNro" value="${escapeHTML(pData.padrePruebaNro)}" placeholder="2610-30">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CUADRO COMPARATIVO DE LOCI / IP / TAMAÑO DE ALELO -->
+            <div class="card mb-3 border">
+                <div class="card-header bg-dark text-white py-2 d-flex justify-content-between align-items-center">
+                    <span class="fw-bold"><i class="bi bi-table me-1"></i>3. Cuadro Comparativo de Marcadores STR (24 Loci con IP y Alelos)</span>
+                    <small class="opacity-75">Orden idéntico al PDF pericial de 4 columnas</small>
+                </div>
+                <div class="table-responsive p-0">
+                    <table class="table table-bordered table-sm align-middle mb-0" id="tabla-editor-loci-paternidad-legal">
+                        <thead class="table-light text-center" style="font-size: 0.8rem;">
+                            <tr>
+                                <th rowspan="2" class="align-middle" style="width: 14%;">Loci</th>
+                                <th rowspan="2" class="align-middle" style="width: 10%;">IP</th>
+                                <th colspan="2" class="border-bottom-0" style="width: 24%;">MADRE BIOLÓGICA</th>
+                                <th colspan="2" class="bg-primary-subtle text-primary border-bottom-0" style="width: 26%;">MENOR</th>
+                                <th colspan="2" class="bg-success-subtle text-success border-bottom-0" style="width: 26%;">PRESUNTO PADRE</th>
+                            </tr>
+                            <tr>
+                                <th class="py-1" style="font-size: 0.72rem;">Alelo 1</th>
+                                <th class="py-1" style="font-size: 0.72rem;">Alelo 2</th>
+                                <th class="bg-primary-subtle text-primary py-1" style="font-size: 0.72rem;">Alelo 1</th>
+                                <th class="bg-primary-subtle text-primary py-1" style="font-size: 0.72rem;">Alelo 2</th>
+                                <th class="bg-success-subtle text-success py-1" style="font-size: 0.72rem;">Alelo 1</th>
+                                <th class="bg-success-subtle text-success py-1" style="font-size: 0.72rem;">Alelo 2</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${filasLoci}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- INTERPRETACIÓN Y RESULTADOS GLOBALES -->
+            <div class="card mb-2 border bg-light">
+                <div class="card-header bg-white py-2 fw-bold text-dark border-bottom">
+                    <i class="bi bi-file-earmark-check me-1 text-success"></i>4. Interpretación y Resultados Globales Bioestadísticos
+                </div>
+                <div class="card-body p-3">
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold mb-1">Interpretación (Texto debajo del cuadro):</label>
+                        <textarea class="form-control form-control-sm" id="pl-edit-interpretacion" rows="3">${escapeHTML(pData.interpretacion)}</textarea>
+                    </div>
+
+                    <div class="row g-2 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold mb-1">ÍNDICE DE PATERNIDAD ACUMULATIVO (IPC):</label>
+                            <input type="text" class="form-control form-control-sm fw-bold font-monospace" id="pl-edit-ipcAcumulado" value="${escapeHTML(pData.ipcAcumulado)}">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold mb-1">PROBABILIDAD DE PATERNIDAD ACUMULATIVA (%):</label>
+                            <input type="text" class="form-control form-control-sm fw-bold font-monospace text-success" id="pl-edit-probabilidadAcumulada" value="${escapeHTML(pData.probabilidadAcumulada)}">
+                        </div>
+                    </div>
+
+                    <div class="row g-2 mb-3">
+                        <div class="col-12">
+                            <label class="form-label small fw-bold mb-1">Nota de procedencia de muestra:</label>
+                            <input type="text" class="form-control form-control-sm" id="pl-edit-notaLaboratorio" value="${escapeHTML(pData.notaLaboratorio)}">
+                        </div>
+                    </div>
+
+                    <!-- VISTA PREVIA DE LOS CUADROS DE FIRMAS Y SELLOS LEGALES -->
+                    <div class="card border">
+                        <div class="card-header bg-white py-1 px-2 border-bottom small fw-bold text-secondary">
+                            <i class="bi bi-shield-check me-1 text-success"></i>Diseño Oficial del Pie Legal (Resultados Globales + Toma de Muestra + Análisis con Sello y Firma):
+                        </div>
+                        <div class="card-body p-2 bg-white">
+                            <div class="row g-2 align-items-center">
+                                <div class="col-md-4 border-end text-center p-2">
+                                    <span class="badge bg-light text-dark border d-block py-1 mb-1">PERSONAL A CARGO DE LA TOMA</span>
+                                    <small class="text-muted d-block" style="font-size: 11px;">Recuadro reglamentario para firma física y sello del personal de toma de muestra.</small>
+                                </div>
+                                <div class="col-md-8 text-center p-2">
+                                    <span class="badge bg-light text-dark border d-block py-1 mb-1">PERSONAL A CARGO DEL ANALISIS DE LA MUESTRA</span>
+                                    <img src="sello-firma-biologo-legal.png" alt="Sello y Firma del Biólogo Genetista" style="max-height: 60px; object-fit: contain; margin-top: 4px;" onerror="this.src='./sello-firma-biologo-legal.png'">
+                                    <div class="small fw-semibold text-dark mt-1">Christian Emilio Cancho Ccaico — Biólogo genetista C.B.P. 14529</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+function generarBloquePaternidadLegalOficialHTML(ex, orden) {
+    const guardado = (orden.resultados || []).find(r => r.codigo === ex.codigo);
+    const pData = extraerDatosPaternidadLegalDeOrden(orden, guardado);
+
+    const cabeceraHabitual = construirCabeceraInformeHTML();
+    const pieHabitual = construirPieInformeHTML();
+
+    const codigoCaso = escapeHTML(pData.codigoCaso || orden.nroOrden || 'PAV-2610');
+    const convenio = escapeHTML(pData.convenio || 'CONVENIO - PIURA');
+    const fechaAtencion = escapeHTML(pData.fechaAtencion || (orden.fechaHora ? String(orden.fechaHora).split(',')[0].trim() : '13/10/26'));
+    const fechaEmision = escapeHTML(pData.fechaEmision || new Date().toLocaleDateString('es-PE', { day: '2-digit', month: '2-digit', year: '2-digit' }));
+    const tecnologia = escapeHTML(pData.tecnologia || 'Análisis realizado con el Spectrum Compact CE System / VersaPlex™ 27PY System / GeneMarker®HID Software');
+    const casoTitulo = escapeHTML(pData.casoTitulo || 'PAT-2610');
+    
+    const madreNombre = escapeHTML(pData.madreNombre || 'ESTRELLA LUCERO CASTRO ALFARO');
+    const madreMuestra = escapeHTML(pData.madreTipoMuestra || 'Bucal / Sangre');
+    const madrePrueba = escapeHTML(pData.madrePruebaNro || '2610-10');
+
+    const menorNombre = escapeHTML(pData.menorNombre || orden.nombre || 'AITANA LUCERO');
+    const menorCui = escapeHTML(pData.menorCui || 'CUI:94778406');
+    const menorMuestra = escapeHTML(pData.menorTipoMuestra || 'Bucal / Sangre');
+    const menorPrueba = escapeHTML(pData.menorPruebaNro || '2610-20');
+
+    const padreNombre = escapeHTML(pData.padreNombre || 'DIONEL GOMEZ PEÑA');
+    const padreMuestra = escapeHTML(pData.padreTipoMuestra || 'Bucal / Sangre');
+    const padrePrueba = escapeHTML(pData.padrePruebaNro || '2610-30');
+
+    const interpretacion = escapeHTML(pData.interpretacion || '');
+    const ipc = escapeHTML(pData.ipcAcumulado || '0');
+    const prob = escapeHTML(pData.probabilidadAcumulada || '0%');
+    const notaLab = escapeHTML(pData.notaLaboratorio || 'Basado en las muestras recibidas de labotatorio VITAL HEALTH el cual provee los nombres de las partes probadas que aparecen en este reporte.');
+
+    let filasLociHTML = '';
+    (pData.loci || LOCI_PATERNIDAD_LEGAL_DEFECTO).forEach(l => {
+        const locusNom = escapeHTML(l.locus);
+        const ipVal = escapeHTML(l.ip ?? '');
+        const m1Val = escapeHTML(l.m1 ?? '');
+        const m2Val = escapeHTML(l.m2 ?? '');
+        const hijo1Val = escapeHTML(l.hijo1 ?? '');
+        const hijo2Val = escapeHTML(l.hijo2 ?? '');
+        const p1Val = escapeHTML(l.p1 ?? '');
+        const p2Val = escapeHTML(l.p2 ?? '');
+
+        filasLociHTML += `
+            <tr style="height: 18px; border-bottom: 0.5px solid #000000;">
+                <td style="font-weight: 700; text-align: left; padding: 1px 4px; font-size: 9.2px;">${locusNom}</td>
+                <td style="font-weight: 700; text-align: center; padding: 1px 2px; font-size: 9.2px; border-right: 1.5px solid #000000;">${ipVal}</td>
+                <td style="text-align: center; padding: 1px 2px; font-size: 9.2px; width: 13%;">${m1Val}</td>
+                <td style="text-align: center; padding: 1px 2px; font-size: 9.2px; width: 13%; border-right: 1.5px solid #000000;">${m2Val}</td>
+                <td style="text-align: center; padding: 1px 2px; font-size: 9.2px; width: 13%;">${hijo1Val}</td>
+                <td style="text-align: center; padding: 1px 2px; font-size: 9.2px; width: 13%; border-right: 1.5px solid #000000;">${hijo2Val}</td>
+                <td style="text-align: center; padding: 1px 2px; font-size: 9.2px; width: 13%;">${p1Val}</td>
+                <td style="text-align: center; padding: 1px 2px; font-size: 9.2px; width: 13%;">${p2Val}</td>
+            </tr>
+        `;
+    });
+
+    return `
+        <div class="adn-paternidad-contenedor adn-paternidad-legal-contenedor" style="font-family: Arial, Helvetica, sans-serif; color: #000000; width: 100%; box-sizing: border-box; margin: 0 auto; line-height: 1.25; display: flex; flex-direction: column; justify-content: space-between; min-height: 275mm; page-break-inside: avoid; break-inside: avoid;">
+            <div style="flex: 0 0 auto;">
+                <!-- ENCABEZADO HABITUAL CON LOGO Y CÓDIGO QR -->
+                ${cabeceraHabitual}
+            </div>
+
+            <div style="flex: 1 1 auto;">
+                <!-- TÍTULO OFICIAL LEGAL -->
+                <div style="text-align: center; margin: 3px 0 2px 0;">
+                    <div style="font-size: 15.5px; font-weight: 900; letter-spacing: 0.8px; color: #000000; text-transform: uppercase;">PRUEBA DE PATERNIDAD LEGAL</div>
+                </div>
+
+                <!-- CUADRO DE DATOS DE CASO CON CONVENIO -->
+                <div style="background-color: #e2f0d9; border: 1px solid #b7d7a8; padding: 4px 10px; margin-bottom: 4px; font-size: 10.5px; line-height: 1.35; display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <div style="display: flex; margin-bottom: 1px;">
+                            <span style="width: 140px; font-weight: 700; color: #1f3864;">Código de caso</span>
+                            <span style="font-weight: 700; color: #000000;">${codigoCaso}</span>
+                        </div>
+                        <div style="display: flex; margin-bottom: 1px;">
+                            <span style="width: 140px; font-weight: 700; color: #1f3864;">Fecha de atención</span>
+                            <span style="font-weight: 700; color: #000000;">${fechaAtencion}</span>
+                        </div>
+                        <div style="display: flex;">
+                            <span style="width: 140px; font-weight: 700; color: #1f3864;">Fecha de emisión</span>
+                            <span style="font-weight: 700; color: #000000;">${fechaEmision}</span>
+                        </div>
+                    </div>
+                    <div style="text-align: right;">
+                        <div style="font-weight: 800; font-size: 11px; color: #000000; letter-spacing: 0.5px;">${convenio}</div>
+                        <div style="font-size: 10px; font-weight: 700; color: #334155; margin-top: 3px;">Página 1 / 1</div>
+                    </div>
+                </div>
+
+                <!-- SUBTÍTULO TECNOLOGÍA EXACTA -->
+                <div style="text-align: center; font-size: 7.8px; font-weight: 700; color: #000000; margin-bottom: 3px; letter-spacing: 0.2px;">
+                    ${tecnologia}
+                </div>
+
+                <!-- CUADRO COMPARATIVO COMPLETO LEGAL (IDENTICO AL PDF DE 4 COLUMNAS) -->
+                <table class="adn-tabla-comparativa-legal" style="width: 100%; border-collapse: collapse; border: 1.5px solid #000000; font-size: 9.5px; margin-bottom: 4px;">
+                    <thead>
+                        <!-- FILA 1: CASO Y NOMBRES -->
+                        <tr style="border-bottom: 1.5px solid #000000;">
+                            <th colspan="2" style="border-right: 1.5px solid #000000; text-align: left; padding: 2px 4px; width: 22%; background: #ffffff;">
+                                <span style="font-weight: 700; font-size: 9.5px;">Caso: ${casoTitulo}</span><br>
+                                <span style="font-weight: 700; font-size: 9.5px;">Nombre</span>
+                            </th>
+                            <th colspan="2" style="border-right: 1.5px solid #000000; text-align: center; padding: 2px 4px; width: 26%; background: #ffffff;">
+                                <span style="font-weight: 800; font-size: 9px; text-transform: uppercase;">MADRE BIOLÓGICA</span><br>
+                                <span style="font-weight: 800; font-size: 9.5px; text-transform: uppercase;">${madreNombre}</span>
+                            </th>
+                            <th colspan="2" style="border-right: 1.5px solid #000000; text-align: center; padding: 2px 4px; width: 26%; background: #ffffff;">
+                                <span style="font-weight: 800; font-size: 9px; text-transform: uppercase;">MENOR</span><br>
+                                <span style="font-weight: 800; font-size: 9.5px; text-transform: uppercase;">${menorNombre}</span>
+                                ${menorCui ? `<br><span style="font-weight: 700; font-size: 8.5px;">${menorCui}</span>` : ''}
+                            </th>
+                            <th colspan="2" style="text-align: center; padding: 2px 4px; width: 26%; background: #ffffff;">
+                                <span style="font-weight: 800; font-size: 9px; text-transform: uppercase;">PRESUNTO PADRE</span><br>
+                                <span style="font-weight: 800; font-size: 9.5px; text-transform: uppercase;">${padreNombre}</span>
+                            </th>
+                        </tr>
+                        <!-- FILA 2: TIPO DE MUESTRAS -->
+                        <tr style="border-bottom: 1px solid #000000;">
+                            <th colspan="2" style="border-right: 1.5px solid #000000; text-align: left; padding: 1.5px 4px; font-weight: 700; background: #ffffff;">
+                                Tipo de muestras
+                            </th>
+                            <th colspan="2" style="border-right: 1.5px solid #000000; text-align: center; padding: 1.5px 4px; font-weight: normal; background: #ffffff;">
+                                ${madreMuestra}
+                            </th>
+                            <th colspan="2" style="border-right: 1.5px solid #000000; text-align: center; padding: 1.5px 4px; font-weight: normal; background: #ffffff;">
+                                ${menorMuestra}
+                            </th>
+                            <th colspan="2" style="text-align: center; padding: 1.5px 4px; font-weight: normal; background: #ffffff;">
+                                ${padreMuestra}
+                            </th>
+                        </tr>
+                        <!-- FILA 3: PRUEBA N° -->
+                        <tr style="border-bottom: 1.5px solid #000000;">
+                            <th colspan="2" style="border-right: 1.5px solid #000000; text-align: left; padding: 1.5px 4px; font-weight: 700; background: #ffffff;">
+                                Prueba N°
+                            </th>
+                            <th colspan="2" style="border-right: 1.5px solid #000000; text-align: center; padding: 1.5px 4px; font-weight: 700; background: #ffffff;">
+                                ${madrePrueba}
+                            </th>
+                            <th colspan="2" style="border-right: 1.5px solid #000000; text-align: center; padding: 1.5px 4px; font-weight: 700; background: #ffffff;">
+                                ${menorPrueba}
+                            </th>
+                            <th colspan="2" style="text-align: center; padding: 1.5px 4px; font-weight: 700; background: #ffffff;">
+                                ${padrePrueba}
+                            </th>
+                        </tr>
+                        <!-- FILA 4: CABECERA TAMAÑO DE ALELO -->
+                        <tr style="border-bottom: 1.5px solid #000000; background-color: #ffffff;">
+                            <th style="width: 14%; padding: 2px 3px; text-align: left; font-weight: 700; font-size: 9.5px;">Loci</th>
+                            <th style="border-right: 1.5px solid #000000; width: 8%; padding: 2px 2px; text-align: center; font-weight: 700; font-size: 9.5px;">IP</th>
+                            <th colspan="2" style="border-right: 1.5px solid #000000; width: 26%; padding: 2px 3px; text-align: center; font-weight: 700; font-size: 9px;">Tamaño de Alelo</th>
+                            <th colspan="2" style="border-right: 1.5px solid #000000; width: 26%; padding: 2px 3px; text-align: center; font-weight: 700; font-size: 9px;">Tamaño de Alelo</th>
+                            <th colspan="2" style="width: 26%; padding: 2px 3px; text-align: center; font-weight: 700; font-size: 9px;">Tamaño de Alelo</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${filasLociHTML}
+                    </tbody>
+                </table>
+
+                <!-- CUADRO DE INTERPRETACIÓN PERICIAL -->
+                <div style="border: 1.5px solid #000000; padding: 4px 6px; margin-bottom: 4px; font-size: 9.2px; line-height: 1.35; background: #ffffff;">
+                    <div style="font-weight: 700; margin-bottom: 1px;">Interpretación:</div>
+                    <div style="text-align: justify; color: #000000;">
+                        ${interpretacion}
+                    </div>
+                </div>
+
+                <!-- CUADRO DE RESULTADOS GLOBALES Y FIRMAS LEGALES (SELLO Y FIRMA DE CHRISTIAN CANCHO) -->
+                <div style="border: 1.5px solid #000000; margin-bottom: 3px; display: flex; background: #ffffff;">
+                    <!-- COLUMNA IZQUIERDA: RESULTADOS GLOBALES -->
+                    <div style="flex: 1 1 48%; border-right: 1.5px solid #000000; padding: 4px 8px; display: flex; flex-direction: column; justify-content: space-between;">
+                        <div>
+                            <div style="text-align: center; font-weight: 800; font-size: 11.5px; margin-bottom: 3px; letter-spacing: 0.5px;">
+                                RESULTADOS GLOBALES
+                            </div>
+                            <div style="font-size: 9.5px; margin-bottom: 2px;">
+                                <span style="font-weight: 700;">ÍNDICE DE PATERNIDAD ACUMULATIVO:</span> 
+                                <span style="font-weight: 800; font-size: 13.5px;">${ipc}</span>
+                            </div>
+                            <div style="font-size: 9.5px; margin-bottom: 4px;">
+                                <span style="font-weight: 700;">PROBABILIDAD DE PATERNIDAD ACUMULATIVA:</span> 
+                                <span style="font-weight: 800; font-size: 13.5px;">${prob}</span>
+                            </div>
+                        </div>
+                        <div style="font-size: 8px; color: #222222; line-height: 1.25; margin-top: 2px;">
+                            ${notaLab}
+                        </div>
+                    </div>
+
+                    <!-- COLUMNA DERECHA: DOS CUADROS (TOMA DE MUESTRA Y ANALISIS CON SELLO/FIRMA) -->
+                    <div style="flex: 1 1 52%; display: flex;">
+                        <!-- CUADRO 1: TOMA DE MUESTRA -->
+                        <div style="flex: 1 1 50%; border-right: 1.5px solid #000000; display: flex; flex-direction: column;">
+                            <div style="font-weight: 800; font-size: 7.2px; text-align: center; padding: 2px 2px; border-bottom: 1.5px solid #000000; line-height: 1.15; background: #ffffff;">
+                                PERSONAL A CARGO DE LA TOMA<br>DE LA MUESTRA
+                            </div>
+                            <div style="flex: 1 1 auto; min-height: 75px; background: #ffffff;">
+                                <!-- Espacio libre para firma/sello de toma -->
+                            </div>
+                        </div>
+
+                        <!-- CUADRO 2: ANALISIS DE LA MUESTRA CON SELLO Y FIRMA DE CHRISTIAN CANCHO -->
+                        <div style="flex: 1 1 50%; display: flex; flex-direction: column;">
+                            <div style="font-weight: 800; font-size: 7.2px; text-align: center; padding: 2px 2px; border-bottom: 1.5px solid #000000; line-height: 1.15; background: #ffffff;">
+                                PERSONAL A CARGO DEL ANALISIS DE<br>LA MUESTRA
+                            </div>
+                            <div style="flex: 1 1 auto; min-height: 75px; display: flex; align-items: center; justify-content: center; padding: 2px;">
+                                <img src="sello-firma-biologo-legal.png" alt="Sello y Firma del Biólogo Genetista" style="max-height: 70px; max-width: 98%; object-fit: contain; display: block;" onerror="this.src='./sello-firma-biologo-legal.png'">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SEDES Y PIE DE PÁGINA HABITUAL DE VITAL HEALTH -->
+            <div style="flex: 0 0 auto; margin-top: auto;">
+                <div style="display: flex; justify-content: space-between; font-size: 7.5px; color: #94a3b8; padding: 1px 4px; margin-bottom: 1px;">
+                    <span>Santiago de Surco (Sede Central, Lima)</span>
+                    <span>Los Olivos (Sede Lima Norte)</span>
+                    <span>Yanahuara, Arequipa</span>
+                    <span>Piura, Piura</span>
+                </div>
+                ${pieHabitual}
+            </div>
+        </div>
+    `;
+}
+
 
 function debeOcultarFirma(orden) {
     if (!orden) return false;
@@ -2275,8 +2876,16 @@ function abrirResultados(nroOrden) {
         const itemCatalogo = (typeof examenesCatalogo !== 'undefined' ? examenesCatalogo : []).find(c => c.codigo === ex.codigo);
         const nombreLimpioExamen = itemCatalogo && itemCatalogo.nombre ? itemCatalogo.nombre : ex.nombre;
 
-        // Si es la prueba de paternidad, renderizar el editor pericial completo
-        if (esExamenPaternidad(ex) || esExamenPaternidad(itemCatalogo)) {
+        // Si es la prueba de paternidad legal o informativa, renderizar su respectivo editor pericial
+        const esPatLegal = esExamenPaternidadLegal(ex) || esExamenPaternidadLegal(itemCatalogo);
+        const esPatGeneral = esExamenPaternidad(ex) || esExamenPaternidad(itemCatalogo);
+
+        if (esPatLegal) {
+            html += generarEditorFormularioPaternidadLegal(ex, exIdx, orden, guardado);
+            return;
+        }
+
+        if (esPatGeneral) {
             html += generarEditorFormularioPaternidad(ex, exIdx, orden, guardado);
             return;
         }
@@ -2513,7 +3122,8 @@ function guardarResultados(nroOrden, silencioso = false) {
 
     const grupos = editor.querySelectorAll("[data-ex]");
     const cardPaternidad = editor.querySelector("[data-paternidad-card='true']");
-    if (!grupos.length && !cardPaternidad) return false;
+    const cardPaternidadLegal = editor.querySelector("[data-paternidad-legal-card='true']");
+    if (!grupos.length && !cardPaternidad && !cardPaternidadLegal) return false;
 
     const porExamen = {};
     grupos.forEach(fila => {
@@ -2541,7 +3151,59 @@ function guardarResultados(nroOrden, silencioso = false) {
         });
     });
 
-    // Si la orden incluye la prueba de paternidad y se editó con el formulario especializado
+    // Si la orden incluye la prueba de paternidad legal
+    let datosPaternidadLegalGuardar = null;
+    if (cardPaternidadLegal) {
+        const valPL = id => {
+            const el = document.getElementById(id);
+            return el ? el.value.trim() : "";
+        };
+
+        const lociLegalExtraidos = [];
+        const filasLL = cardPaternidadLegal.querySelectorAll("[data-pl-locus-row]");
+        filasLL.forEach(fl => {
+            const getVal = c => {
+                const el = fl.querySelector(`[data-pl-campo="${c}"]`);
+                return el ? el.value.trim() : "";
+            };
+            lociLegalExtraidos.push({
+                locus: getVal("locus"),
+                ip: getVal("ip"),
+                m1: getVal("m1"),
+                m2: getVal("m2"),
+                hijo1: getVal("hijo1"),
+                hijo2: getVal("hijo2"),
+                p1: getVal("p1"),
+                p2: getVal("p2")
+            });
+        });
+
+        datosPaternidadLegalGuardar = {
+            codigoCaso: valPL("pl-edit-codigoCaso"),
+            convenio: valPL("pl-edit-convenio"),
+            fechaAtencion: valPL("pl-edit-fechaAtencion"),
+            fechaEmision: valPL("pl-edit-fechaEmision"),
+            tecnologia: valPL("pl-edit-tecnologia"),
+            casoTitulo: valPL("pl-edit-casoTitulo") || valPL("pl-edit-codigoCaso") || "PAT-2610",
+            madreNombre: valPL("pl-edit-madreNombre"),
+            madreTipoMuestra: valPL("pl-edit-madreTipoMuestra"),
+            madrePruebaNro: valPL("pl-edit-madrePruebaNro"),
+            menorNombre: valPL("pl-edit-menorNombre"),
+            menorCui: valPL("pl-edit-menorCui"),
+            menorTipoMuestra: valPL("pl-edit-menorTipoMuestra"),
+            menorPruebaNro: valPL("pl-edit-menorPruebaNro"),
+            padreNombre: valPL("pl-edit-padreNombre"),
+            padreTipoMuestra: valPL("pl-edit-padreTipoMuestra"),
+            padrePruebaNro: valPL("pl-edit-padrePruebaNro"),
+            interpretacion: valPL("pl-edit-interpretacion"),
+            ipcAcumulado: valPL("pl-edit-ipcAcumulado"),
+            probabilidadAcumulada: valPL("pl-edit-probabilidadAcumulada"),
+            notaLaboratorio: valPL("pl-edit-notaLaboratorio"),
+            loci: lociLegalExtraidos
+        };
+    }
+
+    // Si la orden incluye la prueba de paternidad informativa
     let datosPaternidadGuardar = null;
     if (cardPaternidad) {
         const valP = id => {
@@ -2590,7 +3252,45 @@ function guardarResultados(nroOrden, silencioso = false) {
 
     orden.resultados = (orden.examenes || []).map((base, exIdx) => {
         const catalogo = examenesCatalogo.find(c => c.codigo === base.codigo);
+        const esPatLegal = esExamenPaternidadLegal(base) || esExamenPaternidadLegal(catalogo);
         const esPat = esExamenPaternidad(base) || esExamenPaternidad(catalogo);
+
+        if (esPatLegal && datosPaternidadLegalGuardar) {
+            const indPaternidadLegal = [
+                { nombre: "Datos del Caso y Participantes", esSeccion: true },
+                { id: 'codigo_caso', nombre: 'Código de caso', resultado: datosPaternidadLegalGuardar.codigoCaso, referencia: datosPaternidadLegalGuardar.convenio },
+                { id: 'fecha_atencion', nombre: 'Fecha de atención', resultado: datosPaternidadLegalGuardar.fechaAtencion, referencia: 'Fecha de atención' },
+                { id: 'fecha_emision', nombre: 'Fecha de emisión', resultado: datosPaternidadLegalGuardar.fechaEmision, referencia: 'Fecha de emisión' },
+                { id: 'madre_nombre', nombre: 'Nombre MADRE BIOLÓGICA', resultado: datosPaternidadLegalGuardar.madreNombre, referencia: `Prueba: ${datosPaternidadLegalGuardar.madrePruebaNro}` },
+                { id: 'menor_nombre', nombre: 'Nombre MENOR', resultado: datosPaternidadLegalGuardar.menorNombre, referencia: `Prueba: ${datosPaternidadLegalGuardar.menorPruebaNro}` },
+                { id: 'padre_nombre', nombre: 'Nombre PRESUNTO PADRE', resultado: datosPaternidadLegalGuardar.padreNombre, referencia: `Prueba: ${datosPaternidadLegalGuardar.padrePruebaNro}` },
+                { nombre: "Cuadro Comparativo de Marcadores STR", esSeccion: true }
+            ];
+
+            datosPaternidadLegalGuardar.loci.forEach(l => {
+                const alelosMadre = [l.m1, l.m2].filter(Boolean).join(', ');
+                const alelosHijo = [l.hijo1, l.hijo2].filter(Boolean).join(', ');
+                const alelosPadre = [l.p1, l.p2].filter(Boolean).join(', ');
+                indPaternidadLegal.push({
+                    nombre: l.locus,
+                    resultado: `IP: ${l.ip || '0.00'} | Madre: [${alelosMadre}] | Menor: [${alelosHijo}] | Padre: [${alelosPadre}]`,
+                    referencia: 'Locus STR'
+                });
+            });
+
+            indPaternidadLegal.push({ nombre: "Evaluación Bioestadística", esSeccion: true });
+            indPaternidadLegal.push({ nombre: 'ÍNDICE DE PATERNIDAD ACUMULATIVO', resultado: datosPaternidadLegalGuardar.ipcAcumulado, referencia: '-' });
+            indPaternidadLegal.push({ nombre: 'PROBABILIDAD DE PATERNIDAD ACUMULATIVA', resultado: datosPaternidadLegalGuardar.probabilidadAcumulada, referencia: '-' });
+            indPaternidadLegal.push({ nombre: 'Interpretación Clínica', resultado: datosPaternidadLegalGuardar.interpretacion, referencia: '-' });
+
+            return {
+                codigo: base.codigo,
+                nombre: base.nombre,
+                metodo: "Spectrum Compact CE System / VersaPlex™ 27PY System / GeneMarker®HID Software",
+                datosPaternidadLegal: datosPaternidadLegalGuardar,
+                indicadores: indPaternidadLegal
+            };
+        }
 
         if (esPat && datosPaternidadGuardar) {
             // Formatear indicadores sintéticos para compatibilidad universal
@@ -2742,6 +3442,7 @@ function obtenerPlantillaIndicadores(nombreExamen, codigoExamen = null) {
         { test: n => n.includes("TSH") || n.includes("TIROIDES ULTRASENSIBLE") || n.includes("TIROTROPINA"), key: "TSH ULTRASENSIBLE" },
         { test: n => n.includes("PROTEINA C REACTIVA") || n === "PCR" || n.startsWith("PCR ") || n.includes("PCR CUANTITATIV"), key: "PROTEINA C REACTIVA" },
         { test: n => n.includes("SEDIMENTACION") || n.includes("VSG"), key: "VELOCIDAD DE SEDIMENTACION GLOBULAR" },
+        { test: n => n.includes("LEGAL") && (n.includes("PATERNIDAD") || n.includes("ADN") || n.includes("FILIACION")), key: "PRUEBA DE PATERNIDAD LEGAL" },
         { test: n => n.includes("PATERNIDAD") || n.includes("ADN") || n.includes("FILIACION"), key: "PRUEBA DE PATERNIDAD INFORMATIVA" }
     ];
 
@@ -5326,7 +6027,12 @@ function generarBloqueExamenHTML(ex, orden) {
     const itemCatalogo = (typeof examenesCatalogo !== 'undefined' ? examenesCatalogo : []).find(c => c.codigo === ex.codigo);
     const nombreLimpioExamen = itemCatalogo && itemCatalogo.nombre ? itemCatalogo.nombre : ex.nombre;
 
-    // Si es examen de paternidad, bifurcar inmediatamente al formato especializado oficial
+    // Si es examen de paternidad legal, bifurcar al formato pericial legal
+    if (esExamenPaternidadLegal(ex) || esExamenPaternidadLegal(itemCatalogo)) {
+        return generarBloquePaternidadLegalOficialHTML(ex, orden);
+    }
+
+    // Si es examen de paternidad informativa, bifurcar al formato informativo oficial
     if (esExamenPaternidad(ex) || esExamenPaternidad(itemCatalogo)) {
         return generarBloquePaternidadOficialHTML(ex, orden);
     }
@@ -5575,7 +6281,7 @@ function imprimirInforme(nroOrden) {
 let imagenesInformeCacheadas = false;
 async function precargarImagenesInforme() {
     if (imagenesInformeCacheadas) return;
-    const fuentes = [obtenerLogoSrc(), "qr-redes.png", "firma-biologa.png"];
+    const fuentes = [obtenerLogoSrc(), "qr-redes.png", "firma-biologa.png", "sello-firma-biologo-legal.png"];
     await Promise.all(fuentes.map(src => new Promise(resolver => {
         const img = new Image();
         img.onload = img.onerror = resolver;
