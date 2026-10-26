@@ -3217,7 +3217,6 @@ function guardarResultados(nroOrden, silencioso = false) {
 
         datosPaternidadGuardar = {
             codigoCaso: valP("p-edit-codigoCaso"),
-            convenio: valP("p-edit-convenio"),
             fechaAtencion: valP("p-edit-fechaAtencion"),
             fechaEmision: valP("p-edit-fechaEmision"),
             tecnologia: valP("p-edit-tecnologia"),
