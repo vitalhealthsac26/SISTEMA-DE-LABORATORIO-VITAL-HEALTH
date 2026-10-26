@@ -281,7 +281,7 @@ body { background-color: var(--bg-light); font-family: 'Segoe UI', Tahoma, Genev
     border: 1.5px solid #000000;
     padding: 6px 8px;
     margin-bottom: 6px;
-    font-size: 9.5px;
+    font-size: 13px;
     line-height: 1.35;
     background: #ffffff;
 }
@@ -397,7 +397,7 @@ body { background-color: var(--bg-light); font-family: 'Segoe UI', Tahoma, Genev
     font-weight: 700;
     color: #0f172a;
     padding: 4px 6px;
-    font-size: 10.5px;
+    font-size: 12px;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
 }
