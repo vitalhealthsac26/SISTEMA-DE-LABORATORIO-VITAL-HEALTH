@@ -1953,7 +1953,6 @@ const LOCI_PATERNIDAD_LEGAL_DEFECTO = [
 function extraerDatosPaternidadLegalDeOrden(orden, guardado) {
     const d = {
         codigoCaso: 'PAV-2610',
-        convenio: 'CONVENIO - PIURA',
         fechaAtencion: '13/10/26',
         fechaEmision: '26/10/26',
         tecnologia: 'Análisis realizado con el Spectrum Compact CE System / VersaPlex™ 27PY System / GeneMarker®HID Software',
@@ -1988,7 +1987,6 @@ function extraerDatosPaternidadLegalDeOrden(orden, guardado) {
         guardado.indicadores.forEach(ind => {
             const nom = String(ind.nombre || '').toUpperCase();
             if (nom.includes('CODIGO DE CASO') && ind.resultado) d.codigoCaso = ind.resultado;
-            if (nom.includes('CONVENIO') && ind.resultado) d.convenio = ind.resultado;
             if (nom.includes('FECHA DE ATENCION') && ind.resultado) d.fechaAtencion = ind.resultado;
             if (nom.includes('FECHA DE EMISION') && ind.resultado) d.fechaEmision = ind.resultado;
             if (nom.includes('NOMBRE MADRE') && ind.resultado) d.madreNombre = ind.resultado;
