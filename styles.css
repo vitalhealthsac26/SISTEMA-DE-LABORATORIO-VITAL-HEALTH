@@ -319,8 +319,8 @@ body { background-color: var(--bg-light); font-family: 'Segoe UI', Tahoma, Genev
     color: #000000 !important;
     width: 100%;
     margin: 0 auto;
-    font-size: 15.5px !important;
-    line-height: 1.4 !important;
+    font-size: 13.5px !important;
+    line-height: 1.3 !important;
 }
 
 .adn-tabla-comparativa-legal {
@@ -328,7 +328,7 @@ body { background-color: var(--bg-light); font-family: 'Segoe UI', Tahoma, Genev
     border-collapse: collapse;
     border: 2px solid #000000;
     margin-bottom: 6px;
-    font-size: 16px !important; /* ⬅️ ¡Números y letras de los alelos grandes! */
+    font-size: 13px !important; /* ⬅️ ¡Números y letras de los alelos grandes! */
 }
 
 .adn-tabla-comparativa-legal th,
@@ -338,12 +338,12 @@ body { background-color: var(--bg-light); font-family: 'Segoe UI', Tahoma, Genev
     padding: 3.5px 4px !important;
     text-align: center;
     vertical-align: middle;
-    font-size: 16px !important; /* ⬅️ Forzado para que cada celda sea grande */
+    font-size: 13px !important; /* ⬅️ Forzado para que cada celda sea grande */
 }
 
 .adn-tabla-comparativa-legal thead th {
     border-bottom: 2px solid #000000;
-    font-size: 15px !important; /* ⬅️ Encabezados de la tabla más grandes */
+    font-size: 13px !important; /* ⬅️ Encabezados de la tabla más grandes */
 }
 
 /* Separadores verticales exactos del cuadro legal */
@@ -353,7 +353,7 @@ body { background-color: var(--bg-light); font-family: 'Segoe UI', Tahoma, Genev
 
 /* Bloque individual de cada examen */
 .examen-bloque {
-    margin-bottom: 12px;
+    margin-bottom: 10px;
     page-break-inside: avoid !important;
     break-inside: avoid !important;
 }
@@ -361,7 +361,7 @@ body { background-color: var(--bg-light); font-family: 'Segoe UI', Tahoma, Genev
 .examen-bloque h3 {
     background-color: #f1f5f9;
     padding: 6px 10px;
-    font-size: 18px;
+    font-size: 15px;
     color: #1e293b;
     border-left: 4px solid #2563eb;
     margin-bottom: 6px;
@@ -371,7 +371,7 @@ body { background-color: var(--bg-light); font-family: 'Segoe UI', Tahoma, Genev
 /* ⬅️ INTERPRETACIÓN GRANDE Y CLARA */
 .informe-nota, 
 .adn-bloque-interpretacion-legal { 
-    font-size: 15px !important; /* ⬅️ Texto de interpretación bien legible */
+    font-size: 13px !important; /* ⬅️ Texto de interpretación bien legible */
     line-height: 1.45 !important;
     font-style: normal; 
     color: #000000; 
@@ -393,7 +393,7 @@ body { background-color: var(--bg-light); font-family: 'Segoe UI', Tahoma, Genev
     flex: 1 1 58%;
     border-right: 2px solid #000000;
     padding: 8px 10px;
-    font-size: 15px !important; /* ⬅️ Índice y Probabilidad de Paternidad Acumulativa grandes */
+    font-size: 13px !important; /* ⬅️ Índice y Probabilidad de Paternidad Acumulativa grandes */
 }
 
 .adn-globales-col-der-legal {
