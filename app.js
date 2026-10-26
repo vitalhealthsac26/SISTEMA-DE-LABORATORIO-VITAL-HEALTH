@@ -248,6 +248,60 @@ const BASE_VALORES_REFERENCIALES = {
   { id: 'igm', nombre: 'Banda IgM', valor: '', unidad: 'S/U', referencia: 'No Reactivo' }
 ],
 
+"PRUEBA DE PATERNIDAD LEGAL": [
+  // --- IDENTIFICACIÓN DEL CASO Y MUESTRAS ---
+  { nombre: "Datos del Caso y Participantes", esSeccion: true },
+  { id: 'codigo_caso', nombre: 'Código de caso', valor: 'PAV-2610', unidad: '', referencia: 'CONVENIO - PIURA', metodo: '-' },
+  { id: 'fecha_atencion', nombre: 'Fecha de atención', valor: '13/10/26', unidad: '', referencia: 'Fecha de toma', metodo: '-' },
+  { id: 'fecha_emision', nombre: 'Fecha de emisión', valor: '26/10/26', unidad: '', referencia: 'Fecha de informe', metodo: '-' },
+  { id: 'tecnologia', nombre: 'Metodología / Plataforma', valor: 'Análisis realizado con el Spectrum Compact CE System / VersaPlex™ 27PY System / GeneMarker®HID Software', unidad: '', referencia: 'Plataforma de alta resolución', metodo: 'PCR Multiplex / Electroforesis Capilar' },
+  { id: 'caso_titulo', nombre: 'Caso / Referencia', valor: 'PAT-2610', unidad: '', referencia: 'Nro de Caso', metodo: '-' },
+  { id: 'madre_nombre', nombre: 'Nombre MADRE BIOLÓGICA', valor: 'ESTRELLA LUCERO CASTRO ALFARO', unidad: '', referencia: 'Madre evaluada', metodo: '-' },
+  { id: 'madre_tipo_muestra', nombre: 'Tipo de muestra MADRE', valor: 'Bucal / Sangre', unidad: '', referencia: 'Hisopado Bucal / Sangre', metodo: '-' },
+  { id: 'madre_prueba_nro', nombre: 'Prueba N° MADRE', valor: '2610-10', unidad: '', referencia: 'Identificador muestra', metodo: '-' },
+  { id: 'menor_nombre', nombre: 'Nombre MENOR', valor: 'AITANA LUCERO', unidad: '', referencia: 'Hijo(a) evaluado(a)', metodo: '-' },
+  { id: 'menor_cui', nombre: 'CUI / DNI MENOR', valor: 'CUI:94778406', unidad: '', referencia: 'CUI o DNI del menor', metodo: '-' },
+  { id: 'menor_tipo_muestra', nombre: 'Tipo de muestra MENOR', valor: 'Bucal / Sangre', unidad: '', referencia: 'Hisopado Bucal / Sangre', metodo: '-' },
+  { id: 'menor_prueba_nro', nombre: 'Prueba N° MENOR', valor: '2610-20', unidad: '', referencia: 'Identificador muestra', metodo: '-' },
+  { id: 'padre_nombre', nombre: 'Nombre PRESUNTO PADRE', valor: 'DIONEL GOMEZ PEÑA', unidad: '', referencia: 'Presunto Padre evaluado', metodo: '-' },
+  { id: 'padre_tipo_muestra', nombre: 'Tipo de muestra PRESUNTO PADRE', valor: 'Bucal / Sangre', unidad: '', referencia: 'Hisopado Bucal / Sangre', metodo: '-' },
+  { id: 'padre_prueba_nro', nombre: 'Prueba N° PRESUNTO PADRE', valor: '2610-30', unidad: '', referencia: 'Identificador muestra', metodo: '-' },
+
+  // --- CUADRO COMPARATIVO DE LOCI / STR (24 Loci del PDF) ---
+  { nombre: "Cuadro Comparativo de Marcadores STR (24 Loci)", esSeccion: true },
+  { id: 'loci_d3s1358', nombre: 'D3S1358', ip: '0.00', madre1: '15', madre2: '16', menor1: '15', menor2: '16', padre1: '14', padre2: '18', valor: '0.00 | M: 15, 16 | H: 15, 16 | P: 14, 18', referencia: 'Locus STR' },
+  { id: 'loci_d1s1656', nombre: 'D1S1656', ip: '3.63', madre1: '14', madre2: '', menor1: '14', menor2: '15', padre1: '14', padre2: '15', valor: '3.63 | M: 14 | H: 14, 15 | P: 14, 15', referencia: 'Locus STR' },
+  { id: 'loci_d2s441', nombre: 'D2S441', ip: '1.67', madre1: '10', madre2: '14', menor1: '11', menor2: '14', padre1: '10', padre2: '11', valor: '1.67 | M: 10, 14 | H: 11, 14 | P: 10, 11', referencia: 'Locus STR' },
+  { id: 'loci_d10s1248', nombre: 'D10S1248', ip: '0.00', madre1: '15', madre2: '', menor1: '15', menor2: '', padre1: '13', padre2: '14', valor: '0.00 | M: 15 | H: 15 | P: 13, 14', referencia: 'Locus STR' },
+  { id: 'loci_d13s317', nombre: 'D13S317', ip: '0.00', madre1: '9', madre2: '13', menor1: '9', menor2: '13', padre1: '11', padre2: '12', valor: '0.00 | M: 9, 13 | H: 9, 13 | P: 11, 12', referencia: 'Locus STR' },
+  { id: 'loci_penta_e', nombre: 'Penta E', ip: '0.00', madre1: '14', madre2: '16', menor1: '5', menor2: '16', padre1: '12', padre2: '15', valor: '0.00 | M: 14, 16 | H: 5, 16 | P: 12, 15', referencia: 'Locus STR' },
+  { id: 'loci_d16s539', nombre: 'D16S539', ip: '2.34', madre1: '10', madre2: '12', menor1: '10', menor2: '12', padre1: '10', padre2: '12', valor: '2.34 | M: 10, 12 | H: 10, 12 | P: 10, 12', referencia: 'Locus STR' },
+  { id: 'loci_d18s51', nombre: 'D18S51', ip: '0.00', madre1: '14', madre2: '17', menor1: '15', menor2: '17', padre1: '16', padre2: '', valor: '0.00 | M: 14, 17 | H: 15, 17 | P: 16', referencia: 'Locus STR' },
+  { id: 'loci_d2s1338', nombre: 'D2S1338', ip: '0.00', madre1: '17', madre2: '23', menor1: '23', menor2: '24', padre1: '17', padre2: '23', valor: '0.00 | M: 17, 23 | H: 23, 24 | P: 17, 23', referencia: 'Locus STR' },
+  { id: 'loci_csf1po', nombre: 'CSF1PO', ip: '0.00', madre1: '12', madre2: '', menor1: '12', menor2: '13', padre1: '12', padre2: '', valor: '0.00 | M: 12 | H: 12, 13 | P: 12', referencia: 'Locus STR' },
+  { id: 'loci_penta_d', nombre: 'Penta D', ip: '0.00', madre1: '11', madre2: '13', menor1: '11', menor2: '12', padre1: '10', padre2: '', valor: '0.00 | M: 11, 13 | H: 11, 12 | P: 10', referencia: 'Locus STR' },
+  { id: 'loci_th01', nombre: 'TH01', ip: '0.00', madre1: '7', madre2: '', menor1: '6', menor2: '7', padre1: '7', padre2: '9.3', valor: '0.00 | M: 7 | H: 6, 7 | P: 7, 9.3', referencia: 'Locus STR' },
+  { id: 'loci_vwa', nombre: 'vWA', ip: '2.03', madre1: '16', madre2: '', menor1: '16', menor2: '17', padre1: '16', padre2: '17', valor: '2.03 | M: 16 | H: 16, 17 | P: 16, 17', referencia: 'Locus STR' },
+  { id: 'loci_d21s11', nombre: 'D21S11', ip: '0.00', madre1: '29', madre2: '31.2', menor1: '29', menor2: '33.2', padre1: '29', padre2: '32.2', valor: '0.00 | M: 29, 31.2 | H: 29, 33.2 | P: 29, 32.2', referencia: 'Locus STR' },
+  { id: 'loci_d7s820', nombre: 'D7S820', ip: '0.00', madre1: '10', madre2: '', menor1: '10', menor2: '12', padre1: '11', padre2: '', valor: '0.00 | M: 10 | H: 10, 12 | P: 11', referencia: 'Locus STR' },
+  { id: 'loci_d5s818', nombre: 'D5S818', ip: '0.00', madre1: '11', madre2: '', menor1: '11', menor2: '', padre1: '12', padre2: '', valor: '0.00 | M: 11 | H: 11 | P: 12', referencia: 'Locus STR' },
+  { id: 'loci_tpox', nombre: 'TPOX', ip: '1.35', madre1: '8', madre2: '11', menor1: '8', menor2: '11', padre1: '8', padre2: '11', valor: '1.35 | M: 8, 11 | H: 8, 11 | P: 8, 11', referencia: 'Locus STR' },
+  { id: 'loci_d8s1179', nombre: 'D8S1179', ip: '3.87', madre1: '11', madre2: '14', menor1: '12', menor2: '14', padre1: '12', padre2: '15', valor: '3.87 | M: 11, 14 | H: 12, 14 | P: 12, 15', referencia: 'Locus STR' },
+  { id: 'loci_d12s391', nombre: 'D12S391', ip: '0.00', madre1: '19', madre2: '20', menor1: '19', menor2: '23', padre1: '18', padre2: '21', valor: '0.00 | M: 19, 20 | H: 19, 23 | P: 18, 21', referencia: 'Locus STR' },
+  { id: 'loci_d19s433', nombre: 'D19S433', ip: '0.00', madre1: '13', madre2: '15.2', menor1: '12.2', menor2: '13', padre1: '13', padre2: '', valor: '0.00 | M: 13, 15.2 | H: 12.2, 13 | P: 13', referencia: 'Locus STR' },
+  { id: 'loci_d6s1043', nombre: 'D6S1043', ip: '11.79', madre1: '14', madre2: '18', menor1: '18', menor2: '21.3', padre1: '12', padre2: '21.3', valor: '11.79 | M: 14, 18 | H: 18, 21.3 | P: 12, 21.3', referencia: 'Locus STR' },
+  { id: 'loci_d22s1045', nombre: 'D22S1045', ip: '1.43', madre1: '16', madre2: '', menor1: '16', menor2: '', padre1: '15', padre2: '16', valor: '1.43 | M: 16 | H: 16 | P: 15, 16', referencia: 'Locus STR' },
+  { id: 'loci_fga', nombre: 'FGA', ip: '0.00', madre1: '20', madre2: '22', menor1: '20', menor2: '21', padre1: '24', padre2: '27', valor: '0.00 | M: 20, 22 | H: 20, 21 | P: 24, 27', referencia: 'Locus STR' },
+  { id: 'loci_amelogenina', nombre: 'Amelogenina', ip: '', madre1: 'X', madre2: '', menor1: 'X', menor2: '', padre1: 'X', padre2: 'Y', valor: 'M: X | H: X | P: X, Y', referencia: 'Marcador Sexual (X, Y)' },
+
+  // --- INTERPRETACIÓN Y RESULTADOS GLOBALES ---
+  { nombre: "Interpretación y Resultados Bioestadísticos Globales", esSeccion: true },
+  { id: 'interpretacion', nombre: 'Interpretación Clínica', valor: 'El presunto padre es excluído como padre biológico del niño (a). Examinado (a). Esta conclusión es basada en los alelos no correspondientes observados en los loci listados con un IP igual a 0. Al presunto padre le faltan los marcadores genéticos que deben ser contrubuídos al niño (a) por el padre biológico. La probabilidad de paternidad es de 0%.', unidad: '', referencia: 'Texto de dictamen pericial', metodo: '-' },
+  { id: 'ipc_acumulado', nombre: 'ÍNDICE DE PATERNIDAD ACUMULATIVO', valor: '0', unidad: '', referencia: 'IPC acumulativo Bayesiano', metodo: '-' },
+  { id: 'probabilidad_acumulada', nombre: 'PROBABILIDAD DE PATERNIDAD ACUMULATIVA', valor: '0%', unidad: '%', referencia: 'Probabilidad Essen-Möller', metodo: '-' },
+  { id: 'nota_laboratorio', nombre: 'Nota de procedencia de muestra', valor: 'Basado en las muestras recibidas de labotatorio VITAL HEALTH el cual provee los nombres de las partes probadas que aparecen en este reporte.', unidad: '', referencia: 'Constancia de recepción', metodo: '-' }
+],
+    
 "PRUEBA DE PATERNIDAD INFORMATIVA": [
   // --- IDENTIFICACIÓN DEL CASO Y MUESTRAS ---
   { nombre: "Datos del Caso y Participantes", esSeccion: true },
