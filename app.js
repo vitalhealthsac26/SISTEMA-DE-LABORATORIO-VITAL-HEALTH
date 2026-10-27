@@ -2451,11 +2451,11 @@ function generarBloquePaternidadLegalOficialHTML(ex, orden) {
                 </div>
                 <div style="font-size: 11.5px; margin-bottom: 4px; white-space: nowrap;">
                     <span style="font-weight: 700;">ÍNDICE DE PATERNIDAD ACUMULATIVO:</span> 
-                    <span style="font-weight: 800; font-size: 11px;">${ipc}</span>
+                    <span style="font-weight: 800; font-size: 11.5px;">${ipc}</span>
                 </div>
                 <div style="font-size: 11.5px; margin-bottom: 6px; white-space: nowrap;">
                     <span style="font-weight: 700;">PROBABILIDAD DE PATERNIDAD ACUMULATIVA:</span> 
-                    <span style="font-weight: 800; font-size: 11px;">${prob}</span>
+                    <span style="font-weight: 800; font-size: 11.5px;">${prob}</span>
                 </div>
             </div>
             <div style="font-size: 11px; color: #222222; line-height: 1.25; margin-top: 4px;">
