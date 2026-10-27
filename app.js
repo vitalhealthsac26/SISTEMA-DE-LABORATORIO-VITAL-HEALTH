@@ -2446,7 +2446,7 @@ function generarBloquePaternidadLegalOficialHTML(ex, orden) {
         <!-- COLUMNA IZQUIERDA: RESULTADOS GLOBALES (TEXTO MÁS GRANDE Y DESTACADO) -->
         <div style="flex: 1 1 48%; border-right: 1.5px solid #000000; padding: 8px 10px; display: flex; flex-direction: column; justify-content: space-between; box-sizing: border-box;">
             <div>
-                <div style="text-align: center; font-weight: 800; font-size: 12.5px; margin-bottom: 6px; letter-spacing: 0.5px;">
+                <div style="text-align: center; font-weight: 800; font-size: 12px; margin-bottom: 6px; letter-spacing: 0.5px;">
                     RESULTADOS GLOBALES
                 </div>
                 <div style="font-size: 13px; margin-bottom: 4px;">
@@ -2471,9 +2471,7 @@ function generarBloquePaternidadLegalOficialHTML(ex, orden) {
                 <div style="font-weight: 800; font-size: 7.2px; text-align: center; padding: 2px 2px; border-bottom: 1.5px solid #000000; line-height: 1.15; background: #ffffff;">
                     PERSONAL A CARGO DE LA TOMA<br>DE LA MUESTRA
                 </div>
-                <div style="flex: 1 1 auto; min-height: 75px; background: #ffffff;">
-                    <!-- Espacio libre para firma/sello de toma -->
-                </div>
+                <div style="flex: 1 1 auto; min-height: 105px; background: #ffffff;"></div>
             </div>
 
             <!-- CUADRO 2: ANALISIS DE LA MUESTRA CON SELLO Y FIRMA DE CHRISTIAN CANCHO -->
@@ -2481,8 +2479,8 @@ function generarBloquePaternidadLegalOficialHTML(ex, orden) {
                 <div style="font-weight: 800; font-size: 7.2px; text-align: center; padding: 2px 2px; border-bottom: 1.5px solid #000000; line-height: 1.15; background: #ffffff;">
                     PERSONAL A CARGO DEL ANALISIS DE<br>LA MUESTRA
                 </div>
-                <div style="flex: 1 1 auto; min-height: 75px; display: flex; align-items: center; justify-content: center; padding: 2px;">
-                    <img src="sello-firma-biologo-legal.png" alt="Sello y Firma del Biólogo Genetista" style="max-height: 70px; max-width: 98%; object-fit: contain; display: block;" onerror="this.src='./sello-firma-biologo-legal.png'">
+                <div style="flex: 1 1 auto; min-height: 105px; display: flex; align-items: center; justify-content: center; padding: 2px;">
+                    <img src="sello-firma-biologo-legal.png" alt="Sello y Firma del Biólogo Genetista" style="max-height: 98px; max-width: 98%; object-fit: contain; display: block;" onerror="this.src='./sello-firma-biologo-legal.png'">
                 </div>
             </div>
             
