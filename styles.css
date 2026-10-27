@@ -334,7 +334,7 @@ body { background-color: var(--bg-light); font-family: 'Segoe UI', Tahoma, Genev
 .adn-tabla-comparativa-legal th,
 .adn-tabla-comparativa-legal td {
     border: none;
-    border-bottom: 0.5px solid #000000;
+    border-bottom: none !important; /* ⬅️ Líneas horizontales eliminadas por completo */
     padding: 1.5px 3px !important; /* ⬅️ Espaciado compacto para evitar desbordes */
     text-align: center;
     vertical-align: middle;
@@ -342,11 +342,11 @@ body { background-color: var(--bg-light); font-family: 'Segoe UI', Tahoma, Genev
 }
 
 .adn-tabla-comparativa-legal thead th {
-    border-bottom: 1.5px solid #000000;
+    border-bottom: 1.5px solid #000000; /* Mantiene la línea que separa los títulos de la tabla */
     font-size: 11px !important;
 }
 
-/* Separadores verticales exactos del cuadro legal */
+/* Separadores verticales exactos del cuadro legal (se conservan intactos) */
 .adn-tabla-comparativa-legal tbody td:nth-child(2) { border-right: 1.5px solid #000000; }
 .adn-tabla-comparativa-legal tbody td:nth-child(4) { border-right: 1.5px solid #000000; }
 .adn-tabla-comparativa-legal tbody td:nth-child(6) { border-right: 1.5px solid #000000; }
