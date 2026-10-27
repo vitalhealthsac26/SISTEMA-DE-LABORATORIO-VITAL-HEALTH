@@ -2433,9 +2433,9 @@ function generarBloquePaternidadLegalOficialHTML(ex, orden) {
                 </table>
 
                 <!-- CUADRO DE INTERPRETACIÓN PERICIAL (TEXTO MÁS GRANDE) -->
-<div style="border: 1.5px solid #000000; padding: 8px 10px; margin-bottom: 6px; font-size: 14px; line-height: 1.45; background: #ffffff;">
-    <div style="font-weight: 700; font-size: 14.5px; margin-bottom: 3px;">Interpretación:</div>
-    <div style="text-align: justify; color: #000000; font-size: 14px; font-weight: 600;">
+<div style="border: 1.5px solid #000000; padding: 8px 10px; margin-bottom: 6px; font-size: 13px; line-height: 1.45; background: #ffffff;">
+    <div style="font-weight: 700; font-size: 13px; margin-bottom: 3px;">Interpretación:</div>
+    <div style="text-align: justify; color: #000000; font-size: 13px; font-weight: 600;">
         ${interpretacion}
     </div>
 </div>
@@ -2443,16 +2443,16 @@ function generarBloquePaternidadLegalOficialHTML(ex, orden) {
                 <!-- COLUMNA IZQUIERDA: RESULTADOS GLOBALES (TEXTO MÁS GRANDE Y DESTACADO) -->
 <div style="flex: 1 1 48%; border-right: 1.5px solid #000000; padding: 8px 10px; display: flex; flex-direction: column; justify-content: space-between;">
     <div>
-        <div style="text-align: center; font-weight: 800; font-size: 14px; margin-bottom: 6px; letter-spacing: 0.5px;">
+        <div style="text-align: center; font-weight: 800; font-size: 13px; margin-bottom: 6px; letter-spacing: 0.5px;">
             RESULTADOS GLOBALES
         </div>
         <div style="font-size: 13px; margin-bottom: 4px;">
             <span style="font-weight: 700;">ÍNDICE DE PATERNIDAD ACUMULATIVO:</span> 
-            <span style="font-weight: 800; font-size: 16px;">${ipc}</span>
+            <span style="font-weight: 800; font-size: 14px;">${ipc}</span>
         </div>
         <div style="font-size: 13px; margin-bottom: 6px;">
             <span style="font-weight: 700;">PROBABILIDAD DE PATERNIDAD ACUMULATIVA:</span> 
-            <span style="font-weight: 800; font-size: 16px;">${prob}</span>
+            <span style="font-weight: 800; font-size: 14px;">${prob}</span>
         </div>
     </div>
     <div style="font-size: 9px; color: #222222; line-height: 1.25; margin-top: 4px;">
