@@ -657,3 +657,17 @@ body { background-color: var(--bg-light); font-family: 'Segoe UI', Tahoma, Genev
     50% { transform: scale(1.04); }
     100% { transform: scale(1); }
 }
+/* --- ELIMINAR TODAS LAS LÍNEAS HORIZONTALES INTERNAS DE LA TABLA DE ADN --- */
+.adn-tabla-comparativa-legal,
+.adn-tabla-comparativa-legal tbody,
+.adn-tabla-comparativa-legal tr,
+.adn-tabla-comparativa-legal th,
+.adn-tabla-comparativa-legal td {
+    border-top: none !important;
+    border-bottom: none !important;
+}
+
+/* Restaurar únicamente la línea inferior del encabezado principal de los títulos */
+.adn-tabla-comparativa-legal thead th {
+    border-bottom: 1.5px solid #000000 !important;
+}
