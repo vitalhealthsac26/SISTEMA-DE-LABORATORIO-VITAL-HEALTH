@@ -323,33 +323,38 @@ body { background-color: var(--bg-light); font-family: 'Segoe UI', Tahoma, Genev
     line-height: 1.25 !important;
 }
 
-/* --- RECUPERAR EL BORDE SUPERIOR DEL CUADRO GENERAL --- */
+/* --- FORMATO CORREGIDO: MARCO SUPERIOR Y TAMAÑO IDEAL DE NÚMEROS --- */
 .adn-tabla-comparativa-legal {
     width: 100%;
     border-collapse: collapse;
-    border: 1.5px solid #000000 !important; /* Mantiene todo el marco exterior completo */
+    border: 1.5px solid #000000 !important;
+    border-top: 1.5px solid #000000 !important;
     margin-bottom: 3px;
+    font-size: 12px !important;
+}
+
+/* Forzar el borde superior en el encabezado para que el cuadro cierre arriba */
+.adn-tabla-comparativa-legal thead th {
+    border-top: 1.5px solid #000000 !important;
+    border-bottom: 1.5px solid #000000 !important;
     font-size: 11.5px !important;
 }
 
-/* Quitar solo las líneas horizontales internas de las filas */
-.adn-tabla-comparativa-legal tr,
-.adn-tabla-comparativa-legal th,
-.adn-tabla-comparativa-legal td {
+/* Tamaño de los números (alelos) más grande y legible, sin líneas horizontales */
+.adn-tabla-comparativa-legal td, 
+.adn-tabla-comparativa-legal th {
+    font-size: 12px !important; /* ⬅️ Aumenta el tamaño de los números */
     border-top: none !important;
-    border-bottom: none !important;
-}
-
-/* Mantener únicamente la línea horizontal del encabezado principal */
-.adn-tabla-comparativa-legal thead th {
-    border-bottom: 1.5px solid #000000 !important;
+    border-bottom: none !important; /* ⬅️ Mantiene las líneas horizontales internas borradas */
+    padding: 2px 3px !important;
+    text-align: center;
+    vertical-align: middle;
 }
 
 /* Separadores verticales exactos (se conservan intactos) */
 .adn-tabla-comparativa-legal tbody td:nth-child(2) { border-right: 1.5px solid #000000 !important; }
 .adn-tabla-comparativa-legal tbody td:nth-child(4) { border-right: 1.5px solid #000000 !important; }
 .adn-tabla-comparativa-legal tbody td:nth-child(6) { border-right: 1.5px solid #000000 !important; }
-
 /* Bloque individual de cada examen */
 .examen-bloque {
     margin-bottom: 6px;
