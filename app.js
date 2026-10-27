@@ -2458,7 +2458,7 @@ function generarBloquePaternidadLegalOficialHTML(ex, orden) {
                     <span style="font-weight: 800; font-size: 11px;">${prob}</span>
                 </div>
             </div>
-            <div style="font-size: 9px; color: #222222; line-height: 1.25; margin-top: 4px;">
+            <div style="font-size: 11px; color: #222222; line-height: 1.25; margin-top: 4px;">
                 ${notaLab}
             </div>
         </div>
