@@ -328,25 +328,25 @@ body { background-color: var(--bg-light); font-family: 'Segoe UI', Tahoma, Genev
     border-collapse: collapse;
     border: 1.5px solid #000000;
     margin-bottom: 3px;
-    font-size: 11.5px !important; /* ⬅️ Tamaño ideal para que entren los 24 loci holgadamente */
+    font-size: 11.5px !important;
 }
 
 .adn-tabla-comparativa-legal th,
 .adn-tabla-comparativa-legal td {
     border: none;
-    border-bottom: none !important; /* ⬅️ Líneas horizontales eliminadas por completo */
-    padding: 1.5px 3px !important; /* ⬅️ Espaciado compacto para evitar desbordes */
+    border-bottom: none !important; /* ⬅️ Esto elimina todas las líneas horizontales de las filas de datos */
+    padding: 1.5px 3px !important;
     text-align: center;
     vertical-align: middle;
     font-size: 11.5px !important; 
 }
 
 .adn-tabla-comparativa-legal thead th {
-    border-bottom: 1.5px solid #000000; /* Mantiene la línea que separa los títulos de la tabla */
+    border-bottom: 1.5px solid #000000; /* ⬅️ Mantiene únicamente la línea que separa los títulos principales (Loci, IP, etc.) */
     font-size: 11px !important;
 }
 
-/* Separadores verticales exactos del cuadro legal (se conservan intactos) */
+/* Separadores verticales exactos (se conservan intactos) */
 .adn-tabla-comparativa-legal tbody td:nth-child(2) { border-right: 1.5px solid #000000; }
 .adn-tabla-comparativa-legal tbody td:nth-child(4) { border-right: 1.5px solid #000000; }
 .adn-tabla-comparativa-legal tbody td:nth-child(6) { border-right: 1.5px solid #000000; }
