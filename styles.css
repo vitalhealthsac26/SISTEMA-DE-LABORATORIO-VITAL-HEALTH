@@ -369,35 +369,36 @@ body { background-color: var(--bg-light); font-family: 'Segoe UI', Tahoma, Genev
 }
 
 /* ========================================================
-   INTERPRETACIÓN Y RESULTADOS GLOBALES (GRANDES Y DESTACADOS)
+   INTERPRETACIÓN Y RESULTADOS GLOBALES (¡MUCHO MÁS GRANDES Y VISIBLES!)
    ======================================================== */
 .informe-nota, 
 .adn-bloque-interpretacion-legal { 
-    font-size: 15px !important; /* ⬅️ ¡Interpretación grande y totalmente legible! */
-    line-height: 1.35 !important;
+    font-size: 18.5px !important; /* ⬅️ Interpretación grande, imponente y muy legible */
+    line-height: 1.4 !important;
     font-style: normal; 
     color: #000000; 
-    margin: 4px 0; 
-    border: 1.5px solid #000000;
-    padding: 6px 8px;
+    margin: 6px 0; 
+    border: 2px solid #000000;
+    padding: 8px 10px;
     background: #ffffff;
-    font-weight: 600;
+    font-weight: 700 !important;
 }
 
-/* RESULTADOS GLOBALES Y FIRMAS INFERIORES EN ORDEN */
+/* CUADRO DE RESULTADOS GLOBALES */
 .adn-bloque-globales-legal {
-    border: 1.5px solid #000000;
-    margin-bottom: 4px;
+    border: 2px solid #000000;
+    margin-bottom: 6px;
     display: flex;
     background: #ffffff;
 }
 
 .adn-globales-col-izq-legal {
     flex: 1 1 58%;
-    border-right: 1.5px solid #000000;
-    padding: 6px 8px;
-    font-size: 15px !important; /* ⬅️ ¡Índice y Probabilidad de Paternidad Acumulativa grandes! */
-    font-weight: 700;
+    border-right: 2px solid #000000;
+    padding: 8px 10px;
+    font-size: 17.5px !important; /* ⬅️ ¡Índice y Probabilidad Acumulativa grandes y destacados! */
+    font-weight: 800 !important;
+    color: #000000 !important;
 }
 
 .adn-globales-col-der-legal {
@@ -407,8 +408,8 @@ body { background-color: var(--bg-light); font-family: 'Segoe UI', Tahoma, Genev
 
 .adn-subcol-personal-legal {
     flex: 1 1 50%;
-    padding: 3px;
-    font-size: 9.5px !important;
+    padding: 4px;
+    font-size: 11px !important;
     text-align: center;
     border-right: 1px solid #000000;
     font-weight: 700;
@@ -417,34 +418,6 @@ body { background-color: var(--bg-light); font-family: 'Segoe UI', Tahoma, Genev
 .adn-subcol-personal-legal:last-child {
     border-right: none;
 }
-
-/* Firma de la bióloga */
-.bloque-firma-completo {
-    page-break-inside: avoid !important;
-    break-inside: avoid !important;
-    margin-top: auto;
-    padding-top: 2px;
-}
-.informe-firma { 
-    margin-top: 2px; 
-    text-align: center; 
-}
-.informe-firma-img { height: 60px; max-height: 60px; object-fit: contain; display: block; margin: 0 auto 1px auto; }
-.informe-firma-linea { width: 180px; border-top: 1.5px solid #0f172a; margin: 0 auto 2px auto; }
-.informe-firma-nombre { font-weight: 700; font-size: 10px; color: #0f172a; }
-.informe-firma-det { font-weight: 700; font-size: 8.5px; color: #0f172a; }
-
-/* Pie de página del centro médico */
-.informe-pie-fijo {
-    border-top: 1px solid #0072bc;
-    margin-top: 3px;
-    padding-top: 3px;
-    font-size: 8.5px;
-    color: #000;
-    background: #ffffff;
-    width: 100%;
-}
-.informe-pie-fijo strong { color: #0f172a; font-size: 9px; }
 
 /* =========================================================
    PAGINACIÓN INTELIGENTE (A4 PARA IMPRESIÓN Y PDF)
