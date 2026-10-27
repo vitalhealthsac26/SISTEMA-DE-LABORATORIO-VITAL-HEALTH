@@ -2443,19 +2443,19 @@ function generarBloquePaternidadLegalOficialHTML(ex, orden) {
     <!-- CONTENEDOR PRINCIPAL DE LA FILA INFERIOR (CORREGIDO EN DOS COLUMNAS SIMÉTRICAS) -->
     <div style="display: flex; flex-direction: row; width: 100%; border: 1.5px solid #000000;">
         
-        <!-- COLUMNA IZQUIERDA: RESULTADOS GLOBALES (TEXTO MÁS GRANDE Y DESTACADO) -->
+        <!-- COLUMNA IZQUIERDA: RESULTADOS GLOBALES (TEXTO AJUSTADO AL COSTADO) -->
         <div style="flex: 1 1 48%; border-right: 1.5px solid #000000; padding: 8px 10px; display: flex; flex-direction: column; justify-content: space-between; box-sizing: border-box;">
             <div>
                 <div style="text-align: center; font-weight: 800; font-size: 12px; margin-bottom: 6px; letter-spacing: 0.5px;">
                     RESULTADOS GLOBALES
                 </div>
-                <div style="font-size: 13px; margin-bottom: 4px;">
+                <div style="font-size: 10.5px; margin-bottom: 4px; white-space: nowrap;">
                     <span style="font-weight: 700;">ÍNDICE DE PATERNIDAD ACUMULATIVO:</span> 
-                    <span style="font-weight: 800; font-size: 12px;">${ipc}</span>
+                    <span style="font-weight: 800; font-size: 11px;">${ipc}</span>
                 </div>
-                <div style="font-size: 13px; margin-bottom: 6px;">
+                <div style="font-size: 10.5px; margin-bottom: 6px; white-space: nowrap;">
                     <span style="font-weight: 700;">PROBABILIDAD DE PATERNIDAD ACUMULATIVA:</span> 
-                    <span style="font-weight: 800; font-size: 12px;">${prob}</span>
+                    <span style="font-weight: 800; font-size: 11px;">${prob}</span>
                 </div>
             </div>
             <div style="font-size: 9px; color: #222222; line-height: 1.25; margin-top: 4px;">
