@@ -2488,7 +2488,7 @@ function generarBloquePaternidadLegalOficialHTML(ex, orden) {
     </div>
 
    <!-- PIE DE PÁGINA SEPARADO Y AL FINAL -->
-    <div style="margin-top: 40px; width: 100%;">
+    <div style="margin-top: 60px; width: 100%;">
         ${pieHabitual}
     </div>
 </div>
