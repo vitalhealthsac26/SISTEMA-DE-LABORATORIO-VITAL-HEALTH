@@ -2451,11 +2451,11 @@ function generarBloquePaternidadLegalOficialHTML(ex, orden) {
                 </div>
                 <div style="font-size: 13px; margin-bottom: 4px;">
                     <span style="font-weight: 700;">ÍNDICE DE PATERNIDAD ACUMULATIVO:</span> 
-                    <span style="font-weight: 800; font-size: 13px;">${ipc}</span>
+                    <span style="font-weight: 800; font-size: 12px;">${ipc}</span>
                 </div>
                 <div style="font-size: 13px; margin-bottom: 6px;">
                     <span style="font-weight: 700;">PROBABILIDAD DE PATERNIDAD ACUMULATIVA:</span> 
-                    <span style="font-weight: 800; font-size: 13px;">${prob}</span>
+                    <span style="font-weight: 800; font-size: 12px;">${prob}</span>
                 </div>
             </div>
             <div style="font-size: 9px; color: #222222; line-height: 1.25; margin-top: 4px;">
@@ -2489,8 +2489,10 @@ function generarBloquePaternidadLegalOficialHTML(ex, orden) {
         </div>
     </div>
 
-    ${pieHabitual}
-</div>
+   <!-- PIE DE PÁGINA SEPARADO Y AL FINAL -->
+    <div style="margin-top: 40px; width: 100%;">
+        ${pieHabitual}
+    </div>
 </div>
     `;
 }
