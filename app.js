@@ -2433,61 +2433,65 @@ function generarBloquePaternidadLegalOficialHTML(ex, orden) {
                 </table>
 
                 <!-- CUADRO DE INTERPRETACIÓN PERICIAL (TEXTO MÁS GRANDE) -->
-<div style="border: 1.5px solid #000000; padding: 8px 10px; margin-bottom: 6px; font-size: 13px; line-height: 1.45; background: #ffffff;">
-    <div style="font-weight: 700; font-size: 13px; margin-bottom: 3px;">Interpretación:</div>
-    <div style="text-align: justify; color: #000000; font-size: 13px; font-weight: 600;">
-        ${interpretacion}
-    </div>
-</div>
-
-                <!-- COLUMNA IZQUIERDA: RESULTADOS GLOBALES (TEXTO MÁS GRANDE Y DESTACADO) -->
-<div style="flex: 1 1 48%; border-right: 1.5px solid #000000; padding: 8px 10px; display: flex; flex-direction: column; justify-content: space-between;">
-    <div>
-        <div style="text-align: center; font-weight: 800; font-size: 13px; margin-bottom: 6px; letter-spacing: 0.5px;">
-            RESULTADOS GLOBALES
-        </div>
-        <div style="font-size: 13px; margin-bottom: 4px;">
-            <span style="font-weight: 700;">ÍNDICE DE PATERNIDAD ACUMULATIVO:</span> 
-            <span style="font-weight: 800; font-size: 14px;">${ipc}</span>
-        </div>
-        <div style="font-size: 13px; margin-bottom: 6px;">
-            <span style="font-weight: 700;">PROBABILIDAD DE PATERNIDAD ACUMULATIVA:</span> 
-            <span style="font-weight: 800; font-size: 14px;">${prob}</span>
+    <div style="border: 1.5px solid #000000; padding: 8px 10px; margin-bottom: 6px; font-size: 12.5px; line-height: 1.35; background: #ffffff;">
+        <div style="font-weight: 700; font-size: 12.5px; margin-bottom: 3px;">Interpretación:</div>
+        <div style="text-align: justify; color: #000000; font-size: 12.5px; font-weight: 600;">
+            ${interpretacion}
         </div>
     </div>
-    <div style="font-size: 9px; color: #222222; line-height: 1.25; margin-top: 4px;">
-        ${notaLab}
-    </div>
-</div>
 
-                    <!-- COLUMNA DERECHA: DOS CUADROS (TOMA DE MUESTRA Y ANALISIS CON SELLO/FIRMA) -->
-                    <div style="flex: 1 1 52%; display: flex;">
-                        <!-- CUADRO 1: TOMA DE MUESTRA -->
-                        <div style="flex: 1 1 50%; border-right: 1.5px solid #000000; display: flex; flex-direction: column;">
-                            <div style="font-weight: 800; font-size: 7.2px; text-align: center; padding: 2px 2px; border-bottom: 1.5px solid #000000; line-height: 1.15; background: #ffffff;">
-                                PERSONAL A CARGO DE LA TOMA<br>DE LA MUESTRA
-                            </div>
-                            <div style="flex: 1 1 auto; min-height: 75px; background: #ffffff;">
-                                <!-- Espacio libre para firma/sello de toma -->
-                            </div>
-                        </div>
+    <!-- CONTENEDOR PRINCIPAL DE LA FILA INFERIOR (CORREGIDO EN DOS COLUMNAS SIMÉTRICAS) -->
+    <div style="display: flex; flex-direction: row; width: 100%; border: 1.5px solid #000000;">
+        
+        <!-- COLUMNA IZQUIERDA: RESULTADOS GLOBALES (TEXTO MÁS GRANDE Y DESTACADO) -->
+        <div style="flex: 1 1 48%; border-right: 1.5px solid #000000; padding: 8px 10px; display: flex; flex-direction: column; justify-content: space-between; box-sizing: border-box;">
+            <div>
+                <div style="text-align: center; font-weight: 800; font-size: 12.5px; margin-bottom: 6px; letter-spacing: 0.5px;">
+                    RESULTADOS GLOBALES
+                </div>
+                <div style="font-size: 13px; margin-bottom: 4px;">
+                    <span style="font-weight: 700;">ÍNDICE DE PATERNIDAD ACUMULATIVO:</span> 
+                    <span style="font-weight: 800; font-size: 13px;">${ipc}</span>
+                </div>
+                <div style="font-size: 13px; margin-bottom: 6px;">
+                    <span style="font-weight: 700;">PROBABILIDAD DE PATERNIDAD ACUMULATIVA:</span> 
+                    <span style="font-weight: 800; font-size: 13px;">${prob}</span>
+                </div>
+            </div>
+            <div style="font-size: 9px; color: #222222; line-height: 1.25; margin-top: 4px;">
+                ${notaLab}
+            </div>
+        </div>
 
-                        <!-- CUADRO 2: ANALISIS DE LA MUESTRA CON SELLO Y FIRMA DE CHRISTIAN CANCHO -->
-                        <div style="flex: 1 1 50%; display: flex; flex-direction: column;">
-                            <div style="font-weight: 800; font-size: 7.2px; text-align: center; padding: 2px 2px; border-bottom: 1.5px solid #000000; line-height: 1.15; background: #ffffff;">
-                                PERSONAL A CARGO DEL ANALISIS DE<br>LA MUESTRA
-                            </div>
-                            <div style="flex: 1 1 auto; min-height: 75px; display: flex; align-items: center; justify-content: center; padding: 2px;">
-                                <img src="sello-firma-biologo-legal.png" alt="Sello y Firma del Biólogo Genetista" style="max-height: 70px; max-width: 98%; object-fit: contain; display: block;" onerror="this.src='./sello-firma-biologo-legal.png'">
-                            </div>
-                        </div>
-                    </div>
+        <!-- COLUMNA DERECHA: DOS CUADROS (TOMA DE MUESTRA Y ANALISIS CON SELLO/FIRMA) -->
+        <div style="flex: 1 1 52%; display: flex; flex-direction: row; box-sizing: border-box;">
+            
+            <!-- CUADRO 1: TOMA DE MUESTRA -->
+            <div style="flex: 1 1 50%; border-right: 1.5px solid #000000; display: flex; flex-direction: column; box-sizing: border-box;">
+                <div style="font-weight: 800; font-size: 7.2px; text-align: center; padding: 2px 2px; border-bottom: 1.5px solid #000000; line-height: 1.15; background: #ffffff;">
+                    PERSONAL A CARGO DE LA TOMA<br>DE LA MUESTRA
+                </div>
+                <div style="flex: 1 1 auto; min-height: 75px; background: #ffffff;">
+                    <!-- Espacio libre para firma/sello de toma -->
                 </div>
             </div>
 
-                ${pieHabitual}
+            <!-- CUADRO 2: ANALISIS DE LA MUESTRA CON SELLO Y FIRMA DE CHRISTIAN CANCHO -->
+            <div style="flex: 1 1 50%; display: flex; flex-direction: column; box-sizing: border-box;">
+                <div style="font-weight: 800; font-size: 7.2px; text-align: center; padding: 2px 2px; border-bottom: 1.5px solid #000000; line-height: 1.15; background: #ffffff;">
+                    PERSONAL A CARGO DEL ANALISIS DE<br>LA MUESTRA
+                </div>
+                <div style="flex: 1 1 auto; min-height: 75px; display: flex; align-items: center; justify-content: center; padding: 2px;">
+                    <img src="sello-firma-biologo-legal.png" alt="Sello y Firma del Biólogo Genetista" style="max-height: 70px; max-width: 98%; object-fit: contain; display: block;" onerror="this.src='./sello-firma-biologo-legal.png'">
+                </div>
             </div>
+            
         </div>
+    </div>
+
+    ${pieHabitual}
+</div>
+</div>
     `;
 }
 
