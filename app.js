@@ -879,15 +879,20 @@ function calcularEdad() {
 function buscarPaciente() {
     const dni = val("pac-dni");
     
-    // Si todavía no completa los 8 dígitos, no hace nada (evita alertas prematuras)
+    // Si todavía no completa los 8 dígitos, no hace nada
     if (dni.length < 8) return;
 
     const lista = (window.pacientesRegistrados || []).concat(window.listaPacientesCache || []);
     const pac = lista.map(normalizarPaciente).find(p => String(p.dni) === dni);
     
     if (!pac) {
-        // SILENCIOSO: Si no existe, no lanzamos alert. 
-        // Simplemente dejamos los campos libres para que el personal escriba con tranquilidad.
+        // LIMPIEZA AUTOMÁTICA: Si el DNI no existe, borramos los campos para evitar errores
+        setVal("pac-nombre", "");
+        setVal("pac-celular", "");
+        setVal("pac-fnac", "");
+        setVal("pac-edad", "");
+        setVal("pac-sexo", "MASCULINO"); // Valor por defecto o el que prefieras
+        setVal("pac-doctor", "");
         return;
     }
 
@@ -906,14 +911,20 @@ function buscarPaciente() {
 function buscarPacienteCotizacion() {
     const dni = val("dni");
     
-    // Si todavía no completa los 8 dígitos, no hace nada de forma silenciosa
+    // Si todavía no completa los 8 dígitos, no hace nada
     if (dni.length < 8) return;
 
     const lista = (window.pacientesRegistrados || []).concat(window.listaPacientesCache || []);
     const pac = lista.map(normalizarPaciente).find(p => String(p.dni) === dni);
     
     if (!pac) {
-        // SILENCIOSO: Si no está en la base de datos, no interrumpe con ningún alert.
+        // LIMPIEZA AUTOMÁTICA: Si el DNI no existe en cotizaciones, limpiamos todo
+        setVal("nombres", "");
+        setVal("celular", "");
+        setVal("fechaNacimiento", "");
+        setVal("edad", "");
+        setVal("sexo", "MASCULINO");
+        setVal("medico", "");
         return;
     }
 
