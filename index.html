@@ -377,7 +377,15 @@
                                     <div class="col-12 col-md-3">
                                         <label for="dni" class="form-label fw-semibold">DNI / Documento</label>
                                         <div class="input-group">
-                                            <input type="text" id="dni" class="form-control" placeholder="8 dígitos" maxlength="8" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 8); if(this.value.length === 8) { buscarPacienteCotizacion(); }" onkeydown="if(event.key==='Enter'){event.preventDefault();buscarPacienteCotizacion();}">
+                                            <input 
+    type="text" 
+    id="dni" 
+    class="form-control" 
+    placeholder="8 dígitos" 
+    maxlength="8" 
+    oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 8); if(this.value.length === 8) { buscarPacienteCotizacion(); }" 
+    onkeydown="if(event.key==='Enter'){event.preventDefault();buscarPacienteCotizacion();}"
+>
                                             <button class="btn btn-primary" type="button" onclick="buscarPacienteCotizacion()" title="Buscar paciente registrado"><i class="bi bi-search"></i></button>
                                         </div>
                                     </div>
