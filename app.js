@@ -878,16 +878,20 @@ function calcularEdad() {
 // ==========================================
 function buscarPaciente() {
     const dni = val("pac-dni");
-    if (dni.length < 8) {
-        alert("Ingrese un DNI o documento válido de al menos 8 dígitos.");
-        return;
-    }
+    
+    // Si todavía no completa los 8 dígitos, no hace nada (evita alertas prematuras)
+    if (dni.length < 8) return;
+
     const lista = (window.pacientesRegistrados || []).concat(window.listaPacientesCache || []);
     const pac = lista.map(normalizarPaciente).find(p => String(p.dni) === dni);
+    
     if (!pac) {
-        alert("No se encontró un paciente registrado con ese DNI. Complete los datos manualmente.");
+        // SILENCIOSO: Si no existe, no lanzamos alert. 
+        // Simplemente dejamos los campos libres para que el personal escriba con tranquilidad.
         return;
     }
+
+    // Si existe, autocompleta con normalidad
     setVal("pac-nombre", pac.nombre);
     setVal("pac-celular", pac.celular);
     setVal("pac-fnac", pac.fnac);
@@ -901,16 +905,19 @@ function buscarPaciente() {
 
 function buscarPacienteCotizacion() {
     const dni = val("dni");
-    if (dni.length < 8) {
-        alert("Ingrese un DNI o documento válido de al menos 8 dígitos.");
-        return;
-    }
+    
+    // Si todavía no completa los 8 dígitos, no hace nada de forma silenciosa
+    if (dni.length < 8) return;
+
     const lista = (window.pacientesRegistrados || []).concat(window.listaPacientesCache || []);
     const pac = lista.map(normalizarPaciente).find(p => String(p.dni) === dni);
+    
     if (!pac) {
-        alert("No se encontró un paciente registrado con ese DNI en la base de datos.");
+        // SILENCIOSO: Si no está en la base de datos, no interrumpe con ningún alert.
         return;
     }
+
+    // Si existe, autocompleta los campos de cotización con normalidad
     setVal("nombres", pac.nombre);
     setVal("celular", pac.celular);
     setVal("fechaNacimiento", pac.fnac);
