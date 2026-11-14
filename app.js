@@ -2600,23 +2600,26 @@ function generarEditorFormularioPaternidad(ex, exIdx, orden, guardado) {
     (pData.loci || LOCI_PATERNIDAD_DEFECTO).forEach((item, lIdx) => {
         filasLoci += `
             <tr data-p-locus-row="${lIdx}">
-                <td class="text-center bg-light fw-bold" style="width: 15%;">
+                <td class="text-center bg-light fw-bold" style="width: 18%;">
                     <input type="text" class="form-control form-control-sm text-center fw-bold py-1" data-p-campo="locus" value="${escapeHTML(item.locus)}">
                 </td>
                 <td style="width: 15%;">
-                    <input type="text" class="form-control form-control-sm text-center py-1" data-p-campo="ip" placeholder="IP (ej. 1.55)" value="${escapeHTML(item.ip ?? '')}">
+                    <input type="text" class="form-control form-control-sm text-center py-1" data-p-campo="ip" placeholder="IP" value="${escapeHTML(item.ip ?? '')}">
                 </td>
-                <td style="width: 17%;">
+                <td style="width: 16%;">
                     <input type="text" class="form-control form-control-sm text-center py-1 font-monospace" data-p-campo="m1" placeholder="Alelo 1" value="${escapeHTML(item.m1 ?? '')}">
                 </td>
-                <td style="width: 17%;">
-                    <input type="text" class="form-control form-control-sm text-center py-1 font-monospace" data-p-campo="m2" placeholder="Alelo 2 (opc)" value="${escapeHTML(item.m2 ?? '')}">
+                <td style="width: 16%;">
+                    <input type="text" class="form-control form-control-sm text-center py-1 font-monospace" data-p-campo="m2" placeholder="Alelo 2" value="${escapeHTML(item.m2 ?? '')}">
                 </td>
-                <td style="width: 18%;">
+                <td style="width: 16%;">
                     <input type="text" class="form-control form-control-sm text-center py-1 font-monospace fw-semibold" data-p-campo="p1" placeholder="Alelo 1" value="${escapeHTML(item.p1 ?? '')}">
                 </td>
-                <td style="width: 18%;">
-                    <input type="text" class="form-control form-control-sm text-center py-1 font-monospace fw-semibold" data-p-campo="p2" placeholder="Alelo 2 (opc)" value="${escapeHTML(item.p2 ?? '')}">
+                <td style="width: 16%;">
+                    <input type="text" class="form-control form-control-sm text-center py-1 font-monospace fw-semibold" data-p-campo="p2" placeholder="Alelo 2" value="${escapeHTML(item.p2 ?? '')}">
+                </td>
+                <td class="text-center align-middle" style="width: 9%;">
+                    <button type="button" class="btn btn-sm btn-outline-danger py-0 px-2" onclick="this.closest('tr').remove()" title="Eliminar este locus">❌</button>
                 </td>
             </tr>
         `;
@@ -2636,92 +2639,63 @@ function generarEditorFormularioPaternidad(ex, exIdx, orden, guardado) {
                         <i class="bi bi-shield-slash me-1"></i>Sin Firma (Conocimiento Propio)
                     </span>
                 </div>
-                <div class="text-muted small">
-                    <i class="bi bi-pencil-square me-1"></i>Todos los datos son 100% editables para generar el documento oficial.
-                </div>
             </div>
 
             <!-- ENCABEZADO PERICIAL Y FECHAS -->
             <div class="card mb-3 border bg-light">
                 <div class="card-header bg-white py-2 fw-bold text-dark border-bottom d-flex justify-content-between">
-                    <span><i class="bi bi-folder2-open me-1 text-primary"></i>1. Identificación del Caso, Convenio y Fechas</span>
-                    <small class="text-muted">Aparece en la parte superior del informe</small>
+                    <span><i class="bi bi-folder2-open me-1 text-primary"></i>1. Identificación del Caso y Fechas</span>
                 </div>
                 <div class="card-body p-3">
                     <div class="row g-2 mb-2">
                         <div class="col-md-3">
                             <label class="form-label small fw-bold mb-1">Código de caso:</label>
-                            <input type="text" class="form-control form-control-sm" id="p-edit-codigoCaso" value="${escapeHTML(pData.codigoCaso)}" placeholder="ej. PAV-2609">
+                            <input type="text" class="form-control form-control-sm" id="p-edit-codigoCaso" value="${escapeHTML(pData.codigoCaso)}">
                         </div>
                         <div class="col-md-3">
                             <label class="form-label small fw-bold mb-1">Fecha de atención:</label>
-                            <input type="text" class="form-control form-control-sm" id="p-edit-fechaAtencion" value="${escapeHTML(pData.fechaAtencion)}" placeholder="DD/MM/AA">
+                            <input type="text" class="form-control form-control-sm" id="p-edit-fechaAtencion" value="${escapeHTML(pData.fechaAtencion)}">
                         </div>
                         <div class="col-md-3">
                             <label class="form-label small fw-bold mb-1">Fecha de emisión:</label>
-                            <input type="text" class="form-control form-control-sm" id="p-edit-fechaEmision" value="${escapeHTML(pData.fechaEmision)}" placeholder="DD/MM/AA">
-                        </div>
-                    </div>
-                    <div class="row g-2">
-                        <div class="col-12">
-                            <label class="form-label small fw-bold mb-1">Texto de Tecnología / Plataforma (encima del cuadro):</label>
-                            <input type="text" class="form-control form-control-sm bg-white" id="p-edit-tecnologia" value="${escapeHTML(pData.tecnologia)}">
+                            <input type="text" class="form-control form-control-sm" id="p-edit-fechaEmision" value="${escapeHTML(pData.fechaEmision)}">
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- PARTICIPANTES Y MUESTRAS -->
+            <!-- PARTICIPANTES -->
             <div class="card mb-3 border bg-light">
                 <div class="card-header bg-white py-2 fw-bold text-dark border-bottom">
-                    <i class="bi bi-people me-1 text-primary"></i>2. Datos de los Participantes y Muestras
+                    <i class="bi bi-people me-1 text-primary"></i>2. Datos de los Participantes
                 </div>
                 <div class="card-body p-3">
                     <div class="row g-3">
                         <div class="col-md-6 border-end">
-                            <h6 class="fw-bold text-primary mb-2"><i class="bi bi-person me-1"></i>MENOR / EXAMINADO(A)</h6>
+                            <h6 class="fw-bold text-primary mb-2">MENOR / EXAMINADO(A)</h6>
                             <div class="mb-2">
-                                <label class="form-label small mb-1">Nombre Completo del Menor:</label>
-                                <input type="text" class="form-control form-control-sm fw-bold" id="p-edit-menorNombre" value="${escapeHTML(pData.menorNombre || orden.nombre)}" placeholder="ej. NORMA">
-                            </div>
-                            <div class="row g-2">
-                                <div class="col-6">
-                                    <label class="form-label small mb-1">Tipo de muestra:</label>
-                                    <input type="text" class="form-control form-control-sm" id="p-edit-menorTipoMuestra" value="${escapeHTML(pData.menorTipoMuestra)}" placeholder="Bucal">
-                                </div>
-                                <div class="col-6">
-                                    <label class="form-label small mb-1">Prueba N°:</label>
-                                    <input type="text" class="form-control form-control-sm" id="p-edit-menorPruebaNro" value="${escapeHTML(pData.menorPruebaNro)}" placeholder="2609-20">
-                                </div>
+                                <label class="form-label small mb-1">Nombre Completo:</label>
+                                <input type="text" class="form-control form-control-sm fw-bold" id="p-edit-menorNombre" value="${escapeHTML(pData.menorNombre || orden.nombre)}">
                             </div>
                         </div>
-
                         <div class="col-md-6">
-                            <h6 class="fw-bold text-success mb-2"><i class="bi bi-person-badge me-1"></i>PRESUNTO PADRE</h6>
+                            <h6 class="fw-bold text-success mb-2">PRESUNTO PADRE</h6>
                             <div class="mb-2">
-                                <label class="form-label small mb-1">Nombre Completo del Presunto Padre:</label>
-                                <input type="text" class="form-control form-control-sm fw-bold" id="p-edit-padreNombre" value="${escapeHTML(pData.padreNombre)}" placeholder="ej. ENRIQUE">
-                            </div>
-                            <div class="row g-2">
-                                <div class="col-6">
-                                    <label class="form-label small mb-1">Tipo de muestra:</label>
-                                    <input type="text" class="form-control form-control-sm" id="p-edit-padreTipoMuestra" value="${escapeHTML(pData.padreTipoMuestra)}" placeholder="Bucal">
-                                </div>
-                                <div class="col-6">
-                                    <label class="form-label small mb-1">Prueba N°:</label>
-                                    <input type="text" class="form-control form-control-sm" id="p-edit-padrePruebaNro" value="${escapeHTML(pData.padrePruebaNro)}" placeholder="2609-30">
-                                </div>
+                                <label class="form-label small mb-1">Nombre Completo:</label>
+                                <input type="text" class="form-control form-control-sm fw-bold" id="p-edit-padreNombre" value="${escapeHTML(pData.padreNombre)}">
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- CUADRO COMPARATIVO DE LOCI / IP / TAMAÑO DE ALELO -->
+            <!-- CUADRO COMPARATIVO DE LOCI -->
             <div class="card mb-3 border">
                 <div class="card-header bg-dark text-white py-2 d-flex justify-content-between align-items-center">
-                    <span class="fw-bold"><i class="bi bi-table me-1"></i>3. Cuadro Comparativo de Marcadores STR (24 Loci con IP y Alelos)</span>
-                    <small class="opacity-75">Orden idéntico al PDF del Spectrum Compact CE</small>
+                    <span class="fw-bold"><i class="bi bi-table me-1"></i>3. Cuadro Comparativo de Marcadores STR</span>
+                    <button type="button" class="btn btn-sm btn-success fw-bold text-white px-3 shadow-sm" onclick="agregarFilaLocusInformativa()">
+                        ➕ Agregar Nuevo Locus / Indicador
+                    </button>
                 </div>
                 <div class="table-responsive p-0">
                     <table class="table table-bordered table-sm align-middle mb-0" id="tabla-editor-loci-paternidad">
@@ -2729,34 +2703,34 @@ function generarEditorFormularioPaternidad(ex, exIdx, orden, guardado) {
                             <tr>
                                 <th rowspan="2" class="align-middle">Loci</th>
                                 <th rowspan="2" class="align-middle">IP</th>
-                                <th colspan="2" class="bg-primary-subtle text-primary border-bottom-0">MENOR (Tamaño de Alelo)</th>
-                                <th colspan="2" class="bg-success-subtle text-success border-bottom-0">PRESUNTO PADRE (Tamaño de Alelo)</th>
+                                <th colspan="2" class="bg-primary-subtle text-primary border-bottom-0">MENOR (Alelos)</th>
+                                <th colspan="2" class="bg-success-subtle text-success border-bottom-0">PRESUNTO PADRE (Alelos)</th>
+                                <th rowspan="2" class="align-middle">Acción</th>
                             </tr>
                             <tr>
-                                <th class="bg-primary-subtle text-primary py-1" style="font-size: 0.75rem;">Alelo 1</th>
-                                <th class="bg-primary-subtle text-primary py-1" style="font-size: 0.75rem;">Alelo 2</th>
-                                <th class="bg-success-subtle text-success py-1" style="font-size: 0.75rem;">Alelo 1</th>
-                                <th class="bg-success-subtle text-success py-1" style="font-size: 0.75rem;">Alelo 2</th>
+                                <th class="bg-primary-subtle text-primary py-1">Alelo 1</th>
+                                <th class="bg-primary-subtle text-primary py-1">Alelo 2</th>
+                                <th class="bg-success-subtle text-success py-1">Alelo 1</th>
+                                <th class="bg-success-subtle text-success py-1">Alelo 2</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody id="tbody-loci-paternidad-informativa">
                             ${filasLoci}
                         </tbody>
                     </table>
                 </div>
             </div>
 
-            <!-- INTERPRETACIÓN Y RESULTADOS GLOBALES -->
+            <!-- RESULTADOS GLOBALES -->
             <div class="card mb-2 border bg-light">
                 <div class="card-header bg-white py-2 fw-bold text-dark border-bottom">
-                    <i class="bi bi-file-earmark-check me-1 text-primary"></i>4. Interpretación y Resultados Globales Bioestadísticos
+                    <i class="bi bi-file-earmark-check me-1 text-primary"></i>4. Resultados Globales
                 </div>
                 <div class="card-body p-3">
                     <div class="mb-3">
-                        <label class="form-label small fw-bold mb-1">Interpretación (Texto que va debajo del cuadro):</label>
+                        <label class="form-label small fw-bold mb-1">Interpretación:</label>
                         <textarea class="form-control form-control-sm" id="p-edit-interpretacion" rows="3">${escapeHTML(pData.interpretacion)}</textarea>
                     </div>
-
                     <div class="row g-2 mb-3">
                         <div class="col-md-6">
                             <label class="form-label small fw-bold mb-1">ÍNDICE DE PATERNIDAD ACUMULATIVO (IPC):</label>
@@ -2765,17 +2739,6 @@ function generarEditorFormularioPaternidad(ex, exIdx, orden, guardado) {
                         <div class="col-md-6">
                             <label class="form-label small fw-bold mb-1">PROBABILIDAD DE PATERNIDAD ACUMULATIVA (%):</label>
                             <input type="text" class="form-control form-control-sm fw-bold font-monospace text-primary" id="p-edit-probabilidadAcumulada" value="${escapeHTML(pData.probabilidadAcumulada)}">
-                        </div>
-                    </div>
-
-                    <div class="row g-2">
-                        <div class="col-md-8">
-                            <label class="form-label small fw-bold mb-1">Nota de procedencia de muestra:</label>
-                            <input type="text" class="form-control form-control-sm" id="p-edit-notaLaboratorio" value="${escapeHTML(pData.notaLaboratorio)}">
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label small fw-bold mb-1">Alcance:</label>
-                            <input type="text" class="form-control form-control-sm" id="p-edit-alcancePrivado" value="${escapeHTML(pData.alcancePrivado)}">
                         </div>
                     </div>
                 </div>
@@ -6481,3 +6444,74 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 window.addEventListener("beforeunload", persistirDatos);
+function agregarFilaLocusLegal() {
+    const tbody = document.getElementById("tbody-loci-paternidad-legal");
+    if (!tbody) return;
+    const nuevoIdx = tbody.querySelectorAll("tr").length;
+    const tr = document.createElement("tr");
+    tr.setAttribute("data-pl-locus-row", nuevoIdx);
+    tr.innerHTML = `
+        <td class="text-center bg-light fw-bold" style="width: 13%;">
+            <input type="text" class="form-control form-control-sm text-center fw-bold py-1" data-pl-campo="locus" placeholder="Nuevo Locus">
+        </td>
+        <td style="width: 9%;">
+            <input type="text" class="form-control form-control-sm text-center py-1 fw-bold" data-pl-campo="ip" placeholder="IP" value="0.00">
+        </td>
+        <td style="width: 11%;">
+            <input type="text" class="form-control form-control-sm text-center py-1 font-monospace" data-pl-campo="m1" placeholder="Alelo">
+        </td>
+        <td style="width: 11%;">
+            <input type="text" class="form-control form-control-sm text-center py-1 font-monospace" data-pl-campo="m2" placeholder="Alelo">
+        </td>
+        <td style="width: 12%;">
+            <input type="text" class="form-control form-control-sm text-center py-1 font-monospace bg-primary-subtle" data-pl-campo="hijo1" placeholder="Alelo">
+        </td>
+        <td style="width: 12%;">
+            <input type="text" class="form-control form-control-sm text-center py-1 font-monospace bg-primary-subtle" data-pl-campo="hijo2" placeholder="Alelo">
+        </td>
+        <td style="width: 12%;">
+            <input type="text" class="form-control form-control-sm text-center py-1 font-monospace bg-success-subtle fw-semibold" data-pl-campo="p1" placeholder="Alelo">
+        </td>
+        <td style="width: 12%;">
+            <input type="text" class="form-control form-control-sm text-center py-1 font-monospace bg-success-subtle fw-semibold" data-pl-campo="p2" placeholder="Alelo">
+        </td>
+        <td class="text-center align-middle" style="width: 8%;">
+            <button type="button" class="btn btn-sm btn-outline-danger py-0 px-2" onclick="this.closest('tr').remove()" title="Eliminar este locus">❌</button>
+        </td>
+    `;
+    tbody.appendChild(tr);
+}
+window.agregarFilaLocusLegal = agregarFilaLocusLegal;
+
+function agregarFilaLocusInformativa() {
+    const tbody = document.getElementById("tbody-loci-paternidad-informativa");
+    if (!tbody) return;
+    const nuevoIdx = tbody.querySelectorAll("tr").length;
+    const tr = document.createElement("tr");
+    tr.setAttribute("data-p-locus-row", nuevoIdx);
+    tr.innerHTML = `
+        <td class="text-center bg-light fw-bold" style="width: 18%;">
+            <input type="text" class="form-control form-control-sm text-center fw-bold py-1" data-p-campo="locus" placeholder="Nuevo Locus">
+        </td>
+        <td style="width: 15%;">
+            <input type="text" class="form-control form-control-sm text-center py-1" data-p-campo="ip" placeholder="IP" value="1.00">
+        </td>
+        <td style="width: 16%;">
+            <input type="text" class="form-control form-control-sm text-center py-1 font-monospace" data-p-campo="m1" placeholder="Alelo">
+        </td>
+        <td style="width: 16%;">
+            <input type="text" class="form-control form-control-sm text-center py-1 font-monospace" data-p-campo="m2" placeholder="Alelo">
+        </td>
+        <td style="width: 16%;">
+            <input type="text" class="form-control form-control-sm text-center py-1 font-monospace fw-semibold" data-p-campo="p1" placeholder="Alelo">
+        </td>
+        <td style="width: 16%;">
+            <input type="text" class="form-control form-control-sm text-center py-1 font-monospace fw-semibold" data-p-campo="p2" placeholder="Alelo">
+        </td>
+        <td class="text-center align-middle" style="width: 9%;">
+            <button type="button" class="btn btn-sm btn-outline-danger py-0 px-2" onclick="this.closest('tr').remove()" title="Eliminar este locus">❌</button>
+        </td>
+    `;
+    tbody.appendChild(tr);
+}
+window.agregarFilaLocusInformativa = agregarFilaLocusInformativa;
