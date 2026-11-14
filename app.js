@@ -2047,29 +2047,32 @@ function generarEditorFormularioPaternidadLegal(ex, exIdx, orden, guardado) {
     (pData.loci || LOCI_PATERNIDAD_LEGAL_DEFECTO).forEach((item, lIdx) => {
         filasLoci += `
             <tr data-pl-locus-row="${lIdx}">
-                <td class="text-center bg-light fw-bold" style="width: 14%;">
+                <td class="text-center bg-light fw-bold" style="width: 13%;">
                     <input type="text" class="form-control form-control-sm text-center fw-bold py-1" data-pl-campo="locus" value="${escapeHTML(item.locus)}">
                 </td>
-                <td style="width: 10%;">
+                <td style="width: 9%;">
                     <input type="text" class="form-control form-control-sm text-center py-1 fw-bold" data-pl-campo="ip" placeholder="IP" value="${escapeHTML(item.ip ?? '')}">
                 </td>
-                <td style="width: 12%;">
+                <td style="width: 11%;">
                     <input type="text" class="form-control form-control-sm text-center py-1 font-monospace" data-pl-campo="m1" placeholder="Alelo 1" value="${escapeHTML(item.m1 ?? '')}">
                 </td>
-                <td style="width: 12%;">
+                <td style="width: 11%;">
                     <input type="text" class="form-control form-control-sm text-center py-1 font-monospace" data-pl-campo="m2" placeholder="Alelo 2" value="${escapeHTML(item.m2 ?? '')}">
                 </td>
-                <td style="width: 13%;">
+                <td style="width: 12%;">
                     <input type="text" class="form-control form-control-sm text-center py-1 font-monospace bg-primary-subtle" data-pl-campo="hijo1" placeholder="Alelo 1" value="${escapeHTML(item.hijo1 ?? '')}">
                 </td>
-                <td style="width: 13%;">
+                <td style="width: 12%;">
                     <input type="text" class="form-control form-control-sm text-center py-1 font-monospace bg-primary-subtle" data-pl-campo="hijo2" placeholder="Alelo 2" value="${escapeHTML(item.hijo2 ?? '')}">
                 </td>
-                <td style="width: 13%;">
+                <td style="width: 12%;">
                     <input type="text" class="form-control form-control-sm text-center py-1 font-monospace bg-success-subtle fw-semibold" data-pl-campo="p1" placeholder="Alelo 1" value="${escapeHTML(item.p1 ?? '')}">
                 </td>
-                <td style="width: 13%;">
+                <td style="width: 12%;">
                     <input type="text" class="form-control form-control-sm text-center py-1 font-monospace bg-success-subtle fw-semibold" data-pl-campo="p2" placeholder="Alelo 2" value="${escapeHTML(item.p2 ?? '')}">
+                </td>
+                <td class="text-center align-middle" style="width: 8%;">
+                    <button type="button" class="btn btn-sm btn-outline-danger py-0 px-2" onclick="this.closest('tr').remove()" title="Eliminar este locus">❌</button>
                 </td>
             </tr>
         `;
@@ -2133,7 +2136,7 @@ function generarEditorFormularioPaternidadLegal(ex, exIdx, orden, guardado) {
                 </div>
             </div>
 
-            <!-- PARTICIPANTES Y MUESTRAS (3 PARTES: MADRE, MENOR Y PRESUNTO PADRE) -->
+            <!-- PARTICIPANTES Y MUESTRAS -->
             <div class="card mb-3 border bg-light">
                 <div class="card-header bg-white py-2 fw-bold text-dark border-bottom">
                     <i class="bi bi-people me-1 text-success"></i>2. Datos de los Participantes y Muestras (Madre, Menor y Presunto Padre)
@@ -2145,16 +2148,16 @@ function generarEditorFormularioPaternidadLegal(ex, exIdx, orden, guardado) {
                             <h6 class="fw-bold text-secondary mb-2"><i class="bi bi-gender-female me-1"></i>MADRE BIOLÓGICA</h6>
                             <div class="mb-2">
                                 <label class="form-label small mb-1">Nombre Completo de la Madre:</label>
-                                <input type="text" class="form-control form-control-sm fw-bold" id="pl-edit-madreNombre" value="${escapeHTML(pData.madreNombre)}" placeholder="ej. ESTRELLA LUCERO CASTRO ALFARO">
+                                <input type="text" class="form-control form-control-sm fw-bold" id="pl-edit-madreNombre" value="${escapeHTML(pData.madreNombre)}">
                             </div>
                             <div class="row g-2">
                                 <div class="col-6">
                                     <label class="form-label small mb-1">Tipo de muestra:</label>
-                                    <input type="text" class="form-control form-control-sm" id="pl-edit-madreTipoMuestra" value="${escapeHTML(pData.madreTipoMuestra)}" placeholder="Bucal / Sangre">
+                                    <input type="text" class="form-control form-control-sm" id="pl-edit-madreTipoMuestra" value="${escapeHTML(pData.madreTipoMuestra)}">
                                 </div>
                                 <div class="col-6">
                                     <label class="form-label small mb-1">Prueba N°:</label>
-                                    <input type="text" class="form-control form-control-sm" id="pl-edit-madrePruebaNro" value="${escapeHTML(pData.madrePruebaNro)}" placeholder="2610-10">
+                                    <input type="text" class="form-control form-control-sm" id="pl-edit-madrePruebaNro" value="${escapeHTML(pData.madrePruebaNro)}">
                                 </div>
                             </div>
                         </div>
@@ -2164,20 +2167,20 @@ function generarEditorFormularioPaternidadLegal(ex, exIdx, orden, guardado) {
                             <h6 class="fw-bold text-primary mb-2"><i class="bi bi-person me-1"></i>MENOR</h6>
                             <div class="mb-2">
                                 <label class="form-label small mb-1">Nombre Completo del Menor:</label>
-                                <input type="text" class="form-control form-control-sm fw-bold" id="pl-edit-menorNombre" value="${escapeHTML(pData.menorNombre || orden.nombre)}" placeholder="ej. AITANA LUCERO">
+                                <input type="text" class="form-control form-control-sm fw-bold" id="pl-edit-menorNombre" value="${escapeHTML(pData.menorNombre || orden.nombre)}">
                             </div>
                             <div class="mb-2">
                                 <label class="form-label small mb-1">CUI / DNI del Menor:</label>
-                                <input type="text" class="form-control form-control-sm" id="pl-edit-menorCui" value="${escapeHTML(pData.menorCui)}" placeholder="CUI:94778406">
+                                <input type="text" class="form-control form-control-sm" id="pl-edit-menorCui" value="${escapeHTML(pData.menorCui)}">
                             </div>
                             <div class="row g-2">
                                 <div class="col-6">
                                     <label class="form-label small mb-1">Tipo de muestra:</label>
-                                    <input type="text" class="form-control form-control-sm" id="pl-edit-menorTipoMuestra" value="${escapeHTML(pData.menorTipoMuestra)}" placeholder="Bucal / Sangre">
+                                    <input type="text" class="form-control form-control-sm" id="pl-edit-menorTipoMuestra" value="${escapeHTML(pData.menorTipoMuestra)}">
                                 </div>
                                 <div class="col-6">
                                     <label class="form-label small mb-1">Prueba N°:</label>
-                                    <input type="text" class="form-control form-control-sm" id="pl-edit-menorPruebaNro" value="${escapeHTML(pData.menorPruebaNro)}" placeholder="2610-20">
+                                    <input type="text" class="form-control form-control-sm" id="pl-edit-menorPruebaNro" value="${escapeHTML(pData.menorPruebaNro)}">
                                 </div>
                             </div>
                         </div>
@@ -2187,16 +2190,16 @@ function generarEditorFormularioPaternidadLegal(ex, exIdx, orden, guardado) {
                             <h6 class="fw-bold text-success mb-2"><i class="bi bi-person-badge me-1"></i>PRESUNTO PADRE</h6>
                             <div class="mb-2">
                                 <label class="form-label small mb-1">Nombre Completo del Presunto Padre:</label>
-                                <input type="text" class="form-control form-control-sm fw-bold" id="pl-edit-padreNombre" value="${escapeHTML(pData.padreNombre)}" placeholder="ej. DIONEL GOMEZ PEÑA">
+                                <input type="text" class="form-control form-control-sm fw-bold" id="pl-edit-padreNombre" value="${escapeHTML(pData.padreNombre)}">
                             </div>
                             <div class="row g-2 mt-4">
                                 <div class="col-6">
                                     <label class="form-label small mb-1">Tipo de muestra:</label>
-                                    <input type="text" class="form-control form-control-sm" id="pl-edit-padreTipoMuestra" value="${escapeHTML(pData.padreTipoMuestra)}" placeholder="Bucal / Sangre">
+                                    <input type="text" class="form-control form-control-sm" id="pl-edit-padreTipoMuestra" value="${escapeHTML(pData.padreTipoMuestra)}">
                                 </div>
                                 <div class="col-6">
                                     <label class="form-label small mb-1">Prueba N°:</label>
-                                    <input type="text" class="form-control form-control-sm" id="pl-edit-padrePruebaNro" value="${escapeHTML(pData.padrePruebaNro)}" placeholder="2610-30">
+                                    <input type="text" class="form-control form-control-sm" id="pl-edit-padrePruebaNro" value="${escapeHTML(pData.padrePruebaNro)}">
                                 </div>
                             </div>
                         </div>
@@ -2207,18 +2210,21 @@ function generarEditorFormularioPaternidadLegal(ex, exIdx, orden, guardado) {
             <!-- CUADRO COMPARATIVO DE LOCI / IP / TAMAÑO DE ALELO -->
             <div class="card mb-3 border">
                 <div class="card-header bg-dark text-white py-2 d-flex justify-content-between align-items-center">
-                    <span class="fw-bold" style="font-size: 1.1rem;"><i class="bi bi-table me-1"></i>3. Cuadro Comparativo de Marcadores STR (24 Loci con IP y Alelos)</span>
-                    <small class="opacity-75" style="font-size: 0.9rem;">Orden idéntico al PDF pericial de 4 columnas</small>
+                    <span class="fw-bold" style="font-size: 1.1rem;"><i class="bi bi-table me-1"></i>3. Cuadro Comparativo de Marcadores STR (Loci con IP y Alelos)</span>
+                    <button type="button" class="btn btn-sm btn-success fw-bold text-white px-3 shadow-sm" onclick="agregarFilaLocusLegal()">
+                        ➕ Agregar Nuevo Locus / Indicador
+                    </button>
                 </div>
                 <div class="table-responsive p-0">
                     <table class="table table-bordered align-middle mb-0" id="tabla-editor-loci-paternidad-legal">
                         <thead class="table-light text-center" style="font-size: 1.05rem;">
                             <tr>
-                                <th rowspan="2" class="align-middle" style="width: 14%;">Loci</th>
-                                <th rowspan="2" class="align-middle" style="width: 10%;">IP</th>
-                                <th colspan="2" class="border-bottom-0" style="width: 24%;">MADRE BIOLÓGICA</th>
-                                <th colspan="2" class="bg-primary-subtle text-primary border-bottom-0" style="width: 26%;">MENOR</th>
-                                <th colspan="2" class="bg-success-subtle text-success border-bottom-0" style="width: 26%;">PRESUNTO PADRE</th>
+                                <th rowspan="2" class="align-middle" style="width: 13%;">Loci</th>
+                                <th rowspan="2" class="align-middle" style="width: 9%;">IP</th>
+                                <th colspan="2" class="border-bottom-0" style="width: 22%;">MADRE BIOLÓGICA</th>
+                                <th colspan="2" class="bg-primary-subtle text-primary border-bottom-0" style="width: 24%;">MENOR</th>
+                                <th colspan="2" class="bg-success-subtle text-success border-bottom-0" style="width: 24%;">PRESUNTO PADRE</th>
+                                <th rowspan="2" class="align-middle" style="width: 8%;">Acción</th>
                             </tr>
                             <tr>
                                 <th class="py-1" style="font-size: 0.95rem;">Alelo 1</th>
@@ -2229,7 +2235,7 @@ function generarEditorFormularioPaternidadLegal(ex, exIdx, orden, guardado) {
                                 <th class="bg-success-subtle text-success py-1" style="font-size: 0.95rem;">Alelo 2</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody id="tbody-loci-paternidad-legal">
                             ${filasLoci}
                         </tbody>
                     </table>
@@ -2262,26 +2268,6 @@ function generarEditorFormularioPaternidadLegal(ex, exIdx, orden, guardado) {
                         <div class="col-12">
                             <label class="form-label fw-bold mb-1" style="font-size: 1rem;">Nota de procedencia de muestra:</label>
                             <input type="text" class="form-control" id="pl-edit-notaLaboratorio" value="${escapeHTML(pData.notaLaboratorio)}" style="font-size: 1rem;">
-                        </div>
-                    </div>
-
-                    <!-- VISTA PREVIA DE LOS CUADROS DE FIRMAS Y SELLOS LEGALES -->
-                    <div class="card border">
-                        <div class="card-header bg-white py-1 px-2 border-bottom fw-bold text-secondary" style="font-size: 1rem;">
-                            <i class="bi bi-shield-check me-1 text-success"></i>Diseño Oficial del Pie Legal (Resultados Globales + Toma de Muestra + Análisis con Sello y Firma):
-                        </div>
-                        <div class="card-body p-2 bg-white">
-                            <div class="row g-2 align-items-center">
-                                <div class="col-md-4 border-end text-center p-2">
-                                    <span class="badge bg-light text-dark border d-block py-1 mb-1" style="font-size: 0.9rem;">PERSONAL A CARGO DE LA TOMA</span>
-                                    <span class="text-muted d-block" style="font-size: 0.95rem;">Recuadro reglamentario para firma física y sello del personal de toma de muestra.</span>
-                                </div>
-                                <div class="col-md-8 text-center p-2">
-                                    <span class="badge bg-light text-dark border d-block py-1 mb-1" style="font-size: 0.9rem;">PERSONAL A CARGO DEL ANALISIS DE LA MUESTRA</span>
-                                    <img src="sello-firma-biologo-legal.png" alt="Sello y Firma del Biólogo Genetista" style="max-height: 70px; object-fit: contain; margin-top: 4px;" onerror="this.src='./sello-firma-biologo-legal.png'">
-                                    <div class="fw-bold text-dark mt-1" style="font-size: 1.05rem;">Christian Emilio Cancho Ccaico — Biólogo genetista C.B.P. 14529</div>
-                                </div>
-                            </div>
                         </div>
                     </div>
                 </div>
