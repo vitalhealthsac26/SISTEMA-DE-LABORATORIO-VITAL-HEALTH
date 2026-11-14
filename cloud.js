@@ -230,13 +230,13 @@ window.nubeGuardarConfiguracion = function (conf) {
 
 window.nubeGuardarOrden = function (orden) {
     if (!db || !auth || !auth.currentUser) return;
-    setDoc(doc(db, "ordenes", String(orden.nroOrden)), limpiar(orden))
+    setDoc(doc(db, "ordenes", String(orden.nroOrden)), limpiar(orden), { merge: true })
         .catch(error => console.error("No se pudo subir la orden a la nube:", error));
 };
 
 window.nubeGuardarMovimiento = function (movimiento) {
     if (!db || !auth || !auth.currentUser) return;
-    setDoc(doc(db, "caja", String(movimiento.id)), limpiar(movimiento))
+    setDoc(doc(db, "caja", String(movimiento.id)), limpiar(movimiento), { merge: true })
         .catch(error => console.error("No se pudo subir el movimiento a la nube:", error));
 };
 
@@ -249,14 +249,14 @@ window.nubeGuardarExamen = function (examen) {
 window.nubeGuardarPaciente = function (paciente) {
     if (!db || !auth || !auth.currentUser) return;
     const idDoc = String(paciente.dni || paciente.id || `pac_${Date.now()}`);
-    setDoc(doc(db, "pacientes", idDoc), limpiar(paciente))
+    setDoc(doc(db, "pacientes", idDoc), limpiar(paciente), { merge: true })
         .catch(error => console.error("No se pudo subir el paciente a la nube:", error));
 };
 
 window.nubeGuardarCotizacion = function (cotizacion) {
     if (!db || !auth || !auth.currentUser) return;
     const idDoc = String(cotizacion.id || `cot_${Date.now()}`);
-    setDoc(doc(db, "cotizaciones", idDoc), limpiar(cotizacion))
+    setDoc(doc(db, "cotizaciones", idDoc), limpiar(cotizacion), { merge: true })
         .catch(error => console.error("No se pudo subir la cotización a la nube:", error));
 };
 
