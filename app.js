@@ -5735,8 +5735,21 @@ function construirCabeceraInformeHTML() {
 }
 
 function construirDatosPacienteInformeHTML(orden) {
-    const fechaEmision = new Date().toLocaleDateString();
-    const horaEmision = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    // Si la orden ya tiene una fecha de emisión original fija, úsala. Si no, toma la fecha de creación de la orden.
+    // Solo como último recurso absoluto (si faltaran ambas) usará la fecha actual del sistema.
+    const fechaOriginalOrden = orden.fechaEmisionOriginal || orden.fechaHora || new Date().toLocaleString();
+    
+    // Si la fecha de la orden trae hora o formato largo, la separamos o la mostramos limpia
+    const partesFecha = String(fechaOriginalOrden).split(',');
+    const fechaEmisionFija = partesFecha[0].trim();
+    const horaEmisionFija = partesFecha[1] ? partesFecha[1].trim() : (orden.horaInforme || "00:00");
+
+    // Guardamos la fecha fija en la orden la primera vez para que nunca cambie
+    if (!orden.fechaEmisionOriginal) {
+        orden.fechaEmisionOriginal = `${fechaEmisionFija} ${horaEmisionFija}`;
+        // Si usas nube o localStorage, puedes persistirlo aquí si lo deseas
+    }
+    
     return `
         <div class="informe-titulo" style="text-align: center; color: #0072bc; font-weight: 800; font-size: 12px; letter-spacing: 2px; margin: 4px 0 8px 0;">INFORME DE RESULTADOS DE LABORATORIO</div>
         <div class="informe-datos">
