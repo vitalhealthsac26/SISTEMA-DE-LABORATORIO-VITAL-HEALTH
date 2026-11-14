@@ -5746,17 +5746,17 @@ function construirDatosPacienteInformeHTML(orden) {
     if (!orden.fechaEmisionOriginal) {
         orden.fechaEmisionOriginal = `${fechaEmisionFija} ${horaEmisionFija}`;
     }
-    
+
     return `
         <div class="informe-titulo" style="text-align: center; color: #0072bc; font-weight: 800; font-size: 12px; letter-spacing: 2px; margin: 4px 0 8px 0;">INFORME DE RESULTADOS DE LABORATORIO</div>
         <div class="informe-datos">
-            <div class="dato dato-ancho"><span class="dato-rotulo">Paciente</span><span class="dato-valor">${escapeHTML(orden.nombre)}</span></div>
-            <div class="dato"><span class="dato-rotulo">DNI</span><span class="dato-valor">${escapeHTML(orden.dni)}</span></div>
-            <div class="dato"><span class="dato-rotulo">Edad</span><span class="dato-valor">${escapeHTML(orden.edad || "—")}</span></div>
-            <div class="dato"><span class="dato-rotulo">Sexo</span><span class="dato-valor">${escapeHTML(orden.sexo || "—")}</span></div>
-            <div class="dato"><span class="dato-rotulo">Médico solicitante</span><span class="dato-valor">${escapeHTML(orden.doctor || "Particular")}</span></div>
-            <div class="dato"><span class="dato-rotulo">N° de orden</span><span class="dato-valor">${escapeHTML(orden.nroOrden)}</span></div>
-            <div class="dato"><span class="dato-rotulo">Fecha de informe</span><span class="dato-valor">${fechaEmision} ${horaEmision}</span></div>
+            <div class="dato dato-ancho"><span class="dato-rotulo">Paciente</span><span class="dato-valor">${orden.nombre || ""}</span></div>
+            <div class="dato"><span class="dato-rotulo">DNI</span><span class="dato-valor">${orden.dni || ""}</span></div>
+            <div class="dato"><span class="dato-rotulo">Edad</span><span class="dato-valor">${orden.edad || "—"}</span></div>
+            <div class="dato"><span class="dato-rotulo">Sexo</span><span class="dato-valor">${orden.sexo || "—"}</span></div>
+            <div class="dato"><span class="dato-rotulo">Médico solicitante</span><span class="dato-valor">${orden.doctor || "Particular"}</span></div>
+            <div class="dato"><span class="dato-rotulo">N° de orden</span><span class="dato-valor">${orden.nroOrden || ""}</span></div>
+            <div class="dato"><span class="dato-rotulo">Fecha de informe</span><span class="dato-valor">${orden.fechaEmisionOriginal}</span></div>
             <div class="dato"><span class="dato-rotulo">Exámenes incluidos</span><span class="dato-valor">${(orden.resultados || orden.examenes || []).length}</span></div>
         </div>
     `;
