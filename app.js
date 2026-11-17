@@ -3108,16 +3108,6 @@ function reordenarExamenesDragDrop(nroOrden, desdeIndex, haciaIndex) {
 }
 window.reordenarExamenesDragDrop = reordenarExamenesDragDrop;
 
-function guardarResultados(nroOrden, silencioso = false) {
-    const orden = (ordenesRegistradas || []).find(o => o.nroOrden === nroOrden);
-    const editor = document.getElementById("resultados-editor");
-    if (!orden || !editor) return false;
-
-    const grupos = editor.querySelectorAll(".indicador-resultado-row");
-    const cardPaternidad = editor.querySelector("[data-paternidad-card='true']");
-    const cardPaternidadLegal = editor.querySelector("[data-paternidad-legal-card='true']");
-    if (!grupos.length && !cardPaternidad && !cardPaternidadLegal) return false;
-
     function guardarResultados(nroOrden, silencioso = false) {
     const orden = (ordenesRegistradas || []).find(o => o.nroOrden === nroOrden);
     const editor = document.getElementById("resultados-editor");
