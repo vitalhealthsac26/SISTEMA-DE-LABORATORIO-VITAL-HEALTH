@@ -353,49 +353,6 @@ const BASE_VALORES_REFERENCIALES = {
   { id: 'nota_laboratorio', nombre: 'Nota de procedencia de muestra', valor: 'Basado en las muestras recibidas de laboratorio VITAL HEALTH el cual provee los nombres de las partes probadas que aparecen en este reporte.', unidad: '', referencia: 'Constancia de recepción', metodo: '-' },
   { id: 'alcance_privado', nombre: 'Alcance del informe', valor: 'Informe de prueba de ADN - Solo para conocimiento propio. No tiene validez judicial ni pericial.', unidad: '', referencia: 'Uso estrictamente confidencial', metodo: '-' }
 ],
-
-"PERFIL PREVENTIVO": [
-  { nombre: "GLUCOSA BASAL", esSeccion: true },
-  { id: 'glucosa_basal', nombre: 'GLUCOSA BASAL', valor: '', unidad: 'mg/dL', refMin: 74, refMax: 106, referencia: 'Adultos: 74 - 106 | Niños: 60 - 100 | Neonatos: 50 - 80', metodo: 'Colorimétrico Enzimático o Espectrofotometría EC 9200' },
-  
-  { nombre: "PERFIL LIPÍDICO", esSeccion: true },
-  { id: 'col_tot', nombre: 'Colesterol Total', valor: '', unidad: 'mg/dL', refMin: 0, refMax: 200, referencia: 'Deseable: < 200 | Moderadamente alto: 200 - 239 | Elevado: >= 240' },
-  { id: 'hdl', nombre: 'HDL - Colesterol', valor: '', unidad: 'mg/dL', refMin: 40, refMax: 60, referencia: 'Hombres: > 40.00 | Mujeres: > 50.00' },
-  { id: 'ldl', nombre: 'LDL - Colesterol', valor: '', unidad: 'mg/dL', refMin: 0, refMax: 129, referencia: 'Óptimo: < 100 | Riesgo moderado: 100 - 129 | Riesgo alto: >= 130' },
-  { id: 'vldl', nombre: 'VLDL - Colesterol', valor: '', unidad: 'mg/dL', refMin: 2, refMax: 30, referencia: '2.00 - 30.00' },
-  { id: 'trig', nombre: 'Triglicéridos', valor: '', unidad: 'mg/dL', refMin: 0, refMax: 150, referencia: 'Normal: < 150 | Límite: 150 - 199 | Elevado: >= 200' },
-  
-  { nombre: "HEMATOLOGÍA", esSeccion: true },
-  { id: 'hemoglobina', nombre: 'Hemoglobina', valor: '', unidad: 'g/dL', refMin: 12.00, refMax: 17.50, referencia: 'Hombres: 13.5 - 17.5 | Mujeres: 12.0 - 15.5 | Niños: 11.5 - 15.0' },
-  { id: 'hematocrito', nombre: 'Hematocrito', valor: '', unidad: '%', refMin: 36.00, refMax: 50.00, referencia: 'Hombres: 41.0 - 50.0 | Mujeres: 36.0 - 45.0 | Niños: 35.0 - 44.0' },
-
-  { nombre: "EXAMEN COMPLETO DE ORINA", esSeccion: true },
-  { nombre: "Física", esSeccion: true },
-  { id: 'color', nombre: 'Color', valor: '', referencia: 'Translúcido - Amarillo' },
-  { id: 'aspecto', nombre: 'Aspecto', valor: '', referencia: 'Ligeramente Turbio' },
-  { nombre: "Química", esSeccion: true },
-  { id: 'sangre', nombre: 'Sangre', valor: '', unidad: 'mg/dL', referencia: 'Negativo' },
-  { id: 'urobilinogeno', nombre: 'Urobilinógeno', valor: '', referencia: 'Normal' },
-  { id: 'bilirrubinas', nombre: 'Bilirrubinas', valor: '', referencia: 'Negativo' },
-  { id: 'proteinas', nombre: 'Proteínas', valor: '', unidad: 'mg/dL', referencia: 'Negativo' },
-  { id: 'nitritos', nombre: 'Nitritos', valor: '', referencia: 'Negativo' },
-  { id: 'cetonas', nombre: 'Cetonas', valor: '', unidad: 'mg/dL', referencia: 'Negativo' },
-  { id: 'acido_ascorbico', nombre: 'Ácido Ascórbico', valor: '', unidad: 'mmol/L', referencia: 'Negativo' },
-  { id: 'glucosa', nombre: 'Glucosa', valor: '', unidad: 'mg/dL', referencia: 'Negativo - Normal' },
-  { id: 'ph', nombre: 'pH', valor: '', referencia: '5.0 - 8.0' },
-  { id: 'densidad', nombre: 'Densidad', valor: '', referencia: '1.005 - 1.030' },
-  { id: 'leucocitos_q', nombre: 'Leucocitos', valor: '', referencia: 'Negativo' },
-  { nombre: "Microscópico", esSeccion: true },
-  { id: 'cel_epiteliales', nombre: 'Células epiteliales', unidad: 'cél/campo' },
-  { id: 'leucocitos_m', nombre: 'Leucocitos', valor: '', unidad: 'cél/campo' },
-  { id: 'hematies', nombre: 'Hematíes', valor: '', unidad: 'cél/campo' },
-  { id: 'piocitos', nombre: 'Piocitos', valor: '', unidad: 'cél/campo' },
-  { id: 'cristales', nombre: 'Cristales', valor: '', unidad: 'cr/campo' },
-  { id: 'filamento_mucoide', nombre: 'Filamento Mucoide', valor: '', unidad: 'fm/campo' },
-  { id: 'bacterias', nombre: 'Bacterias', valor: '', unidad: 'cél/campo' },
-  { id: 'levaduras', nombre: 'Levaduras', valor: '', unidad: 'cél/campo' },
-  { id: 'otros', nombre: 'Otros', valor: '', unidad: '/campo', referencia: 'Negativo' }
-],
 };
     
 // ==========================================
