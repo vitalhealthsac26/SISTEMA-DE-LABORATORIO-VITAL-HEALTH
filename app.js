@@ -3164,7 +3164,6 @@ function guardarResultados(nroOrden, silencioso = false) {
         });
     });
     
-    // Si la orden incluye la prueba de paternidad legal
     let datosPaternidadLegalGuardar = null;
     if (cardPaternidadLegal) {
         const valPL = id => {
@@ -3215,7 +3214,6 @@ function guardarResultados(nroOrden, silencioso = false) {
         };
     }
 
-    // Si la orden incluye la prueba de paternidad informativa
     let datosPaternidadGuardar = null;
     if (cardPaternidad) {
         const valP = id => {
