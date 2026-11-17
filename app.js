@@ -3137,8 +3137,11 @@ function guardarResultados(nroOrden, silencioso = false) {
             return el ? el.value.trim() : "";
         };
 
+        // CAMBIO CLAVE: Lee el nombre editado o nuevo indicador
+        const nombreParametro = leer("nombre-param") || fila.dataset.nombre || "Resultado";
+
         porExamen[exIdx].push({
-            nombre: fila.dataset.nombre || "Resultado", esSeccion: false,
+            nombre: nombreParametro, esSeccion: false,
             resultado: leer("resultado"), unidad: leer("unidad"),
             refMin: fila.dataset.refmin || "", refMax: fila.dataset.refmax || "",
             referencia: leer("referencia"),
@@ -3286,7 +3289,6 @@ function guardarResultados(nroOrden, silencioso = false) {
         }
 
         if (esPat && datosPaternidadGuardar) {
-            // Formatear indicadores sintéticos para compatibilidad universal
             const indPaternidad = [
                 { nombre: "Datos del Caso y Participantes", esSeccion: true },
                 { id: 'codigo_caso', nombre: 'Código de caso', resultado: datosPaternidadGuardar.codigoCaso },
