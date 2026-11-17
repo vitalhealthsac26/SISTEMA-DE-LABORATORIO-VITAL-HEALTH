@@ -3119,6 +3119,16 @@ function guardarResultados(nroOrden, silencioso = false) {
     const cardPaternidadLegal = editor.querySelector("[data-paternidad-legal-card='true']");
     if (!grupos.length && !cardPaternidad && !cardPaternidadLegal) return false;
 
+    function guardarResultados(nroOrden, silencioso = false) {
+    const orden = (ordenesRegistradas || []).find(o => o.nroOrden === nroOrden);
+    const editor = document.getElementById("resultados-editor");
+    if (!orden || !editor) return false;
+
+    const grupos = editor.querySelectorAll(".indicador-resultado-row");
+    const cardPaternidad = editor.querySelector("[data-paternidad-card='true']");
+    const cardPaternidadLegal = editor.querySelector("[data-paternidad-legal-card='true']");
+    if (!grupos.length && !cardPaternidad && !cardPaternidadLegal) return false;
+
     const porExamen = {};
     grupos.forEach(fila => {
         const exIdx = fila.dataset.ex;
@@ -3134,28 +3144,25 @@ function guardarResultados(nroOrden, silencioso = false) {
             return;
         }
 
+        // Lectura estricta por la posición exacta de cada columna en la fila visual:
+        // [0] Nombre/Parámetro | [1] Resultado | [2] Unidad | [3] Referencia | [4] Método
         const inputs = fila.querySelectorAll("input");
 
-        // Función inteligente: busca por atributo o usa la posición exacta del input como respaldo
-        const leer = (campo, indexFallback) => {
-            const el = fila.querySelector(`[data-campo="${campo}"]`);
-            if (el && el.value !== undefined && el.value !== "") return el.value.trim();
-            if (inputs[indexFallback] !== undefined) return inputs[indexFallback].value.trim();
-            return el ? el.value.trim() : "";
-        };
-
-        // Captura fielmente el nombre editado o el nuevo indicador escrito en pantalla
-        const nombreParametro = leer("nombre-param", 0) || fila.dataset.nombre || "Resultado";
+        const nombreParametro = (inputs[0] ? inputs[0].value.trim() : "") || fila.dataset.nombre || "Resultado";
+        const resultadoVal = inputs[1] ? inputs[1].value.trim() : "";
+        const unidadVal = inputs[2] ? inputs[2].value.trim() : "";
+        const referenciaVal = inputs[3] ? inputs[3].value.trim() : "";
+        const metodoVal = inputs[4] ? inputs[4].value.trim() : "";
 
         porExamen[exIdx].push({
             nombre: nombreParametro, 
             esSeccion: false,
-            resultado: leer("resultado", 1), 
-            unidad: leer("unidad", 2),
+            resultado: resultadoVal, 
+            unidad: unidadVal,
             refMin: fila.dataset.refmin || "", 
             refMax: fila.dataset.refmax || "",
-            referencia: leer("referencia", 3),
-            metodo: leer("metodo", 4)
+            referencia: referenciaVal,
+            metodo: metodoVal
         });
     });
     
