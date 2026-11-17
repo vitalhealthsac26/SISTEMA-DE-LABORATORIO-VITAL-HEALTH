@@ -396,6 +396,7 @@ const BASE_VALORES_REFERENCIALES = {
   { id: 'levaduras', nombre: 'Levaduras', valor: '', unidad: 'cél/campo' },
   { id: 'otros', nombre: 'Otros', valor: '', unidad: '/campo', referencia: 'Negativo' }
 ],
+};
     
 // ==========================================
 // 1. TUS EXÁMENES DETALLADOS PRINCIPALES
