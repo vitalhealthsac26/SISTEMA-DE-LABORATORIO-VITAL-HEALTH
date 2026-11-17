@@ -1060,6 +1060,6 @@
   {"Codigo": "1153", "Nombre": "XILOSA, EXCRECION EN ORINA", "Precio": 104.00},
   {"Codigo": "1154", "Nombre": "YODO PROTEICO (PBI)", "Precio": 203.00},
   {"Codigo": "1155", "Nombre": "ZINC EN ORINA DE 24 HORAS", "Precio": 189.00},
-  {"Codigo": "1156", "Nombre": "ZINC SERICO", "Precio": 160.00}
+  {"Codigo": "1156", "Nombre": "ZINC SERICO", "Precio": 160.00},
   {"Codigo": "1157", "Nombre": "PERFIL PREVENTIVO", "Precio": 90.00}
 ]
