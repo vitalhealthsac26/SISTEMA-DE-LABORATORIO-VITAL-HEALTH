@@ -2837,7 +2837,6 @@ function abrirResultados(nroOrden) {
         }
 
         const plantilla = obtenerIndicadoresParaOrden(ex);
-        // Limpiar cualquier contaminación previa de la plantilla de 24 indicadores de orina en exámenes independientes
         const teniaPlantillaOrinaErronea = (!plantilla || plantilla.length === 0) && guardado && Array.isArray(guardado.indicadores) &&
             guardado.indicadores.some(i => i.nombre === "Urobilinógeno" || i.nombre === "Ácido Ascórbico" || i.nombre === "Recuento Bacteriano");
 
@@ -2860,21 +2859,26 @@ function abrirResultados(nroOrden) {
         let filas = "";
         indicadores.forEach((ind, indIdx) => {
             const previo = guardado && guardado.indicadores && guardado.indicadores[indIdx] ? guardado.indicadores[indIdx] : null;
+            
             if (ind.esSeccion) {
                 filas += `
-                    <div class="row g-2 mb-2 mt-3" data-ex="${exIdx}" data-esseccion="true" data-nombre="${escapeHTML(ind.nombre)}">
-                        <div class="col-12">
+                    <div class="row g-2 mb-2 mt-3 indicador-resultado-row" data-ex="${exIdx}" data-esseccion="true" data-nombre="${escapeHTML(ind.nombre)}">
+                        <div class="col-11">
                             <h6 class="fw-bold text-dark bg-light p-2 border-start border-primary border-4 mb-0">${escapeHTML(ind.nombre)}</h6>
+                        </div>
+                        <div class="col-1 text-center">
+                            <button type="button" class="btn btn-sm btn-outline-danger py-0 px-2" onclick="this.closest('.indicador-resultado-row').remove()" title="Eliminar sección">❌</button>
                         </div>
                     </div>
                 `;
                 return;
             }
+
+            const nombreParam = previo && previo.nombre ? previo.nombre : ind.nombre;
             const referenciaBase = ind.referencia || formatoRango(ind.refMin, ind.refMax);
             const valorReferenciaPrevio = (previo && previo.referencia !== undefined && previo.referencia !== "") 
                 ? previo.referencia 
                 : referenciaBase;
-            const tieneUnidad = ind.unidad && ind.unidad.trim() !== "";
             const valorResultadoPrevio = previo ? previo.resultado : "";
             const valorMetodoPrevio = previo && previo.metodo !== undefined ? previo.metodo : (ind.metodo || "");
 
@@ -2911,23 +2915,25 @@ function abrirResultados(nroOrden) {
             }
 
             filas += `
-                <div class="row g-2 mb-2 align-items-center" data-ex="${exIdx}" data-ind="${indIdx}" data-nombre="${escapeHTML(ind.nombre)}" data-refmin="${escapeHTML(ind.refMin ?? "")}" data-refmax="${escapeHTML(ind.refMax ?? "")}">
+                <div class="row g-2 mb-2 align-items-center indicador-resultado-row" data-ex="${exIdx}" data-ind="${indIdx}" data-refmin="${escapeHTML(ind.refMin ?? "")}" data-refmax="${escapeHTML(ind.refMax ?? "")}">
                     <div class="col-md-3">
-                        <label class="form-label small mb-0 ps-2 fw-semibold">${escapeHTML(ind.nombre)}</label>
+                        <input type="text" class="form-control form-control-sm fw-semibold text-dark" data-campo="nombre-param" value="${escapeHTML(nombreParam)}" placeholder="Nombre indicador">
                     </div>
-                    <div class="${tieneUnidad ? 'col-md-2' : 'col-md-3'}">
+                    <div class="col-md-2">
                         <input type="text" class="form-control form-control-sm" data-campo="resultado" placeholder="Valor obtenido" value="${escapeHTML(valorResultadoPrevio)}">
                     </div>
-                    ${tieneUnidad ? `
                     <div class="col-md-2">
-                        <input type="text" class="form-control form-control-sm bg-light" data-campo="unidad" value="${escapeHTML(ind.unidad)}" readonly>
-                    </div>` : `<input type="hidden" data-campo="unidad" value="">`}
-                    <div class="${tieneUnidad ? 'col-md-3' : 'col-md-4'}">
+                        <input type="text" class="form-control form-control-sm bg-light" data-campo="unidad" value="${escapeHTML(ind.unidad || '')}" placeholder="Unidad">
+                    </div>
+                    <div class="col-md-3">
                         <input type="text" class="form-control form-control-sm bg-white" data-campo="referencia" value="${escapeHTML(valorReferenciaPrevio)}" placeholder="Valores de referencia">
                         ${htmlVariaciones}
                     </div>
-                    <div class="col-md-2">
+                    <div class="col-md-1">
                         <input type="text" class="form-control form-control-sm" data-campo="metodo" placeholder="Método" value="${escapeHTML(valorMetodoPrevio)}">
+                    </div>
+                    <div class="col-md-1 text-center">
+                        <button type="button" class="btn btn-sm btn-outline-danger py-0 px-1" onclick="this.closest('.indicador-resultado-row').remove()" title="Eliminar indicador">❌</button>
                     </div>
                 </div>
             `;
@@ -2945,16 +2951,25 @@ function abrirResultados(nroOrden) {
                         </span>
                         <h6 class="fw-bold text-primary mb-0 fs-6">${escapeHTML(nombreLimpioExamen)}</h6>
                     </div>
-                    <div class="btn-group btn-group-sm" role="group">
-                        <button type="button" class="btn btn-outline-secondary" onclick="moverExamenEnResultados('${orden.nroOrden}', ${exIdx}, -1)" ${exIdx === 0 ? 'disabled' : ''} title="Subir examen en el informe">
-                            <i class="bi bi-arrow-up-circle me-1"></i> Subir
-                        </button>
-                        <button type="button" class="btn btn-outline-secondary" onclick="moverExamenEnResultados('${orden.nroOrden}', ${exIdx}, 1)" ${exIdx === orden.examenes.length - 1 ? 'disabled' : ''} title="Bajar examen en el informe">
-                            <i class="bi bi-arrow-down-circle me-1"></i> Bajar
-                        </button>
+                    <div class="d-flex gap-2 align-items-center">
+                        <div class="btn-group btn-group-sm" role="group">
+                            <button type="button" class="btn btn-outline-secondary" onclick="moverExamenEnResultados('${orden.nroOrden}', ${exIdx}, -1)" ${exIdx === 0 ? 'disabled' : ''} title="Subir examen en el informe">
+                                <i class="bi bi-arrow-up-circle me-1"></i> Subir
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary" onclick="moverExamenEnResultados('${orden.nroOrden}', ${exIdx}, 1)" ${exIdx === orden.examenes.length - 1 ? 'disabled' : ''} title="Bajar examen en el informe">
+                                <i class="bi bi-arrow-down-circle me-1"></i> Bajar
+                            </button>
+                        </div>
                     </div>
                 </div>
-                ${filas}
+                <div class="contenedor-parametros-examen-${exIdx}">
+                    ${filas}
+                </div>
+                <div class="mt-3 pt-2 border-top d-flex justify-content-start">
+                    <button type="button" class="btn btn-sm btn-outline-success fw-bold px-3" onclick="agregarIndicadorEnResultados(${exIdx})">
+                        <i class="bi bi-plus-circle me-1"></i> Agregar Indicador
+                    </button>
+                </div>
             </div>
         `;
     });
@@ -2963,6 +2978,40 @@ function abrirResultados(nroOrden) {
     editor.innerHTML = html;
     inicializarDragAndDropResultados(nroOrden);
 }
+
+// Función auxiliar para agregar nuevos indicadores al vuelo
+function agregarIndicadorEnResultados(exIdx) {
+    const card = document.querySelector(`[data-ex-card-idx="${exIdx}"]`);
+    if (!card) return;
+    const contenedor = card.querySelector(`.contenedor-parametros-examen-${exIdx}`);
+    if (!contenedor) return;
+
+    const div = document.createElement("div");
+    div.className = "row g-2 mb-2 align-items-center indicador-resultado-row";
+    div.dataset.ex = exIdx;
+    div.innerHTML = `
+        <div class="col-md-3">
+            <input type="text" class="form-control form-control-sm fw-semibold text-dark" data-campo="nombre-param" placeholder="Nuevo parámetro">
+        </div>
+        <div class="col-md-2">
+            <input type="text" class="form-control form-control-sm" data-campo="resultado" placeholder="Valor obtenido">
+        </div>
+        <div class="col-md-2">
+            <input type="text" class="form-control form-control-sm bg-light" data-campo="unidad" placeholder="Unidad">
+        </div>
+        <div class="col-md-3">
+            <input type="text" class="form-control form-control-sm bg-white" data-campo="referencia" placeholder="Valores de referencia">
+        </div>
+        <div class="col-md-1">
+            <input type="text" class="form-control form-control-sm" data-campo="metodo" placeholder="Método">
+        </div>
+        <div class="col-md-1 text-center">
+            <button type="button" class="btn btn-sm btn-outline-danger py-0 px-1" onclick="this.closest('.indicador-resultado-row').remove()" title="Eliminar indicador">❌</button>
+        </div>
+    `;
+    contenedor.appendChild(div);
+}
+window.agregarIndicadorEnResultados = agregarIndicadorEnResultados;
 
 function inicializarDragAndDropResultados(nroOrden) {
     const contenedor = document.getElementById("contenedor-cards-examenes");
