@@ -3137,6 +3137,12 @@ window.reordenarExamenesDragDrop = reordenarExamenesDragDrop;
 
         const nombreParametro = (inputs[0] ? inputs[0].value.trim() : "") || fila.dataset.nombre || "Resultado";
         const resultadoVal = inputs[1] ? inputs[1].value.trim() : "";
+        
+        // 🚀 Si el resultado está vacío, se omite y no se guarda
+        if (resultadoVal === "") {
+            return; 
+        }
+
         const unidadVal = inputs[2] ? inputs[2].value.trim() : "";
         const referenciaVal = inputs[3] ? inputs[3].value.trim() : "";
         const metodoVal = inputs[4] ? inputs[4].value.trim() : "";
@@ -3151,6 +3157,32 @@ window.reordenarExamenesDragDrop = reordenarExamenesDragDrop;
             referencia: referenciaVal,
             metodo: metodoVal
         });
+    });
+
+    // 🧹 LIMPIEZA INTELIGENTE: Oculta secciones que se hayan quedado sin indicadores llenados
+    Object.keys(porExamen).forEach(exIdx => {
+        const items = porExamen[exIdx];
+        const itemsLimpios = [];
+        for (let i = 0; i < items.length; i++) {
+            if (items[i].esSeccion) {
+                let tieneElementosValidos = false;
+                for (let j = i + 1; j < items.length; j++) {
+                    if (items[j].esSeccion) break;
+                    if (items[j].resultado && items[j].resultado.trim() !== "") {
+                        tieneElementosValidos = true;
+                        break;
+                    }
+                }
+                if (tieneElementosValidos) {
+                    itemsLimpios.push(items[i]);
+                }
+            } else {
+                if (items[i].resultado && items[i].resultado.trim() !== "") {
+                    itemsLimpios.push(items[i]);
+                }
+            }
+        }
+        porExamen[exIdx] = itemsLimpios;
     });
     
     let datosPaternidadLegalGuardar = null;
