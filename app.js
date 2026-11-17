@@ -3144,8 +3144,6 @@ function guardarResultados(nroOrden, silencioso = false) {
             return;
         }
 
-        // Lectura estricta por la posición exacta de cada columna en la fila visual:
-        // [0] Nombre/Parámetro | [1] Resultado | [2] Unidad | [3] Referencia | [4] Método
         const inputs = fila.querySelectorAll("input");
 
         const nombreParametro = (inputs[0] ? inputs[0].value.trim() : "") || fila.dataset.nombre || "Resultado";
@@ -3364,7 +3362,7 @@ function guardarResultados(nroOrden, silencioso = false) {
     if (!silencioso) alert(`Resultados guardados correctamente para la orden ${nroOrden}.`);
     return true;
 }
-
+    
 // ==========================================
 // CATÁLOGO Y PLANTILLAS
 // ==========================================
