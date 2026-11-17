@@ -3114,7 +3114,7 @@ function guardarResultados(nroOrden, silencioso = false) {
     const editor = document.getElementById("resultados-editor");
     if (!orden || !editor) return false;
 
-    const grupos = editor.querySelectorAll(".indicador-resultado-row"); // <--- CAMBIADO AQUÍ
+    const grupos = editor.querySelectorAll(".indicador-resultado-row");
     const cardPaternidad = editor.querySelector("[data-paternidad-card='true']");
     const cardPaternidadLegal = editor.querySelector("[data-paternidad-legal-card='true']");
     if (!grupos.length && !cardPaternidad && !cardPaternidadLegal) return false;
@@ -3134,23 +3134,28 @@ function guardarResultados(nroOrden, silencioso = false) {
             return;
         }
 
-        const leer = campo => {
+        const inputs = fila.querySelectorAll("input");
+
+        // Función inteligente: busca por atributo o usa la posición exacta del input como respaldo
+        const leer = (campo, indexFallback) => {
             const el = fila.querySelector(`[data-campo="${campo}"]`);
+            if (el && el.value !== undefined && el.value !== "") return el.value.trim();
+            if (inputs[indexFallback] !== undefined) return inputs[indexFallback].value.trim();
             return el ? el.value.trim() : "";
         };
 
         // Captura fielmente el nombre editado o el nuevo indicador escrito en pantalla
-        const nombreParametro = leer("nombre-param") || fila.dataset.nombre || "Resultado";
+        const nombreParametro = leer("nombre-param", 0) || fila.dataset.nombre || "Resultado";
 
         porExamen[exIdx].push({
             nombre: nombreParametro, 
             esSeccion: false,
-            resultado: leer("resultado"), 
-            unidad: leer("unidad"),
+            resultado: leer("resultado", 1), 
+            unidad: leer("unidad", 2),
             refMin: fila.dataset.refmin || "", 
             refMax: fila.dataset.refmax || "",
-            referencia: leer("referencia"),
-            metodo: leer("metodo")
+            referencia: leer("referencia", 3),
+            metodo: leer("metodo", 4)
         });
     });
     
