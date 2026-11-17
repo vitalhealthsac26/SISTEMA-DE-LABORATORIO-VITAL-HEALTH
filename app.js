@@ -3114,7 +3114,7 @@ function guardarResultados(nroOrden, silencioso = false) {
     const editor = document.getElementById("resultados-editor");
     if (!orden || !editor) return false;
 
-    const grupos = editor.querySelectorAll("[data-ex]");
+    const grupos = editor.querySelectorAll(".indicador-resultado-row"); // <--- CAMBIADO AQUÍ
     const cardPaternidad = editor.querySelector("[data-paternidad-card='true']");
     const cardPaternidadLegal = editor.querySelector("[data-paternidad-legal-card='true']");
     if (!grupos.length && !cardPaternidad && !cardPaternidadLegal) return false;
