@@ -4559,6 +4559,24 @@ function guardarCotizacion() {
     window.nubeGuardarCotizacion?.(cotizacion);
     setVal("input-buscar-cotizacion", "");
     cargarCotizaciones();
+
+    // ==========================================
+    // LIMPIEZA AUTOMÁTICA DE CAMPOS (NUEVO)
+    // ==========================================
+    currentCotizacionId = null; // Reinicia el ID para que la siguiente sea una cotización nueva
+    setVal("dni", "");
+    setVal("nombres", "");
+    setVal("medico", "");
+    setVal("fechaNacimiento", "");
+    setVal("edad", "");
+    setVal("celular", "");
+    setVal("sexo", "MASCULINO");
+    setVal("tipo-convenio-cotizacion", "Particular");
+    setVal("cot-descuento-valor", "");
+    setVal("cot-descuento-tipo", "%");
+    
+    listaCotizacionInd = []; // Vacía el carrito de exámenes cotizados
+    renderizarTablaCotizacion(); // Actualiza la tabla visualmente para que quede limpia
 }
 
 // Variable global para filtrar cotizaciones por fecha
