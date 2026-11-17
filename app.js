@@ -3124,31 +3124,37 @@ function guardarResultados(nroOrden, silencioso = false) {
     grupos.forEach(fila => {
         const exIdx = fila.dataset.ex;
         if (!porExamen[exIdx]) porExamen[exIdx] = [];
+        
         const esSeccion = fila.dataset.esseccion === "true";
         if (esSeccion) {
             porExamen[exIdx].push({
-                nombre: fila.dataset.nombre || "", esSeccion: true,
+                nombre: fila.dataset.nombre || "", 
+                esSeccion: true,
                 resultado: "", unidad: "", refMin: "", refMax: "", referencia: "", metodo: ""
             });
             return;
         }
+
         const leer = campo => {
             const el = fila.querySelector(`[data-campo="${campo}"]`);
             return el ? el.value.trim() : "";
         };
 
-        // CAMBIO CLAVE: Lee el nombre editado o nuevo indicador
+        // Captura fielmente el nombre editado o el nuevo indicador escrito en pantalla
         const nombreParametro = leer("nombre-param") || fila.dataset.nombre || "Resultado";
 
         porExamen[exIdx].push({
-            nombre: nombreParametro, esSeccion: false,
-            resultado: leer("resultado"), unidad: leer("unidad"),
-            refMin: fila.dataset.refmin || "", refMax: fila.dataset.refmax || "",
+            nombre: nombreParametro, 
+            esSeccion: false,
+            resultado: leer("resultado"), 
+            unidad: leer("unidad"),
+            refMin: fila.dataset.refmin || "", 
+            refMax: fila.dataset.refmax || "",
             referencia: leer("referencia"),
             metodo: leer("metodo")
         });
     });
-
+    
     // Si la orden incluye la prueba de paternidad legal
     let datosPaternidadLegalGuardar = null;
     if (cardPaternidadLegal) {
