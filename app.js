@@ -4506,6 +4506,42 @@ function renderizarTablaCotizacion() {
     calcularTotalCotizacion();
 }
 
+// ==========================================
+// CERRAR / CANCELAR EDICIÓN DE COTIZACIÓN
+// ==========================================
+function cerrarOcancelarEdicion() {
+    // 1. Reiniciamos el ID de la cotización actual
+    currentCotizacionId = null;
+
+    // 2. Limpiamos los campos del formulario de datos del paciente
+    setVal("dni", "");
+    setVal("nombres", "");
+    setVal("medico", "");
+    setVal("fechaNacimiento", "");
+    setVal("edad", "");
+    setVal("celular", "");
+    setVal("sexo", "MASCULINO");
+    setVal("tipo-convenio-cotizacion", "Particular");
+    
+    // 3. Limpiamos los campos de descuento
+    setVal("cot-descuento-tipo", "%");
+    setVal("cot-descuento-valor", "");
+    
+    // 4. Vaciamos la lista de exámenes cotizados y actualizamos la tabla visual
+    listaCotizacionInd = [];
+    renderizarTablaCotizacion();
+
+    // 5. ACCIÓN VISUAL: Ocultar el modal o la sección de cotización
+    // (Descomenta la opción que aplique a tu código HTML):
+    
+    // Opción A: Si usas Bootstrap Modal (ej. con jQuery)
+    // $('#modalCotizacion').modal('hide'); 
+
+    // Opción B: Si manejas la visibilidad cambiando el estilo display de un contenedor
+    // document.getElementById('contenedor-cotizacion').style.display = 'none';
+}
+window.cerrarOcancelarEdicion = cerrarOcancelarEdicion;
+
 function guardarCotizacion() {
     const nombres = val("nombres");
     if (!nombres) {
