@@ -2802,8 +2802,8 @@ function abrirResultados(nroOrden) {
     `;
 
     orden.examenes.forEach((ex, exIdx) => {
-        const guardado = (orden.resultados || []).find(r => r.codigo === ex.codigo);
-        const itemCatalogo = (typeof examenesCatalogo !== 'undefined' ? examenesCatalogo : []).find(c => c.codigo === ex.codigo);
+        const guardado = (orden.resultados || []).find(r => String(r.codigo) === String(ex.codigo));
+        const itemCatalogo = (typeof examenesCatalogo !== 'undefined' ? examenesCatalogo : []).find(c => String(c.codigo) === String(ex.codigo));
         const nombreLimpioExamen = itemCatalogo && itemCatalogo.nombre ? itemCatalogo.nombre : ex.nombre;
 
         const esPatLegal = typeof esExamenPaternidadLegal === 'function' && (esExamenPaternidadLegal(ex) || esExamenPaternidadLegal(itemCatalogo));
@@ -2829,11 +2829,22 @@ function abrirResultados(nroOrden) {
             /UROCULTIVO/i.test(String(ex.nombre || ''));
         const listaGuardadaVacia = guardado && Array.isArray(guardado.indicadores) &&
             guardado.indicadores.length === 0;
+        // VITAL HEALTH: para exámenes aún sin valores ingresados, usar la plantilla
+        // vigente del catálogo. Los resultados que ya contienen valores permanecen
+        // intactos, incluso si posteriormente se modifica el catálogo.
+        const tieneValoresClinicos = !!(guardado && Array.isArray(guardado.indicadores) &&
+            guardado.indicadores.some(i => i && !i.esSeccion &&
+                String(i.resultado ?? i.valor ?? '').trim() !== '' &&
+                String(i.resultado ?? i.valor ?? '').trim() !== '...'));
+        const plantillaActual = typeof obtenerIndicadoresParaOrden === 'function'
+            ? obtenerIndicadoresParaOrden(ex) : null;
+        const hayPlantillaActual = Array.isArray(plantillaActual) && plantillaActual.length > 0;
         if (guardado && Array.isArray(guardado.indicadores) &&
-            !(esUrocultivoPendiente && listaGuardadaVacia)) {
+            !(esUrocultivoPendiente && listaGuardadaVacia) &&
+            (tieneValoresClinicos || !hayPlantillaActual)) {
             indicadores = guardado.indicadores;
         } else {
-            const plantilla = typeof obtenerIndicadoresParaOrden === 'function' ? obtenerIndicadoresParaOrden(ex) : null;
+            const plantilla = plantillaActual;
             indicadores = plantilla && plantilla.length ? plantilla : [{
                 nombre: nombreLimpioExamen || "Resultado del análisis",
                 unidad: ex.unidad || (itemCatalogo && itemCatalogo.unidad) || "",
