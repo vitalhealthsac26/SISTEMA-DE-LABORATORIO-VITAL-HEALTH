@@ -2770,16 +2770,12 @@ function abrirResultados(nroOrden) {
                         <div class="fs-6 text-dark">
                             El paciente <strong>${escapeHTML(orden.nombre)}</strong> (DNI: ${escapeHTML(orden.dni)}) aún debe:
                             <span class="badge bg-danger fs-6 px-2 py-1 ms-1">S/ ${saldoOrd.toFixed(2)}</span>
-                            <span class="text-muted ms-2">(Total: S/ ${totalOrd.toFixed(2)} | A cuenta abonado: S/ ${aCuentaOrd.toFixed(2)})</span>
                         </div>
-                        <small class="text-danger fw-semibold">
-                            ⚠️ Por favor, solicite el cobro del saldo pendiente antes de entregar o emitir los resultados finales.
-                        </small>
                     </div>
                 </div>
                 <div class="d-flex gap-2">
                     <button class="btn btn-danger fw-bold shadow-sm px-3 py-2" onclick="abrirModalGestionPago('${escapeHTML(orden.nroOrden)}')">
-                        <i class="bi bi-cash-stack me-1"></i> Cobrar / Saldar Deuda Ahora
+                        <i class="bi bi-cash-stack me-1"></i> Cobrar / Saldar Deuda
                     </button>
                 </div>
             </div>
@@ -2793,24 +2789,11 @@ function abrirResultados(nroOrden) {
                 <strong>Orden:</strong> ${escapeHTML(orden.nroOrden)} | <strong>Paciente:</strong> ${escapeHTML(orden.nombre)} (${escapeHTML(orden.dni)})
                 <span class="badge bg-primary-subtle text-primary border border-primary-subtle ms-2">Sexo: ${escapeHTML(orden.sexo || "—")}</span>
                 <span class="badge bg-secondary-subtle text-secondary border ms-1">Edad: ${escapeHTML(orden.edad || "—")}</span>
-                ${tieneDeuda ? `<span class="badge bg-danger ms-2" style="cursor:pointer;" onclick="abrirModalGestionPago('${escapeHTML(orden.nroOrden)}')"><i class="bi bi-exclamation-triangle-fill me-1"></i>Debe S/ ${saldoOrd.toFixed(2)}</span>` : `<span class="badge bg-success-subtle text-success border ms-2"><i class="bi bi-check-circle-fill me-1"></i>Pagado</span>`}
-                <span class="text-muted ms-2 d-block d-md-inline mt-1 mt-md-0">
-                    <i class="bi bi-arrow-down-up me-1 text-primary"></i>Organiza el orden o usa los atajos rápidos de variación por sexo/edad.
-                </span>
             </div>
             <div class="d-flex gap-2 flex-wrap align-items-center">
-                <button class="btn ${tieneDeuda ? 'btn-danger text-white fw-bold' : 'btn-outline-secondary'} btn-sm" onclick="abrirModalGestionPago('${orden.nroOrden}')" title="Ver / gestionar pagos de esta orden"><i class="bi bi-cash-stack me-1"></i> ${tieneDeuda ? 'Cobrar Deuda' : 'Cobro'}</button>
-                <button class="btn btn-outline-info btn-sm fw-semibold" onclick="abrirHistorialEvolutivo('${orden.dni}')" title="Ver Historial Evolutivo y Comparativa del Paciente"><i class="bi bi-graph-up me-1"></i> Evolución</button>
-                <div class="form-check form-switch ms-1 me-1 mb-0 py-1 px-2 border rounded bg-white shadow-sm" title="Activar para omitir la firma física o de la bióloga en el informe impreso y en el PDF">
-                    <input class="form-check-input ms-0 me-1" type="checkbox" id="check-ocultar-firma-${orden.nroOrden}" ${debeOcultarFirma(orden) ? 'checked' : ''} onchange="cambiarOcultarFirma('${orden.nroOrden}', this.checked)">
-                    <label class="form-check-label small fw-semibold text-secondary" for="check-ocultar-firma-${orden.nroOrden}" style="font-size: 0.78rem; cursor: pointer;">
-                        <i class="bi bi-pen me-1 text-muted"></i>Sin firma en informe
-                    </label>
-                </div>
-                <button class="btn btn-success btn-sm fw-semibold" onclick="enviarResultadoWhatsApp('${orden.nroOrden}')" title="Enviar WhatsApp al paciente"><i class="bi bi-whatsapp me-1"></i> WhatsApp</button>
                 <button class="btn btn-primary btn-sm" onclick="guardarResultados('${orden.nroOrden}')"><i class="bi bi-save me-1"></i> Guardar Resultados</button>
-                <button class="btn btn-outline-primary btn-sm ms-1" onclick="imprimirInforme('${orden.nroOrden}')"><i class="bi bi-printer me-1"></i> Imprimir Informe</button>
-                <button class="btn btn-outline-danger btn-sm ms-1" onclick="descargarInformePDF('${orden.nroOrden}')"><i class="bi bi-file-earmark-pdf me-1"></i> Descargar PDF</button>
+                <button class="btn btn-outline-primary btn-sm ms-1" onclick="imprimirInforme('${orden.nroOrden}')"><i class="bi bi-printer me-1"></i> Imprimir</button>
+                <button class="btn btn-outline-danger btn-sm ms-1" onclick="descargarInformePDF('${orden.nroOrden}')"><i class="bi bi-file-earmark-pdf me-1"></i> PDF</button>
             </div>
         </div>
         <div class="list-group" id="contenedor-cards-examenes">
@@ -2821,44 +2804,38 @@ function abrirResultados(nroOrden) {
         const itemCatalogo = (typeof examenesCatalogo !== 'undefined' ? examenesCatalogo : []).find(c => c.codigo === ex.codigo);
         const nombreLimpioExamen = itemCatalogo && itemCatalogo.nombre ? itemCatalogo.nombre : ex.nombre;
 
-        // Si es la prueba de paternidad legal o informativa, renderizar su respectivo editor pericial
-        const esPatLegal = esExamenPaternidadLegal(ex) || esExamenPaternidadLegal(itemCatalogo);
-        const esPatGeneral = esExamenPaternidad(ex) || esExamenPaternidad(itemCatalogo);
+        const esPatLegal = typeof esExamenPaternidadLegal === 'function' && (esExamenPaternidadLegal(ex) || esExamenPaternidadLegal(itemCatalogo));
+        const esPatGeneral = typeof esExamenPaternidad === 'function' && (esExamenPaternidad(ex) || esExamenPaternidad(itemCatalogo));
 
-        if (esPatLegal) {
+        if (esPatLegal && typeof generarEditorFormularioPaternidadLegal === 'function') {
             html += generarEditorFormularioPaternidadLegal(ex, exIdx, orden, guardado);
             return;
         }
 
-        if (esPatGeneral) {
+        if (esPatGeneral && typeof generarEditorFormularioPaternidad === 'function') {
             html += generarEditorFormularioPaternidad(ex, exIdx, orden, guardado);
             return;
         }
 
-        const plantilla = obtenerIndicadoresParaOrden(ex);
-        const teniaPlantillaOrinaErronea = (!plantilla || plantilla.length === 0) && guardado && Array.isArray(guardado.indicadores) &&
-            guardado.indicadores.some(i => i.nombre === "Urobilinógeno" || i.nombre === "Ácido Ascórbico" || i.nombre === "Recuento Bacteriano");
-
-        let indicadores = plantilla && plantilla.length ? plantilla : null;
-        if (!indicadores && guardado && Array.isArray(guardado.indicadores) && guardado.indicadores.length > 0 && !teniaPlantillaOrinaErronea) {
+        // 🧠 LÓGICA INTELIGENTE: Si el usuario ya guardó resultados previamente para este examen, 
+        // usamos esos datos exactos (respetando lo que borró o agregó). Si no, usamos la plantilla base.
+        let indicadores = [];
+        if (guardado && Array.isArray(guardado.indicadores) && guardado.indicadores.length > 0) {
             indicadores = guardado.indicadores;
-        }
-
-        if (!indicadores || !indicadores.length) {
-            indicadores = [{
+        } else {
+            const plantilla = typeof obtenerIndicadoresParaOrden === 'function' ? obtenerIndicadoresParaOrden(ex) : null;
+            indicadores = plantilla && plantilla.length ? plantilla : [{
                 nombre: nombreLimpioExamen || "Resultado del análisis",
                 unidad: ex.unidad || (itemCatalogo && itemCatalogo.unidad) || "",
-                refMin: ex.refMin ?? (itemCatalogo && itemCatalogo.refMin !== undefined ? itemCatalogo.refMin : ""),
-                refMax: ex.refMax ?? (itemCatalogo && itemCatalogo.refMax !== undefined ? itemCatalogo.refMax : ""),
-                referencia: ex.referencia || (itemCatalogo && itemCatalogo.referencia) || "",
-                metodo: ex.metodo || (itemCatalogo && itemCatalogo.metodo) || ""
+                refMin: ex.refMin ?? "",
+                refMax: ex.refMax ?? "",
+                referencia: ex.referencia || "",
+                metodo: ex.metodo || ""
             }];
         }
 
         let filas = "";
         indicadores.forEach((ind, indIdx) => {
-            const previo = guardado && guardado.indicadores && guardado.indicadores[indIdx] ? guardado.indicadores[indIdx] : null;
-            
             if (ind.esSeccion) {
                 filas += `
                     <div class="row g-2 mb-2 mt-3 indicador-resultado-row" data-ex="${exIdx}" data-esseccion="true" data-nombre="${escapeHTML(ind.nombre)}">
@@ -2873,63 +2850,22 @@ function abrirResultados(nroOrden) {
                 return;
             }
 
-            const nombreParam = previo && previo.nombre ? previo.nombre : ind.nombre;
-            const referenciaBase = ind.referencia || formatoRango(ind.refMin, ind.refMax);
-            const valorReferenciaPrevio = (previo && previo.referencia !== undefined && previo.referencia !== "") 
-                ? previo.referencia 
-                : referenciaBase;
-            const valorResultadoPrevio = previo ? previo.resultado : "";
-            const valorMetodoPrevio = previo && previo.metodo !== undefined ? previo.metodo : (ind.metodo || "");
-
-            // Variaciones inteligentes para Sexo / Edad
-            let htmlVariaciones = "";
-            if (referenciaBase && typeof referenciaBase === "string" && referenciaBase.includes("|")) {
-                const varAnalisis = extraerReferenciaSegunPaciente(referenciaBase, orden.sexo, orden.edad);
-                if (varAnalisis && Array.isArray(varAnalisis.todas)) {
-                    const botonesVar = [];
-                    if (varAnalisis.sugerencia) {
-                        botonesVar.push(`
-                            <button type="button" class="btn btn-xs btn-outline-primary py-0 px-2 fw-semibold" style="font-size: 10px;" onclick="aplicarVariacionRef(this, '${escapeHTML(varAnalisis.sugerencia)}')" title="Aplicar automáticamente para este paciente (${escapeHTML(varAnalisis.etiqueta)})">
-                                ⚡ ${escapeHTML(varAnalisis.etiqueta)}: ${escapeHTML(varAnalisis.sugerencia)}
-                            </button>
-                        `);
-                    }
-                    varAnalisis.todas.forEach(v => {
-                        if (!varAnalisis.sugerencia || v !== varAnalisis.sugerencia) {
-                            const label = v.split(":")[0]?.trim() || v;
-                            botonesVar.push(`
-                                <button type="button" class="btn btn-xs btn-outline-secondary py-0 px-1" style="font-size: 10px;" onclick="aplicarVariacionRef(this, '${escapeHTML(v)}')" title="Usar: ${escapeHTML(v)}">
-                                    ${escapeHTML(label)}
-                                </button>
-                            `);
-                        }
-                    });
-                    botonesVar.push(`
-                        <button type="button" class="btn btn-xs btn-link text-decoration-none py-0 px-1 text-muted" style="font-size: 10px;" onclick="aplicarVariacionRef(this, '${escapeHTML(referenciaBase)}')" title="Restaurar texto completo">
-                            ↺ Todos
-                        </button>
-                    `);
-                    htmlVariaciones = `<div class="d-flex flex-wrap gap-1 mt-1">${botonesVar.join("")}</div>`;
-                }
-            }
-
             filas += `
                 <div class="row g-2 mb-2 align-items-center indicador-resultado-row" data-ex="${exIdx}" data-refmin="${escapeHTML(ind.refMin ?? "")}" data-refmax="${escapeHTML(ind.refMax ?? "")}">
                     <div class="col-md-3">
-                        <input type="text" class="form-control form-control-sm fw-semibold text-dark" data-campo="nombre-param" value="${escapeHTML(nombreParam)}" placeholder="Nombre indicador">
+                        <input type="text" class="form-control form-control-sm fw-semibold text-dark" data-campo="nombre-param" value="${escapeHTML(ind.nombre || '')}" placeholder="Nombre indicador">
                     </div>
                     <div class="col-md-2">
-                        <input type="text" class="form-control form-control-sm" data-campo="resultado" placeholder="Valor obtenido" value="${escapeHTML(valorResultadoPrevio)}">
+                        <input type="text" class="form-control form-control-sm" data-campo="resultado" placeholder="Valor obtenido" value="${escapeHTML(ind.resultado || '')}">
                     </div>
                     <div class="col-md-2">
                         <input type="text" class="form-control form-control-sm bg-light" data-campo="unidad" value="${escapeHTML(ind.unidad || '')}" placeholder="Unidad">
                     </div>
                     <div class="col-md-3">
-                        <input type="text" class="form-control form-control-sm bg-white" data-campo="referencia" value="${escapeHTML(valorReferenciaPrevio)}" placeholder="Valores de referencia">
-                        ${htmlVariaciones}
+                        <input type="text" class="form-control form-control-sm bg-white" data-campo="referencia" value="${escapeHTML(ind.referencia || '')}" placeholder="Valores de referencia">
                     </div>
                     <div class="col-md-1">
-                        <input type="text" class="form-control form-control-sm" data-campo="metodo" placeholder="Método" value="${escapeHTML(valorMetodoPrevio)}">
+                        <input type="text" class="form-control form-control-sm" data-campo="metodo" placeholder="Método" value="${escapeHTML(ind.metodo || '')}">
                     </div>
                     <div class="col-md-1 text-center">
                         <button type="button" class="btn btn-sm btn-outline-danger py-0 px-1" onclick="this.closest('.indicador-resultado-row').remove()" title="Eliminar indicador">❌</button>
@@ -2939,27 +2875,9 @@ function abrirResultados(nroOrden) {
         });
 
         html += `
-            <div class="list-group-item mb-3 shadow-sm border rounded card-examen-arrastrable" 
-                 draggable="true" 
-                 data-ex-card-idx="${exIdx}"
-                 style="cursor: default; transition: all 0.2s ease;">
+            <div class="list-group-item mb-3 shadow-sm border rounded card-examen-arrastrable" draggable="true" data-ex-card-idx="${exIdx}">
                 <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom flex-wrap gap-2 bg-light p-2 rounded">
-                    <div class="d-flex align-items-center gap-2">
-                        <span class="badge bg-primary text-white fs-6 px-2 py-1 drag-handle" style="cursor: grab;" title="Arrastrar para reordenar examen">
-                            <i class="bi bi-grip-vertical me-1"></i>#${exIdx + 1}
-                        </span>
-                        <h6 class="fw-bold text-primary mb-0 fs-6">${escapeHTML(nombreLimpioExamen)}</h6>
-                    </div>
-                    <div class="d-flex gap-2 align-items-center">
-                        <div class="btn-group btn-group-sm" role="group">
-                            <button type="button" class="btn btn-outline-secondary" onclick="moverExamenEnResultados('${orden.nroOrden}', ${exIdx}, -1)" ${exIdx === 0 ? 'disabled' : ''} title="Subir examen en el informe">
-                                <i class="bi bi-arrow-up-circle me-1"></i> Subir
-                            </button>
-                            <button type="button" class="btn btn-outline-secondary" onclick="moverExamenEnResultados('${orden.nroOrden}', ${exIdx}, 1)" ${exIdx === orden.examenes.length - 1 ? 'disabled' : ''} title="Bajar examen en el informe">
-                                <i class="bi bi-arrow-down-circle me-1"></i> Bajar
-                            </button>
-                        </div>
-                    </div>
+                    <h6 class="fw-bold text-primary mb-0 fs-6">${escapeHTML(nombreLimpioExamen)}</h6>
                 </div>
                 <div class="contenedor-parametros-examen-${exIdx}">
                     ${filas}
@@ -2975,8 +2893,9 @@ function abrirResultados(nroOrden) {
 
     html += `</div>`;
     editor.innerHTML = html;
-    inicializarDragAndDropResultados(nroOrden);
-}
+    if (typeof inicializarDragAndDropResultados === 'function') {
+        inicializarDragAndDropResultados(nroOrden);
+    }
 
 // Función auxiliar para agregar nuevos indicadores al vuelo
 function agregarIndicadorEnResultados(exIdx) {
