@@ -3133,32 +3133,36 @@ window.reordenarExamenesDragDrop = reordenarExamenesDragDrop;
             return;
         }
 
-        const inputs = fila.querySelectorAll("input");
+        // 🎯 LECTURA SEGURA Y EXACTA POR ATRIBUTO (Evita que aparezca "Resultado" por error)
+        const getVal = campo => {
+            const el = fila.querySelector(`[data-campo="${campo}"]`) || fila.querySelectorAll("input")[campo];
+            return el ? el.value.trim() : "";
+        };
 
-        // 🎯 RECUPERAMOS EL NOMBRE ORIGINAL Y EXACTO DEL INDICADOR (Sin reescribirlo)
-        const nombreParametro = (inputs[0] ? inputs[0].value.trim() : "") || fila.dataset.nombre || "";
+        const inputNombre = fila.querySelector('[data-campo="nombre-param"]') || fila.querySelectorAll("input")[0];
+        const nombreParametro = (inputNombre ? inputNombre.value.trim() : "") || fila.dataset.nombre || "";
+
+        const inputResultado = fila.querySelector('[data-campo="resultado"]') || fila.querySelectorAll("input")[1];
+        const resultadoVal = inputResultado ? inputResultado.value.trim() : "";
         
-        // 🛡️ LECTURA SEGURA DE LAS COLUMNAS RESTANTES
-        const resultadoVal = inputs[1] ? inputs[1].value.trim() : "";
-        
-        // Si el resultado está vacío, se omite por completo
+        // 🚀 Si el resultado está vacío, se omite por completo (no se guarda ni se dibuja)
         if (resultadoVal === "") {
             return; 
         }
 
-        const unidadVal = inputs[2] ? inputs[2].value.trim() : "";
-        const referenciaVal = inputs[3] ? inputs[3].value.trim() : "";
-        const metodoVal = inputs[4] ? inputs[4].value.trim() : "";
+        const inputUnidad = fila.querySelector('[data-campo="unidad"]') || fila.querySelectorAll("input")[2];
+        const inputReferencia = fila.querySelector('[data-campo="referencia"]') || fila.querySelectorAll("input")[3];
+        const inputMetodo = fila.querySelector('[data-campo="metodo"]') || fila.querySelectorAll("input")[4];
 
         porExamen[exIdx].push({
             nombre: nombreParametro, 
             esSeccion: false,
             resultado: resultadoVal, 
-            unidad: unidadVal,
+            unidad: inputUnidad ? inputUnidad.value.trim() : "",
             refMin: fila.dataset.refmin || "", 
             refMax: fila.dataset.refmax || "",
-            referencia: referenciaVal,
-            metodo: metodoVal
+            referencia: inputReferencia ? inputReferencia.value.trim() : "",
+            metodo: inputMetodo ? inputMetodo.value.trim() : ""
         });
     });
 
