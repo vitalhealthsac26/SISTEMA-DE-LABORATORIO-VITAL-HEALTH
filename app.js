@@ -3134,16 +3134,21 @@ window.reordenarExamenesDragDrop = reordenarExamenesDragDrop;
             return;
         }
 
-        // Lectura segura por atributo data-campo
-        const inputNombre = fila.querySelector('[data-campo="nombre-param"]') || fila.querySelectorAll("input")[0];
+        // Lectura directa y exclusiva por su atributo data-campo (Evita cruces de columnas)
+        const inputNombre = fila.querySelector('[data-campo="nombre-param"]');
         const nombreParametro = (inputNombre ? inputNombre.value.trim() : "") || fila.dataset.nombre || "";
 
-        const inputResultado = fila.querySelector('[data-campo="resultado"]') || fila.querySelectorAll("input")[1];
+        const inputResultado = fila.querySelector('[data-campo="resultado"]');
         const resultadoVal = inputResultado ? inputResultado.value.trim() : "";
 
-        const inputUnidad = fila.querySelector('[data-campo="unidad"]') || fila.querySelectorAll("input")[2];
-        const inputReferencia = fila.querySelector('[data-campo="referencia"]') || fila.querySelectorAll("input")[3];
-        const inputMetodo = fila.querySelector('[data-campo="metodo"]') || fila.querySelectorAll("input")[4];
+        const inputUnidad = fila.querySelector('[data-campo="unidad"]');
+        const unidadVal = inputUnidad ? inputUnidad.value.trim() : "";
+
+        const inputReferencia = fila.querySelector('[data-campo="referencia"]');
+        const referenciaVal = inputReferencia ? inputReferencia.value.trim() : "";
+
+        const inputMetodo = fila.querySelector('[data-campo="metodo"]');
+        const metodoVal = inputMetodo ? inputMetodo.value.trim() : "";
 
         // Se guarda el indicador siempre para mantener la alineación exacta de los índices
         porExamen[exIdx].push({
