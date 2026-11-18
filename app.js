@@ -3133,19 +3133,23 @@ window.reordenarExamenesDragDrop = reordenarExamenesDragDrop;
             return;
         }
 
-        const inputs = fila.querySelectorAll("input");
+        // 🛡️ LECTURA SEGURA POR ATRIBUTO (Evita que se crucen las columnas de Hemograma y Orina)
+        const getVal = campo => {
+            const el = fila.querySelector(`[data-campo="${campo}"]`);
+            return el ? el.value.trim() : "";
+        };
 
-        const nombreParametro = (inputs[0] ? inputs[0].value.trim() : "") || fila.dataset.nombre || "Resultado";
-        const resultadoVal = inputs[1] ? inputs[1].value.trim() : "";
+        const nombreParametro = getVal("nombre") || fila.dataset.nombre || "Resultado";
+        const resultadoVal = getVal("resultado");
         
-        // 🚀 Si el resultado está vacío, se omite y no se guarda
+        // 🚀 Si el resultado está vacío, se omite por completo (no se guarda ni se dibuja)
         if (resultadoVal === "") {
             return; 
         }
 
-        const unidadVal = inputs[2] ? inputs[2].value.trim() : "";
-        const referenciaVal = inputs[3] ? inputs[3].value.trim() : "";
-        const metodoVal = inputs[4] ? inputs[4].value.trim() : "";
+        const unidadVal = getVal("unidad");
+        const referenciaVal = getVal("referencia");
+        const metodoVal = getVal("metodo");
 
         porExamen[exIdx].push({
             nombre: nombreParametro, 
@@ -3159,7 +3163,7 @@ window.reordenarExamenesDragDrop = reordenarExamenesDragDrop;
         });
     });
 
-    // 🧹 LIMPIEZA INTELIGENTE: Oculta secciones que se hayan quedado sin indicadores llenados
+    // 🧹 LIMPIEZA DE SECCIONES HUÉRFANES: Si una sección se queda sin parámetros llenos, se oculta
     Object.keys(porExamen).forEach(exIdx => {
         const items = porExamen[exIdx];
         const itemsLimpios = [];
