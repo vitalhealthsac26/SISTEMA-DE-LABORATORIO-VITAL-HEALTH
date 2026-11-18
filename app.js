@@ -6248,19 +6248,15 @@ function imprimirInforme(nroOrden) {
     const orden = (ordenesRegistradas || []).find(o => o.nroOrden === nroOrden);
     if (!orden) return;
 
+    // 🚀 1. Auto-guardado obligatorio y silencioso previo a imprimir para capturar cualquier cambio actual
+    guardarResultados(nroOrden, true);
+
     const saldoOrd = orden.saldoPendiente !== undefined ? Number(orden.saldoPendiente) : Math.max(0, Number(orden.total || 0) - Number(orden.aCuenta !== undefined ? orden.aCuenta : orden.total || 0));
     if (saldoOrd > 0.009) {
         const continuar = confirm(`⚠️ ATENCIÓN DE CAJA: El paciente ${orden.nombre} tiene un saldo pendiente de pago de S/ ${saldoOrd.toFixed(2)}.\n\n¿Desea continuar con la emisión del informe de todas maneras?`);
         if (!continuar) return;
     }
 
-    if (!orden.resultados || !orden.resultados.length) {
-        const guardado = guardarResultados(nroOrden, true);
-        if (!guardado) {
-            alert("Primero capture los resultados en el editor y guárdelos.");
-            return;
-        }
-    }
     const zona = document.getElementById("zona-impresion");
     if (!zona) return;
     zona.innerHTML = `<div class="informe-print">${construirInformeHTML(orden)}</div>`;
@@ -6302,18 +6298,13 @@ async function descargarInformePDF(nroOrden) {
     const orden = (ordenesRegistradas || []).find(o => o.nroOrden === nroOrden);
     if (!orden) return;
 
+    // 🚀 1. Auto-guardado obligatorio y silencioso previo a generar el PDF para capturar cualquier cambio actual
+    guardarResultados(nroOrden, true);
+
     const saldoOrd = orden.saldoPendiente !== undefined ? Number(orden.saldoPendiente) : Math.max(0, Number(orden.total || 0) - Number(orden.aCuenta !== undefined ? orden.aCuenta : orden.total || 0));
     if (saldoOrd > 0.009) {
         const continuar = confirm(`⚠️ ATENCIÓN DE CAJA: El paciente ${orden.nombre} tiene un saldo pendiente de pago de S/ ${saldoOrd.toFixed(2)}.\n\n¿Desea continuar con la descarga del PDF de todas maneras?`);
         if (!continuar) return;
-    }
-
-    if (!orden.resultados || !orden.resultados.length) {
-        const guardado = guardarResultados(nroOrden, true);
-        if (!guardado) {
-            alert("Primero capture los resultados en el editor y guárdelos.");
-            return;
-        }
     }
 
     // Feedback visual inmediato en el botón
@@ -6421,7 +6412,6 @@ async function descargarInformePDF(nroOrden) {
                 windowWidth: 794,
                 windowHeight: 1123,
                 ignoreElements: (el) => {
-                    // Ignorar cualquier elemento fuera del contenedor para clonación casi instantánea
                     if (el.parentElement === document.body && el !== contenedor) {
                         return true;
                     }
@@ -6429,12 +6419,10 @@ async function descargarInformePDF(nroOrden) {
                 }
             });
 
-            // Calidad máxima 0.96: nitidez absoluta en textos, tablas y firmas
             const imgData = canvas.toDataURL("image/jpeg", 0.96);
             if (i > 0) pdf.addPage("a4", "portrait");
             pdf.addImage(imgData, "JPEG", 0, 0, 210, 297, undefined, "FAST");
             
-            // Pausa mínima entre páginas para fluidez
             if (i < totalPaginas - 1) {
                 await new Promise(r => setTimeout(r, 10));
             }
