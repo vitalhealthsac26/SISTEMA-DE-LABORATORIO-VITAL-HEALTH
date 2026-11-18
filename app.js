@@ -3134,27 +3134,18 @@ window.reordenarExamenesDragDrop = reordenarExamenesDragDrop;
             return;
         }
 
-        // 🎯 LECTURA SEGURA Y EXACTA POR ATRIBUTO (Evita que aparezca "Resultado" por error)
-        const getVal = campo => {
-            const el = fila.querySelector(`[data-campo="${campo}"]`) || fila.querySelectorAll("input")[campo];
-            return el ? el.value.trim() : "";
-        };
-
+        // Lectura segura por atributo data-campo
         const inputNombre = fila.querySelector('[data-campo="nombre-param"]') || fila.querySelectorAll("input")[0];
         const nombreParametro = (inputNombre ? inputNombre.value.trim() : "") || fila.dataset.nombre || "";
 
         const inputResultado = fila.querySelector('[data-campo="resultado"]') || fila.querySelectorAll("input")[1];
         const resultadoVal = inputResultado ? inputResultado.value.trim() : "";
-        
-        // 🚀 Si el resultado está vacío, se omite por completo (no se guarda ni se dibuja)
-        if (resultadoVal === "") {
-            return; 
-        }
 
         const inputUnidad = fila.querySelector('[data-campo="unidad"]') || fila.querySelectorAll("input")[2];
         const inputReferencia = fila.querySelector('[data-campo="referencia"]') || fila.querySelectorAll("input")[3];
         const inputMetodo = fila.querySelector('[data-campo="metodo"]') || fila.querySelectorAll("input")[4];
 
+        // Se guarda el indicador siempre para mantener la alineación exacta de los índices
         porExamen[exIdx].push({
             nombre: nombreParametro, 
             esSeccion: false,
@@ -3167,32 +3158,6 @@ window.reordenarExamenesDragDrop = reordenarExamenesDragDrop;
         });
     });
 
-    // 🧹 LIMPIEZA DE SECCIONES HUÉRFANES
-    Object.keys(porExamen).forEach(exIdx => {
-        const items = porExamen[exIdx];
-        const itemsLimpios = [];
-        for (let i = 0; i < items.length; i++) {
-            if (items[i].esSeccion) {
-                let tieneElementosValidos = false;
-                for (let j = i + 1; j < items.length; j++) {
-                    if (items[j].esSeccion) break;
-                    if (items[j].resultado && items[j].resultado.trim() !== "") {
-                        tieneElementosValidos = true;
-                        break;
-                    }
-                }
-                if (tieneElementosValidos) {
-                    itemsLimpios.push(items[i]);
-                }
-            } else {
-                if (items[i].resultado && items[i].resultado.trim() !== "") {
-                    itemsLimpios.push(items[i]);
-                }
-            }
-        }
-        porExamen[exIdx] = itemsLimpios;
-    });
-    
     let datosPaternidadLegalGuardar = null;
     if (cardPaternidadLegal) {
         const valPL = id => {
