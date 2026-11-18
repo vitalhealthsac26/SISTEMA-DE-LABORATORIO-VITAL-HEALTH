@@ -3136,7 +3136,7 @@ window.reordenarExamenesDragDrop = reordenarExamenesDragDrop;
         const inputs = fila.querySelectorAll("input");
 
         // 🎯 RECUPERAMOS EL NOMBRE ORIGINAL Y EXACTO DEL INDICADOR (Sin reescribirlo)
-        const nombreParametro = (inputs[0] ? inputs[0].value.trim() : "") || fila.dataset.nombre || "Resultado";
+        const nombreParametro = (inputs[0] ? inputs[0].value.trim() : "") || fila.dataset.nombre || "";
         
         // 🛡️ LECTURA SEGURA DE LAS COLUMNAS RESTANTES
         const resultadoVal = inputs[1] ? inputs[1].value.trim() : "";
