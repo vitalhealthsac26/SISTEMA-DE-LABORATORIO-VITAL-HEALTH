@@ -1378,13 +1378,9 @@ function renderizarTablaOrdenes(ordenes) {
                 <button class="btn btn-sm ${tieneDeuda ? 'btn-danger text-white fw-bold' : 'btn-outline-secondary'} me-1" title="Gestionar Pago / Cobrar Saldo / Modificar Deuda" onclick="abrirModalGestionPago('${ord.nroOrden}')">
                     <i class="bi bi-cash-stack"></i> ${tieneDeuda ? 'Cobrar' : 'Pago'}
                 </button>
-                <button class="btn btn-sm btn-outline-success me-1 text-success" title="Enviar mensaje por WhatsApp al paciente" onclick="enviarResultadoWhatsApp('${ord.nroOrden}')">
-                    <i class="bi bi-whatsapp"></i>
-                </button>
                 <button class="btn btn-sm btn-outline-secondary me-1" title="Reimprimir ticket" onclick="mostrarTicketPorNro('${ord.nroOrden}')"><i class="bi bi-receipt"></i></button>
                 ${ord.resultados ? `<button class="btn btn-sm btn-outline-primary me-1" title="Imprimir informe de resultados" onclick="imprimirInforme('${ord.nroOrden}')"><i class="bi bi-printer"></i> Informe</button>` : ""}
                 ${ord.resultados ? `<button class="btn btn-sm btn-outline-danger me-1" title="Descargar informe en PDF" onclick="descargarInformePDF('${ord.nroOrden}')"><i class="bi bi-file-earmark-pdf"></i> PDF</button>` : ""}
-                <button class="btn btn-sm btn-outline-success me-1" onclick="agregarExamenOrdenExistente('${ord.nroOrden}')" title="Añadir pruebas a esta orden"><i class="bi bi-plus-circle"></i> Examen</button>
                 <button class="btn btn-sm btn-outline-primary me-1" onclick="abrirResultados('${ord.nroOrden}')" title="Resultados"><i class="bi bi-file-earmark-medical"></i> Resultados</button>
                 <button class="btn btn-sm btn-outline-danger" onclick="eliminarOrden('${ord.nroOrden}')" title="Eliminar Orden"><i class="bi bi-trash"></i></button>
             </td>
@@ -2084,6 +2080,7 @@ function generarEditorFormularioPaternidadLegal(ex, exIdx, orden, guardado) {
              draggable="false" 
              data-ex-card-idx="${exIdx}"
              data-paternidad-legal-card="true">
+            <div class="text-end mb-2"><button type="button" class="btn btn-sm btn-outline-danger" onclick="eliminarExamenDesdeResultados('${orden.nroOrden}', ${exIdx})"><i class="bi bi-trash me-1"></i> Eliminar examen</button></div>
             <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom flex-wrap gap-2 bg-success-subtle p-2 rounded">
                 <div class="d-flex align-items-center gap-2">
                     <span class="badge bg-success text-white fs-6 px-2 py-1">
@@ -2630,6 +2627,7 @@ function generarEditorFormularioPaternidad(ex, exIdx, orden, guardado) {
              draggable="false" 
              data-ex-card-idx="${exIdx}"
              data-paternidad-card="true">
+            <div class="text-end mb-2"><button type="button" class="btn btn-sm btn-outline-danger" onclick="eliminarExamenDesdeResultados('${orden.nroOrden}', ${exIdx})"><i class="bi bi-trash me-1"></i> Eliminar examen</button></div>
             <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom flex-wrap gap-2 bg-primary-subtle p-2 rounded">
                 <div class="d-flex align-items-center gap-2">
                     <span class="badge bg-primary text-white fs-6 px-2 py-1">
@@ -2795,6 +2793,8 @@ function abrirResultados(nroOrden) {
                 <button class="btn btn-primary btn-sm" onclick="guardarResultados('${orden.nroOrden}')"><i class="bi bi-save me-1"></i> Guardar Resultados</button>
                 <button class="btn btn-outline-primary btn-sm ms-1" onclick="imprimirInforme('${orden.nroOrden}')"><i class="bi bi-printer me-1"></i> Imprimir</button>
                 <button class="btn btn-outline-danger btn-sm ms-1" onclick="descargarInformePDF('${orden.nroOrden}')"><i class="bi bi-file-earmark-pdf me-1"></i> PDF</button>
+                <button type="button" class="btn btn-outline-success btn-sm" onclick="enviarResultadoWhatsApp('${orden.nroOrden}')" title="Enviar WhatsApp al paciente"><i class="bi bi-whatsapp me-1"></i> WhatsApp</button>
+                <button type="button" class="btn btn-outline-success btn-sm" onclick="agregarExamenDesdeResultados('${orden.nroOrden}')" title="Agregar examen a esta orden"><i class="bi bi-plus-circle me-1"></i> Agregar examen</button>
             </div>
         </div>
         <div class="list-group" id="contenedor-cards-examenes">
@@ -2887,6 +2887,7 @@ function abrirResultados(nroOrden) {
             <div class="list-group-item mb-3 shadow-sm border rounded card-examen-arrastrable" draggable="true" data-ex-card-idx="${exIdx}">
                 <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom flex-wrap gap-2 bg-light p-2 rounded">
                     <h6 class="fw-bold text-primary mb-0 fs-6">${escapeHTML(nombreLimpioExamen)}</h6>
+                    <button type="button" class="btn btn-sm btn-outline-danger" onclick="eliminarExamenDesdeResultados('${orden.nroOrden}', ${exIdx})" title="Eliminar examen completo de esta orden"><i class="bi bi-trash me-1"></i> Eliminar examen</button>
                 </div>
                 <div class="contenedor-parametros-examen-${exIdx}">
                     ${filas}
@@ -6652,3 +6653,60 @@ function agregarExamenOrdenExistente(nroOrden) {
     alert('Examen agregado correctamente. El importe adicional está pendiente de cobro.');
 }
 window.agregarExamenOrdenExistente = agregarExamenOrdenExistente;
+
+
+// Acciones dentro de la orden: se guarda primero lo que esté escrito en pantalla.
+// No modifica la función de impresión ni la generación del PDF.
+function guardarEdicionAntesDeCambiarExamenes(nroOrden) {
+    const editor = document.getElementById('resultados-editor');
+    if (!editor || !editor.querySelector(`button[onclick*="guardarResultados('${nroOrden}')"]`)) {
+        alert('Abra primero los resultados de esta orden.');
+        return false;
+    }
+    if (typeof guardarResultados !== 'function' || !guardarResultados(nroOrden, true)) {
+        alert('No se pudieron guardar los datos actuales. No se modificó la lista de exámenes.');
+        return false;
+    }
+    return true;
+}
+
+function agregarExamenDesdeResultados(nroOrden) {
+    if (!guardarEdicionAntesDeCambiarExamenes(nroOrden)) return;
+    const orden = (ordenesRegistradas || []).find(o => String(o.nroOrden) === String(nroOrden));
+    const antes = orden ? (orden.examenes || []).length : 0;
+    agregarExamenOrdenExistente(nroOrden);
+    if (orden && (orden.examenes || []).length !== antes) abrirResultados(nroOrden);
+}
+window.agregarExamenDesdeResultados = agregarExamenDesdeResultados;
+
+function eliminarExamenDesdeResultados(nroOrden, indice) {
+    const orden = (ordenesRegistradas || []).find(o => String(o.nroOrden) === String(nroOrden));
+    if (!orden || !Array.isArray(orden.examenes)) return alert('No se encontró la orden.');
+    const ex = orden.examenes[indice];
+    if (!ex) return alert('No se encontró el examen.');
+    const tieneResultados = (orden.resultados || []).some(r => String(r.codigo) === String(ex.codigo));
+    const aviso = `¿Eliminar el examen "${ex.nombre}" de esta orden?` +
+        (tieneResultados ? '\nATENCIÓN: también se eliminarán sus resultados guardados.' : '') +
+        '\nLa fecha, hora, número de orden y pagos realizados no se modificarán.';
+    if (!confirm(aviso)) return;
+    if (!guardarEdicionAntesDeCambiarExamenes(nroOrden)) return;
+    // Volver a consultar después del guardado; preservar los demás exámenes y resultados.
+    const actual = orden.examenes[indice];
+    if (!actual || String(actual.codigo) !== String(ex.codigo)) return alert('La orden cambió. Vuelva a abrirla.');
+    const precio = Number(actual.precio || 0) * Number(actual.cantidad || 1);
+    orden.examenes.splice(indice, 1);
+    orden.resultados = (orden.resultados || []).filter(r => String(r.codigo) !== String(actual.codigo));
+    if (Number.isFinite(precio) && precio >= 0) {
+        orden.subtotal = Math.max(0, Number(orden.subtotal ?? orden.total ?? 0) - precio);
+        orden.total = Math.max(0, Number(orden.total || 0) - precio);
+        orden.saldoPendiente = Math.max(0, Number(orden.saldoPendiente || 0) - precio);
+        orden.estadoPago = orden.saldoPendiente > 0.009 ? 'Pendiente' : 'Pagado';
+    }
+    orden.en = Date.now(); // sincronización; NO modifica fechaHora
+    persistirDatos();
+    window.nubeGuardarOrden?.(orden);
+    cargarOrdenes();
+    abrirResultados(nroOrden);
+    alert('Examen eliminado. Revise el total y los pagos si la orden tenía descuentos o anticipos.');
+}
+window.eliminarExamenDesdeResultados = eliminarExamenDesdeResultados;
