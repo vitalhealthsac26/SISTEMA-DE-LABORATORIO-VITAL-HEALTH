@@ -3318,9 +3318,97 @@ window.reordenarExamenesDragDrop = reordenarExamenesDragDrop;
 // ==========================================
 // CATÁLOGO Y PLANTILLAS
 // ==========================================
+// VITAL HEALTH: perfiles compuestos por referencias a exámenes del catálogo.
+// No se duplican ni sustituyen las plantillas originales.
+function vitalResolverPlantillaVinculada(examen, visitados = new Set()) {
+    if (!examen) return [];
+    const codigo = String(examen.codigo || '');
+    if (visitados.has(codigo)) return []; // evita referencias circulares
+    const ruta = new Set(visitados);
+    ruta.add(codigo);
+    const propios = Array.isArray(examen.plantillaPersonalizada) ? examen.plantillaPersonalizada : [];
+    const salida = propios.map(ind => ({...ind}));
+    const vinculados = Array.isArray(examen.examenesVinculados) ? examen.examenesVinculados : [];
+    vinculados.forEach(cod => {
+        const origen = examenesCatalogo.find(e => String(e.codigo) === String(cod));
+        if (!origen || ruta.has(String(cod))) return;
+        const indicadores = vitalResolverPlantillaVinculada(origen, ruta);
+        const plantillaOrigen = indicadores.length ? indicadores : vitalPlantillaBaseSinVinculos(origen);
+        if (!plantillaOrigen.length) return;
+        salida.push({ nombre: origen.nombre, esSeccion: true, vitalOrigen: String(cod) });
+        plantillaOrigen.forEach(ind => salida.push({ ...ind, vitalOrigen: String(cod), valor: '' }));
+    });
+    return salida;
+}
+function vitalPlantillaBaseSinVinculos(examen) {
+    if (!examen) return [];
+    const nombre = String(examen.nombre || '').trim().toUpperCase();
+    const base = BASE_VALORES_REFERENCIALES[nombre];
+    if (Array.isArray(base)) return base.map(i => ({...i}));
+    return examen.nombre ? [{nombre: examen.nombre, unidad: examen.unidad || '', referencia: examen.referencia || '', metodo: examen.metodo || ''}] : [];
+}
+let vitalCodigosVinculadosEnEdicion = [];
+function vitalPintarVinculosCatalogo() {
+    const cont = document.getElementById('vital-vinculos-catalogo');
+    if (!cont) return;
+    cont.innerHTML = '';
+    vitalCodigosVinculadosEnEdicion.forEach(cod => {
+        const ex = examenesCatalogo.find(e => String(e.codigo) === String(cod));
+        const fila = document.createElement('div');
+        fila.className = 'd-flex align-items-center justify-content-between border rounded p-2 my-1 gap-2';
+        const texto = document.createElement('span');
+        texto.textContent = ex ? `${ex.nombre} (${cod}) · plantilla vinculada` : `Examen ${cod} no disponible (vínculo conservado)`;
+        const quitar = document.createElement('button');
+        quitar.type = 'button'; quitar.className = 'btn btn-sm btn-outline-danger'; quitar.textContent = 'Quitar vínculo';
+        quitar.onclick = () => { vitalCodigosVinculadosEnEdicion = vitalCodigosVinculadosEnEdicion.filter(x => x !== cod); vitalPintarVinculosCatalogo(); };
+        fila.append(texto, quitar); cont.appendChild(fila);
+    });
+}
+function vitalPrepararSelectorCatalogo() {
+    const cont = document.getElementById('contenedor-indicadores');
+    if (!cont || document.getElementById('vital-selector-perfiles')) return;
+    const panel = document.createElement('div');
+    panel.id = 'vital-selector-perfiles'; panel.className = 'border rounded p-3 my-3 bg-light';
+    panel.innerHTML = `<div class="fw-bold mb-2">Exámenes vinculados al perfil (se actualizan desde el catálogo)</div><button type="button" class="btn btn-sm btn-primary mb-2" id="vital-boton-vincular">+ Agregar exámenes del catálogo</button><div id="vital-vinculos-catalogo"></div><small class="text-muted">Los indicadores propios se editan arriba. Los exámenes vinculados se incorporan automáticamente al ingresar resultados; sus plantillas originales no se modifican.</small>`;
+    cont.insertAdjacentElement('afterend', panel);
+    panel.querySelector('#vital-boton-vincular').onclick = vitalAbrirSelectorVinculos;
+    vitalPintarVinculosCatalogo();
+}
+function vitalAbrirSelectorVinculos() {
+    const actual = String(document.getElementById('cat-id-original')?.value || document.getElementById('cat-codigo')?.value || '');
+    const overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed;inset:0;background:#0009;z-index:99999;display:flex;align-items:center;justify-content:center;padding:15px';
+    const panel = document.createElement('div');
+    panel.style.cssText = 'background:white;border-radius:12px;padding:20px;width:min(720px,100%);max-height:85vh;display:flex;flex-direction:column;gap:10px';
+    panel.innerHTML = '<h5>Agregar exámenes al perfil</h5><input class="form-control" placeholder="Buscar por nombre o código..."><div class="vital-lista" style="overflow:auto;min-height:120px;max-height:55vh"></div><div class="d-flex justify-content-end gap-2"><button class="btn btn-secondary vital-cancelar" type="button">Cancelar</button><button class="btn btn-primary vital-confirmar" type="button">Agregar seleccionados</button></div>';
+    overlay.appendChild(panel); document.body.appendChild(overlay);
+    const buscador = panel.querySelector('input'), lista = panel.querySelector('.vital-lista');
+    const seleccionados = new Set();
+    const pintar = () => {
+        const filtro = buscador.value.trim().toLocaleLowerCase();
+        lista.replaceChildren();
+        examenesCatalogo.filter(e => String(e.codigo) !== actual && !vitalCodigosVinculadosEnEdicion.includes(String(e.codigo)) && (`${e.codigo} ${e.nombre}`).toLocaleLowerCase().includes(filtro)).slice(0, 150).forEach(ex => {
+            const fila = document.createElement('label'); fila.className = 'd-flex align-items-center gap-2 p-2 border-bottom';
+            const check = document.createElement('input'); check.type = 'checkbox'; check.checked = seleccionados.has(String(ex.codigo));
+            check.onchange = () => check.checked ? seleccionados.add(String(ex.codigo)) : seleccionados.delete(String(ex.codigo));
+            const nombre = document.createElement('span'); nombre.textContent = `${ex.codigo} · ${ex.nombre}`;
+            fila.append(check,nombre); lista.appendChild(fila);
+        });
+    };
+    buscador.oninput = pintar; pintar(); buscador.focus();
+    panel.querySelector('.vital-cancelar').onclick = () => overlay.remove();
+    panel.querySelector('.vital-confirmar').onclick = () => {
+        vitalCodigosVinculadosEnEdicion = [...new Set([...vitalCodigosVinculadosEnEdicion,...seleccionados])];
+        vitalPintarVinculosCatalogo(); overlay.remove();
+    };
+    overlay.addEventListener('click', e => { if(e.target === overlay) overlay.remove(); });
+}
 function obtenerPlantillaIndicadores(nombreExamen, codigoExamen = null) {
     if (codigoExamen) {
         const exCat = examenesCatalogo.find(e => String(e.codigo) === String(codigoExamen));
+        if (exCat && Array.isArray(exCat.examenesVinculados) && exCat.examenesVinculados.length) {
+            return vitalResolverPlantillaVinculada(exCat);
+        }
         if (exCat && Array.isArray(exCat.plantillaPersonalizada) && exCat.plantillaPersonalizada.length > 0) {
             return exCat.plantillaPersonalizada;
         }
@@ -3328,6 +3416,9 @@ function obtenerPlantillaIndicadores(nombreExamen, codigoExamen = null) {
     
     if (nombreExamen) {
         const exCatByName = examenesCatalogo.find(e => String(e.nombre || "").trim().toUpperCase() === String(nombreExamen).trim().toUpperCase());
+        if (exCatByName && Array.isArray(exCatByName.examenesVinculados) && exCatByName.examenesVinculados.length) {
+            return vitalResolverPlantillaVinculada(exCatByName);
+        }
         if (exCatByName && Array.isArray(exCatByName.plantillaPersonalizada) && exCatByName.plantillaPersonalizada.length > 0) {
             return exCatByName.plantillaPersonalizada;
         }
@@ -3430,6 +3521,7 @@ function obtenerPlantillaIndicadores(nombreExamen, codigoExamen = null) {
 }
 
 function renderizarTablaCatalogo(filtro = "") {
+    vitalPrepararSelectorCatalogo();
     const tbody = document.getElementById("tabla-catalogo-body");
     const countEl = document.getElementById("total-cat-count");
     if (!tbody) return;
@@ -3469,6 +3561,8 @@ function renderizarTablaCatalogo(filtro = "") {
 }
 
 function prepararNuevoExamen() {
+    vitalCodigosVinculadosEnEdicion = [];
+    vitalPrepararSelectorCatalogo(); vitalPintarVinculosCatalogo();
     const form = document.getElementById("form-catalogo");
     if (form) form.reset();
     setVal("cat-id-original", "");
@@ -3641,6 +3735,7 @@ function vaciarTodosLosIndicadores() {
 }
 
 function guardarExamenCatalogo() {
+    vitalPrepararSelectorCatalogo();
     const codigo = val("cat-codigo").trim();
     const codigoOriginal = val("cat-id-original").trim();
     const nombre = val("cat-nombre").trim();
@@ -3683,8 +3778,10 @@ function guardarExamenCatalogo() {
         }
     });
 
-    const nuevoEx = { 
-        codigo, nombre, precio, muestra, metodo, tubo, plantilla, refTexto, plantillaPersonalizada, en: Date.now()
+    const previoEx = examenesCatalogo.find(e => String(e.codigo) === String(codigoOriginal || codigo));
+    const nuevoEx = {
+        ...(previoEx || {}), codigo, nombre, precio, muestra, metodo, tubo, plantilla, refTexto,
+        plantillaPersonalizada, examenesVinculados: [...vitalCodigosVinculadosEnEdicion], en: Date.now()
     };
 
     let index = -1;
@@ -3721,6 +3818,8 @@ function editarExamenCatalogo(codigo) {
     const titulo = document.getElementById("catalogo-form-titulo");
     if (titulo) titulo.innerHTML = `<i class="bi bi-pencil-square me-2"></i>Editar Examen: ${escapeHTML(ex.codigo)}`;
 
+    vitalCodigosVinculadosEnEdicion = Array.isArray(ex.examenesVinculados) ? ex.examenesVinculados.map(String) : [];
+    vitalPrepararSelectorCatalogo(); vitalPintarVinculosCatalogo();
     vaciarTodosLosIndicadores();
     if (Array.isArray(ex.plantillaPersonalizada) && ex.plantillaPersonalizada.length > 0) {
         ex.plantillaPersonalizada.forEach(ind => {
