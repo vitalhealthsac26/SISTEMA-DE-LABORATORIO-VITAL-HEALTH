@@ -1384,6 +1384,7 @@ function renderizarTablaOrdenes(ordenes) {
                 <button class="btn btn-sm btn-outline-secondary me-1" title="Reimprimir ticket" onclick="mostrarTicketPorNro('${ord.nroOrden}')"><i class="bi bi-receipt"></i></button>
                 ${ord.resultados ? `<button class="btn btn-sm btn-outline-primary me-1" title="Imprimir informe de resultados" onclick="imprimirInforme('${ord.nroOrden}')"><i class="bi bi-printer"></i> Informe</button>` : ""}
                 ${ord.resultados ? `<button class="btn btn-sm btn-outline-danger me-1" title="Descargar informe en PDF" onclick="descargarInformePDF('${ord.nroOrden}')"><i class="bi bi-file-earmark-pdf"></i> PDF</button>` : ""}
+                <button class="btn btn-sm btn-outline-success me-1" onclick="agregarExamenOrdenExistente('${ord.nroOrden}')" title="Añadir pruebas a esta orden"><i class="bi bi-plus-circle"></i> Examen</button>
                 <button class="btn btn-sm btn-outline-primary me-1" onclick="abrirResultados('${ord.nroOrden}')" title="Resultados"><i class="bi bi-file-earmark-medical"></i> Resultados</button>
                 <button class="btn btn-sm btn-outline-danger" onclick="eliminarOrden('${ord.nroOrden}')" title="Eliminar Orden"><i class="bi bi-trash"></i></button>
             </td>
@@ -2901,6 +2902,7 @@ function abrirResultados(nroOrden) {
 
     html += `</div>`;
     editor.innerHTML = html;
+    activarOrdenamientoIndicadores(editor);
     if (typeof inicializarDragAndDropResultados === 'function') {
         inicializarDragAndDropResultados(nroOrden);
     }
@@ -6070,17 +6072,12 @@ function generarBloqueExamenHTML(ex, orden) {
             referencia: ex.referencia || "", metodo: ex.metodo || ""
         }];
     }
-    // PDF: no mostrar resultados vacíos ni secciones huérfanas.
-    listaIndicadores = listaIndicadores.filter((ind, idx, lista) => {
-        if (!ind || !ind.esSeccion) return ind && String(ind.resultado ?? ind.valor ?? '').trim() !== '' && String(ind.resultado ?? ind.valor ?? '').trim() !== '...';
-        const siguientes = lista.slice(idx + 1);
-        const proximaSeccion = siguientes.findIndex(x => x && x.esSeccion);
-        const grupo = proximaSeccion < 0 ? siguientes : siguientes.slice(0, proximaSeccion);
-        return grupo.some(x => x && !x.esSeccion && String(x.resultado ?? x.valor ?? '').trim() !== '');
-    });
-
-    // Un examen completamente pendiente no debe generar bloque ni página en el PDF.
-    if (!listaIndicadores.some(ind => ind && !ind.esSeccion && String(ind.resultado ?? ind.valor ?? '').trim() !== '' && String(ind.resultado ?? ind.valor ?? '').trim() !== '...')) return '';
+    // Conservar todos los indicadores y secciones en su orden original.
+    // Solo se excluye el examen completo cuando NO existe ningún resultado ingresado.
+    const tieneResultado = listaIndicadores.some(ind => ind && !ind.esSeccion &&
+        String(ind.resultado ?? '').trim() !== '' && String(ind.resultado ?? '').trim() !== '...');
+    if (!tieneResultado) return '';
+    listaIndicadores = listaIndicadores.filter(Boolean);
     let filasHTML = '';
     if (listaIndicadores && listaIndicadores.length > 0) {
         listaIndicadores.forEach((ind, indIdx) => {
@@ -6580,3 +6577,78 @@ function agregarFilaLocusInformativa() {
     tbody.appendChild(tr);
 }
 window.agregarFilaLocusInformativa = agregarFilaLocusInformativa;
+
+// ============================================================
+// VITAL HEALTH: ORDEN PERSONALIZADO DE INDICADORES POR EXAMEN
+// ============================================================
+function activarOrdenamientoIndicadores(editor) {
+    if (!editor || editor.dataset.vitalOrdenamiento === '1') return;
+    editor.dataset.vitalOrdenamiento = '1';
+    function colocarBotones() {
+        editor.querySelectorAll('.indicador-resultado-row').forEach(fila => {
+            if (fila.querySelector('.vital-mover-indicador')) return;
+            const controles = document.createElement('span');
+            controles.className = 'vital-mover-indicador d-inline-flex gap-1 ms-1';
+            controles.innerHTML = '<button type="button" class="btn btn-sm btn-outline-primary py-0 px-1" data-mover="arriba" title="Subir parámetro">↑</button><button type="button" class="btn btn-sm btn-outline-primary py-0 px-1" data-mover="abajo" title="Bajar parámetro">↓</button>';
+            const destino = fila.querySelector('.col-1:last-child') || fila.lastElementChild;
+            if (destino) destino.appendChild(controles);
+        });
+    }
+    colocarBotones();
+    editor.addEventListener('click', e => {
+        const boton = e.target.closest('[data-mover]');
+        if (!boton || !editor.contains(boton)) return;
+        const fila = boton.closest('.indicador-resultado-row');
+        if (!fila) return;
+        const contenedor = fila.parentElement;
+        const filas = [...contenedor.children].filter(x => x.classList.contains('indicador-resultado-row'));
+        const posicion = filas.indexOf(fila);
+        const destino = filas[posicion + (boton.dataset.mover === 'arriba' ? -1 : 1)];
+        if (!destino) return;
+        if (boton.dataset.mover === 'arriba') contenedor.insertBefore(fila, destino);
+        else contenedor.insertBefore(destino, fila);
+    });
+    // Incluye indicadores agregados posteriormente sin alterar sus valores.
+    const observador = new MutationObserver(() => colocarBotones());
+    observador.observe(editor, {childList:true,subtree:true});
+}
+
+// Añade pruebas sin recrear orden, fecha, hora, ni movimientos de caja.
+function agregarExamenOrdenExistente(nroOrden) {
+    const orden = (ordenesRegistradas || []).find(o => String(o.nroOrden) === String(nroOrden));
+    if (!orden) return alert('No se encontró la orden.');
+    const texto = prompt('Agregar examen a ' + nroOrden + '\nEscriba el nombre o código exacto del catálogo:');
+    if (texto === null || !texto.trim()) return;
+    const busqueda = texto.trim().toLocaleLowerCase('es');
+    const coincidencias = (examenesCatalogo || []).filter(ex =>
+        String(ex.codigo).toLocaleLowerCase('es') === busqueda ||
+        String(ex.nombre || '').toLocaleLowerCase('es') === busqueda);
+    if (coincidencias.length !== 1) {
+        alert(coincidencias.length ? 'Hay varios exámenes con ese nombre. Use el código exacto.' : 'No se encontró ese examen en el catálogo.');
+        return;
+    }
+    const ex = coincidencias[0];
+    if ((orden.examenes || []).some(i => String(i.codigo) === String(ex.codigo))) {
+        alert('Este examen ya está registrado en la orden.'); return;
+    }
+    const precio = Number(ex.precio ?? ex.Precio ?? 0);
+    if (!Number.isFinite(precio) || precio < 0) return alert('El precio del examen no es válido.');
+    const respuesta = confirm('Agregar ' + ex.nombre + ' por S/ ' + precio.toFixed(2) +
+        ' a la orden ' + nroOrden + '?\nSe conservarán la fecha, hora, resultados y pagos anteriores. El nuevo importe quedará como saldo pendiente.');
+    if (!respuesta) return;
+    // Usar la estructura de ítems existente y no modificar la fecha original.
+    const nuevo = {codigo: ex.codigo, nombre: ex.nombre, precio, cantidad: 1};
+    orden.examenes = Array.isArray(orden.examenes) ? orden.examenes : [];
+    orden.examenes.push(nuevo);
+    orden.subtotal = Number(orden.subtotal ?? orden.total ?? 0) + precio;
+    orden.total = Number(orden.total || 0) + precio;
+    orden.saldoPendiente = Math.max(0, Number(orden.saldoPendiente || 0) + precio);
+    orden.estadoPago = orden.saldoPendiente > 0.009 ? 'Pendiente' : 'Pagado';
+    orden.estado = 'Resultados pendientes';
+    orden.en = Date.now(); // solo control de sincronización, NO fechaHora
+    persistirDatos();
+    window.nubeGuardarOrden?.(orden);
+    cargarOrdenes();
+    alert('Examen agregado correctamente. El importe adicional está pendiente de cobro.');
+}
+window.agregarExamenOrdenExistente = agregarExamenOrdenExistente;
