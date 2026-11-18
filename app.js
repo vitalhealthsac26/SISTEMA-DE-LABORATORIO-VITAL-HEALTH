@@ -2820,7 +2820,15 @@ function abrirResultados(nroOrden) {
         // 🧠 LÓGICA INTELIGENTE: Si el usuario ya guardó resultados previamente para este examen, 
         // usamos esos datos exactos (respetando lo que borró o agregó). Si no, usamos la plantilla base.
         let indicadores = [];
-        if (guardado && Array.isArray(guardado.indicadores) && guardado.indicadores.length >= 0) {
+        // Recuperación limitada: una lista vacía guardada para UROCULTIVO no debe
+        // ocultar su plantilla en el editor. No modifica los datos persistidos.
+        // Para los demás exámenes y para listas no vacías, respetar lo guardado.
+        const esUrocultivoPendiente = String(ex.codigo ?? '') === '1050' ||
+            /UROCULTIVO/i.test(String(ex.nombre || ''));
+        const listaGuardadaVacia = guardado && Array.isArray(guardado.indicadores) &&
+            guardado.indicadores.length === 0;
+        if (guardado && Array.isArray(guardado.indicadores) &&
+            !(esUrocultivoPendiente && listaGuardadaVacia)) {
             indicadores = guardado.indicadores;
         } else {
             const plantilla = typeof obtenerIndicadoresParaOrden === 'function' ? obtenerIndicadoresParaOrden(ex) : null;
