@@ -2896,9 +2896,9 @@ function abrirResultados(nroOrden) {
         });
 
         html += `
-            <div class="list-group-item mb-3 shadow-sm border rounded card-examen-arrastrable" draggable="true" data-ex-card-idx="${exIdx}">
+            <div class="list-group-item mb-3 shadow-sm border rounded card-examen-arrastrable" data-ex-card-idx="${exIdx}">
                 <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom flex-wrap gap-2 bg-light p-2 rounded">
-                    <h6 class="fw-bold text-primary mb-0 fs-6">${escapeHTML(nombreLimpioExamen)}</h6>
+                    <div class="d-flex align-items-center gap-2"><button type="button" draggable="true" class="btn btn-sm btn-outline-primary vital-asa-examen" title="Arrastrar el examen completo con todos sus indicadores" aria-label="Mover bloque completo de examen" style="cursor:grab;touch-action:none">⠿</button><h6 class="fw-bold text-primary mb-0 fs-6">${escapeHTML(nombreLimpioExamen)}</h6></div>
                     <button type="button" class="btn btn-sm btn-outline-danger" onclick="eliminarExamenDesdeResultados('${orden.nroOrden}', ${exIdx})" title="Eliminar examen completo de esta orden"><i class="bi bi-trash me-1"></i> Eliminar examen</button>
                 </div>
                 <div class="contenedor-parametros-examen-${exIdx}">
@@ -2965,6 +2965,7 @@ function inicializarDragAndDropResultados(nroOrden) {
 
     cards.forEach(card => {
         card.addEventListener("dragstart", (e) => {
+            if (!e.target.closest?.('.vital-asa-examen')) return;
             indexArrastrado = parseInt(card.dataset.exCardIdx, 10);
             card.classList.add("arrastrando");
             e.dataTransfer.effectAllowed = "move";
@@ -2972,11 +2973,14 @@ function inicializarDragAndDropResultados(nroOrden) {
         });
 
         card.addEventListener("dragend", () => {
+            indexArrastrado = null;
             card.classList.remove("arrastrando");
             cards.forEach(c => c.classList.remove("drag-sobre"));
         });
 
         card.addEventListener("dragover", (e) => {
+            if (e.target.closest?.('.indicador-resultado-row') && e.dataTransfer?.types?.includes('vital-indicador')) return;
+            if (indexArrastrado === null) return;
             e.preventDefault();
             e.dataTransfer.dropEffect = "move";
             card.classList.add("drag-sobre");
@@ -2987,6 +2991,7 @@ function inicializarDragAndDropResultados(nroOrden) {
         });
 
         card.addEventListener("drop", (e) => {
+            if (indexArrastrado === null) return;
             e.preventDefault();
             card.classList.remove("drag-sobre");
             const indexDestino = parseInt(card.dataset.exCardIdx, 10);
@@ -3348,20 +3353,72 @@ function vitalPlantillaBaseSinVinculos(examen) {
     return examen.nombre ? [{nombre: examen.nombre, unidad: examen.unidad || '', referencia: examen.referencia || '', metodo: examen.metodo || ''}] : [];
 }
 let vitalCodigosVinculadosEnEdicion = [];
+// Vista previa de solo lectura: los vínculos siempre apuntan a la plantilla actual.
 function vitalPintarVinculosCatalogo() {
     const cont = document.getElementById('vital-vinculos-catalogo');
     if (!cont) return;
-    cont.innerHTML = '';
+    cont.replaceChildren();
+    let arrastrado = null;
     vitalCodigosVinculadosEnEdicion.forEach(cod => {
         const ex = examenesCatalogo.find(e => String(e.codigo) === String(cod));
         const fila = document.createElement('div');
-        fila.className = 'd-flex align-items-center justify-content-between border rounded p-2 my-1 gap-2';
-        const texto = document.createElement('span');
+        fila.className = 'border rounded p-2 my-2 vital-bloque-vinculado';
+        fila.dataset.codigoVinculado = String(cod);
+        const cabecera = document.createElement('div');
+        cabecera.className = 'd-flex align-items-center gap-2 flex-wrap';
+        const asa = document.createElement('button');
+        asa.type = 'button'; asa.draggable = true; asa.className = 'btn btn-sm btn-outline-primary';
+        asa.textContent = '⠿'; asa.title = 'Arrastrar examen completo dentro del perfil';
+        asa.style.cssText = 'cursor:grab;touch-action:none';
+        const texto = document.createElement('strong');
+        texto.className = 'flex-grow-1';
         texto.textContent = ex ? `${ex.nombre} (${cod}) · plantilla vinculada` : `Examen ${cod} no disponible (vínculo conservado)`;
+        const ver = document.createElement('button');
+        ver.type = 'button'; ver.className = 'btn btn-sm btn-outline-primary';
+        ver.textContent = 'Ver plantilla';
         const quitar = document.createElement('button');
         quitar.type = 'button'; quitar.className = 'btn btn-sm btn-outline-danger'; quitar.textContent = 'Quitar vínculo';
         quitar.onclick = () => { vitalCodigosVinculadosEnEdicion = vitalCodigosVinculadosEnEdicion.filter(x => x !== cod); vitalPintarVinculosCatalogo(); };
-        fila.append(texto, quitar); cont.appendChild(fila);
+        const detalle = document.createElement('div');
+        detalle.hidden = true; detalle.className = 'mt-2 table-responsive';
+        ver.onclick = () => {
+            detalle.hidden = !detalle.hidden;
+            ver.textContent = detalle.hidden ? 'Ver plantilla' : 'Ocultar plantilla';
+            if (detalle.hidden) return;
+            detalle.replaceChildren();
+            if (!ex) { detalle.textContent = 'Examen no disponible. El vínculo se conserva.'; return; }
+            const plantilla = vitalResolverPlantillaVinculada(ex);
+            const indicadores = plantilla.length ? plantilla : vitalPlantillaBaseSinVinculos(ex);
+            if (!indicadores.length) { detalle.textContent = 'Este examen no tiene indicadores configurados.'; return; }
+            const tabla = document.createElement('table'); tabla.className = 'table table-sm table-bordered align-middle';
+            const thead = document.createElement('thead');
+            const tr = document.createElement('tr');
+            ['Indicador / sección','Unidad','Referencia','Método'].forEach(t => { const th=document.createElement('th'); th.textContent=t; tr.appendChild(th); });
+            thead.appendChild(tr); tabla.appendChild(thead);
+            const tbody = document.createElement('tbody');
+            indicadores.forEach(ind => {
+                const r = document.createElement('tr');
+                const datos = [ind.nombre || '', ind.esSeccion ? '' : (ind.unidad || ''), ind.esSeccion ? '' : (ind.referencia || ''), ind.esSeccion ? '' : (ind.metodo || '')];
+                datos.forEach(t => { const td=document.createElement('td'); td.textContent=String(t); if (ind.esSeccion) td.className='fw-bold bg-light'; r.appendChild(td); });
+                tbody.appendChild(r);
+            });
+            tabla.appendChild(tbody); detalle.appendChild(tabla);
+        };
+        asa.addEventListener('dragstart', e => { arrastrado = String(cod); e.dataTransfer.effectAllowed='move'; e.dataTransfer.setData('text/plain','vital-vinculo'); e.stopPropagation(); });
+        asa.addEventListener('dragend', () => { arrastrado = null; });
+        fila.addEventListener('dragover', e => { if (arrastrado !== null) { e.preventDefault(); e.dataTransfer.dropEffect='move'; } });
+        fila.addEventListener('drop', e => {
+            if (arrastrado === null) return;
+            e.preventDefault();
+            const desde=vitalCodigosVinculadosEnEdicion.indexOf(arrastrado);
+            const hasta=vitalCodigosVinculadosEnEdicion.indexOf(String(cod));
+            if (desde < 0 || hasta < 0 || desde === hasta) return;
+            vitalCodigosVinculadosEnEdicion.splice(desde,1);
+            vitalCodigosVinculadosEnEdicion.splice(hasta,0,arrastrado);
+            arrastrado=null; vitalPintarVinculosCatalogo();
+        });
+        cabecera.append(asa,texto,ver,quitar);
+        fila.append(cabecera,detalle); cont.appendChild(fila);
     });
 }
 function vitalPrepararSelectorCatalogo() {
