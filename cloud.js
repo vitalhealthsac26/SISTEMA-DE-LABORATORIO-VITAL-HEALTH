@@ -137,13 +137,9 @@ async function sincronizarTodo() {
             const sinOrden = !nroOrdNorm;
 
             if (ordenFueEliminada || ordenInexistente || sinOrden) {
-                // Eliminar cobro huérfano de Firestore
-                try {
-                    await deleteDoc(doc(db, "caja", idMovStr));
-                } catch (e) {
-                    console.error("Error purgando cobro inválido en Firestore:", e);
-                }
-                continue;
+                // PROTECCIÓN: no borrar automáticamente movimientos de caja.
+                // Una orden ausente durante sincronización no demuestra que el cobro sea inválido.
+                console.warn("Vital Health: movimiento de caja pendiente de conciliación (conservado):", idMovStr);
             }
 
             nuevaCaja.push(remota);
