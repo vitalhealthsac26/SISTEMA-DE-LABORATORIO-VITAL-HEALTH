@@ -3150,16 +3150,15 @@ window.reordenarExamenesDragDrop = reordenarExamenesDragDrop;
         const inputMetodo = fila.querySelector('[data-campo="metodo"]');
         const metodoVal = inputMetodo ? inputMetodo.value.trim() : "";
 
-        // Se guarda el indicador siempre para mantener la alineación exacta de los índices
         porExamen[exIdx].push({
             nombre: nombreParametro, 
             esSeccion: false,
             resultado: resultadoVal, 
-            unidad: inputUnidad ? inputUnidad.value.trim() : "",
+            unidad: unidadVal, // <-- Aquí aseguramos que viaje su unidad independiente
             refMin: fila.dataset.refmin || "", 
             refMax: fila.dataset.refmax || "",
-            referencia: inputReferencia ? inputReferencia.value.trim() : "",
-            metodo: inputMetodo ? inputMetodo.value.trim() : ""
+            referencia: referenciaVal,
+            metodo: metodoVal
         });
     });
 
