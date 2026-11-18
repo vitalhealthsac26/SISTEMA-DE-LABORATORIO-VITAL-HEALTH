@@ -3561,7 +3561,78 @@ function agregarIndicadorResultado(datos = {}) {
             <input type="text" class="form-control form-control-sm ind-referencia bg-white" value="${escapeHTML(refVal)}" placeholder="Ej: Hombres: 0.70 - 1.30 | Mujeres: 0.60 - 1.10   ó   Adultos: 74 - 106 | Niños: 60 - 100 | Neonatos: 50 - 80">
         </div>
     `;
+    // Asa para reordenar la plantilla sin tocar los valores de sus campos.
+    const asa = document.createElement('button');
+    asa.type = 'button';
+    asa.className = 'vital-asa-catalogo btn btn-sm btn-outline-primary mt-3';
+    asa.textContent = '⠿';
+    asa.draggable = true;
+    asa.title = 'Arrastrar para cambiar el orden del indicador';
+    asa.setAttribute('aria-label', 'Arrastrar indicador del catálogo');
+    asa.style.cssText = 'cursor:grab;touch-action:none;user-select:none;font-size:20px;line-height:1.3';
+    const controles = div.querySelector('.col-md-1.col-1');
+    if (controles) controles.prepend(asa);
     contenedor.appendChild(div);
+    activarArrastrePlantillasCatalogo(contenedor);
+}
+
+// Reordenamiento visual de filas del Catálogo. El guardado existente lee el orden del DOM.
+function activarArrastrePlantillasCatalogo(contenedor) {
+    if (!contenedor || contenedor.dataset.vitalArrastreCatalogo === '1') return;
+    contenedor.dataset.vitalArrastreCatalogo = '1';
+    let filaArrastrada = null;
+    let tactil = null;
+    const obtenerFila = e => e.target.closest?.('.indicador-row');
+    function mover(fila, objetivo, y) {
+        if (!fila || !objetivo || fila === objetivo || fila.parentElement !== objetivo.parentElement) return;
+        const rect = objetivo.getBoundingClientRect();
+        objetivo.parentElement.insertBefore(fila, y < rect.top + rect.height / 2 ? objetivo : objetivo.nextSibling);
+    }
+    contenedor.addEventListener('dragstart', e => {
+        if (!e.target.closest?.('.vital-asa-catalogo')) return;
+        filaArrastrada = obtenerFila(e);
+        if (!filaArrastrada || !e.dataTransfer) return;
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/plain', 'vital-catalogo-indicador');
+        filaArrastrada.style.opacity = '0.55';
+    });
+    contenedor.addEventListener('dragover', e => {
+        if (!filaArrastrada || !obtenerFila(e)) return;
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+    });
+    contenedor.addEventListener('drop', e => {
+        if (!filaArrastrada) return;
+        e.preventDefault();
+        mover(filaArrastrada, obtenerFila(e), e.clientY);
+        filaArrastrada.style.opacity = '';
+        filaArrastrada = null;
+    });
+    contenedor.addEventListener('dragend', () => {
+        if (filaArrastrada) filaArrastrada.style.opacity = '';
+        filaArrastrada = null;
+    });
+    // En pantallas táctiles, se sujeta el asa y se suelta sobre otra fila.
+    contenedor.addEventListener('pointerdown', e => {
+        if (e.pointerType === 'mouse' || !e.target.closest?.('.vital-asa-catalogo')) return;
+        const asa = e.target.closest('.vital-asa-catalogo');
+        const fila = obtenerFila(e);
+        if (!fila) return;
+        tactil = { fila, id: e.pointerId };
+        asa.setPointerCapture?.(e.pointerId);
+        fila.style.opacity = '0.55';
+        e.preventDefault();
+    });
+    contenedor.addEventListener('pointerup', e => {
+        if (!tactil || e.pointerId !== tactil.id) return;
+        tactil.fila.style.opacity = '';
+        mover(tactil.fila, document.elementFromPoint(e.clientX, e.clientY)?.closest('.indicador-row'), e.clientY);
+        tactil = null;
+    });
+    contenedor.addEventListener('pointercancel', () => {
+        if (tactil) tactil.fila.style.opacity = '';
+        tactil = null;
+    });
 }
 
 function vaciarTodosLosIndicadores() {
@@ -6597,33 +6668,94 @@ window.agregarFilaLocusInformativa = agregarFilaLocusInformativa;
 function activarOrdenamientoIndicadores(editor) {
     if (!editor || editor.dataset.vitalOrdenamiento === '1') return;
     editor.dataset.vitalOrdenamiento = '1';
-    function colocarBotones() {
+    let arrastrada = null;
+    let inicioTactil = null;
+
+    function colocarAsas() {
         editor.querySelectorAll('.indicador-resultado-row').forEach(fila => {
-            if (fila.querySelector('.vital-mover-indicador')) return;
-            const controles = document.createElement('span');
-            controles.className = 'vital-mover-indicador d-inline-flex gap-1 ms-1';
-            controles.innerHTML = '<button type="button" class="btn btn-sm btn-outline-primary py-0 px-1" data-mover="arriba" title="Subir parámetro">↑</button><button type="button" class="btn btn-sm btn-outline-primary py-0 px-1" data-mover="abajo" title="Bajar parámetro">↓</button>';
+            if (fila.querySelector('.vital-asa-indicador')) return;
+            const asa = document.createElement('button');
+            asa.type = 'button';
+            asa.className = 'vital-asa-indicador btn btn-sm btn-outline-primary py-0 px-2 ms-1';
+            asa.textContent = '⠿';
+            asa.title = 'Arrastrar para cambiar el orden del indicador';
+            asa.setAttribute('aria-label', 'Arrastrar indicador para reordenarlo');
+            asa.draggable = true;
+            asa.style.cssText = 'cursor:grab;touch-action:none;user-select:none;font-size:20px;line-height:1.3';
             const destino = fila.querySelector('.col-1:last-child') || fila.lastElementChild;
-            if (destino) destino.appendChild(controles);
+            if (destino) destino.appendChild(asa);
         });
     }
-    colocarBotones();
-    editor.addEventListener('click', e => {
-        const boton = e.target.closest('[data-mover]');
-        if (!boton || !editor.contains(boton)) return;
-        const fila = boton.closest('.indicador-resultado-row');
-        if (!fila) return;
-        const contenedor = fila.parentElement;
-        const filas = [...contenedor.children].filter(x => x.classList.contains('indicador-resultado-row'));
-        const posicion = filas.indexOf(fila);
-        const destino = filas[posicion + (boton.dataset.mover === 'arriba' ? -1 : 1)];
-        if (!destino) return;
-        if (boton.dataset.mover === 'arriba') contenedor.insertBefore(fila, destino);
-        else contenedor.insertBefore(destino, fila);
+
+    function colocarAntesODetras(fila, objetivo, y) {
+        if (!fila || !objetivo || fila === objetivo || fila.parentElement !== objetivo.parentElement) return;
+        const mitad = objetivo.getBoundingClientRect().top + objetivo.getBoundingClientRect().height / 2;
+        objetivo.parentElement.insertBefore(fila, y < mitad ? objetivo : objetivo.nextSibling);
+    }
+
+    colocarAsas();
+    editor.addEventListener('dragstart', e => {
+        const asa = e.target.closest?.('.vital-asa-indicador');
+        if (!asa || !editor.contains(asa)) return;
+        e.stopPropagation(); // No activar el arrastre de exámenes completos.
+        arrastrada = asa.closest('.indicador-resultado-row');
+        if (!arrastrada) return;
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/plain', 'vital-indicador');
+        arrastrada.style.opacity = '0.55';
     });
-    // Incluye indicadores agregados posteriormente sin alterar sus valores.
-    const observador = new MutationObserver(() => colocarBotones());
-    observador.observe(editor, {childList:true,subtree:true});
+    editor.addEventListener('dragover', e => {
+        if (!arrastrada) return;
+        const objetivo = e.target.closest?.('.indicador-resultado-row');
+        if (!objetivo || objetivo.parentElement !== arrastrada.parentElement) return;
+        e.preventDefault();
+        e.stopPropagation();
+        e.dataTransfer.dropEffect = 'move';
+    });
+    editor.addEventListener('drop', e => {
+        if (!arrastrada) return;
+        const objetivo = e.target.closest?.('.indicador-resultado-row');
+        if (!objetivo) return;
+        e.preventDefault();
+        e.stopPropagation();
+        colocarAntesODetras(arrastrada, objetivo, e.clientY);
+        arrastrada.style.opacity = '';
+        arrastrada = null;
+    });
+    editor.addEventListener('dragend', e => {
+        if (!arrastrada) return;
+        e.stopPropagation();
+        arrastrada.style.opacity = '';
+        arrastrada = null;
+    });
+
+    // Alternativa para pantallas táctiles: sujetar el asa y soltar sobre otra fila.
+    editor.addEventListener('pointerdown', e => {
+        if (e.pointerType === 'mouse') return;
+        const asa = e.target.closest?.('.vital-asa-indicador');
+        if (!asa) return;
+        const fila = asa.closest('.indicador-resultado-row');
+        if (!fila) return;
+        inicioTactil = { fila, id: e.pointerId };
+        asa.setPointerCapture?.(e.pointerId);
+        fila.style.opacity = '0.6';
+        e.preventDefault();
+    });
+    editor.addEventListener('pointerup', e => {
+        if (!inicioTactil || e.pointerId !== inicioTactil.id) return;
+        const fila = inicioTactil.fila;
+        fila.style.opacity = '';
+        const objetivo = document.elementFromPoint(e.clientX, e.clientY)?.closest('.indicador-resultado-row');
+        colocarAntesODetras(fila, objetivo, e.clientY);
+        inicioTactil = null;
+    });
+    editor.addEventListener('pointercancel', () => {
+        if (inicioTactil) inicioTactil.fila.style.opacity = '';
+        inicioTactil = null;
+    });
+
+    // También se habilita en indicadores añadidos posteriormente.
+    new MutationObserver(colocarAsas).observe(editor, {childList:true, subtree:true});
 }
 
 // Añade pruebas sin recrear orden, fecha, hora, ni movimientos de caja.
