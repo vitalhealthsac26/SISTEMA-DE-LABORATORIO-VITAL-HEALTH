@@ -3073,9 +3073,8 @@ window.reordenarExamenesDragDrop = reordenarExamenesDragDrop;
         const inputMetodo = fila.querySelector('[data-campo="metodo"]');
         const metodoVal = inputMetodo ? inputMetodo.value.trim() : "";
 
-        // Los indicadores sin resultado no forman parte del informe de este paciente.
-        // El valor 0 es válido y se conserva.
-        if (!resultadoVal) return;
+        // Conservar los indicadores pendientes en la orden. Solo el PDF los omite.
+        // Así no desaparecen al guardar y volver a abrir el editor.
         porExamen[exIdx].push({
             nombre: nombreParametro, 
             esSeccion: false,
@@ -3088,14 +3087,7 @@ window.reordenarExamenesDragDrop = reordenarExamenesDragDrop;
         });
     });
 
-    // No guardar títulos de secciones que hayan quedado sin indicadores.
-    Object.keys(porExamen).forEach(k => {
-        const items = porExamen[k];
-        porExamen[k] = items.filter((item, idx) => !item.esSeccion ||
-            items.slice(idx + 1).some(siguiente => !siguiente.esSeccion && String(siguiente.resultado ?? '').trim() !== '' &&
-                (items.slice(idx + 1).findIndex(x => x.esSeccion) === -1 ||
-                 items.slice(idx + 1).findIndex(x => !x.esSeccion) < items.slice(idx + 1).findIndex(x => x.esSeccion))));
-    });
+    // Mantener también las secciones de indicadores pendientes en el editor.
 
     let datosPaternidadLegalGuardar = null;
     if (cardPaternidadLegal) {
@@ -3284,7 +3276,13 @@ window.reordenarExamenesDragDrop = reordenarExamenesDragDrop;
         orden.ocultarFirma = true;
     }
 
-    orden.estado = "Resultados listos";
+    // Un examen sin resultados sigue pendiente, aunque otros ya estén informados.
+    const hayPendientes = (orden.resultados || []).some(r => {
+        const cat = examenesCatalogo.find(c => String(c.codigo) === String(r.codigo));
+        if (esExamenPaternidad(r) || esExamenPaternidadLegal(r) || esExamenPaternidad(cat) || esExamenPaternidadLegal(cat)) return false;
+        return !(r.indicadores || []).some(i => !i.esSeccion && String(i.resultado ?? '').trim() !== '' && String(i.resultado ?? '').trim() !== '...');
+    });
+    orden.estado = hayPendientes ? "Resultados pendientes" : "Resultados listos";
     orden.en = Date.now();
     persistirDatos();
     cargarOrdenes();
@@ -6066,13 +6064,15 @@ function generarBloqueExamenHTML(ex, orden) {
     }
     // PDF: no mostrar resultados vacíos ni secciones huérfanas.
     listaIndicadores = listaIndicadores.filter((ind, idx, lista) => {
-        if (!ind || !ind.esSeccion) return ind && String(ind.resultado ?? ind.valor ?? '').trim() !== '';
+        if (!ind || !ind.esSeccion) return ind && String(ind.resultado ?? ind.valor ?? '').trim() !== '' && String(ind.resultado ?? ind.valor ?? '').trim() !== '...';
         const siguientes = lista.slice(idx + 1);
         const proximaSeccion = siguientes.findIndex(x => x && x.esSeccion);
         const grupo = proximaSeccion < 0 ? siguientes : siguientes.slice(0, proximaSeccion);
         return grupo.some(x => x && !x.esSeccion && String(x.resultado ?? x.valor ?? '').trim() !== '');
     });
 
+    // Un examen completamente pendiente no debe generar bloque ni página en el PDF.
+    if (!listaIndicadores.some(ind => ind && !ind.esSeccion && String(ind.resultado ?? ind.valor ?? '').trim() !== '' && String(ind.resultado ?? ind.valor ?? '').trim() !== '...')) return '';
     let filasHTML = '';
     if (listaIndicadores && listaIndicadores.length > 0) {
         listaIndicadores.forEach((ind, indIdx) => {
@@ -6138,7 +6138,7 @@ function generarBloqueExamenHTML(ex, orden) {
 // PAGINACIÓN INTELIGENTE A4 (CON FIRMA EN TODAS LAS HOJAS DE RESULTADOS)
 // =========================================================================
 function paginarInformeOrden(orden) {
-    const examenes = orden.examenes || [];
+    const examenes = (orden.examenes || []).filter(ex => Boolean(generarBloqueExamenHTML(ex, orden).trim()));
     if (!examenes.length) {
         return [{
             esPrimera: true,
