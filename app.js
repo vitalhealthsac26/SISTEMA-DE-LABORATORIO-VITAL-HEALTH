@@ -2914,27 +2914,28 @@ function abrirResultados(nroOrden) {
             }
 
             filas += `
-    <div class="row g-2 mb-2 align-items-center indicador-resultado-row" data-ex="${exIdx}" data-refmin="${escapeHTML(ind.refMin ?? "")}" data-refmax="${escapeHTML(ind.refMax ?? "")}">
-        <div class="col-md-3">
-            <input type="text" class="form-control form-control-sm fw-semibold text-dark" data-campo="nombre-param" value="${escapeHTML(nombreParam)}" placeholder="Nombre indicador">
-        </div>
-        <div class="col-md-2">
-            <input type="text" class="form-control form-control-sm" data-campo="resultado" placeholder="Valor obtenido" value="${escapeHTML(valorResultadoPrevio)}">
-        </div>
-        <div class="col-md-2">
-            <input type="text" class="form-control form-control-sm bg-light" data-campo="unidad" value="${escapeHTML(ind.unidad || '')}" placeholder="Unidad">
-        </div>
-        <div class="col-md-3">
-            <input type="text" class="form-control form-control-sm bg-white" data-campo="referencia" value="${escapeHTML(valorReferenciaPrevio)}" placeholder="Valores de referencia">
-        </div>
-        <div class="col-md-1">
-            <input type="text" class="form-control form-control-sm" data-campo="metodo" placeholder="Método" value="${escapeHTML(valorMetodoPrevio)}">
-        </div>
-        <div class="col-md-1 text-center">
-            <button type="button" class="btn btn-sm btn-outline-danger py-0 px-1" onclick="this.closest('.indicador-resultado-row').remove()" title="Eliminar indicador">❌</button>
-        </div>
-    </div>
-`;
+                <div class="row g-2 mb-2 align-items-center indicador-resultado-row" data-ex="${exIdx}" data-refmin="${escapeHTML(ind.refMin ?? "")}" data-refmax="${escapeHTML(ind.refMax ?? "")}">
+                    <div class="col-md-3">
+                        <input type="text" class="form-control form-control-sm fw-semibold text-dark" data-campo="nombre-param" value="${escapeHTML(nombreParam)}" placeholder="Nombre indicador">
+                    </div>
+                    <div class="col-md-2">
+                        <input type="text" class="form-control form-control-sm" data-campo="resultado" placeholder="Valor obtenido" value="${escapeHTML(valorResultadoPrevio)}">
+                    </div>
+                    <div class="col-md-2">
+                        <input type="text" class="form-control form-control-sm bg-light" data-campo="unidad" value="${escapeHTML(ind.unidad || '')}" placeholder="Unidad">
+                    </div>
+                    <div class="col-md-3">
+                        <input type="text" class="form-control form-control-sm bg-white" data-campo="referencia" value="${escapeHTML(valorReferenciaPrevio)}" placeholder="Valores de referencia">
+                        ${htmlVariaciones}
+                    </div>
+                    <div class="col-md-1">
+                        <input type="text" class="form-control form-control-sm" data-campo="metodo" placeholder="Método" value="${escapeHTML(valorMetodoPrevio)}">
+                    </div>
+                    <div class="col-md-1 text-center">
+                        <button type="button" class="btn btn-sm btn-outline-danger py-0 px-1" onclick="this.closest('.indicador-resultado-row').remove()" title="Eliminar indicador">❌</button>
+                    </div>
+                </div>
+            `;
         });
 
         html += `
