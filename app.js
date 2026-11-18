@@ -2795,6 +2795,7 @@ function abrirResultados(nroOrden) {
                 <button class="btn btn-outline-danger btn-sm ms-1" onclick="descargarInformePDF('${orden.nroOrden}')"><i class="bi bi-file-earmark-pdf me-1"></i> PDF</button>
                 <button type="button" class="btn btn-outline-success btn-sm" onclick="enviarResultadoWhatsApp('${orden.nroOrden}')" title="Enviar WhatsApp al paciente"><i class="bi bi-whatsapp me-1"></i> WhatsApp</button>
                 <button type="button" class="btn btn-outline-success btn-sm" onclick="agregarExamenDesdeResultados('${orden.nroOrden}')" title="Agregar examen a esta orden"><i class="bi bi-plus-circle me-1"></i> Agregar examen</button>
+                <button type="button" class="btn btn-outline-secondary btn-sm" onclick="mostrarTicketPorNro('${orden.nroOrden}')" title="Ver e imprimir ticket actualizado"><i class="bi bi-receipt me-1"></i> Ticket actualizado</button>
             </div>
         </div>
         <div class="list-group" id="contenedor-cards-examenes">
@@ -6618,39 +6619,86 @@ function activarOrdenamientoIndicadores(editor) {
 function agregarExamenOrdenExistente(nroOrden) {
     const orden = (ordenesRegistradas || []).find(o => String(o.nroOrden) === String(nroOrden));
     if (!orden) return alert('No se encontró la orden.');
-    const texto = prompt('Agregar examen a ' + nroOrden + '\nEscriba el nombre o código exacto del catálogo:');
-    if (texto === null || !texto.trim()) return;
-    const busqueda = texto.trim().toLocaleLowerCase('es');
-    const coincidencias = (examenesCatalogo || []).filter(ex =>
-        String(ex.codigo).toLocaleLowerCase('es') === busqueda ||
-        String(ex.nombre || '').toLocaleLowerCase('es') === busqueda);
-    if (coincidencias.length !== 1) {
-        alert(coincidencias.length ? 'Hay varios exámenes con ese nombre. Use el código exacto.' : 'No se encontró ese examen en el catálogo.');
-        return;
+    let panel = document.getElementById('vital-panel-agregar-examen');
+    if (!panel) {
+        panel = document.createElement('div');
+        panel.id = 'vital-panel-agregar-examen';
+        panel.style.cssText = 'position:fixed;inset:0;z-index:20000;background:rgba(15,23,42,.55);display:flex;align-items:center;justify-content:center;padding:16px';
+        panel.innerHTML = `<div role="dialog" aria-modal="true" aria-label="Buscar examen" style="width:min(560px,100%);max-height:85vh;overflow:hidden;background:white;border-radius:14px;box-shadow:0 20px 60px #0004;display:flex;flex-direction:column">
+          <div style="padding:17px 20px;border-bottom:1px solid #e2e8f0;display:flex;justify-content:space-between;align-items:center"><strong style="font-size:18px;color:#075985">Agregar examen a la orden</strong><button type="button" id="vital-cerrar-examen" class="btn btn-sm btn-outline-secondary">Cerrar ✕</button></div>
+          <div style="padding:16px 20px"><label for="vital-buscar-examen" style="font-weight:600;margin-bottom:7px">Buscar por nombre o código</label><input id="vital-buscar-examen" class="form-control" autocomplete="off" placeholder="Ej.: glucosa, hemograma, 548"><div id="vital-seleccion-examen" style="font-size:13px;margin-top:8px;color:#475569">Seleccione un examen de la lista.</div></div>
+          <div id="vital-lista-examenes" style="padding:0 20px 12px;overflow:auto;min-height:80px;max-height:310px"></div>
+          <div style="padding:14px 20px;border-top:1px solid #e2e8f0;display:flex;justify-content:flex-end;gap:8px"><button type="button" id="vital-cancelar-examen" class="btn btn-outline-secondary">Cancelar</button><button type="button" id="vital-confirmar-examen" class="btn btn-primary" disabled>Agregar examen</button></div>
+        </div>`;
+        document.body.appendChild(panel);
     }
-    const ex = coincidencias[0];
-    if ((orden.examenes || []).some(i => String(i.codigo) === String(ex.codigo))) {
-        alert('Este examen ya está registrado en la orden.'); return;
-    }
-    const precio = Number(ex.precio ?? ex.Precio ?? 0);
-    if (!Number.isFinite(precio) || precio < 0) return alert('El precio del examen no es válido.');
-    const respuesta = confirm('Agregar ' + ex.nombre + ' por S/ ' + precio.toFixed(2) +
-        ' a la orden ' + nroOrden + '?\nSe conservarán la fecha, hora, resultados y pagos anteriores. El nuevo importe quedará como saldo pendiente.');
-    if (!respuesta) return;
-    // Usar la estructura de ítems existente y no modificar la fecha original.
-    const nuevo = {codigo: ex.codigo, nombre: ex.nombre, precio, cantidad: 1};
-    orden.examenes = Array.isArray(orden.examenes) ? orden.examenes : [];
-    orden.examenes.push(nuevo);
-    orden.subtotal = Number(orden.subtotal ?? orden.total ?? 0) + precio;
-    orden.total = Number(orden.total || 0) + precio;
-    orden.saldoPendiente = Math.max(0, Number(orden.saldoPendiente || 0) + precio);
-    orden.estadoPago = orden.saldoPendiente > 0.009 ? 'Pendiente' : 'Pagado';
-    orden.estado = 'Resultados pendientes';
-    orden.en = Date.now(); // solo control de sincronización, NO fechaHora
-    persistirDatos();
-    window.nubeGuardarOrden?.(orden);
-    cargarOrdenes();
-    alert('Examen agregado correctamente. El importe adicional está pendiente de cobro.');
+    panel.style.display = 'flex';
+    const buscar = panel.querySelector('#vital-buscar-examen');
+    const lista = panel.querySelector('#vital-lista-examenes');
+    const seleccion = panel.querySelector('#vital-seleccion-examen');
+    const confirmar = panel.querySelector('#vital-confirmar-examen');
+    let elegido = null;
+    const cerrar = () => { panel.style.display = 'none'; };
+    panel.querySelector('#vital-cerrar-examen').onclick = cerrar;
+    panel.querySelector('#vital-cancelar-examen').onclick = cerrar;
+    panel.onclick = e => { if (e.target === panel) cerrar(); };
+    buscar.value = '';
+    const normalizar = x => String(x || '').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+    const render = () => {
+        const q = normalizar(buscar.value.trim());
+        const disponibles = (examenesCatalogo || []).filter(ex =>
+            !((orden.examenes || []).some(i => String(i.codigo) === String(ex.codigo))) &&
+            (!q || normalizar(ex.nombre).includes(q) || normalizar(ex.codigo).includes(q))
+        ).slice(0,60);
+        lista.replaceChildren();
+        if (!disponibles.length) { lista.textContent = 'No se encontraron exámenes disponibles.'; return; }
+        disponibles.forEach(ex => {
+            const boton = document.createElement('button');
+            boton.type = 'button'; boton.className = 'btn btn-outline-light text-dark border w-100 text-start mb-1';
+            boton.style.cssText = 'display:flex;justify-content:space-between;gap:12px;align-items:center;white-space:normal';
+            const nombre = document.createElement('span'); nombre.textContent = `${ex.nombre} (${ex.codigo})`;
+            const precio = document.createElement('strong'); precio.textContent = `S/ ${Number(ex.precio ?? ex.Precio ?? 0).toFixed(2)}`;
+            boton.append(nombre,precio);
+            boton.onclick = () => {
+                elegido = ex; confirmar.disabled = false;
+                seleccion.textContent = `Seleccionado: ${ex.nombre} — S/ ${Number(ex.precio ?? ex.Precio ?? 0).toFixed(2)}`;
+                lista.querySelectorAll('button').forEach(x => x.classList.remove('border-primary','bg-primary-subtle'));
+                boton.classList.add('border-primary','bg-primary-subtle');
+            };
+            lista.appendChild(boton);
+        });
+    };
+    buscar.oninput = () => { elegido = null; confirmar.disabled = true; seleccion.textContent = 'Seleccione un examen de la lista.'; render(); };
+    confirmar.onclick = () => {
+        if (!elegido) return;
+        const ex = elegido;
+        const precio = Number(ex.precio ?? ex.Precio ?? 0);
+        if (!Number.isFinite(precio) || precio < 0) return alert('Precio no válido.');
+        if ((orden.examenes || []).some(i => String(i.codigo) === String(ex.codigo))) return alert('El examen ya está en la orden.');
+        if (!confirm(`¿Agregar ${ex.nombre} por S/ ${precio.toFixed(2)}?\nLos pagos y la fecha original se conservarán.`)) return;
+        orden.examenes = Array.isArray(orden.examenes) ? orden.examenes : [];
+        orden.examenes.push({codigo:ex.codigo,nombre:ex.nombre,precio,cantidad:1});
+        orden.subtotal = Number(orden.subtotal ?? orden.total ?? 0) + precio;
+        orden.total = Number(orden.total || 0) + precio;
+        const pagado = Number(orden.aCuenta ?? (Number(orden.total) - precio - Number(orden.saldoPendiente || 0)));
+        orden.saldoPendiente = Math.max(0, Number(orden.total) - Math.max(0,pagado));
+        orden.estadoPago = orden.saldoPendiente > .009 ? 'Pendiente' : 'Pagado';
+        orden.estado = 'Resultados pendientes';
+        orden.en = Date.now();
+        persistirDatos();
+        window.nubeGuardarOrden?.(orden);
+        if (window._ticketActual && String(window._ticketActual.nroOrden) === String(nroOrden)) {
+            const cuerpo = document.getElementById('modal-ticket-body');
+            const zona = document.getElementById('zona-impresion');
+            const ticket = construirTicketHTML(orden);
+            if (cuerpo) cuerpo.innerHTML = `<div class="ticket-visual">${ticket}</div>`;
+            if (zona) zona.innerHTML = `<div class="ticket-print">${ticket}</div>`;
+        }
+        cerrar(); cargarOrdenes(); abrirResultados(nroOrden);
+        alert('Examen agregado. El ticket y el saldo se actualizaron; puede reimprimir el ticket desde la orden.');
+    };
+    elegido = null; confirmar.disabled = true; seleccion.textContent = 'Seleccione un examen de la lista.';
+    render(); buscar.focus();
 }
 window.agregarExamenOrdenExistente = agregarExamenOrdenExistente;
 
@@ -6672,10 +6720,7 @@ function guardarEdicionAntesDeCambiarExamenes(nroOrden) {
 
 function agregarExamenDesdeResultados(nroOrden) {
     if (!guardarEdicionAntesDeCambiarExamenes(nroOrden)) return;
-    const orden = (ordenesRegistradas || []).find(o => String(o.nroOrden) === String(nroOrden));
-    const antes = orden ? (orden.examenes || []).length : 0;
     agregarExamenOrdenExistente(nroOrden);
-    if (orden && (orden.examenes || []).length !== antes) abrirResultados(nroOrden);
 }
 window.agregarExamenDesdeResultados = agregarExamenDesdeResultados;
 
