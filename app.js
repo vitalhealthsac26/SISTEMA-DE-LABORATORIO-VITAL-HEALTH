@@ -2820,7 +2820,7 @@ function abrirResultados(nroOrden) {
         // 🧠 LÓGICA INTELIGENTE: Si el usuario ya guardó resultados previamente para este examen, 
         // usamos esos datos exactos (respetando lo que borró o agregó). Si no, usamos la plantilla base.
         let indicadores = [];
-        if (guardado && Array.isArray(guardado.indicadores) && guardado.indicadores.length > 0) {
+        if (guardado && Array.isArray(guardado.indicadores) && guardado.indicadores.length >= 0) {
             indicadores = guardado.indicadores;
         } else {
             const plantilla = typeof obtenerIndicadoresParaOrden === 'function' ? obtenerIndicadoresParaOrden(ex) : null;
@@ -2896,6 +2896,8 @@ function abrirResultados(nroOrden) {
     if (typeof inicializarDragAndDropResultados === 'function') {
         inicializarDragAndDropResultados(nroOrden);
     }
+
+}
 
 // Función auxiliar para agregar nuevos indicadores al vuelo
 function agregarIndicadorEnResultados(exIdx) {
@@ -3032,6 +3034,8 @@ window.reordenarExamenesDragDrop = reordenarExamenesDragDrop;
     const orden = (ordenesRegistradas || []).find(o => o.nroOrden === nroOrden);
     const editor = document.getElementById("resultados-editor");
     if (!orden || !editor) return false;
+    // No sobrescribir una orden usando el editor abierto para otra.
+    if (!editor.querySelector(`button[onclick*="guardarResultados('${nroOrden}')"]`)) return false;
 
     const grupos = editor.querySelectorAll(".indicador-resultado-row");
     const cardPaternidad = editor.querySelector("[data-paternidad-card='true']");
@@ -3069,6 +3073,9 @@ window.reordenarExamenesDragDrop = reordenarExamenesDragDrop;
         const inputMetodo = fila.querySelector('[data-campo="metodo"]');
         const metodoVal = inputMetodo ? inputMetodo.value.trim() : "";
 
+        // Los indicadores sin resultado no forman parte del informe de este paciente.
+        // El valor 0 es válido y se conserva.
+        if (!resultadoVal) return;
         porExamen[exIdx].push({
             nombre: nombreParametro, 
             esSeccion: false,
@@ -3079,6 +3086,15 @@ window.reordenarExamenesDragDrop = reordenarExamenesDragDrop;
             referencia: referenciaVal,
             metodo: metodoVal
         });
+    });
+
+    // No guardar títulos de secciones que hayan quedado sin indicadores.
+    Object.keys(porExamen).forEach(k => {
+        const items = porExamen[k];
+        porExamen[k] = items.filter((item, idx) => !item.esSeccion ||
+            items.slice(idx + 1).some(siguiente => !siguiente.esSeccion && String(siguiente.resultado ?? '').trim() !== '' &&
+                (items.slice(idx + 1).findIndex(x => x.esSeccion) === -1 ||
+                 items.slice(idx + 1).findIndex(x => !x.esSeccion) < items.slice(idx + 1).findIndex(x => x.esSeccion))));
     });
 
     let datosPaternidadLegalGuardar = null;
@@ -6033,21 +6049,29 @@ function generarBloqueExamenHTML(ex, orden) {
     const teniaPlantillaOrinaErronea = (!plantilla || plantilla.length === 0) && guardado && Array.isArray(guardado.indicadores) &&
         guardado.indicadores.some(i => i.nombre === "Urobilinógeno" || i.nombre === "Ácido Ascórbico" || i.nombre === "Recuento Bacteriano");
 
+    // El resultado guardado es la fuente de verdad, incluso si está vacío.
+    // No reponer indicadores eliminados desde la plantilla general.
     let listaIndicadores = [];
-    if (plantilla && plantilla.length > 0) {
-        listaIndicadores = plantilla;
-    } else if (guardado && Array.isArray(guardado.indicadores) && guardado.indicadores.length > 0 && !teniaPlantillaOrinaErronea) {
+    if (guardado && Array.isArray(guardado.indicadores)) {
         listaIndicadores = guardado.indicadores;
+    } else if (plantilla && plantilla.length > 0) {
+        listaIndicadores = plantilla;
     } else {
         listaIndicadores = [{
             nombre: nombreLimpioExamen || "Resultado del análisis",
             unidad: ex.unidad || (itemCatalogo && itemCatalogo.unidad) || "",
-            refMin: ex.refMin ?? (itemCatalogo && itemCatalogo.refMin !== undefined ? itemCatalogo.refMin : ""),
-            refMax: ex.refMax ?? (itemCatalogo && itemCatalogo.refMax !== undefined ? itemCatalogo.refMax : ""),
-            referencia: ex.referencia || (itemCatalogo && itemCatalogo.referencia) || "",
-            metodo: ex.metodo || (itemCatalogo && itemCatalogo.metodo) || ""
+            refMin: ex.refMin ?? "", refMax: ex.refMax ?? "",
+            referencia: ex.referencia || "", metodo: ex.metodo || ""
         }];
     }
+    // PDF: no mostrar resultados vacíos ni secciones huérfanas.
+    listaIndicadores = listaIndicadores.filter((ind, idx, lista) => {
+        if (!ind || !ind.esSeccion) return ind && String(ind.resultado ?? ind.valor ?? '').trim() !== '';
+        const siguientes = lista.slice(idx + 1);
+        const proximaSeccion = siguientes.findIndex(x => x && x.esSeccion);
+        const grupo = proximaSeccion < 0 ? siguientes : siguientes.slice(0, proximaSeccion);
+        return grupo.some(x => x && !x.esSeccion && String(x.resultado ?? x.valor ?? '').trim() !== '');
+    });
 
     let filasHTML = '';
     if (listaIndicadores && listaIndicadores.length > 0) {
@@ -6062,7 +6086,7 @@ function generarBloqueExamenHTML(ex, orden) {
                 `;
                 return;
             }
-            const previo = guardado && guardado.indicadores && guardado.indicadores[indIdx] ? guardado.indicadores[indIdx] : null;
+            const previo = null; // Los indicadores guardados ya contienen sus propios valores; no cruzar por índice.
             const valorObtenido = ind.resultado !== undefined && ind.resultado !== "" ? ind.resultado : (previo ? previo.resultado : '');
             const unidadVal = ind.unidad || (previo && previo.unidad) || '';
             const unidadTexto = unidadVal ? ` ${unidadVal}` : '';
