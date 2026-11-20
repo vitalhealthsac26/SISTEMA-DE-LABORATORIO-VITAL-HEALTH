@@ -1225,14 +1225,32 @@ function guardarOrdenGenerarTicket() {
 // ==========================================
 window.filtroFechaOrdenes = null;
 window.filtroBusquedaOrdenes = "";
+window.filtroMesOrdenes = "";
+
+function cambiarMesFiltroOrdenes(mesValor) {
+    window.filtroMesOrdenes = /^\d{4}-\d{2}$/.test(String(mesValor || "")) ? mesValor : "";
+    if (window.filtroMesOrdenes) {
+        window.filtroFechaOrdenes = "todas";
+        const inputFecha = document.getElementById("filtro-ordenes-fecha");
+        if (inputFecha) inputFecha.value = "";
+    }
+    filtrarOrdenes();
+}
+window.cambiarMesFiltroOrdenes = cambiarMesFiltroOrdenes;
 
 function cambiarFechaFiltroOrdenes(fechaValor) {
+    window.filtroMesOrdenes = "";
+    const inputMes = document.getElementById("filtro-ordenes-mes");
+    if (inputMes) inputMes.value = "";
     window.filtroFechaOrdenes = fechaValor || "todas";
     filtrarOrdenes();
 }
 window.cambiarFechaFiltroOrdenes = cambiarFechaFiltroOrdenes;
 
 function filtrarOrdenesHoy() {
+    window.filtroMesOrdenes = "";
+    const inputMes = document.getElementById("filtro-ordenes-mes");
+    if (inputMes) inputMes.value = "";
     const hoyISO = obtenerFechaISO(new Date());
     window.filtroFechaOrdenes = hoyISO;
     const inputFecha = document.getElementById("filtro-ordenes-fecha");
@@ -1242,6 +1260,9 @@ function filtrarOrdenesHoy() {
 window.filtrarOrdenesHoy = filtrarOrdenesHoy;
 
 function filtrarOrdenesTodas() {
+    window.filtroMesOrdenes = "";
+    const inputMes = document.getElementById("filtro-ordenes-mes");
+    if (inputMes) inputMes.value = "";
     window.filtroFechaOrdenes = "todas";
     const inputFecha = document.getElementById("filtro-ordenes-fecha");
     if (inputFecha) inputFecha.value = "";
@@ -1272,6 +1293,11 @@ function filtrarOrdenes() {
         });
     }
 
+    // Filtro mensual: utiliza la fecha original de registro; la lupa sigue combinándose con él.
+    if (window.filtroMesOrdenes) {
+        lista = lista.filter(ord => obtenerFechaISO(ord.fechaISO || ord.fechaHora || ord.en).slice(0, 7) === window.filtroMesOrdenes);
+    }
+
     // 2. Filtrar por texto (paciente, DNI, orden, médico)
     if (texto) {
         lista = lista.filter(ord => {
@@ -1293,6 +1319,10 @@ function filtrarOrdenes() {
             const partes = fechaFiltro.split("-").reverse().join("/");
             etiqueta = `Mostrando órdenes del ${partes} (${lista.length} órdenes)`;
         }
+        if (window.filtroMesOrdenes) {
+            const [anio, mes] = window.filtroMesOrdenes.split("-");
+            etiqueta = `Mostrando órdenes del mes ${mes}/${anio} (${lista.length} órdenes)`;
+        }
         if (texto) etiqueta += ` • Búsqueda: "${texto}"`;
         badgeContador.textContent = etiqueta;
     }
@@ -1303,6 +1333,8 @@ window.filtrarOrdenes = filtrarOrdenes;
 
 function cargarOrdenes() {
     const inputFecha = document.getElementById("filtro-ordenes-fecha");
+    const inputMes = document.getElementById("filtro-ordenes-mes");
+    if (inputMes && window.filtroMesOrdenes) inputMes.value = window.filtroMesOrdenes;
     const hoyISO = obtenerFechaISO(new Date());
     if (window.filtroFechaOrdenes === null) {
         window.filtroFechaOrdenes = hoyISO;
@@ -1322,7 +1354,9 @@ function renderizarTablaOrdenes(ordenes) {
         const texto = window.filtroBusquedaOrdenes;
         const hoyISO = obtenerFechaISO(new Date());
         let msg = "No se encontraron órdenes para la fecha seleccionada.";
-        if (fechaFiltro === "todas") {
+        if (window.filtroMesOrdenes) {
+            msg = "No se encontraron órdenes para el mes seleccionado.";
+        } else if (fechaFiltro === "todas") {
             msg = "No se encontraron órdenes en el historial.";
         } else if (fechaFiltro === hoyISO) {
             msg = `No hay órdenes registradas para hoy (${new Date().toLocaleDateString("es-PE")}).`;
@@ -4226,17 +4260,11 @@ function actualizarControlesPeriodoCaja() {
 // Hora de ingreso de la orden, no hora de edición del informe ni del pago.
 // Si una orden antigua no conserva hora verificable, se deja '-'.
 function horaIngresoOrdenCaja(nroOrden) {
-    const orden = (ordenesRegistradas || []).find(o => normalizarClaveOrden(o.nroOrden) === normalizarClaveOrden(nroOrden));
+    // La fechaHora original es la que se muestra en Órdenes Registradas y en el PDF.
+    // NO utilizar orden.en: otras funciones lo actualizan al editar resultados.
+    const orden = (ordenesRegistradas || []).find(o => o && normalizarClaveOrden(o.nroOrden) === normalizarClaveOrden(nroOrden));
     if (!orden) return "-";
-    if (orden.en !== undefined && orden.en !== null && orden.en !== "") {
-        const valor = Number(orden.en);
-        if (Number.isFinite(valor) && valor > 100000000000) {
-            const d = new Date(valor);
-            if (!isNaN(d.getTime())) return d.toLocaleTimeString("es-PE");
-        }
-    }
-    // fechaHora se creó al registrar la orden; leer solo su componente de hora.
-    const original = String(orden.fechaHora || "");
+    const original = String(orden.fechaHora || "").trim();
     const match = original.match(/(?:^|[\s,])([01]?\d|2[0-3]):[0-5]\d(?::[0-5]\d)?(?:\s*[ap]\.?\s*m\.?)?/i);
     return match ? match[0].trim().replace(/^,/, "").trim() : "-";
 }
