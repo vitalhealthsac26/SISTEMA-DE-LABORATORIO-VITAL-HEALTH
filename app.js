@@ -4165,7 +4165,7 @@ function obtenerFechaISO(fechaStrOEn) {
 window.obtenerFechaISO = obtenerFechaISO;
 
 function filtrarCajaPorFecha(fechaValor) {
-    window.fechaSeleccionadaCaja = fechaValor || null;
+    window.fechaSeleccionadaCaja = fechaValor || obtenerFechaISO(new Date());
     actualizarTotalesCaja();
 }
 window.filtrarCajaPorFecha = filtrarCajaPorFecha;
@@ -4186,6 +4186,60 @@ function verTodosLosCobrosCaja() {
     actualizarTotalesCaja();
 }
 window.verTodosLosCobrosCaja = verTodosLosCobrosCaja;
+
+// Filtro de caja por mes (solo visualización; no modifica movimientos ni Firebase)
+function filtrarCajaPorMes(mesValor) {
+    if (!/^\d{4}-(0[1-9]|1[0-2])$/.test(mesValor || "")) return;
+    window.fechaSeleccionadaCaja = "mes:" + mesValor;
+    const dia = document.getElementById("filtro-caja-fecha");
+    if (dia) dia.value = "";
+    actualizarTotalesCaja();
+}
+window.filtrarCajaPorMes = filtrarCajaPorMes;
+
+function movimientosSegunPeriodoCaja(movimientos, periodo) {
+    if (periodo === "todos") return movimientos;
+    if (typeof periodo === "string" && periodo.startsWith("mes:")) {
+        const mes = periodo.slice(4);
+        return movimientos.filter(m => typeof m.fecha === "string" && m.fecha.slice(0, 7) === mes);
+    }
+    return movimientos.filter(m => m.fecha === periodo);
+}
+
+function etiquetaPeriodoCaja(periodo) {
+    if (periodo === "todos") return "HISTORICO_COMPLETO";
+    if (typeof periodo === "string" && periodo.startsWith("mes:")) return periodo.slice(4);
+    return periodo || obtenerFechaISO(new Date());
+}
+
+function actualizarControlesPeriodoCaja() {
+    const periodo = window.fechaSeleccionadaCaja;
+    const mes = document.getElementById("filtro-caja-mes");
+    const dia = document.getElementById("filtro-caja-fecha");
+    if (mes) mes.value = (typeof periodo === "string" && periodo.startsWith("mes:")) ? periodo.slice(4) : "";
+    if (dia && (periodo === "todos" || (typeof periodo === "string" && periodo.startsWith("mes:")))) dia.value = "";
+    const etiqueta = document.getElementById("caja-etiqueta-total-periodo");
+    if (etiqueta) etiqueta.textContent = periodo === "todos" ? "Total ingresos del histórico completo" :
+        (typeof periodo === "string" && periodo.startsWith("mes:")) ? "Total ingresos del mes seleccionado" : "Total ingresos del día seleccionado";
+}
+
+// Hora de ingreso de la orden, no hora de edición del informe ni del pago.
+// Si una orden antigua no conserva hora verificable, se deja '-'.
+function horaIngresoOrdenCaja(nroOrden) {
+    const orden = (ordenesRegistradas || []).find(o => normalizarClaveOrden(o.nroOrden) === normalizarClaveOrden(nroOrden));
+    if (!orden) return "-";
+    if (orden.en !== undefined && orden.en !== null && orden.en !== "") {
+        const valor = Number(orden.en);
+        if (Number.isFinite(valor) && valor > 100000000000) {
+            const d = new Date(valor);
+            if (!isNaN(d.getTime())) return d.toLocaleTimeString("es-PE");
+        }
+    }
+    // fechaHora se creó al registrar la orden; leer solo su componente de hora.
+    const original = String(orden.fechaHora || "");
+    const match = original.match(/(?:^|[\s,])([01]?\d|2[0-3]):[0-5]\d(?::[0-5]\d)?(?:\s*[ap]\.?\s*m\.?)?/i);
+    return match ? match[0].trim().replace(/^,/, "").trim() : "-";
+}
 
 // Normaliza un movimiento de caja asegurando fecha, hora, DNI y paciente
 function normalizarMovimientoCaja(m) {
@@ -4215,7 +4269,7 @@ function normalizarMovimientoCaja(m) {
         ...m,
         fecha: fechaISO,
         fechaVisual: fechaVisual || fechaISO,
-        hora: hora || "-",
+        hora: horaIngresoOrdenCaja(m.nroOrden),
         dni: m.dni || "-",
         paciente: m.paciente || "Cliente General",
         metodoPago: m.metodoPago || "Efectivo",
@@ -4236,13 +4290,16 @@ function actualizarTotalesCaja() {
     }
 
     const fechaFiltro = window.fechaSeleccionadaCaja;
+    actualizarControlesPeriodoCaja();
     const movimientosNormalizados = (cajaMovimientos || []).map(normalizarMovimientoCaja);
 
     // Filtrar movimientos según la fecha seleccionada
-    let movimientosFiltrados = movimientosNormalizados;
+    let movimientosFiltrados = movimientosSegunPeriodoCaja(movimientosNormalizados, fechaFiltro);
     let textoSubtitulo = "Mostrando cobros de hoy";
-    if (fechaFiltro && fechaFiltro !== "todos") {
-        movimientosFiltrados = movimientosNormalizados.filter(m => m.fecha === fechaFiltro);
+    if (typeof fechaFiltro === "string" && fechaFiltro.startsWith("mes:")) {
+        const mes = fechaFiltro.slice(4);
+        textoSubtitulo = `Mostrando cobros del mes ${mes.slice(5,7)}/${mes.slice(0,4)} (${movimientosFiltrados.length} movimientos)`;
+    } else if (fechaFiltro && fechaFiltro !== "todos") {
         textoSubtitulo = fechaFiltro === hoyISO 
             ? `Mostrando cobros de hoy (${new Date().toLocaleDateString("es-PE")})` 
             : `Mostrando cobros del día: ${fechaFiltro.split("-").reverse().join("/")}`;
@@ -4323,8 +4380,12 @@ function renderizarTopExamenesCaja(fechaFiltro) {
     let etiquetaPeriodo = "del periodo histórico general";
     const hoyISO = obtenerFechaISO(new Date());
 
-    if (fechaFiltro && fechaFiltro !== "todos") {
-        ordenes = ordenes.filter(o => obtenerFechaISO(o.fechaHora || o.en) === fechaFiltro);
+    if (typeof fechaFiltro === "string" && fechaFiltro.startsWith("mes:")) {
+        const mes = fechaFiltro.slice(4);
+        ordenes = ordenes.filter(o => obtenerFechaISO(o.fechaISO || o.en || o.fechaHora).slice(0, 7) === mes);
+        etiquetaPeriodo = `del mes ${mes.slice(5,7)}/${mes.slice(0,4)}`;
+    } else if (fechaFiltro && fechaFiltro !== "todos") {
+        ordenes = ordenes.filter(o => obtenerFechaISO(o.fechaISO || o.en || o.fechaHora) === fechaFiltro);
         etiquetaPeriodo = fechaFiltro === hoyISO 
             ? `de hoy (${new Date().toLocaleDateString("es-PE")})` 
             : `del día ${fechaFiltro.split("-").reverse().join("/")}`;
@@ -4412,7 +4473,7 @@ function exportarTopExamenesExcel() {
         return;
     }
     const fechaFiltro = window.fechaSeleccionadaCaja || "historico";
-    const etiquetaFecha = (fechaFiltro === "todos" || !fechaFiltro) ? "HISTORICO_COMPLETO" : fechaFiltro;
+    const etiquetaFecha = etiquetaPeriodoCaja(fechaFiltro);
 
     const datos = [
         ["CENTRO MÉDICO VITAL HEALTH - LABORATORIO CLÍNICO"],
@@ -4444,9 +4505,7 @@ function exportarCierreCajaExcel() {
     const movimientosNormalizados = (cajaMovimientos || []).map(normalizarMovimientoCaja);
     let listaExportar = movimientosNormalizados;
 
-    if (fechaFiltro && fechaFiltro !== "todos") {
-        listaExportar = movimientosNormalizados.filter(m => m.fecha === fechaFiltro);
-    }
+    listaExportar = movimientosSegunPeriodoCaja(movimientosNormalizados, fechaFiltro);
 
     if (listaExportar.length === 0) {
         alert("No hay movimientos registrados para exportar en la fecha seleccionada.");
@@ -4477,7 +4536,7 @@ function exportarCierreCajaExcel() {
         });
     });
 
-    const etiquetaFecha = (fechaFiltro && fechaFiltro !== "todos") ? fechaFiltro : new Date().toLocaleDateString("es-PE").replace(/\//g, "-");
+    const etiquetaFecha = etiquetaPeriodoCaja(fechaFiltro);
 
     // Si la librería XLSX está disponible, genera archivo .xlsx real con dos hojas
     if (window.XLSX) {
@@ -4486,7 +4545,7 @@ function exportarCierreCajaExcel() {
         // Hoja 1: Resumen de Cierre de Caja
         const datosResumen = [
             ["CENTRO MÉDICO VITAL HEALTH - LABORATORIO CLÍNICO"],
-            ["REPORTE Y CUADRE DE CAJA DIARIO"],
+            ["REPORTE Y CUADRE DE CAJA - PERIODO SELECCIONADO"],
             [`Fecha del Arqueo: ${etiquetaFecha}`],
             [`Generado: ${new Date().toLocaleString("es-PE")}`],
             [],
@@ -4538,9 +4597,7 @@ function imprimirCierreCajaTicket() {
     const fechaFiltro = window.fechaSeleccionadaCaja;
     const movimientosNormalizados = (cajaMovimientos || []).map(normalizarMovimientoCaja);
     let listaFiltrada = movimientosNormalizados;
-    if (fechaFiltro && fechaFiltro !== "todos") {
-        listaFiltrada = movimientosNormalizados.filter(m => m.fecha === fechaFiltro);
-    }
+    listaFiltrada = movimientosSegunPeriodoCaja(movimientosNormalizados, fechaFiltro);
 
     let efectivo = 0, yape = 0, plin = 0, tarjeta = 0, total = 0;
     listaFiltrada.forEach(m => {
@@ -4553,9 +4610,9 @@ function imprimirCierreCajaTicket() {
         else tarjeta += monto;
     });
 
-    const fechaVisual = (fechaFiltro && fechaFiltro !== "todos") 
-        ? fechaFiltro.split("-").reverse().join("/") 
-        : new Date().toLocaleDateString("es-PE");
+    const fechaVisual = fechaFiltro === "todos" ? "HISTORICO COMPLETO" :
+        (typeof fechaFiltro === "string" && fechaFiltro.startsWith("mes:")) ? `MES ${fechaFiltro.slice(9,11)}/${fechaFiltro.slice(4,8)}` :
+        (fechaFiltro || obtenerFechaISO(new Date())).split("-").reverse().join("/");
     const ahora = new Date().toLocaleTimeString("es-PE");
 
     const html = `
