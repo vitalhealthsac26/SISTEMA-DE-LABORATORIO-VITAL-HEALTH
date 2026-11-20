@@ -675,3 +675,10 @@ body { background-color: var(--bg-light); font-family: 'Segoe UI', Tahoma, Genev
 .adn-tabla-comparativa-legal thead th {
     border-bottom: 1.5px solid #000000 !important;
 }
+
+/* Vital Health: selector de mes de caja; no modifica estilos de otros módulos */
+#sec-caja .vital-caja-mes input[type="month"] { min-width: 150px; max-width: 190px; }
+@media (max-width: 575.98px) {
+  #sec-caja .vital-caja-mes { width: 100% !important; }
+  #sec-caja .vital-caja-mes input[type="month"] { flex: 1 1 auto; max-width: none; }
+}
