@@ -528,6 +528,10 @@
                                     <button class="btn btn-outline-secondary btn-sm" type="button" onclick="filtrarOrdenesHoy()" title="Ver órdenes de hoy">Hoy</button>
                                     <button class="btn btn-outline-secondary btn-sm" type="button" onclick="filtrarOrdenesTodas()" title="Ver todas las órdenes">Todas</button>
                                 </div>
+                                <div class="input-group input-group-sm" style="width: auto;">
+                                    <span class="input-group-text bg-light fw-semibold text-secondary"><i class="bi bi-calendar-month me-1"></i>Mes:</span>
+                                    <input type="month" id="filtro-ordenes-mes" class="form-control form-control-sm" style="max-width: 165px;" onchange="cambiarMesFiltroOrdenes(this.value)" title="Filtrar órdenes por mes">
+                                </div>
                                 <div class="d-flex gap-1">
                                     <button class="btn btn-sm btn-outline-secondary" onclick="cargarOrdenes()" title="Actualizar lista"><i class="bi bi-arrow-clockwise"></i></button>
                                     <button class="btn btn-sm btn-outline-success" onclick="respaldarDatos()" title="Respaldar datos"><i class="bi bi-download"></i></button>
